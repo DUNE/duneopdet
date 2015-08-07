@@ -1,0 +1,83 @@
+#include "photpropservices.fcl"
+
+BEGIN_PROLOG
+
+dune35t_photonvisibilityservice:
+{
+
+  NX: 100
+  NY: 100
+  NZ: 100
+  UseCryoBoundary: true
+
+  DoNotLoadLibrary: false
+
+  LibraryBuildJob: false
+
+  LibraryFile: "PhotonPropagation/LibraryData/lib_35ton_v5_20150721.root"
+
+ #These are not used when usecryoboundary=true
+  XMin: -120
+  XMax: 120
+  YMin: -120
+  YMax: 120
+  ZMin: 0
+  ZMax: 1200
+}
+
+dune35t_photonvisibilityservice_buildlib: @local::dune35t_photonvisibilityservice
+dune35t_photonvisibilityservice_buildlib.DoNotLoadLibrary: true
+dune35t_photonvisibilityservice_buildlib.LibraryBuildJob: true
+dune35t_photonvisibilityservice_buildlib.LibraryFile: "PhotonPropagation/LibraryData/Not_A_Library.root"	 
+
+
+
+dune10kt_workspace_photonvisibilityservice:
+{
+
+  NX: 100
+  NY: 100
+  NZ: 100
+  UseCryoBoundary: true
+
+  DoNotLoadLibrary: false
+
+  LibraryBuildJob: false
+
+  LibraryFile: "PhotonPropagation/LibraryData/lib_dune10kt_v1_workspace_20150716.root"
+
+ #These are not used when usecryoboundary=true
+  XMin: -120
+  XMax: 120
+  YMin: -120
+  YMax: 120
+  ZMin: 0
+  ZMax: 1200
+}
+
+
+
+dunefd_photonvisibilityservice_buildlib:
+{
+
+  NX: 100
+  NY: 100
+  NZ: 100
+  UseCryoBoundary: true
+
+  DoNotLoadLibrary: true
+
+  LibraryBuildJob: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/Not_A_Library.root"
+
+ #These are not used when usecryoboundary=true
+  XMin: -120
+  XMax: 120
+  YMin: -120
+  YMax: 120
+  ZMin: 0
+  ZMax: 1200
+}
+
+END_PROLOG
