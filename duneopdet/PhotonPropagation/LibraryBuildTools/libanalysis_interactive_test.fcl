@@ -18,7 +18,7 @@ services:
 {
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "libanalysis_dune35t_v5_hists.root" }
-  Timing:       {}
+  TimeTracker:       {}
   user:          @local::dune35t_simulation_services  # defined in services.fcl
   message:       @local::standard_info
 }
