@@ -1,0 +1,65 @@
+#include "photpropservices_dune.fcl"
+#include "services_dune.fcl"
+
+BEGIN_PROLOG
+
+dune35t_photolibbuild_services:           @local::dune35t_g4_services
+
+# Set the photon visiblity service to library building mode
+dune35t_photolibbuild_services.PhotonVisibilityService: @local::dune35t_photonvisibilityservice_buildlib
+
+# enable optical physics in LArG4
+dune35t_photolibbuild_services.LArG4Parameters.EnabledPhysics: [ "Em", 
+						"Optical", 
+						"SynchrotronAndGN", 
+						"Ion", 
+						"Hadron", 
+						"Decay", 
+						"HadronElastic", 
+						"Stopping", 
+						"NeutronTrackingCut" ]
+
+# enable this custom physics list
+dune35t_photolibbuild_services.LArG4Parameters.UseCustomPhysics: true
+dune35t_photolibbuild_services.LArG4Parameters.UseLitePhotons: false
+
+# disable cerenkov light
+dune35t_photolibbuild_services.LArProperties.EnableCerenkovLight: false
+
+# Turn off prescaling in opdeteresponse and geant4
+dune35t_photolibbuild_services.OpDetResponseInterface.QuantumEfficiency: 1
+dune35t_photolibbuild_services.LArProperties.ScintPreScale: 1
+
+
+
+
+# FD G4-specific services do not exist yet
+dunefd_photolibbuild_services:                        @local::dunefd_simulation_services
+
+# Set the photon visiblity service to library building mode
+dunefd_photolibbuild_services.PhotonVisibilityService: @local::dunefd_photonvisibilityservice_buildlib
+
+# enable optical physics in LArG4
+dunefd_photolibbuild_services.LArG4Parameters.EnabledPhysics: [ "Em", 
+						"Optical", 
+						"SynchrotronAndGN", 
+						"Ion", 
+						"Hadron", 
+						"Decay", 
+						"HadronElastic", 
+						"Stopping", 
+						"NeutronTrackingCut" ]
+
+# enable this custom physics list
+dunefd_photolibbuild_services.LArG4Parameters.UseCustomPhysics: true
+dunefd_photolibbuild_services.LArG4Parameters.UseLitePhotons: false
+
+# disable cerenkov light
+dunefd_photolibbuild_services.LArProperties.EnableCerenkovLight: false
+
+# Turn off prescaling in opdeteresponse and geant4
+dunefd_photolibbuild_services.OpDetResponseInterface.QuantumEfficiency: 1
+dunefd_photolibbuild_services.LArProperties.ScintPreScale: 1
+
+
+END_PROLOG

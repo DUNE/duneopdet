@@ -1,0 +1,79 @@
+#include "services_dune.fcl"
+#include "singles.fcl"
+#include "largeantmodules.fcl"
+#include "detsimmodules.fcl"
+#include "opticaldetectormodules.fcl"
+#include "photpropservices_dune.fcl"
+#include "photpropmodules_dune.fcl"
+#include "lightsource.fcl"
+
+
+process_name: LibraryBuild
+
+
+
+
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "libanalysis_dune35t_v5_hists.root" }
+  TimeTracker:       {}
+  user:          @local::dune35t_simulation_services  # defined in services.fcl
+  message:       @local::standard_info
+}
+
+physics:
+{
+
+ producers:
+ {
+ }
+
+ analyzers:
+ {
+   libana: @local::dune35t_photonlibraryanalyzer
+ }
+
+ analyzeIt:  [ libana ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #ie filters and producers
+ trigger_paths: [] 
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [analyzeIt]  
+}
+
+
+
+services.user.Geometry.GDML: "dune35t4apa_v5.gdml"
+services.user.Geometry.ROOT: "dune35t4apa_v5.gdml"
+services.user.Geometry.SortingParameters.DetectorVersion: "dune35t4apa_v5"
+
+
+
+# Begin optical specific parts:
+
+#
+# Examine your own library file - need to customize the visibility service
+#
+
+services.user.PhotonVisibilityService.LibraryFile: "PhotonLibraryFile_dune35ton_v5_test.root"
+
+# Number of voxels
+services.user.PhotonVisibilityService.NX: 1
+services.user.PhotonVisibilityService.NY: 20
+services.user.PhotonVisibilityService.NZ: 5
+
+services.user.PhotonVisibilityService.UseCryoBoundary: false
+
+# IF UseCryoBoundary is set to false, so use the following parameters in cm
+services.user.PhotonVisibilityService.XMin:  -8.
+services.user.PhotonVisibilityService.XMax:  -6.
+services.user.PhotonVisibilityService.YMin:  -100.
+services.user.PhotonVisibilityService.YMax:  0
+services.user.PhotonVisibilityService.ZMin:  60.
+services.user.PhotonVisibilityService.ZMax:  90.
+

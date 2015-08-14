@@ -1,0 +1,68 @@
+#include "services_dune.fcl"
+#include "singles.fcl"
+#include "largeantmodules.fcl"
+#include "detsimmodules.fcl"
+#include "opticaldetectormodules.fcl"
+#include "photpropservices_dune.fcl"
+#include "photpropmodules_dune.fcl"
+#include "lightsource.fcl"
+
+
+process_name: LibraryBuild
+
+
+
+
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "libanalysis_dune10kt_v1_workspace_hists.root" }
+  TimeTracker:       {}
+  user:          @local::dune35t_simulation_services  # defined in services.fcl
+  message:       @local::standard_info
+}
+
+physics:
+{
+
+ producers:
+ {
+ }
+
+ analyzers:
+ {
+   libana: @local::dune35t_photonlibraryanalyzer
+ }
+
+ analyzeIt:  [ libana ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #ie filters and producers
+ trigger_paths: [] 
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [analyzeIt]  
+}
+
+
+
+services.user.Geometry.GDML: "dune10kt_v1_workspace.gdml"
+services.user.Geometry.ROOT: "dune10kt_v1_workspace.gdml"
+services.user.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1_workspace"
+
+
+
+# Begin optical specific parts:
+
+#
+# Examine your own library file - need to customize the visibility service
+#
+
+services.user.PhotonVisibilityService.LibraryFile: "lib_dune10kt_v1_workspace_20150616.root"
+
+# Number of voxels
+services.user.PhotonVisibilityService.NX: 100
+services.user.PhotonVisibilityService.NY: 100
+services.user.PhotonVisibilityService.NZ: 100
