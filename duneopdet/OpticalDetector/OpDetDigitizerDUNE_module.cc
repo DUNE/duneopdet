@@ -54,11 +54,10 @@ namespace opdet {
     public:
       
       OpDetDigitizerDUNE(fhicl::ParameterSet const&);
-      virtual ~OpDetDigitizerDUNE();
+      // Should the destructor be empty?
+//      virtual ~OpDetDigitizerDUNE();
       
       void produce(art::Event&);
-
-//      void beginJob();
 
     private:
 
@@ -167,6 +166,7 @@ namespace opdet {
     fRandFlat         = new CLHEP::RandFlat(engine);
 
     // Creating a single photoelectron waveform
+    // Hardcoded, probably need to read them from the FHiCL file
     fPulseLength  = 4.0;
     fPeakTime     = 0.260;
     fMaxAmplitude = 0.12;
@@ -175,18 +175,13 @@ namespace opdet {
     CreateSinglePEWaveform();
 
   }
-
+/*
   //---------------------------------------------------------------------------
   // Destructor
   OpDetDigitizerDUNE::~OpDetDigitizerDUNE()
   {
   }
-/*
-  //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::beginJob()
-  {
-  }
- */ 
+ */
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::produce(art::Event& evt)
   {
@@ -236,11 +231,9 @@ namespace opdet {
         // Produce ADC pulse of integers rather than floats
         raw::OpDetWaveform adcVec(0.0, channel, nSamples);
 
+        // Round each value, then cast to short
         for (float value : opDetWaveforms[channel])
-        {
-          // Round the value, then cast to short
           adcVec.emplace_back(short(std::roundf(value)));
-        }
 
         pulseVecPtr->emplace_back(std::move(adcVec));
 
@@ -267,9 +260,7 @@ namespace opdet {
 
     // Adding a pulse to the waveform
     for (size_t tick = 0; tick != pulseLength; ++tick)
-    {
       waveform[timeBin + tick] += scale*fSinglePEWaveform[tick];
-    }
 
   }
 
@@ -291,9 +282,7 @@ namespace opdet {
     size_t length = size_t(fPulseLength*fSampleFreq + 0.5);
     fSinglePEWaveform.resize(length);
     for (size_t tick = 0; tick != length; ++tick)
-    {
       fSinglePEWaveform[tick] = Pulse1PE(float(tick)/fSampleFreq);
-    }
 
   }
 
@@ -318,7 +307,7 @@ namespace opdet {
       float photonTime = float(pulse.first/1000.0);
       for (int i = 0; i < pulse.second; ++i)
       {
-        if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))  {
+        if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd)) {
           // Sample a random subset according to QE
           if (odResponse.detectedLite(channel, readoutCh))
           {
@@ -330,10 +319,9 @@ namespace opdet {
             fRecordMap[readoutCh] = true;
           }
         }
-        else {
+        else 
           mf::LogInfo("OpDetDigitizerDUNE") 
             << "Throwing away an out-of-time photon at " << photonTime << "\n";
-        }
       }
     }
 
@@ -346,10 +334,8 @@ namespace opdet {
   {
 
     for(auto& waveform : waveforms)
-    {
       for(float& value : waveform) value += 
                                         float(fRandGauss->fire(0, fLineNoise));
-    }
 
   }
 
