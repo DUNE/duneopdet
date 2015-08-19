@@ -248,7 +248,7 @@ namespace opdet{
 
             // Override default number of channels for Fiber and Plank
             float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
-            if (pdtype == 1) NOpHardwareChannels = 3;
+            if (pdtype == 1) NOpHardwareChannels = 8;
             if (pdtype == 2) NOpHardwareChannels = 2;
 
             int hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );

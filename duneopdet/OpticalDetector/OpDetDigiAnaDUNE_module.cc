@@ -133,13 +133,13 @@ namespace opdet {
       TH1F *waveformHist = nullptr;
 
       // Implement different end time for waveforms of variable length
-      float endTime = float(pulse.size()/fSampleFreq) + fTimeBegin;
+      float endTime = float((pulse.size())/fSampleFreq) + pulse.TimeStamp();
 
       waveformHist = tfs->make< TH1F >(histName, ";t (us);",
-                                       pulse.size(), fTimeBegin, endTime);
+                                 pulse.size(), pulse.TimeStamp(), endTime);
 
       for (size_t tick = 0; tick < pulse.size(); tick++)
-        waveformHist->SetBinContent(tick, (float) pulse[tick]);
+        waveformHist->SetBinContent(tick + 1, (float) pulse[tick]);
 
     }
 

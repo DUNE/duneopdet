@@ -11,6 +11,7 @@ dunefd_opdigi:
    DarkNoiseRate:        10.0                # In Hz, Ranges 2-50 depending on Vbias
    CrossTalk:             0.165              # Probability of producing 2 PE for 1 incident photon
    Pedestal:           1500                  # in ADC counts
+   algo_threshold:     @local::standard_algo_sipm
 
    # readout window in optical ticks
    # buffer before waveform
