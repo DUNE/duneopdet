@@ -1,0 +1,78 @@
+#include "opticaldetectormodules.fcl"
+
+BEGIN_PROLOG
+
+dunefd_opdigi:
+{
+   module_type:         "OpDetDigitizerDUNE"
+   InputModule:         "largeant"           # Module that created simphotons
+   VoltageToADC:        151.5                # Converting mV to ADC counts (counts in 1 mV)
+   LineNoise:             2.6                # Pedestal RMS in ADC counts
+   DarkNoiseRate:        10.0                # In Hz, Ranges 2-50 depending on Vbias
+   CrossTalk:             0.165              # Probability of producing 2 PE for 1 incident photon
+   Pedestal:           1500                  # in ADC counts
+   algo_threshold:     @local::standard_algo_sipm
+
+   # readout window in optical ticks
+   # buffer before waveform
+   # see SSP manual, dune-doc-9928, p. 58
+   #
+   # IU waveform window
+   # ReadoutWindow:       700
+   # ReadoutPretrigger:   100
+   #
+   # SSP Maximum window
+   # ReadoutWindow:      2046
+   # ReadoutPretrigger:   100
+   
+   # SaturationScale:         16383 # 2^14 - 1, based on SSP Data
+} 
+
+dunefd_simphotoncounter:
+{
+  module_type:            "SimPhotonCounter"
+  Verbosity:               0
+  InputModule:            "largeant"
+  MakeAllPhotonsTree:      true
+  MakeDetectedPhotonsTree: true
+  MakeOpDetsTree:          true
+  MakeOpDetEventsTree:     true
+  QuantumEfficiency:       1
+  WavelengthCutLow:        0
+  WavelengthCutHigh:       10000
+}
+
+dunefd_tracktimeassoc:         @local::standard_tracktimeassoc
+dunefd_opflash:                @local::standard_opflash
+dunefd_opflash.InputModule:    "opdigi"
+dunefd_opflash.algo_threshold: @local::standard_algo_sipm
+dunefd_opflash.AreaToPE:        true
+
+dunefd_opdigiana:
+{
+   module_type:  "OpDetDigiAnaDUNE"
+   InputModule:  "opdigi"  # Module that created raw::OpDetWaveforms
+   InstanceName: ""     
+}
+dunefd_opflashana:       @local::standard_opflashana
+
+
+dune35t_simphotoncounter: @local::standard_simphotoncounter
+
+dune35t_opdigi:                 @local::dunefd_opdigi
+dune35t_tracktimeassoc:         @local::standard_tracktimeassoc
+dune35t_opflash:                @local::standard_opflash
+dune35t_opflash.InputModule:    "opdigi"
+dune35t_opflash.algo_threshold: @local::standard_algo_sipm
+dune35t_opflash.AreaToPE:        true
+
+dune35t_opdigiana:        @local::dunefd_opdigiana
+dune35t_opflashana:       @local::standard_opflashana
+dune35t_opdigiana.MakeUnipolarHist: false
+
+dune35t_opdigiana_data:   @local::dune35t_opdigiana
+dune35t_opdigiana_data.InputModule: ssptooffline
+dune35t_opdigiana_data.InstanceName: offlinePhoton
+
+
+END_PROLOG

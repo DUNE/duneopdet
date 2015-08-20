@@ -1,0 +1,92 @@
+#include "opticaldetectorservices.fcl"
+
+BEGIN_PROLOG
+
+
+##
+# Opdigi Properties for both detectors
+##
+
+dunefd_opdigiproperties:           @local::standard_opdigiproperties
+dunefd_opdigiproperties.WaveformFile: "OpticalDetector/sensl_1.dat"
+dunefd_opdigiproperties.UseEmpiricalShape: true
+dunefd_opdigiproperties_3windows:  @local::standard_opdigiproperties_3windows
+
+dune35t_opdigiproperties:           @local::standard_opdigiproperties
+dune35t_opdigiproperties.WaveformFile: "dune/OpticalDetector/sensl_1.dat"
+dune35t_opdigiproperties.UseEmpiricalShape: true
+dune35t_opdigiproperties_3windows:  @local::standard_opdigiproperties_3windows
+
+
+
+##
+# FD op det response services, nominal and reference
+##
+
+dunefd_opdetresponse_reference:
+{
+   service_provider:        DUNEOpDetResponse
+   QuantumEfficiency:       0.0016
+   WavelengthCutLow:        0 
+   WavelengthCutHigh:       10000
+   
+   LightGuideAttenuation:   true
+   LambdaShort:              5.56 # cm
+   LambdaLong:              44.13 # cm
+   FracShort:                0.40
+   FracLong:                 0.60
+
+   LongAxis:                z
+   
+   # Convert geometry to readout channels
+   # when reading in fast simulation
+   ChannelConversion:       fast
+
+   # QE here includes:
+   #   SiPMQE: 35%
+   #   SiPM Coverage: 71%
+   #   Surface Conversion: 0.92%
+   #   Mesh transmission: 70%
+   #   Attenuation in bars already in library response
+
+}
+
+dunefd_opdetresponse_alternative: @local::dunefd_opdetresponse_reference
+dunefd_opdetresponse_alternative.QuantumEfficiency:   0.0057 # Surface conversion -> 3.3%
+dunefd_opdetresponse_alternative.LambdaShort:        66.0 #cm
+dunefd_opdetresponse_alternative.LambdaLong:        350.0 #cm
+
+# Use the alternative design by default
+dunefd_opdetresponse: @local::dunefd_opdetresponse_alternative
+
+
+
+##
+# 35ton op det response service
+##
+
+dune35t_opdetresponse:
+{
+   service_provider:        DUNE35tonOpDetResponse
+   QuantumEfficiency:       0.0023 #0.0016/0.6961, the normalization factor for the bars in DUNE35tOpDetResponse_service
+   WavelengthCutLow:        0 
+   WavelengthCutHigh:       10000
+   LightGuideAttenuation:   true
+
+   LongAxis:                y
+   
+   # Convert geometry to readout channels
+   # when reading in fast simulation
+   ChannelConversion:       fast
+
+   # QE here includes:
+   #   SiPMQE: 35%
+   #   SiPM Coverage: 71%
+   #   Surface Conversion: 2% (conservative estimate for new bars)
+   #   Mesh transmission: 83%
+   #   Attenuation in bars already in library response
+
+}
+
+
+END_PROLOG
