@@ -68,7 +68,7 @@ dunefd_opdetresponse: @local::dunefd_opdetresponse_alternative
 dune35t_opdetresponse:
 {
    service_provider:        DUNE35tonOpDetResponse
-   QuantumEfficiency:       0.0041
+   QuantumEfficiency:       0.0023 #0.0016/0.6961, the normalization factor for the bars in DUNE35tOpDetResponse_service
    WavelengthCutLow:        0 
    WavelengthCutHigh:       10000
    LightGuideAttenuation:   true
