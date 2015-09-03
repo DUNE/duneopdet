@@ -8,7 +8,7 @@
 #include "lightsource.fcl"
 
 
-process_name: LibraryBuild
+process_name: LibraryTest
 
 
 
@@ -17,10 +17,11 @@ process_name: LibraryBuild
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "libanalysis_dune35t_v5_hists.root" }
+  TFileService: { fileName: "libanalysis_test_hists.root" }
   TimeTracker:       {}
-  user:          @local::dune35t_simulation_services  # defined in services.fcl
   message:       @local::standard_info
+  PhotonVisibilityService: @local::protodune_photonvisibilityservice
+  @table::dunefd_simulation_services  # defined in services.fcl
 }
 
 physics:
@@ -32,7 +33,7 @@ physics:
 
  analyzers:
  {
-   libana: @local::dune35t_photonlibraryanalyzer
+   libana: @local::dunefd_photonlibraryanalyzer
  }
 
  analyzeIt:  [ libana ]
@@ -47,10 +48,9 @@ physics:
 }
 
 
-
-services.user.Geometry.GDML: "dune35t4apa_v5.gdml"
-services.user.Geometry.ROOT: "dune35t4apa_v5.gdml"
-services.user.Geometry.SortingParameters.DetectorVersion: "dune35t4apa_v5"
+services.Geometry.GDML: "protoDune_v1.gdml"
+services.Geometry.ROOT: "protoDune_v1.gdml"
+services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
 
 
 
@@ -60,20 +60,20 @@ services.user.Geometry.SortingParameters.DetectorVersion: "dune35t4apa_v5"
 # Examine your own library file - need to customize the visibility service
 #
 
-services.user.PhotonVisibilityService.LibraryFile: "PhotonLibraryFile_dune35ton_v5_test.root"
+services.PhotonVisibilityService.LibraryFile: "PhotonLibraryFile_protoDune_test.root"
 
 # Number of voxels
-services.user.PhotonVisibilityService.NX: 1
-services.user.PhotonVisibilityService.NY: 20
-services.user.PhotonVisibilityService.NZ: 5
+services.PhotonVisibilityService.NX: 5
+services.PhotonVisibilityService.NY: 5
+services.PhotonVisibilityService.NZ: 5
 
-services.user.PhotonVisibilityService.UseCryoBoundary: false
+services.PhotonVisibilityService.UseCryoBoundary: false
 
 # IF UseCryoBoundary is set to false, so use the following parameters in cm
-services.user.PhotonVisibilityService.XMin:  -8.
-services.user.PhotonVisibilityService.XMax:  -6.
-services.user.PhotonVisibilityService.YMin:  -100.
-services.user.PhotonVisibilityService.YMax:  0
-services.user.PhotonVisibilityService.ZMin:  60.
-services.user.PhotonVisibilityService.ZMax:  90.
+#services.PhotonVisibilityService.XMin:  -8.
+#services.PhotonVisibilityService.XMax:  -6.
+#services.PhotonVisibilityService.YMin:  -100.
+#services.PhotonVisibilityService.YMax:  0
+#services.PhotonVisibilityService.ZMin:  60.
+#services.PhotonVisibilityService.ZMax:  90.
 
