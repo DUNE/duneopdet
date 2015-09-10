@@ -31,6 +31,7 @@
 #include "Simulation/SimPhotons.h"
 #include "Simulation/LArG4Parameters.h"
 #include "Utilities/DetectorProperties.h"
+#include "Utilities/LArProperties.h"
 #include "Utilities/TimeService.h"
 #include "OpticalDetector/OpDetResponseInterface.h"
 #include "RawData/OpDetWaveform.h"
@@ -64,16 +65,19 @@ namespace opdet {
     private:
 
       // The parameters read from the FHiCL file
-      std::string fInputModule; // Input tag for OpDet collection
-      float fSampleFreq;        // Sampling frequency in MHz
-      float fTimeBegin;         // Beginning of sample in us
-      float fTimeEnd;           // End of sample in us
-      float fVoltageToADC;      // Conversion factor mV to ADC counts
-      float fLineNoise;         // Pedestal RMS in ADC counts
-      float fDarkNoiseRate;     // In Hz
-      float fCrossTalk;         // Probability of SiPM producing 2 PE signal
-                                // in response to 1 photon
-      short fPedestal;          // In ADC counts
+      std::string fInputModule;// Input tag for OpDet collection
+      float fSampleFreq;       // Sampling frequency in MHz
+      float fTimeBegin;        // Beginning of sample in us
+      float fTimeEnd;          // End of sample in us
+      float fVoltageToADC;     // Conversion factor mV to ADC counts
+      float fLineNoise;        // Pedestal RMS in ADC counts
+      float fDarkNoiseRate;    // In Hz
+      float fCrossTalk;        // Probability of SiPM producing 2 PE signal
+                               // in response to 1 photon
+      short fPedestal;         // In ADC counts
+      bool  fDefaultSimWindow; // Set the start time to -1 drift window and
+                               // the end time to the end time 
+                               // of the TPC readout
 
       // Threshold algorithm
       std::unique_ptr< pmtana::AlgoSiPM > fThreshAlg;
@@ -115,7 +119,7 @@ namespace opdet {
 
       unsigned short CrossTalk() const;
 
-      // Create a vector of shorts from a vector of doubles
+      // Create a vector of shorts from a vector of floats
       // rounding it properly
       std::vector< short > VectorOfFloatsToVectorOfShorts
                                            (std::vector< float > const&);
@@ -124,6 +128,9 @@ namespace opdet {
       // recording also when they start in the long waveform
       std::map< size_t, std::vector< short > > 
                               SplitWaveform(std::vector< short > const&);
+
+      float GetDriftWindow();
+
   };
 
 }
@@ -148,12 +155,13 @@ namespace opdet {
     produces< std::vector< raw::OpDetWaveform > >();
 
     // Read the fcl-file
-    fInputModule   = pset.get< std::string >("InputModule"  );
-    fVoltageToADC  = pset.get< float       >("VoltageToADC" );
-    fLineNoise     = pset.get< float       >("LineNoise"    );
-    fDarkNoiseRate = pset.get< float       >("DarkNoiseRate");
-    fCrossTalk     = pset.get< float       >("CrossTalk"    );
-    fPedestal      = pset.get< short       >("Pedestal"     );
+    fInputModule      = pset.get< std::string >("InputModule"     );
+    fVoltageToADC     = pset.get< float       >("VoltageToADC"    );
+    fLineNoise        = pset.get< float       >("LineNoise"       );
+    fDarkNoiseRate    = pset.get< float       >("DarkNoiseRate"   );
+    fCrossTalk        = pset.get< float       >("CrossTalk"       );
+    fPedestal         = pset.get< short       >("Pedestal"        );
+    fDefaultSimWindow = pset.get< bool        >("DefaultSimWindow");
 
     fThreshAlg = std::make_unique< pmtana::AlgoSiPM >
                     (pset.get< fhicl::ParameterSet >("algo_threshold"));
@@ -162,15 +170,22 @@ namespace opdet {
     art::ServiceHandle< util::TimeService > timeService;
     fSampleFreq = timeService->OpticalClock().Frequency();
 
-    // Assume the readout starts at 0
-    fTimeBegin  = 0.0;
+    if (fDefaultSimWindow)
+    {
+      // Assume the readout starts at -1 drift window
+      fTimeBegin = -1*GetDriftWindow();
 
-    // Take the TPC readout window size and covert 
-    // to us with the electronics clock frequency
-    fTimeEnd    = art::ServiceHandle< util::DetectorProperties >()->
-                  ReadOutWindowSize()/timeService->TPCClock().Frequency();
+      // Take the TPC readout window size and convert 
+      // to us with the electronics clock frequency
+      fTimeEnd    = art::ServiceHandle< util::DetectorProperties >()->
+                    ReadOutWindowSize()/timeService->TPCClock().Frequency();
+    }
+    else
+    {
+      fTimeBegin = pset.get< float >("TimeBegin");
+      fTimeEnd   = pset.get< float >("TimeEnd"  );
+    }
 
-    
     // Initializing random number engines
     unsigned int seed = 
              pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
@@ -192,13 +207,7 @@ namespace opdet {
     CreateSinglePEWaveform();
 
   }
-/*
-  //---------------------------------------------------------------------------
-  // Destructor
-  OpDetDigitizerDUNE::~OpDetDigitizerDUNE()
-  {
-  }
- */
+   
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::produce(art::Event& evt)
   {
@@ -455,8 +464,25 @@ namespace opdet {
                        std::vector< short >(window_start, window_end);
     }
 
-
     return mapTickWaveform;
+
+  }
+
+  //---------------------------------------------------------------------------
+  float OpDetDigitizerDUNE::GetDriftWindow()
+  {
+
+    float driftWindow;
+
+    float maxDrift = 0.0;
+    for (geo::TPCGeo const& tpc : 
+           art::ServiceHandle< geo::Geometry >()->IterateTPCs())
+      if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
+
+    driftWindow = 
+      maxDrift/art::ServiceHandle< util::LArProperties >()->DriftVelocity();
+
+    return driftWindow;
 
   }
 
