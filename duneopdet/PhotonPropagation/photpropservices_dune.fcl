@@ -32,31 +32,6 @@ dune35t_photonvisibilityservice_buildlib.LibraryFile: "PhotonPropagation/Library
 
 
 
-dune10kt_workspace_photonvisibilityservice:
-{
-
-  NX: 100
-  NY: 100
-  NZ: 100
-  UseCryoBoundary: true
-
-  DoNotLoadLibrary: false
-
-  LibraryBuildJob: false
-
-  LibraryFile: "PhotonPropagation/LibraryData/lib_dune10kt_v1_workspace_20150716.root"
-
- #These are not used when usecryoboundary=true
-  XMin: -120
-  XMax: 120
-  YMin: -120
-  YMax: 120
-  ZMin: 0
-  ZMax: 1200
-}
-
-
-
 dunefd_photonvisibilityservice_buildlib:
 {
 
@@ -79,5 +54,19 @@ dunefd_photonvisibilityservice_buildlib:
   ZMin: 0
   ZMax: 1200
 }
+
+
+# Copy the library build job so that number of voxels is matched correctly
+
+dune10kt_workspace_photonvisibilityservice: @local::dunefd_photonvisibilityservice_buildlib
+dune10kt_workspace_photonvisibilityservice.DoNotLoadLibrary: false
+dune10kt_workspace_photonvisibilityservice.LibraryBuildJob: false
+dune10kt_workspace_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_dune10kt_v1_workspace_20150716.root"
+
+protodune_photonvisibilityservice: @local::dunefd_photonvisibilityservice_buildlib
+protodune_photonvisibilityservice.DoNotLoadLibrary: false
+protodune_photonvisibilityservice.LibraryBuildJob: false
+protodune_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_protoDune_v1_20150904.root"
+
 
 END_PROLOG
