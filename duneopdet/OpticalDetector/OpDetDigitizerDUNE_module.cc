@@ -70,7 +70,7 @@ namespace opdet {
       float  fTimeBegin;          // Beginning of waveform in us
       float  fTimeEnd;            // End of waveform in us
       float  fVoltageToADC;       // Conversion factor mV to ADC counts
-      float  fLineNoise;          // Pedestal RMS in ADC counts
+      float  fLineNoiseRMS;       // Pedestal RMS in ADC counts
       float  fDarkNoiseRate;      // In Hz
       float  fCrossTalk;          // Probability of SiPM producing 2 PE signal
                                   // in response to 1 photon
@@ -87,9 +87,9 @@ namespace opdet {
       std::unique_ptr< pmtana::AlgoSiPM > fThreshAlg;
 
       // Random number engines
-      std::unique_ptr< CLHEP::RandGauss >       fRandGauss;
+      std::unique_ptr< CLHEP::RandGauss       > fRandGauss;
       std::unique_ptr< CLHEP::RandExponential > fRandExponential;
-      std::unique_ptr< CLHEP::RandFlat >        fRandFlat;
+      std::unique_ptr< CLHEP::RandFlat        > fRandFlat;
 
       // Function that adds n pulses to a waveform
       void AddPulse(size_t timeBin, int scale, 
@@ -106,6 +106,9 @@ namespace opdet {
                             // of the leading edge in us
       float fBackTime;      // Constant in the exponential function 
                             // of the tail in us
+
+      // Make sure the FHiCL parameters make sense
+      void CheckFHiCLParameters() const;
 
       std::vector< float > fSinglePEWaveform;
       void CreateSinglePEWaveform();
@@ -166,7 +169,7 @@ namespace opdet {
     // Read the fcl-file
     fInputModule        = pset.get< std::string >("InputModule"  );
     fVoltageToADC       = pset.get< float  >("VoltageToADC"      );
-    fLineNoise          = pset.get< float  >("LineNoise"         );
+    fLineNoiseRMS       = pset.get< float  >("LineNoiseRMS"      );
     fDarkNoiseRate      = pset.get< float  >("DarkNoiseRate"     );
     fCrossTalk          = pset.get< float  >("CrossTalk"         );
     fPedestal           = pset.get< short  >("Pedestal"          );
@@ -177,6 +180,7 @@ namespace opdet {
 
     fThreshAlg = std::make_unique< pmtana::AlgoSiPM >
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
+
 
     // Obtaining parameters from the TimeService
     art::ServiceHandle< util::TimeService > timeService;
@@ -190,7 +194,7 @@ namespace opdet {
       // Take the TPC readout window size and convert 
       // to us with the electronics clock frequency
       fTimeEnd   = art::ServiceHandle< util::DetectorProperties >()->
-                   ReadOutWindowSize()/timeService->TPCClock().Frequency();
+                       ReadOutWindowSize()/timeService->TPCClock().Frequency();
     }
     else
     {
@@ -198,6 +202,8 @@ namespace opdet {
       fTimeEnd   = pset.get< float >("TimeEnd"  );
     }
 
+    CheckFHiCLParameters();
+    
     // Initializing random number engines
     unsigned int seed = 
              pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
@@ -270,7 +276,7 @@ namespace opdet {
       if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms);
 
       // Vary the pedestal
-      if (fLineNoise > 0.0)     AddLineNoise(pdWaveforms);
+      if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms);
 
       // Loop over all the created waveforms, split them into shorter
       // waveforms and use them to initialize OpDetWaveforms
@@ -401,7 +407,7 @@ namespace opdet {
 
     for(auto& waveform : waveforms)
       for(float& value : waveform) value += 
-                         static_cast< float >(fRandGauss->fire(0, fLineNoise));
+                      static_cast< float >(fRandGauss->fire(0, fLineNoiseRMS));
 
   }
 
@@ -527,4 +533,34 @@ namespace opdet {
 
   }
   
+  //---------------------------------------------------------------------------
+  void OpDetDigitizerDUNE::CheckFHiCLParameters() const
+  {
+
+    // Are all these logic errors?
+    
+    if (fLineNoiseRMS < 0.0)
+      throw art::Exception(art::errors::LogicError)
+                                 << "fLineNoiseRMS: " << fLineNoiseRMS << '\n'
+                                 << "Line noise RMS should be non-negative!\n";
+
+    if (fDarkNoiseRate < 0.0)
+      throw art::Exception(art::errors::LogicError)
+                                << "fDarkNoiseRate: " << fDarkNoiseRate << '\n'
+                                << "Dark noise rate should be non-negative!\n";
+
+    if (fPreTrigger >= fReadoutWindow)
+      throw art::Exception(art::errors::LogicError)
+               << "PreTrigger: "    << fPreTrigger    << " and " 
+               << "ReadoutWindow: " << fReadoutWindow << '\n'
+               << "Pretrigger window has to be shorter than readout window!\n";
+    
+    if (fTimeBegin >= fTimeEnd)
+      throw art::Exception(art::errors::LogicError)
+                                 << "TimeBegin: " << fTimeBegin << " and " 
+                                 << "TimeEnd: "   << fTimeEnd   << '\n'
+                                 << "TimeBegin should be less than TimeEnd!\n";
+
+  }
+
 }

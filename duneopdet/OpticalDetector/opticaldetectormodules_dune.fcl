@@ -7,14 +7,14 @@ dunefd_opdigi:
    module_type:          "OpDetDigitizerDUNE"
    InputModule:          "largeant" # Module that created simphotons
    VoltageToADC:         151.5      # Converting mV to ADC counts (counts in 1 mV)
-   LineNoise:              2.6      # Pedestal RMS in ADC counts
+   LineNoiseRMS:           2.6      # Pedestal RMS in ADC counts
    DarkNoiseRate:         10.0      # In Hz, Ranges 2-50 depending on Vbias
    CrossTalk:              0.165    # Probability of producing 2 PE for 1 incident photon
    Pedestal:            1500        # in ADC counts
    DefaultSimWindow:    true        # Use -1*drift window as the start time and
                                     # the TPC readout window end time as the end time
    FullWaveformOutput: false        # Output full waveform. Be careful with this option:
-                                    # being set to "true" it can produce large files
+                                    # setting it to "true" can result in large output files
    TimeBegin:              0        # In us (not used if DefaultSimWindow is set to true)
    TimeEnd:             1600        # In us (not used if DefaultSimWindow is set to true)
    PreTrigger:           100        # In ticks
