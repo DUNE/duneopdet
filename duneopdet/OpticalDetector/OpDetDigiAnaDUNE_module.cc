@@ -56,8 +56,8 @@ namespace opdet {
       // Parameters we'll read from the fcl-file
       std::string fInputModule; // Module used to create OpDetWaveforms
       std::string fInstanceName;// Input tag for OpDetWaveforms collection
-      float fSampleFreq;        // Sampling frequency in MHz 
-      float fTimeBegin;         // Beginning of sample in us
+      double fSampleFreq;        // Sampling frequency in MHz 
+      double fTimeBegin;         // Beginning of sample in us
 
   };
 
@@ -130,16 +130,17 @@ namespace opdet {
       // Increase counter for number of waveforms on this optical channel
       mapChannelWF[channel]++;
 
-      TH1F *waveformHist = nullptr;
+      TH1D *waveformHist = nullptr;
 
       // Implement different end time for waveforms of variable length
-      float endTime = float((pulse.size())/fSampleFreq) + pulse.TimeStamp();
+      double endTime = double(pulse.size())/fSampleFreq + pulse.TimeStamp();
 
-      waveformHist = tfs->make< TH1F >(histName, ";t (us);",
+
+      waveformHist = tfs->make< TH1D >(histName, ";t (us);",
                                  pulse.size(), pulse.TimeStamp(), endTime);
 
       for (size_t tick = 0; tick < pulse.size(); tick++)
-        waveformHist->SetBinContent(tick + 1, (float) pulse[tick]);
+        waveformHist->SetBinContent(tick + 1, pulse[tick]);
 
     }
 
