@@ -23,7 +23,7 @@ art_make( BASENAME_ONLY
 	                      OpticalDetector
                         Geometry
                         Geometry_service
-                        LArProperties_service
+                        LArPropertiesServiceStandard_service
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}

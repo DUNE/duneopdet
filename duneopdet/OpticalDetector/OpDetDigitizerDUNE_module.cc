@@ -30,9 +30,8 @@
 #include "Simulation/sim.h"
 #include "Simulation/SimPhotons.h"
 #include "Simulation/LArG4Parameters.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/TimeService.h"
+#include "Utilities/DetectorClocksService.h"
+#include "Utilities/DetectorPropertiesService.h"
 #include "OpticalDetector/OpDetResponseInterface.h"
 #include "RawData/OpDetWaveform.h"
 #include "OpticalDetector/AlgoSiPM.h"
@@ -182,8 +181,8 @@ namespace opdet {
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
 
 
-    // Obtaining parameters from the TimeService
-    art::ServiceHandle< util::TimeService > timeService;
+    // Obtaining parameters from the DetectorClocksService
+    auto const *timeService = lar::providerFrom< util::DetectorClocksService >();
     fSampleFreq = timeService->OpticalClock().Frequency();
 
     if (fDefaultSimWindow)
@@ -193,7 +192,7 @@ namespace opdet {
 
       // Take the TPC readout window size and convert 
       // to us with the electronics clock frequency
-      fTimeEnd   = art::ServiceHandle< util::DetectorProperties >()->ReadOutWindowSize()
+      fTimeEnd   = lar::providerFrom< util::DetectorPropertiesService >()->ReadOutWindowSize()
                    / timeService->TPCClock().Frequency();
     }
     else
@@ -504,7 +503,7 @@ namespace opdet {
       if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
 
     driftWindow = 
-      maxDrift/art::ServiceHandle< util::LArProperties >()->DriftVelocity();
+      maxDrift/lar::providerFrom< util::DetectorPropertiesService >()->DriftVelocity();
 
     return driftWindow;
 
