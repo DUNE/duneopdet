@@ -65,6 +65,15 @@ dunefd_opdigiana:
 dunefd_opflashana:       @local::standard_opflashana
 
 
+dunefd_averagewaveform:
+{
+   module_type:  "AverageWaveform"
+   InputModule:  "opdigi"  # Module that created raw::OpDetWaveforms
+   InstanceName: ""     
+}
+
+
+
 dune35t_simphotoncounter: @local::standard_simphotoncounter
 
 dune35t_opdigi:                 @local::dunefd_opdigi
@@ -81,6 +90,11 @@ dune35t_opdigiana.MakeUnipolarHist: false
 dune35t_opdigiana_data:   @local::dune35t_opdigiana
 dune35t_opdigiana_data.InputModule: ssptooffline
 dune35t_opdigiana_data.InstanceName: offlinePhoton
+
+dune35t_averagewaveform: @local::dunefd_averagewaveform
+dune35t_averagewaveform_data: @local::dune35t_averagewaveform
+dune35t_averagewaveform_data.InputModule: ssptooffline
+dune35t_averagewaveform_data.InstanceName: offlinePhoton
 
 
 END_PROLOG
