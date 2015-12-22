@@ -54,10 +54,9 @@ namespace opdet {
     private:
 
       // Parameters we'll read from the fcl-file
-      std::string fInputModule; // Module used to create OpDetWaveforms
-      std::string fInstanceName;// Input tag for OpDetWaveforms collection
+      std::string fInputModule;  // Module used to create OpDetWaveforms
+      std::string fInstanceName; // Input tag for OpDetWaveforms collection
       double fSampleFreq;        // Sampling frequency in MHz 
-      double fTimeBegin;         // Beginning of sample in us
 
   };
 
@@ -86,9 +85,6 @@ namespace opdet {
     // Obtain parameters from TimeService
     art::ServiceHandle< util::TimeService > timeService;
     fSampleFreq = timeService->OpticalClock().Frequency();
-
-    // Assume starting at 0
-    fTimeBegin  = 0;
 
   }
 
