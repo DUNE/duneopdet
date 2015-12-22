@@ -36,7 +36,8 @@
 
 #include <vector>
 #include <map>
-#include <cstring>
+#include <string>
+#include <sstream>
 
 namespace opdet {
 
@@ -98,9 +99,6 @@ namespace opdet {
   void OpDetDigiAnaDUNE::analyze(art::Event const& evt)
   {
 
-    // Create a string for histogram names
-    char histName[50];
-
     // Map to store how many waveforms are on one optical channel
     std::map< int, int > mapChannelWF;
 
@@ -112,31 +110,29 @@ namespace opdet {
     // histograms for us
     art::ServiceHandle< art::TFileService > tfs;
 
-    for (size_t i = 0; i < waveformHandle->size(); i++)
+    for (auto const& waveform : *waveformHandle)
     {
 
-      // This was probably required to overcome the "const" problem 
-      // with OpDetPulse::Waveform()
-      art::Ptr< raw::OpDetWaveform > waveformPtr(waveformHandle, i);
-      raw::OpDetWaveform pulse = *waveformPtr;
-      int channel = pulse.ChannelNumber();
+      int channel = waveform.ChannelNumber();
       // Make a name for the histogram
-      sprintf(histName, "event_%i_opchannel_%i_waveform_%i", 
-                        evt.id().event(), channel, mapChannelWF[channel]);
+      std::stringstream histName;
+      histName << "event_"      << evt.id().event() 
+               << "_opchannel_" << channel
+               << "_waveform_"  << mapChannelWF[channel];
       // Increase counter for number of waveforms on this optical channel
       mapChannelWF[channel]++;
 
-      TH1D *waveformHist = nullptr;
-
       // Implement different end time for waveforms of variable length
-      double endTime = double(pulse.size())/fSampleFreq + pulse.TimeStamp();
+      double endTime = double(waveform.size())/fSampleFreq 
+                                                    + waveform.TimeStamp();
 
+      // Create a new histogram
+      TH1D *waveformHist = tfs->make< TH1D >(histName.str().c_str(),
+             ";t (#mus);", waveform.size(), waveform.TimeStamp(), endTime);
 
-      waveformHist = tfs->make< TH1D >(histName, ";t (us);",
-                                 pulse.size(), pulse.TimeStamp(), endTime);
-
-      for (size_t tick = 0; tick < pulse.size(); tick++)
-        waveformHist->SetBinContent(tick + 1, pulse[tick]);
+      // Copy values from the waveform into the histogram
+      for (size_t tick = 0; tick < waveform.size(); tick++)
+        waveformHist->SetBinContent(tick + 1, waveform[tick]);
 
     }
 
