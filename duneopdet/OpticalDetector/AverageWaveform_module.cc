@@ -23,9 +23,9 @@
 
 // LArSoft includes
 
-#include "DetectorInfoServices/DetectorPropertiesService.h"
-#include "DetectorInfoServices/DetectorClocksService.h"
-#include "RawData/OpDetWaveform.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/RawData/OpDetWaveform.h"
 
 // ROOT includes
 

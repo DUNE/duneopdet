@@ -3,7 +3,7 @@ art_make( BASENAME_ONLY
           LIB_LIBRARIES 
                         RecoBase
                         Geometry
-                        Geometry_service
+                        larcore_Geometry_Geometry_service
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
@@ -22,8 +22,8 @@ art_make( BASENAME_ONLY
           MODULE_LIBRARIES 
 	                      OpticalDetector
                         Geometry
-                        Geometry_service
-                        LArPropertiesServiceStandard_service
+                        larcore_Geometry_Geometry_service
+                        lardata_DetectorInfoServices_LArPropertiesServiceStandard_service
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
@@ -42,7 +42,7 @@ art_make( BASENAME_ONLY
                         ${ROOT_BASIC_LIB_LIST}
           SERVICE_LIBRARIES
                         Geometry
-                        Geometry_service
+                        larcore_Geometry_Geometry_service
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
                   			${ART_FRAMEWORK_SERVICES_REGISTRY}
