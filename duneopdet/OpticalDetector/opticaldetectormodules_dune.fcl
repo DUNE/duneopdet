@@ -76,6 +76,7 @@ dunefd_calibrationanalysis:
 {
    module_type:  "CalibrationAnalysis"
    InputModule:  "opdigi"  # Module that created raw::OpDetWaveforms
+   OpHitModule:  "opflash"  # Module that created recob::OpHits
    InstanceName: ""     
 }
 
@@ -112,6 +113,7 @@ dune35t_averagewaveform_data.InstanceName: offlinePhoton
 dune35t_calibrationanalysis: @local::dunefd_calibrationanalysis
 dune35t_calibrationanalysis_data: @local::dune35t_calibrationanalysis
 dune35t_calibrationanalysis_data.InputModule: ssptooffline
+dune35t_calibrationanalysis_data.OpHitModule: opflash
 dune35t_calibrationanalysis_data.InstanceName: offlinePhoton
 
 

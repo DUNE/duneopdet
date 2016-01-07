@@ -25,6 +25,7 @@
 
 #include "Utilities/DetectorProperties.h"
 #include "Utilities/TimeService.h"
+#include "RecoBase/OpHit.h"
 #include "RawData/OpDetWaveform.h"
 
 // ROOT includes
@@ -36,6 +37,7 @@
 #include <vector>
 #include <map>
 #include <cstring>
+
 
 namespace opdet {
 
@@ -58,6 +60,7 @@ namespace opdet {
         // Parameters we'll read from the fcl-file
         std::string fInputModule; // Module used to create OpDetWaveforms
         std::string fInstanceName;// Input tag for OpDetWaveforms collection
+        std::string fOpHitModule; // Input tag for OpHit collection
         double fSampleFreq;        // Sampling frequency in MHz 
         double fTimeBegin;         // Beginning of sample in us
 
@@ -65,12 +68,25 @@ namespace opdet {
         std::map< int, TH1D* > averageWaveforms;
         std::map< int, int   > waveformCount;
 
+        // Map to store how many OpHits are on one optical channel
+        std::map< int, int   > OpHitCount;
+
+        // Map to store first hit's peak hit time per channel
+        std::map< int, double   > FirstHitTimePerChannel;
+
+
       TH1D*       fPedestalMeanPerChannel;
       TH1D*       fPedestalSigmaPerChannel;
       TH1D*       fIntegratedSignalMeanPerChannel;
       TH1D*       fFractionSamplesNearMaximumPerChannel;
       TH1D*       fNumberOfWaveformsProcessedPerChannel;
-      
+      TH1D*       fFirstOpHitTimeMean;
+      //TH1D*       fFirstOpHitTimeSigma;
+      TH1D*       fSecondOpHitTimeMean;
+      //TH1D*       fSecondOpHitTimeSigma;
+      TH1D*       fFirstSecondDiffOpHitTimeMean;
+      //TH1D*       fFirstSecondDiffOpHitTimeSigma; 
+      TH1D*       fNumberOfOpHitsPerChannelPerEvent;
 
     };
 
@@ -95,13 +111,14 @@ namespace opdet {
         // Read the fcl-file
         fInputModule  = pset.get< std::string >("InputModule");
         fInstanceName = pset.get< std::string >("InstanceName");
-
+	fOpHitModule = pset.get<std::string>("OpHitModule");
         // Obtain parameters from TimeService
         art::ServiceHandle< util::TimeService > timeService;
         fSampleFreq = timeService->OpticalClock().Frequency();
 
         // Assume starting at 0
         fTimeBegin  = 0;
+
 
     }
 
@@ -129,6 +146,14 @@ namespace opdet {
 
       fNumberOfWaveformsProcessedPerChannel =  tfs->make< TH1D >("NumberOfWaveformsProcessedPerChannel", "Number of Waveforms Processed per Channel;Channel Number;Fraction Near Maximum", 711, 0.5, 711.5);
 
+      fFirstOpHitTimeMean =  tfs->make< TH1D >("FirstOpHitTimeMean", "Mean of first OpHit time per Channel;Channel Number;First OpHit time mean (ticks)", 711, 0.5, 711.5);
+      //fFirstOpHitTimeSigma = tfs->make< TH1D >("FirstOpHitTimeSigma","Sigma of first OpHit time per Channel;Channel Number;First OpHit time sigma (ticks)", 711, 0.5, 711.5);
+      fSecondOpHitTimeMean =  tfs->make< TH1D >("SecondOpHitTimeMean", "Mean of second OpHit time per Channel;Channel Number;Second OpHit time mean (ticks)", 711, 0.5, 711.5);
+      //fSecondOpHitTimeSigma = tfs->make< TH1D >("SecondOpHitTimeSigma","Sigma of second OpHit time per Channel;Channel Number;Second OpHit time sigma (ticks)", 711, 0.5, 711.5);
+      fFirstSecondDiffOpHitTimeMean =  tfs->make< TH1D >("FirstSecondDiffOpHitTimeMean", "Mean of first-second OpHit time difference per Channel;Channel Number;(second - first) OpHit time mean (ticks)", 711, 0.5, 711.5);
+      //fFirstSecondDiffOpHitTimeSigma = tfs->make< TH1D >("FirstSecondDiffOpHitTimeSigma","Sigma of first-second OpHit time difference per Channel;Channel Number;(second - first) OpHit time sigma (ticks)", 711, 0.5, 711.5);
+     fNumberOfOpHitsPerChannelPerEvent =  tfs->make< TH1D >("NumberOfOpHitsPerChannelPerEvent", "Number of OpHits in one channel per event;Number of OpHits;", 16, -0.5, 15.5);
+      
     }
 
     //---------------------------------------------------------------------------
@@ -160,7 +185,19 @@ namespace opdet {
 
         }
 
-	
+	for (auto iter = OpHitCount.begin(); iter != OpHitCount.end(); iter++){
+	  double adjustedFirstOpHitTimeMean = fFirstOpHitTimeMean->GetBinContent(iter->first)/(iter->second);
+	  fFirstOpHitTimeMean->SetBinContent(iter->first,adjustedFirstOpHitTimeMean);
+
+	  double adjustedSecondOpHitTimeMean = fSecondOpHitTimeMean->GetBinContent(iter->first)/(iter->second);
+	  fSecondOpHitTimeMean->SetBinContent(iter->first,adjustedSecondOpHitTimeMean);
+
+	  double adjustedFirstSecondDiffOpHitTimeMean = fFirstSecondDiffOpHitTimeMean->GetBinContent(iter->first)/(iter->second);
+	  fFirstSecondDiffOpHitTimeMean->SetBinContent(iter->first,adjustedFirstSecondDiffOpHitTimeMean);
+
+	}
+
+
 
     }
 
@@ -236,6 +273,47 @@ namespace opdet {
 
 	    
         }
+
+	art::Handle< std::vector< recob::OpHit > > OpHitHandle;
+	evt.getByLabel(fOpHitModule, OpHitHandle);
+	
+        // Map to store how many OpHits are on one optical channel per event
+        std::map< int, int   > OpHitCountPerEvent;
+
+
+
+
+	if(OpHitHandle->size() > 0)
+	  std::cout << "OpHitHandle->size() = " << OpHitHandle->size() << std::endl;
+
+	for(size_t i=0; i!=OpHitHandle->size(); ++i)
+	  {
+	    
+	    int channel = OpHitHandle->at(i).OpChannel();
+	    //std::cout << "hit number = " << i << ", online channel number = " << OpHitHandle->at(i).OpChannel() << ", offline channel number = " << channel << std::endl;
+	    ++OpHitCount[channel];
+	    ++OpHitCountPerEvent[channel];
+
+	    double firstophitpeaktime;
+	    double secondophitpeaktime;
+
+	    if(OpHitCountPerEvent[channel] == 1){
+	      firstophitpeaktime = OpHitHandle->at(i).PeakTime();
+	      FirstHitTimePerChannel[channel] = firstophitpeaktime;
+	      fFirstOpHitTimeMean->Fill(channel, firstophitpeaktime);
+	    
+	    }
+	    else if(OpHitCountPerEvent[channel] == 2){
+	      secondophitpeaktime = OpHitHandle->at(i).PeakTime();
+	      fSecondOpHitTimeMean->Fill(channel, secondophitpeaktime);
+	      fFirstSecondDiffOpHitTimeMean->Fill(channel, secondophitpeaktime-FirstHitTimePerChannel[channel]);
+	    }
+
+	  }
+	
+	for (auto iter = OpHitCountPerEvent.begin(); iter != OpHitCountPerEvent.end(); iter++){
+	  fNumberOfOpHitsPerChannelPerEvent->Fill(iter->second);
+	}
 
     }
 
