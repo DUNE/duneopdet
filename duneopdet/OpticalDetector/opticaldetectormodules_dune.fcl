@@ -76,6 +76,7 @@ dunefd_calibrationanalysis:
 {
    module_type:  "CalibrationAnalysis"
    InputModule:  "opdigi"  # Module that created raw::OpDetWaveforms
+   OpHitModule:  "opflash"  # Module that created recob::OpHits
    InstanceName: ""     
 }
 
@@ -85,10 +86,16 @@ dune35t_simphotoncounter: @local::standard_simphotoncounter
 
 dune35t_opdigi:                 @local::dunefd_opdigi
 dune35t_tracktimeassoc:         @local::standard_tracktimeassoc
+
 dune35t_opflash:                @local::standard_opflash
 dune35t_opflash.InputModule:    "opdigi"
 dune35t_opflash.algo_threshold: @local::standard_algo_sipm
-dune35t_opflash.AreaToPE:        true
+dune35t_opflash.AreaToPE:       true
+
+dune35t_opflash_data:           @local::dune35t_opflash
+dune35t_opflash_data.InputModule:  ssptooffline
+dune35t_opflash_data.InputLabels: [ "offlinePhoton" ]
+
 
 dune35t_opdigiana:        @local::dunefd_opdigiana
 dune35t_opflashana:       @local::standard_opflashana
@@ -106,6 +113,7 @@ dune35t_averagewaveform_data.InstanceName: offlinePhoton
 dune35t_calibrationanalysis: @local::dunefd_calibrationanalysis
 dune35t_calibrationanalysis_data: @local::dune35t_calibrationanalysis
 dune35t_calibrationanalysis_data.InputModule: ssptooffline
+dune35t_calibrationanalysis_data.OpHitModule: opflash
 dune35t_calibrationanalysis_data.InstanceName: offlinePhoton
 
 
