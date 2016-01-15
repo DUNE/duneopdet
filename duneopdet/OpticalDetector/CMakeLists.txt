@@ -1,8 +1,8 @@
 art_make( BASENAME_ONLY
-          LIBRARY_NAME OpticalDetector
+          LIBRARY_NAME larana_OpticalDetector
           LIB_LIBRARIES 
-                        RecoBase
-                        Geometry
+                        lardata_RecoBase
+                        larcore_Geometry
                         larcore_Geometry_Geometry_service
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
@@ -20,8 +20,8 @@ art_make( BASENAME_ONLY
 			                  ${CETLIB}
                         ${ROOT_BASIC_LIB_LIST}
           MODULE_LIBRARIES 
-	                      OpticalDetector
-                        Geometry
+	                      larana_OpticalDetector
+                        larcore_Geometry
                         larcore_Geometry_Geometry_service
                         lardata_DetectorInfoServices_LArPropertiesServiceStandard_service
                         ${SIMULATIONBASE}
@@ -41,7 +41,7 @@ art_make( BASENAME_ONLY
                         ${CLHEP}
                         ${ROOT_BASIC_LIB_LIST}
           SERVICE_LIBRARIES
-                        Geometry
+                        larcore_Geometry
                         larcore_Geometry_Geometry_service
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
@@ -63,5 +63,5 @@ install_headers()
 install_fhicl()
 install_source()
 install_fw( LIST sensl_1.dat
-            SUBDIRNAME dune/OpticalDetector )
+            SUBDIRNAME dune/larana_OpticalDetector )
             
