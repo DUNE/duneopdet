@@ -63,5 +63,5 @@ install_headers()
 install_fhicl()
 install_source()
 install_fw( LIST sensl_1.dat
-            SUBDIRNAME dune/larana_OpticalDetector )
+            SUBDIRNAME dune/OpticalDetector )
             
