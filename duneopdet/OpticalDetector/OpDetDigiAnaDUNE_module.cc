@@ -110,6 +110,9 @@ namespace opdet {
     // histograms for us
     art::ServiceHandle< art::TFileService > tfs;
 
+    double firstWaveformTime = -9999;
+
+    
     for (auto const& waveform : *waveformHandle)
     {
 
@@ -122,13 +125,16 @@ namespace opdet {
       // Increase counter for number of waveforms on this optical channel
       mapChannelWF[channel]++;
 
+
+      if (firstWaveformTime < 0) firstWaveformTime = waveform.TimeStamp();
+      
       // Implement different end time for waveforms of variable length
-      double endTime = double(waveform.size())/fSampleFreq 
-                                                    + waveform.TimeStamp();
+      double startTime = waveform.TimeStamp() - firstWaveformTime;
+      double endTime = double(waveform.size())/fSampleFreq + startTime;
 
       // Create a new histogram
       TH1D *waveformHist = tfs->make< TH1D >(histName.str().c_str(),
-             ";t (#mus);", waveform.size(), waveform.TimeStamp(), endTime);
+             ";t (#mus);", waveform.size(), startTime, endTime);
 
       // Copy values from the waveform into the histogram
       for (size_t tick = 0; tick < waveform.size(); tick++)
