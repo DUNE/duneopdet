@@ -35,7 +35,7 @@
 #include "Utilities/TimeService.h"
 #include "OpticalDetector/OpDetResponseInterface.h"
 #include "RawData/OpDetWaveform.h"
-#include "OpticalDetector/AlgoSiPM.h"
+#include "OpticalDetector/OpHitFinder/AlgoSiPM.h"
 
 // CLHEP includes
 
@@ -463,7 +463,10 @@ namespace opdet {
 
     std::map< size_t, std::vector< short > > mapTickWaveform;
 
-    fThreshAlg->RecoPulse(waveform);
+    ::pmtana::Waveform_t ped_mean (waveform.size(),0);
+    ::pmtana::Waveform_t ped_sigma(waveform.size(),0);
+
+    fThreshAlg->Reconstruct(waveformPulse(waveform,ped_mean,ped_sigma));
 
     std::vector< pmtana::pulse_param > pulses;
     for (size_t pulseCounter = 0; pulseCounter < fThreshAlg->GetNPulse(); 
