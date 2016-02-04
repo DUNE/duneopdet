@@ -466,7 +466,7 @@ namespace opdet {
     ::pmtana::Waveform_t ped_mean (waveform.size(),0);
     ::pmtana::Waveform_t ped_sigma(waveform.size(),0);
 
-    fThreshAlg->Reconstruct(waveformPulse(waveform,ped_mean,ped_sigma));
+    fThreshAlg->Reconstruct(waveform,ped_mean,ped_sigma);
 
     std::vector< pmtana::pulse_param > pulses;
     for (size_t pulseCounter = 0; pulseCounter < fThreshAlg->GetNPulse(); 
