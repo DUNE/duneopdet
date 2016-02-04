@@ -463,8 +463,8 @@ namespace opdet {
 
     std::map< size_t, std::vector< short > > mapTickWaveform;
 
-    ::pmtana::Waveform_t ped_mean (waveform.size(),0);
-    ::pmtana::Waveform_t ped_sigma(waveform.size(),0);
+    ::pmtana::PedestalMean_t  ped_mean (waveform.size(),0);
+    ::pmtana::PedestalSigma_t ped_sigma(waveform.size(),0);
 
     fThreshAlg->Reconstruct(waveform,ped_mean,ped_sigma);
 
