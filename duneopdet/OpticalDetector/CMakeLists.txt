@@ -20,7 +20,8 @@ art_make( BASENAME_ONLY
 			                  ${CETLIB}
                         ${ROOT_BASIC_LIB_LIST}
           MODULE_LIBRARIES 
-	                      OpticalDetector
+	                OpticalDetector
+	  		OpHitFinder
                         Geometry
                         Geometry_service
                         LArProperties_service
