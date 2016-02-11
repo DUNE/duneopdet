@@ -23,10 +23,10 @@
 
 // LArSoft includes
 
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
-#include "RecoBase/OpHit.h"
-#include "RawData/OpDetWaveform.h"
+#include "lardata/Utilities/DetectorProperties.h"
+#include "lardata/Utilities/TimeService.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "lardata/RawData/OpDetWaveform.h"
 
 // ROOT includes
 
