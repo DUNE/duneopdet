@@ -90,5 +90,5 @@ outputs:
    }
 }
 
-services.user.TimeService.FramePeriod: 1600.0      # Readout window end in us
-services.user.TimeService.ClockSpeedOptical: 150.0 # Sampling frequency in MHz
+services.user.DetectorClocksService.FramePeriod: 1600.0      # Readout window end in us
+services.user.DetectorClocksService.ClockSpeedOptical: 150.0 # Sampling frequency in MHz

@@ -24,7 +24,6 @@ art_make( BASENAME_ONLY
 	  		larana_OpticalDetector_OpHitFinder
                         larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        lardata_Utilities_LArProperties_service
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}

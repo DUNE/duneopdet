@@ -24,11 +24,11 @@ dune35t_photolibbuild_services.LArG4Parameters.UseCustomPhysics: true
 dune35t_photolibbuild_services.LArG4Parameters.UseLitePhotons: false
 
 # disable cerenkov light
-dune35t_photolibbuild_services.LArProperties.EnableCerenkovLight: false
+dune35t_photolibbuild_services.LArPropertiesService.EnableCerenkovLight: false
 
 # Turn off prescaling in opdeteresponse and geant4
 dune35t_photolibbuild_services.OpDetResponseInterface.QuantumEfficiency: 1
-dune35t_photolibbuild_services.LArProperties.ScintPreScale: 1
+dune35t_photolibbuild_services.LArPropertiesService.ScintPreScale: 1
 
 
 
@@ -55,11 +55,11 @@ dunefd_photolibbuild_services.LArG4Parameters.UseCustomPhysics: true
 dunefd_photolibbuild_services.LArG4Parameters.UseLitePhotons: false
 
 # disable cerenkov light
-dunefd_photolibbuild_services.LArProperties.EnableCerenkovLight: false
+dunefd_photolibbuild_services.LArPropertiesService.EnableCerenkovLight: false
 
 # Turn off prescaling in opdeteresponse and geant4
 dunefd_photolibbuild_services.OpDetResponseInterface.QuantumEfficiency: 1
-dunefd_photolibbuild_services.LArProperties.ScintPreScale: 1
+dunefd_photolibbuild_services.LArPropertiesService.ScintPreScale: 1
 
 
 END_PROLOG
