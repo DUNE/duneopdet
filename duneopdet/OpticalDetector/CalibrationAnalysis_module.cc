@@ -23,10 +23,10 @@
 
 // LArSoft includes
 
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/TimeService.h"
-#include "RecoBase/OpHit.h"
-#include "RawData/OpDetWaveform.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/RecoBase/OpHit.h"
+#include "lardata/RawData/OpDetWaveform.h"
 
 // ROOT includes
 
@@ -113,7 +113,7 @@ namespace opdet {
         fInstanceName = pset.get< std::string >("InstanceName");
 	fOpHitModule = pset.get<std::string>("OpHitModule");
         // Obtain parameters from TimeService
-        art::ServiceHandle< util::TimeService > timeService;
+        auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
         fSampleFreq = timeService->OpticalClock().Frequency();
 
         // Assume starting at 0

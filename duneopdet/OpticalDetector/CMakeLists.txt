@@ -1,9 +1,9 @@
 art_make( BASENAME_ONLY
-          LIBRARY_NAME OpticalDetector
+          LIBRARY_NAME larana_OpticalDetector
           LIB_LIBRARIES 
-                        RecoBase
-                        Geometry
-                        Geometry_service
+                        lardata_RecoBase
+                        larcore_Geometry
+                        larcore_Geometry_Geometry_service
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
@@ -20,11 +20,10 @@ art_make( BASENAME_ONLY
 			                  ${CETLIB}
                         ${ROOT_BASIC_LIB_LIST}
           MODULE_LIBRARIES 
-	                OpticalDetector
-	  		OpHitFinder
-                        Geometry
-                        Geometry_service
-                        LArProperties_service
+	                larana_OpticalDetector
+	  		larana_OpticalDetector_OpHitFinder
+                        larcore_Geometry
+                        larcore_Geometry_Geometry_service
                         ${SIMULATIONBASE}
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
@@ -42,8 +41,8 @@ art_make( BASENAME_ONLY
                         ${CLHEP}
                         ${ROOT_BASIC_LIB_LIST}
           SERVICE_LIBRARIES
-                        Geometry
-                        Geometry_service
+                        larcore_Geometry
+                        larcore_Geometry_Geometry_service
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
                   			${ART_FRAMEWORK_SERVICES_REGISTRY}

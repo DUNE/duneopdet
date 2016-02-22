@@ -27,15 +27,14 @@
 
 // LArSoft includes
 
-#include "Simulation/sim.h"
-#include "Simulation/SimPhotons.h"
-#include "Simulation/LArG4Parameters.h"
-#include "Utilities/DetectorProperties.h"
-#include "Utilities/LArProperties.h"
-#include "Utilities/TimeService.h"
-#include "OpticalDetector/OpDetResponseInterface.h"
-#include "RawData/OpDetWaveform.h"
-#include "OpticalDetector/OpHitFinder/AlgoSiPM.h"
+#include "larsim/Simulation/sim.h"
+#include "larsim/Simulation/SimPhotons.h"
+#include "larsim/Simulation/LArG4Parameters.h"
+#include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
+#include "larana/OpticalDetector/OpDetResponseInterface.h"
+#include "lardata/RawData/OpDetWaveform.h"
+#include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
 
 // CLHEP includes
 
@@ -182,8 +181,8 @@ namespace opdet {
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
 
 
-    // Obtaining parameters from the TimeService
-    art::ServiceHandle< util::TimeService > timeService;
+    // Obtaining parameters from the DetectorClocksService
+    auto const *timeService = lar::providerFrom< detinfo::DetectorClocksService >();
     fSampleFreq = timeService->OpticalClock().Frequency();
 
     if (fDefaultSimWindow)
@@ -193,7 +192,7 @@ namespace opdet {
 
       // Take the TPC readout window size and convert 
       // to us with the electronics clock frequency
-      fTimeEnd   = art::ServiceHandle< util::DetectorProperties >()->ReadOutWindowSize()
+      fTimeEnd   = lar::providerFrom< detinfo::DetectorPropertiesService >()->ReadOutWindowSize()
                    / timeService->TPCClock().Frequency();
     }
     else
@@ -507,7 +506,7 @@ namespace opdet {
       if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
 
     driftWindow = 
-      maxDrift/art::ServiceHandle< util::LArProperties >()->DriftVelocity();
+      maxDrift/lar::providerFrom< detinfo::DetectorPropertiesService >()->DriftVelocity();
 
     return driftWindow;
 

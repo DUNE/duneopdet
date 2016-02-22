@@ -9,8 +9,8 @@
 #include "dune/OpticalDetector/DUNE35tonOpDetResponse.h"
 #include "TGeoNode.h"
 #include "TGeoBBox.h"
-#include "Geometry/OpDetGeo.h"
-#include "Utilities/LArProperties.h"
+#include "larcore/Geometry/OpDetGeo.h"
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "CLHEP/Random/RandFlat.h"
 
@@ -59,7 +59,7 @@ namespace opdet{
         if (fChannelConversion == "fast") fFastSimChannelConvert = true;
 
         // Correct out the prescaling applied during simulation
-        art::ServiceHandle<util::LArProperties>   LarProp;
+        auto const *LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
         fQE = tempfQE / LarProp->ScintPreScale();
         
         if (fQE > 1.0001 ) {
