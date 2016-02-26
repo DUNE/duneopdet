@@ -51,11 +51,11 @@ dunefd_simphotoncounter:
 }
 
 dunefd_tracktimeassoc:    @local::standard_tracktimeassoc
-dunefd_opflash:           @local::standard_opflash
 dunefd_ophit:             @local::standard_ophit
 dunefd_ophit.InputModule: "opdigi"
 dunefd_ophit.HitAlgoPset: @local::standard_algo_sipm
 dunefd_ophit.AreaToPE:    true
+dunefd_opflash:           @local::standard_opflash
 
 dunefd_opdigiana:
 {
@@ -77,7 +77,7 @@ dunefd_calibrationanalysis:
 {
    module_type:  "CalibrationAnalysis"
    InputModule:  "opdigi"  # Module that created raw::OpDetWaveforms
-   OpHitModule:  "opflash"  # Module that created recob::OpHits
+   OpHitModule:  "ophit"   # Module that created recob::OpHits
    InstanceName: ""     
 }
 
@@ -88,16 +88,18 @@ dune35t_simphotoncounter: @local::standard_simphotoncounter
 dune35t_opdigi:         @local::dunefd_opdigi
 dune35t_tracktimeassoc: @local::standard_tracktimeassoc
 
-dune35t_opflash: @local::dunefd_opflash
 dune35t_ophit:   @local::dunefd_ophit
+dune35t_opflash: @local::dunefd_opflash
 
+dune35t_ophit_data:             @local::dune35t_opflash
+dune35t_ophit_data.InputModule:  ssptooffline
+dune35t_ophit_data.InputLabels: [ "offlinePhoton" ]
 dune35t_opflash_data:           @local::dune35t_opflash
-dune35t_opflash_data.InputModule:  ssptooffline
-dune35t_opflash_data.InputLabels: [ "offlinePhoton" ]
 
+dune35t_ophit_splitdata:             @local::dune35t_ophit
+dune35t_ophit_splitdata.InputModule:  SplitterInput
+dune35t_ophit_splitdata.InputLabels: [ "PHOTON" ]
 dune35t_opflash_splitdata:           @local::dune35t_opflash
-dune35t_opflash_splitdata.InputModule:  SplitterInput
-dune35t_opflash_splitdata.InputLabels: [ "PHOTON" ]
 
 dune35t_opdigiana:        @local::dunefd_opdigiana
 dune35t_opflashana:       @local::standard_opflashana
@@ -124,7 +126,7 @@ dune35t_averagewaveform_splitdata.InstanceName: Photon
 dune35t_calibrationanalysis: @local::dunefd_calibrationanalysis
 dune35t_calibrationanalysis_data: @local::dune35t_calibrationanalysis
 dune35t_calibrationanalysis_data.InputModule: ssptooffline
-dune35t_calibrationanalysis_data.OpHitModule: opflash
+dune35t_calibrationanalysis_data.OpHitModule: ophit
 dune35t_calibrationanalysis_data.InstanceName: offlinePhoton
 
 
