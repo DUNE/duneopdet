@@ -96,6 +96,9 @@ dune35t_opflash_data:           @local::dune35t_opflash
 dune35t_opflash_data.InputModule:  ssptooffline
 dune35t_opflash_data.InputLabels: [ "offlinePhoton" ]
 
+dune35t_opflash_splitdata:           @local::dune35t_opflash
+dune35t_opflash_splitdata.InputModule:  SplitterInput
+dune35t_opflash_splitdata.InputLabels: [ "PHOTON" ]
 
 dune35t_opdigiana:        @local::dunefd_opdigiana
 dune35t_opflashana:       @local::standard_opflashana
@@ -105,10 +108,19 @@ dune35t_opdigiana_data:   @local::dune35t_opdigiana
 dune35t_opdigiana_data.InputModule: ssptooffline
 dune35t_opdigiana_data.InstanceName: offlinePhoton
 
+dune35t_opdigiana_splitdata:   @local::dune35t_opdigiana
+dune35t_opdigiana_splitdata.InputModule: SplitterInput
+dune35t_opdigiana_splitdata.InstanceName: PHOTON
+
+
 dune35t_averagewaveform: @local::dunefd_averagewaveform
 dune35t_averagewaveform_data: @local::dune35t_averagewaveform
 dune35t_averagewaveform_data.InputModule: ssptooffline
 dune35t_averagewaveform_data.InstanceName: offlinePhoton
+
+dune35t_averagewaveform_splitdata: @local::dune35t_averagewaveform
+dune35t_averagewaveform_splitdata.InputModule: SplitterInput
+dune35t_averagewaveform_splitdata.InstanceName: Photon
 
 dune35t_calibrationanalysis: @local::dunefd_calibrationanalysis
 dune35t_calibrationanalysis_data: @local::dune35t_calibrationanalysis
