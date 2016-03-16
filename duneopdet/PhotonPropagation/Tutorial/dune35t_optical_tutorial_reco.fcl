@@ -43,6 +43,7 @@ physics:
    producers:
    {
       # photon detector reconstruction
+      ophit:     @local::dune35t_ophit
       opflash:   @local::dune35t_opflash
       rns:       { module_type: "RandomNumberSaver" }
    }
@@ -67,7 +68,7 @@ physics:
    
    #define the producer and filter modules for this path, order matters, 
    #filters reject all following items.  see lines starting physics.producers below
-   simulate: [ opflash, rns ] 
+   simulate: [ ophit, opflash, rns ] 
    analyzeIt:  [ AnalysisExample, pmtresponse, opdigiana, opflashana ]
    
    #define the output stream, there could be more than one if using filters 

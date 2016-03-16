@@ -91,7 +91,7 @@ dune35t_tracktimeassoc: @local::standard_tracktimeassoc
 dune35t_ophit:   @local::dunefd_ophit
 dune35t_opflash: @local::dunefd_opflash
 
-dune35t_ophit_data:             @local::dune35t_opflash
+dune35t_ophit_data:             @local::dune35t_ophit
 dune35t_ophit_data.InputModule:  ssptooffline
 dune35t_ophit_data.InputLabels: [ "offlinePhoton" ]
 dune35t_opflash_data:           @local::dune35t_opflash
