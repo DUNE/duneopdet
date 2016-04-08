@@ -8,7 +8,7 @@ BEGIN_PROLOG
 ##
 
 dunefd_opdigiproperties:           @local::standard_opdigiproperties
-dunefd_opdigiproperties.WaveformFile: "OpticalDetector/sensl_1.dat"
+dunefd_opdigiproperties.WaveformFile: "dune/OpticalDetector/sensl_1.dat"
 dunefd_opdigiproperties.UseEmpiricalShape: true
 dunefd_opdigiproperties_3windows:  @local::standard_opdigiproperties_3windows
 
