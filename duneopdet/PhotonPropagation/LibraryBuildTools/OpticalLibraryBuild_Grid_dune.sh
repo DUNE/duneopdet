@@ -115,9 +115,9 @@ source /grid/fermiapp/products/dune/setup_dune.sh                               
 #source ${mrb_top}/localProducts_${mrb_project}_${mrb_version}_${mrb_quals/:/_}/setup           1>> ${LOG} 2>&1
 #echo "> mrbslp"                                                                                1>> ${LOG} 2>&1
 #source $MRB_DIR/bin/setup_local_products                                                       1>> ${LOG} 2>&1
-
-echo "> setup $mrb_project"                                                                    1>> ${LOG} 2>&1
-echo "setup $mrb_project $mrb_version -q$mrb_quals"                                            1>> ${LOG} 2>&1
+echo "> ups list -aK+ $mrb_project"                                                            1>> ${LOG} 2>&1
+ups list -aK+ $mrb_project                                                                     1>> ${LOG} 2>&1
+echo "> setup $mrb_project $mrb_version -q$mrb_quals"                                          1>> ${LOG} 2>&1
 setup $mrb_project $mrb_version -q$mrb_quals                                                   1>> ${LOG} 2>&1
 
 ENVLOG=$CONDOR_DIR_LOG/environment_${label}.log
