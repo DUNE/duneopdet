@@ -69,4 +69,13 @@ protodune_photonvisibilityservice.LibraryBuildJob: false
 protodune_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_protoDune_v1_20150904.root"
 
 
+dune10kt_1x2x6_photonvisibilityservice_buildlib: @local::dunefd_photonvisibilityservice_buildlib
+dune10kt_1x2x6_photonvisibilityservice_buildlib.NZ: 300
+
+dune10kt_1x2x6_photonvisibilityservice: @local::dune10kt_1x2x6_photonvisibilityservice_buildlib
+dune10kt_1x2x6_photonvisibilityservice.DoNotLoadLibrary: false
+dune10kt_1x2x6_photonvisibilityservice.LibraryBuildJob: false
+dune10kt_1x2x6_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_dune10kt_v1_1x2x6_160414.root"
+
+
 END_PROLOG
