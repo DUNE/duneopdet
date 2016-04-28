@@ -10,18 +10,14 @@
 
 process_name: LibraryTest
 
-
-
-
-
 services:
 {
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "libanalysis_hists.root" }
   TimeTracker:       {}
   message:       @local::standard_info
-  PhotonVisibilityService: @local::protodune_photonvisibilityservice
   @table::dunefd_simulation_services  # defined in services.fcl
+  PhotonVisibilityService: @local::protodune_photonvisibilityservice
 }
 
 physics:
@@ -47,22 +43,11 @@ physics:
  end_paths:     [analyzeIt]  
 }
 
+#services.Geometry.GDML: "dune10kt_v1_1x2x6.gdml"
+#services.Geometry.ROOT: "dune10kt_v1_1x2x6.gdml"
+#services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
 
-services.Geometry.GDML: "protoDune_v1.gdml"
-services.Geometry.ROOT: "protoDune_v1.gdml"
+services.Geometry.GDML: "protodune_v2.gdml"
+services.Geometry.ROOT: "protodune_v2.gdml"
 services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
 
-
-
-# Begin optical specific parts:
-
-#
-# Examine your own library file - need to customize the visibility service
-#
-
-services.PhotonVisibilityService.LibraryFile: "lib_protoDune_v1_20150904.root"
-
-# Number of voxels
-services.PhotonVisibilityService.NX: 100
-services.PhotonVisibilityService.NY: 100
-services.PhotonVisibilityService.NZ: 100

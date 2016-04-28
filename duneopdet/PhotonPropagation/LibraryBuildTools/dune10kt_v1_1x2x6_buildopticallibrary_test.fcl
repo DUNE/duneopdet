@@ -18,7 +18,7 @@ process_name: LibraryBuild
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "PhotonLibraryFile_protoDune_test.root" }
+  TFileService: { fileName: "PhotonLibraryFile_12apa_test.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} #ART native random number generator
   message:       @local::standard_info
@@ -26,8 +26,8 @@ services:
 }
 
 
-services.Geometry.GDML: "protodune_v2.gdml"
-services.Geometry.ROOT: "protodune_v2.gdml"
+services.Geometry.GDML: "dune10kt_v1_1x2x6.gdml"
+services.Geometry.ROOT: "dune10kt_v1_1x2x6.gdml"
 services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
 
 services.OpDetResponseInterface.LongAxis: z
@@ -124,7 +124,7 @@ services.PhotonVisibilityService.NX: 5
 services.PhotonVisibilityService.NY: 5
 services.PhotonVisibilityService.NZ: 5
 
-services.PhotonVisibilityService.UseCryoBoundary: false
+services.PhotonVisibilityService.UseCryoBoundary: true
 
 # IF UseCryoBoundary is set to false, so use the following parameters in cm
 #services.PhotonVisibilityService.XMin:   -3.
