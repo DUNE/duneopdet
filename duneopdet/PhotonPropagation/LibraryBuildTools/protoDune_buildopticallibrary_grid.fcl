@@ -26,11 +26,11 @@ services:
 }
 
 
-services.user.Geometry.GDML: "protoDune_v1.gdml"
-services.user.Geometry.ROOT: "protoDune_v1.gdml"
-services.user.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
+services.Geometry.GDML: "protodune_v2.gdml"
+services.Geometry.ROOT: "protodune_v2.gdml"
+services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
 
-services.user.OpDetResponseInterface.LongAxis: z
+services.OpDetResponseInterface.LongAxis: z
 
 #Start each new event with an empty event.
 source:
@@ -103,11 +103,11 @@ physics.analyzers.pmtresponse.MakeOpDetEventsTree: false
 
 
 # To disable wireplane absorption, uncomment this line
-#services.user.LArG4Parameters.OpticalParamModels: ["TransparentPlaneAction"]
+#services.LArG4Parameters.OpticalParamModels: ["TransparentPlaneAction"]
 
 
 
 # Number of voxels
-services.user.PhotonVisibilityService.NX: 100
-services.user.PhotonVisibilityService.NY: 100
-services.user.PhotonVisibilityService.NZ: 100
+services.PhotonVisibilityService.NX: 100
+services.PhotonVisibilityService.NY: 100
+services.PhotonVisibilityService.NZ: 100
