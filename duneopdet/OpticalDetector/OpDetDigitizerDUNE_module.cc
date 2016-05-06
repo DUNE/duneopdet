@@ -23,7 +23,7 @@
 #include "fhiclcpp/ParameterSet.h"
 
 // ART extensions
-#include "artextensions/SeedService/SeedService.hh"
+#include "larsim/RandomUtils/LArSeedService.h"
 
 // LArSoft includes
 
