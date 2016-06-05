@@ -1,7 +1,7 @@
 art_make( BASENAME_ONLY
           LIBRARY_NAME larana_OpticalDetector
           LIB_LIBRARIES 
-                        lardata_RecoBase
+                        lardataobj_RecoBase
                         larcore_Geometry
                         larcore_Geometry_Geometry_service
                         nusimdata_SimulationBase

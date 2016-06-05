@@ -11,7 +11,7 @@
 #define DUNE35ton_OPDET_RESPONSE_H
 
 // LArSoft includes
-#include "larsim/Simulation/SimPhotons.h"
+#include "larsimobj/Simulation/SimPhotons.h"
 #include "larana/OpticalDetector/OpDetResponseInterface.h"
 
 

@@ -27,13 +27,13 @@
 
 // LArSoft includes
 
-#include "larsim/Simulation/sim.h"
-#include "larsim/Simulation/SimPhotons.h"
+#include "larsimobj/Simulation/sim.h"
+#include "larsimobj/Simulation/SimPhotons.h"
 #include "larsim/Simulation/LArG4Parameters.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "larana/OpticalDetector/OpDetResponseInterface.h"
-#include "lardata/RawData/OpDetWaveform.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
 
 // CLHEP includes

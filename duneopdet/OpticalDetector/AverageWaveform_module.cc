@@ -25,7 +25,7 @@
 
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
-#include "lardata/RawData/OpDetWaveform.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 
 // ROOT includes
 
