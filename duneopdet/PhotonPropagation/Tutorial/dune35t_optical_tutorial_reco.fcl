@@ -50,26 +50,14 @@ physics:
 
    analyzers:
    {
-      pmtresponse: @local::dune35t_simphotoncounter
-      opdigiana:   @local::dune35t_opdigiana
       opflashana:  @local::dune35t_opflashana
-      
-      AnalysisExample: 
-      {
-         module_type:     "AnalysisExample"
-         SimulationLabel: "largeant"
-         HitLabel:        "gaushit"
-         ClusterLabel:    "fuzzycluster"
-         PDGcode:          13
-         BinSize:          0.3
-      }
    }
    
    
    #define the producer and filter modules for this path, order matters, 
    #filters reject all following items.  see lines starting physics.producers below
    simulate: [ ophit, opflash, rns ] 
-   analyzeIt:  [ AnalysisExample, pmtresponse, opdigiana, opflashana ]
+   analyzeIt:  [ opflashana ]
    
    #define the output stream, there could be more than one if using filters 
    stream1:  [ out1 ]
