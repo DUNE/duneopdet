@@ -50,12 +50,15 @@ dunefd_simphotoncounter:
   WavelengthCutHigh:       10000
 }
 
-dunefd_tracktimeassoc:    @local::standard_tracktimeassoc
-dunefd_ophit:             @local::standard_ophit
-dunefd_ophit.InputModule: "opdigi"
-dunefd_ophit.HitAlgoPset: @local::standard_algo_sipm
-dunefd_ophit.AreaToPE:    true
-dunefd_opflash:           @local::standard_opflash
+dunefd_tracktimeassoc:          @local::standard_tracktimeassoc
+dunefd_ophit:                   @local::standard_ophit
+dunefd_ophit.InputModule:       "opdigi"
+dunefd_ophit.HitAlgoPset:       @local::standard_algo_sipm
+dunefd_ophit.AreaToPE:          true
+dunefd_ophit.SPEArea:           1106
+dunefd_ophit.SPEShift:          0.304
+dunefd_opflash:                 @local::standard_opflash
+dunefd_opflash.FlashThreshold:  1.5
 
 dunefd_opdigiana:
 {

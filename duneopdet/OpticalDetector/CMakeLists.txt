@@ -1,10 +1,10 @@
 art_make( BASENAME_ONLY
           LIBRARY_NAME larana_OpticalDetector
           LIB_LIBRARIES 
-                        lardata_RecoBase
+                        lardataobj_RecoBase
                         larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        ${SIMULATIONBASE}
+                        nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
 			                  ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -12,8 +12,8 @@ art_make( BASENAME_ONLY
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
-			                  ${ART_PERSISTENCY_COMMON}
-			                  ${ART_UTILITIES}
+			                  art_Persistency_Common canvas_Persistency_Common
+			                  art_Utilities canvas_Utilities
 			                  ${MF_MESSAGELOGGER}
 			                  ${MF_UTILITIES}
 	                      ${FHICLCPP}
@@ -24,7 +24,7 @@ art_make( BASENAME_ONLY
 	  		larana_OpticalDetector_OpHitFinder
                         larcore_Geometry
                         larcore_Geometry_Geometry_service
-                        ${SIMULATIONBASE}
+                        nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
 			                  ${ART_FRAMEWORK_SERVICES_REGISTRY}
@@ -32,8 +32,8 @@ art_make( BASENAME_ONLY
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
-			                  ${ART_PERSISTENCY_COMMON}
-			                  ${ART_UTILITIES}
+			                  art_Persistency_Common canvas_Persistency_Common
+			                  art_Utilities canvas_Utilities
 			                  ${MF_MESSAGELOGGER}
 			                  ${MF_UTILITIES}
 	                      ${FHICLCPP}
@@ -49,8 +49,8 @@ art_make( BASENAME_ONLY
 			                  ${ART_FRAMEWORK_SERVICES_BASIC}
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-			                  ${ART_PERSISTENCY_COMMON}
-			                  ${ART_UTILITIES}
+			                  art_Persistency_Common canvas_Persistency_Common
+			                  art_Utilities canvas_Utilities
 			                  ${MF_MESSAGELOGGER}
 			                  ${MF_UTILITIES}
 	                      ${FHICLCPP}
