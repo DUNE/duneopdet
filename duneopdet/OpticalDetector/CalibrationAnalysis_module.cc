@@ -18,15 +18,15 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Optional/TFileService.h"
 #include "art/Framework/Services/Optional/TFileDirectory.h"
-#include "art/Persistency/Common/Ptr.h"
+#include "canvas/Persistency/Common/Ptr.h"
 #include "fhiclcpp/ParameterSet.h"
 
 // LArSoft includes
 
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
-#include "lardata/RecoBase/OpHit.h"
-#include "lardata/RawData/OpDetWaveform.h"
+#include "lardataobj/RecoBase/OpHit.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 
 // ROOT includes
 
