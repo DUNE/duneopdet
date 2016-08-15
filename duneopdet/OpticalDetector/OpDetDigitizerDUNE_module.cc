@@ -54,8 +54,17 @@ namespace opdet {
   class FocusList
   {
   public:
+    FocusList(int nSamples, int padding)
+      : fNSamples(nSamples), fPadding(padding) {}
+
     void AddRange(int from, int to)
     {
+      from -= fPadding;
+      to += fPadding;
+
+      if(from < 0) from = 0;
+      if(to >= fNSamples) to = fNSamples-1;
+
       for(unsigned int i = 0; i < ranges.size(); ++i){
         std::pair<int, int>& r = ranges[i];
         // Completely nested, discard
@@ -76,6 +85,10 @@ namespace opdet {
     }
 
     std::vector<std::pair<int, int>> ranges;
+
+  protected:
+    int fNSamples;
+    int fPadding;
   };
 
   class OpDetDigitizerDUNE : public art::EDProducer{
@@ -108,6 +121,8 @@ namespace opdet {
                                   // output. Mostly for debug purposes
       size_t fReadoutWindow;      // In ticks
       size_t fPreTrigger;         // In ticks
+
+      int    fPadding;            // In ticks
 
       // Threshold algorithm
       std::unique_ptr< pmtana::AlgoSiPM > fThreshAlg;
@@ -209,6 +224,8 @@ namespace opdet {
     fReadoutWindow      = pset.get< size_t >("ReadoutWindow"     );
     fPreTrigger         = pset.get< size_t >("PreTrigger"        );
 
+    fPadding            = pset.get< int    >("Padding"           );
+
     fThreshAlg = std::make_unique< pmtana::AlgoSiPM >
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
 
@@ -297,7 +314,7 @@ namespace opdet {
       // Get number of channels in this optical detector
       unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
 
-      std::vector<FocusList> fls(nChannelsPerOpDet);
+      std::vector<FocusList> fls(nChannelsPerOpDet, FocusList(nSamples, fPadding));
 
       // This vector stores waveforms created for each optical channel
       std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
