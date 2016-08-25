@@ -21,7 +21,7 @@ dunefd_opdigi:
    ReadoutWindow:       1000        # In ticks
    algo_threshold: @local::standard_algo_sipm
 
-   Padding:                0        # In ticks
+   Padding:              100        # In ticks
 
    # readout window in optical ticks
    # buffer before waveform
