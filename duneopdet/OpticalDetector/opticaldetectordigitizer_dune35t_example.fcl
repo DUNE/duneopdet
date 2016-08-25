@@ -43,6 +43,8 @@ physics:
         DarkNoiseRate: 10.0      # In Hz
         CrossTalk:      0.165    # Probability of producing 2 PE for 1 incident photon
         Pedestal:    1500        # in ADC counts
+
+        Padding:     0           # In ticks
       } 
       rns:       { module_type: "RandomNumberSaver" }
    }
