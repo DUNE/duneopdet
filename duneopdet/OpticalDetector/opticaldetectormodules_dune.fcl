@@ -23,6 +23,12 @@ dunefd_opdigi:
 
    Padding:              100        # In ticks
 
+   PulseLength:		 4.0
+   PeakTime:		 0.260
+   MaxAmplitude:	 0.12
+   FrontTime:		 0.009
+   BackTime:		 0.476
+
    # readout window in optical ticks
    # buffer before waveform
    # see SSP manual, dune-doc-9928, p. 58
@@ -86,7 +92,12 @@ dunefd_calibrationanalysis:
    InstanceName: ""     
 }
 
-
+dunefd_opdigi_threegang:	@local::dunefd_opdigi
+dunefd_opdigi_threegang.PulseLength:	0.876
+dunefd_opdigi_threegang.PeakTime:	0.028
+dunefd_opdigi_threegang.MaxAmplitude:	0.0594
+dunefd_opdigi_threegang.FrontTime:	0.013
+dunefd_opdigi_threegang.BackTime:	0.386
 
 dune35t_simphotoncounter: @local::standard_simphotoncounter
 
