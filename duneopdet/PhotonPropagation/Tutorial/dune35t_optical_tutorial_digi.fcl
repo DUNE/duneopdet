@@ -23,7 +23,7 @@ services:
 # DUNE 35ton w/o wires and mesh
 services.user.OpDigiProperties:        @local::dunefd_opdigiproperties
 
-services.user.Geometry:		       @local::dune10kt_workspace_geo
+services.user.Geometry:		       @local::dune10kt_ganged_workspace_geo
 services.user.PhotonVisibilityService: @local::dune10kt_workspace_photonvisibilityservice
 
 #source is now a root file
@@ -44,7 +44,7 @@ physics:
    
    producers:
    {
-      opdigi:    @local::dunefd_opdigi    # simple digitizer with no noise and high saturation
+      opdigi:    @local::dunefd_opdigi_threegang    # simple digitizer with no noise and high saturation
       rns:       { module_type: "RandomNumberSaver" }
    }
 
