@@ -20,7 +20,7 @@ services:
   message:      @local::standard_info
 }
 
-services.user.Geometry:	@local::dune10kt_workspace_geo
+services.user.Geometry:	@local::dune10kt_ganged_workspace_geo
 services.user.PhotonVisibilityService:	@local::dune10kt_workspace_photonvisibilityservice
 
 
