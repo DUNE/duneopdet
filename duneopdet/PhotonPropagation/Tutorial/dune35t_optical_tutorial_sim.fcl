@@ -124,22 +124,6 @@ outputs:
  }
 }
 
-#services.user.LArProperties.ScintYield:	24000
-
-services.user.LArG4Parameters.EnabledPhysics:	[ "Em",
-						  "FastOptical",
-						  "SynchrotronAndGN",
-						  "Ion",
-						  "Hadron",
-						  "Decay",
-						  "HadronElastic",
-						  "Stopping",
-						  "NeutronTrackingCut"	]
-
-services.user.LArG4Parameters.UseCustomPhysics:	  true
-
-#services.user.LArProperties.EnableCerenkovLight: false
-
 
 
 #
