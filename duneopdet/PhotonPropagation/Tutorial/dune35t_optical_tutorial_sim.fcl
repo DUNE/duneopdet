@@ -124,6 +124,18 @@ outputs:
  }
 }
 
+# Custom Physics List
+
+services.user.LArG4Parameters.UseCustomPhysics: true
+services.user.LArG4Parameters.EnabledPhysics: [ "Em",
+                                                      "FastOptical",
+                                                      "SynchrotronAndGN",
+                                                      "Ion",
+                                                      "Hadron",
+                                                      "Decay",
+                                                      "HadronElastic",
+                                                      "Stopping",
+                                                      "NeutronTrackingCut" ]
 
 
 #
