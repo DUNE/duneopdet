@@ -27,8 +27,8 @@
 
 // LArSoft includes
 
-#include "larsimobj/Simulation/sim.h"
-#include "larsimobj/Simulation/SimPhotons.h"
+#include "lardataobj/Simulation/sim.h"
+#include "lardataobj/Simulation/SimPhotons.h"
 #include "larsim/Simulation/LArG4Parameters.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
