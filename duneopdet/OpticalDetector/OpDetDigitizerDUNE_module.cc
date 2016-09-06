@@ -1,6 +1,6 @@
 //=========================================================
 // OpDetDigitizerDUNE_module.cc
-// This module produces digitized output 
+// This module produces digitized output
 // (creating OpDetWaveform)
 // from photon detectors taking SimPhotonsLite as input.
 //
@@ -27,8 +27,8 @@
 
 // LArSoft includes
 
-#include "larsimobj/Simulation/sim.h"
-#include "larsimobj/Simulation/SimPhotons.h"
+#include "lardataobj/Simulation/sim.h"
+#include "lardataobj/Simulation/SimPhotons.h"
 #include "larsim/Simulation/LArG4Parameters.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
@@ -51,14 +51,54 @@
 
 namespace opdet {
 
+  class FocusList
+  {
+  public:
+    FocusList(int nSamples, int padding)
+      : fNSamples(nSamples), fPadding(padding) {}
+
+    void AddRange(int from, int to)
+    {
+      from -= fPadding;
+      to += fPadding;
+
+      if(from < 0) from = 0;
+      if(to >= fNSamples) to = fNSamples-1;
+
+      for(unsigned int i = 0; i < ranges.size(); ++i){
+        std::pair<int, int>& r = ranges[i];
+        // Completely nested, discard
+        if(from >= r.first && to <= r.second) return;
+        // Extend end
+        if(from >= r.first && from <= r.second){
+          r.second = to;
+          return;
+        }
+        // Extend front
+        if(to >= r.first && to <= r.second){
+          r.first = from;
+          return;
+        }
+      }
+      // Discontiguous, add
+      ranges.emplace_back(from, to);
+    }
+
+    std::vector<std::pair<int, int>> ranges;
+
+  protected:
+    int fNSamples;
+    int fPadding;
+  };
+
   class OpDetDigitizerDUNE : public art::EDProducer{
 
     public:
-      
+
       OpDetDigitizerDUNE(fhicl::ParameterSet const&);
       // Should the destructor be empty?
 //      virtual ~OpDetDigitizerDUNE();
-      
+
       void produce(art::Event&);
 
     private:
@@ -75,12 +115,14 @@ namespace opdet {
                                   // in response to 1 photon
       short  fPedestal;           // In ADC counts
       bool   fDefaultSimWindow;   // Set the start time to -1 drift window and
-                                  // the end time to the end time 
+                                  // the end time to the end time
                                   // of the TPC readout
       bool   fFullWaveformOutput; // Output full waveforms -- produces large
                                   // output. Mostly for debug purposes
       size_t fReadoutWindow;      // In ticks
       size_t fPreTrigger;         // In ticks
+
+      int    fPadding;            // In ticks
 
       // Threshold algorithm
       std::unique_ptr< pmtana::AlgoSiPM > fThreshAlg;
@@ -91,8 +133,9 @@ namespace opdet {
       std::unique_ptr< CLHEP::RandFlat        > fRandFlat;
 
       // Function that adds n pulses to a waveform
-      void AddPulse(size_t timeBin, int scale, 
-                    std::vector< double >& waveform) const;
+      void AddPulse(size_t timeBin, int scale,
+                    std::vector< double >& waveform,
+                    FocusList& fl) const;
 
       // Functional response to one photoelectron (time in ns)
       double Pulse1PE(double time) const;
@@ -101,9 +144,9 @@ namespace opdet {
       double fPulseLength;   // 1PE pulse length in us
       double fPeakTime;      // Time when the pulse reaches its maximum in us
       double fMaxAmplitude;  // Maximum amplitude of the pulse in mV
-      double fFrontTime;     // Constant in the exponential function 
+      double fFrontTime;     // Constant in the exponential function
                             // of the leading edge in us
-      double fBackTime;      // Constant in the exponential function 
+      double fBackTime;      // Constant in the exponential function
                             // of the tail in us
 
       // Make sure the FHiCL parameters make sense
@@ -113,15 +156,18 @@ namespace opdet {
       void CreateSinglePEWaveform();
 
       // Produce waveform on one of the optical detectors
-      void CreatePDWaveform(sim::SimPhotonsLite const&, 
+      void CreatePDWaveform(sim::SimPhotonsLite const&,
                             opdet::OpDetResponseInterface const&,
                             geo::Geometry const&,
-                            std::vector< std::vector< double > >&) const;
+                            std::vector< std::vector< double > >&,
+                            std::vector<FocusList>&) const;
 
       // Vary the pedestal
-      void AddLineNoise(std::vector< std::vector< double > >&) const;
+      void AddLineNoise(std::vector< std::vector< double > >&,
+                        const std::vector<FocusList>& fls) const;
 
-      void AddDarkNoise(std::vector< std::vector< double > >&) const;
+      void AddDarkNoise(std::vector< std::vector< double > >&,
+                        std::vector<FocusList>& fls) const;
 
       unsigned short CrossTalk() const;
 
@@ -130,10 +176,11 @@ namespace opdet {
       std::vector< short > VectorOfDoublesToVectorOfShorts
                                            (std::vector< double > const&) const;
 
-      // Make several shorter waveforms out of a long one using a hit finder, 
+      // Make several shorter waveforms out of a long one using a hit finder,
       // recording also when they start in the long waveform
-      std::map< size_t, std::vector< short > > 
-                              SplitWaveform(std::vector< short > const&) const;
+      std::map< size_t, std::vector< short > >
+      SplitWaveform(std::vector< short > const&,
+                    const FocusList&) const;
 
       double GetDriftWindow() const;
 
@@ -155,7 +202,7 @@ namespace opdet {
 }
 
 namespace opdet {
-  
+
   //---------------------------------------------------------------------------
   // Constructor
   OpDetDigitizerDUNE::OpDetDigitizerDUNE(fhicl::ParameterSet const& pset)
@@ -177,6 +224,8 @@ namespace opdet {
     fReadoutWindow      = pset.get< size_t >("ReadoutWindow"     );
     fPreTrigger         = pset.get< size_t >("PreTrigger"        );
 
+    fPadding            = pset.get< int    >("Padding"           );
+
     fThreshAlg = std::make_unique< pmtana::AlgoSiPM >
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
 
@@ -190,7 +239,7 @@ namespace opdet {
       // Assume the readout starts at -1 drift window
       fTimeBegin = -1*GetDriftWindow();
 
-      // Take the TPC readout window size and convert 
+      // Take the TPC readout window size and convert
       // to us with the electronics clock frequency
       fTimeEnd   = lar::providerFrom< detinfo::DetectorPropertiesService >()->ReadOutWindowSize()
                    / timeService->TPCClock().Frequency();
@@ -202,7 +251,7 @@ namespace opdet {
     }
 
     CheckFHiCLParameters();
-    
+
     // Initializing random number engines
     unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
     createEngine(seed);
@@ -223,15 +272,15 @@ namespace opdet {
     CreateSinglePEWaveform();
 
   }
-   
+
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::produce(art::Event& evt)
   {
-    
+
     // A pointer that will store produced OpDetWaveforms
-    std::unique_ptr< std::vector< raw::OpDetWaveform > > 
+    std::unique_ptr< std::vector< raw::OpDetWaveform > >
       pulseVecPtr(std::make_unique< std::vector< raw::OpDetWaveform > >());
-    
+
     art::ServiceHandle< sim::LArG4Parameters > lgp;
     bool fUseLitePhotons = lgp->UseLitePhotons();
 
@@ -257,53 +306,70 @@ namespace opdet {
     evt.getByLabel(fInputModule, litePhotonHandle);
 
     // For every optical detector:
-    for (auto const& litePhotons : (*litePhotonHandle)) 
+    for (auto const& litePhotons : (*litePhotonHandle))
     {
       // OpChannel in SimPhotonsLite is actually the photon detector number
       unsigned int opDet = litePhotons.OpChannel;
 
       // Get number of channels in this optical detector
       unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
+
+      std::vector<FocusList> fls(nChannelsPerOpDet, FocusList(nSamples, fPadding));
+
       // This vector stores waveforms created for each optical channel
-      std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet, 
+      std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
         std::vector< double >(nSamples, static_cast< double >(fPedestal)));
 
-      CreatePDWaveform(litePhotons, *odResponse, *geometry, pdWaveforms);
+      CreatePDWaveform(litePhotons, *odResponse, *geometry, pdWaveforms, fls);
 
       // Generate dark noise
-      if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms);
+      if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls);
+
+      // Uncomment to undo the effect of FocusLists. Replaces the accumulated
+      // lists with ones asserting we need to look at the whole trace.
+      // for(FocusList& fl: fls){
+      //        fl.ranges.clear();
+      //        fl.ranges.emplace_back(0, nSamples-1);
+      // }
 
       // Vary the pedestal
-      if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms);
+      if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls);
 
       // Loop over all the created waveforms, split them into shorter
       // waveforms and use them to initialize OpDetWaveforms
-      for (unsigned int hardwareChannel = 0; 
+      for (unsigned int hardwareChannel = 0;
            hardwareChannel < nChannelsPerOpDet; ++hardwareChannel)
       {
-        std::vector< short > waveformOfShorts = 
-             VectorOfDoublesToVectorOfShorts(pdWaveforms.at(hardwareChannel));
+        for(const std::pair<int, int>& p: fls[hardwareChannel].ranges){
+          // It's a shame we copy here. We could actually avoid by making the
+          // functions below take a begin()/end() pair.
+          const std::vector<double> sub(pdWaveforms[hardwareChannel].begin()+p.first,
+                                        pdWaveforms[hardwareChannel].begin()+p.second+1);
 
-        std::map< size_t, std::vector < short > > mapTickWaveform = 
-          (!fFullWaveformOutput) ? 
-          SplitWaveform(waveformOfShorts) : 
-          std::map< size_t, std::vector< short > >{ std::make_pair(0, 
-                                                          waveformOfShorts) };
+          std::vector< short > waveformOfShorts =
+            VectorOfDoublesToVectorOfShorts(sub);
 
-        unsigned int opChannel = geometry->OpChannel(opDet, hardwareChannel);
+          std::map< size_t, std::vector < short > > mapTickWaveform =
+            (!fFullWaveformOutput) ?
+            SplitWaveform(waveformOfShorts, fls[hardwareChannel]) :
+            std::map< size_t, std::vector< short > >{ std::make_pair(0,
+                                                                     waveformOfShorts) };
 
-        for (auto const& pairTickWaveform : mapTickWaveform)
-        {
-          double timeStamp = 
-            static_cast< double >(TickToTime(pairTickWaveform.first));
+          unsigned int opChannel = geometry->OpChannel(opDet, hardwareChannel);
 
-          raw::OpDetWaveform adcVec(timeStamp, opChannel, 
-                                    pairTickWaveform.second.size());
+          for (auto const& pairTickWaveform : mapTickWaveform)
+          {
+            double timeStamp =
+              static_cast< double >(TickToTime(pairTickWaveform.first+p.first));
 
-          for (short const& value : pairTickWaveform.second)
-            adcVec.emplace_back(value);
+            raw::OpDetWaveform adcVec(timeStamp, opChannel,
+                                      pairTickWaveform.second.size());
 
-          pulseVecPtr->emplace_back(std::move(adcVec));
+            for (short const& value : pairTickWaveform.second)
+              adcVec.emplace_back(value);
+
+            pulseVecPtr->emplace_back(std::move(adcVec));
+          }
         }
       }
     }
@@ -314,14 +380,17 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::AddPulse(size_t timeBin, 
-                              int scale, std::vector< double >& waveform) const
+  void OpDetDigitizerDUNE::AddPulse(size_t timeBin,
+                                    int scale, std::vector< double >& waveform,
+                                    FocusList& fl) const
   {
 
     // How many bins will be changed
     size_t pulseLength = fSinglePEWaveform.size();
-    if ((timeBin + fSinglePEWaveform.size()) > waveform.size()) 
+    if ((timeBin + fSinglePEWaveform.size()) > waveform.size())
       pulseLength = (waveform.size() - timeBin);
+
+    fl.AddRange(timeBin, timeBin+pulseLength-1);
 
     // Adding a pulse to the waveform
     for (size_t tick = 0; tick != pulseLength; ++tick)
@@ -333,9 +402,9 @@ namespace opdet {
   double OpDetDigitizerDUNE::Pulse1PE(double time) const
   {
 
-    if (time < fPeakTime) return 
+    if (time < fPeakTime) return
       (fVoltageToADC*fMaxAmplitude*std::exp((time - fPeakTime)/fFrontTime));
-    else return 
+    else return
       (fVoltageToADC*fMaxAmplitude*std::exp(-(time - fPeakTime)/fBackTime));
 
   }
@@ -344,11 +413,11 @@ namespace opdet {
   void OpDetDigitizerDUNE::CreateSinglePEWaveform()
   {
 
-    size_t length = 
+    size_t length =
       static_cast< size_t > (std::round(fPulseLength*fSampleFreq));
     fSinglePEWaveform.resize(length);
     for (size_t tick = 0; tick != length; ++tick)
-      fSinglePEWaveform[tick] = 
+      fSinglePEWaveform[tick] =
          Pulse1PE(static_cast< double >(tick)/fSampleFreq);
 
   }
@@ -358,8 +427,8 @@ namespace opdet {
                              (sim::SimPhotonsLite const& litePhotons,
                               opdet::OpDetResponseInterface const& odResponse,
                               geo::Geometry const& geometry,
-                              std::vector< std::vector< double > >& 
-                                                            pdWaveforms) const
+                              std::vector< std::vector< double > >& pdWaveforms,
+                              std::vector<FocusList>& fls) const
   {
 
     unsigned int const opDet = litePhotons.OpChannel;
@@ -376,21 +445,21 @@ namespace opdet {
       double photonTime = static_cast< double >(pulse.first)/1000.0;
       for (int i = 0; i < pulse.second; ++i)
       {
-        if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd)) 
+        if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
         {
           // Sample a random subset according to QE
           if (odResponse.detectedLite(opDet, readoutChannel))
           {
-            unsigned int hardwareChannel = 
+            unsigned int hardwareChannel =
                       geometry.HardwareChannelFromOpChannel(readoutChannel);
             // Convert the time of the pulse to ticks
             size_t timeBin = TimeToTick(photonTime);
             // Add 1 pulse to the waveform
-            AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel));
+            AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
           }
         }
-        else 
-          mf::LogInfo("OpDetDigitizerDUNE") 
+        else
+          mf::LogInfo("OpDetDigitizerDUNE")
             << "Throwing away an out-of-time photon at " << photonTime << '\n';
       }
     }
@@ -399,38 +468,47 @@ namespace opdet {
 
 
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::AddLineNoise
-                        (std::vector< std::vector< double > >& waveforms) const
+  void OpDetDigitizerDUNE::
+  AddLineNoise(std::vector< std::vector< double > >& waveforms,
+               const std::vector<FocusList>& fls) const
   {
+    int i = 0;
+    for(auto& waveform : waveforms){
+      for(unsigned int j = 0; j < fls[i].ranges.size(); ++j){
+        const std::pair<int, int>& p = fls[i].ranges[j];
+        for(int k = p.first; k <= p.second; ++k){
+          waveform[k] += fRandGauss->fire(0, fLineNoiseRMS);
+        }
+      }
 
-    for(auto& waveform : waveforms)
-      for(double& value : waveform) value += 
-                      static_cast< double >(fRandGauss->fire(0, fLineNoiseRMS));
-
+      ++i;
+    }
   }
 
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::AddDarkNoise
-                        (std::vector< std::vector< double > >& waveforms) const
+  void OpDetDigitizerDUNE::
+  AddDarkNoise(std::vector< std::vector< double > >& waveforms,
+               std::vector<FocusList>& fls) const
   {
-
+    int i = 0;
     for (auto& waveform : waveforms)
     {
       // Multiply by 10^6 since fDarkNoiseRate is in Hz
       double darkNoiseTime = static_cast< double >(fRandExponential->
                             fire(1.0/fDarkNoiseRate)*1000000.0) + fTimeBegin;
-      while (darkNoiseTime < fTimeEnd) 
+      while (darkNoiseTime < fTimeEnd)
       {
         size_t timeBin = TimeToTick(darkNoiseTime);
-        AddPulse(timeBin, CrossTalk(), waveform);
+        AddPulse(timeBin, CrossTalk(), waveform, fls[i]);
         // Find next time to simulate a single PE pulse
         darkNoiseTime += static_cast< double >
                         (fRandExponential->fire(1.0/fDarkNoiseRate)*1000000.0);
       }
 
+      ++i;
     }
   }
-  
+
   //---------------------------------------------------------------------------
   unsigned short OpDetDigitizerDUNE::CrossTalk() const
   {
@@ -444,7 +522,10 @@ namespace opdet {
   std::vector< short > OpDetDigitizerDUNE::VectorOfDoublesToVectorOfShorts
                             (std::vector< double > const& vectorOfDoubles) const
   {
+    // Don't bother to round properly, it's faster this way
+    return std::vector<short>(vectorOfDoubles.begin(), vectorOfDoubles.end());
 
+    /*
     std::vector< short > vectorOfShorts;
     vectorOfShorts.reserve(vectorOfDoubles.size());
 
@@ -452,12 +533,13 @@ namespace opdet {
       vectorOfShorts.emplace_back(static_cast< short >(std::round(value)));
 
     return vectorOfShorts;
-
+    */
   }
 
   //---------------------------------------------------------------------------
-  std::map< size_t, std::vector< short > > OpDetDigitizerDUNE::SplitWaveform
-                                  (std::vector< short > const& waveform) const
+  std::map< size_t, std::vector< short > > OpDetDigitizerDUNE::
+  SplitWaveform(std::vector< short > const& waveform,
+                const FocusList& fl) const
   {
 
     std::map< size_t, std::vector< short > > mapTickWaveform;
@@ -468,7 +550,7 @@ namespace opdet {
     fThreshAlg->Reconstruct(waveform,ped_mean,ped_sigma);
 
     std::vector< pmtana::pulse_param > pulses;
-    for (size_t pulseCounter = 0; pulseCounter < fThreshAlg->GetNPulse(); 
+    for (size_t pulseCounter = 0; pulseCounter < fThreshAlg->GetNPulse();
                                                           ++pulseCounter)
       pulses.emplace_back(fThreshAlg->GetPulse(pulseCounter));
 
@@ -480,11 +562,11 @@ namespace opdet {
         throw art::Exception(art::errors::LogicError)
           << "Pulse ends before or at the same time it starts!\n";
 
-      std::vector< short >::const_iterator window_start = 
+      std::vector< short >::const_iterator window_start =
               waveform.begin() + static_cast< size_t >(pulse.t_start);
-      std::vector< short >::const_iterator window_end   = 
+      std::vector< short >::const_iterator window_end   =
               waveform.begin() + static_cast< size_t >(pulse.t_end  );
-      mapTickWaveform.emplace(static_cast< size_t >(pulse.t_start), 
+      mapTickWaveform.emplace(static_cast< size_t >(pulse.t_start),
                               std::vector< short >(window_start, window_end));
       // Don't forget to check that the time output by the (new) algortihm
       // is < fTimeEnd and > fTimeBegin!
@@ -501,11 +583,11 @@ namespace opdet {
     double driftWindow;
 
     double maxDrift = 0.0;
-    for (geo::TPCGeo const& tpc : 
+    for (geo::TPCGeo const& tpc :
            art::ServiceHandle< geo::Geometry >()->IterateTPCs())
       if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
 
-    driftWindow = 
+    driftWindow =
       maxDrift/lar::providerFrom< detinfo::DetectorPropertiesService >()->DriftVelocity();
 
     return driftWindow;
@@ -517,7 +599,7 @@ namespace opdet {
   {
 
     if (tick > fPreTrigger)
-      return (static_cast< double >(tick - fPreTrigger)/fSampleFreq 
+      return (static_cast< double >(tick - fPreTrigger)/fSampleFreq
                                                                  + fTimeBegin);
     else
       return (static_cast< double >(fPreTrigger - tick)/fSampleFreq*(-1.0)
@@ -529,17 +611,17 @@ namespace opdet {
   size_t OpDetDigitizerDUNE::TimeToTick(double time) const
   {
 
-    return static_cast< size_t >(std::round((time - fTimeBegin)*fSampleFreq 
+    return static_cast< size_t >(std::round((time - fTimeBegin)*fSampleFreq
                                                                + fPreTrigger));
 
   }
-  
+
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::CheckFHiCLParameters() const
   {
 
     // Are all these logic errors?
-    
+
     if (fLineNoiseRMS < 0.0)
       throw art::Exception(art::errors::LogicError)
                                  << "fLineNoiseRMS: " << fLineNoiseRMS << '\n'
@@ -552,13 +634,13 @@ namespace opdet {
 
     if (fPreTrigger >= fReadoutWindow)
       throw art::Exception(art::errors::LogicError)
-               << "PreTrigger: "    << fPreTrigger    << " and " 
+               << "PreTrigger: "    << fPreTrigger    << " and "
                << "ReadoutWindow: " << fReadoutWindow << '\n'
                << "Pretrigger window has to be shorter than readout window!\n";
-    
+
     if (fTimeBegin >= fTimeEnd)
       throw art::Exception(art::errors::LogicError)
-                                 << "TimeBegin: " << fTimeBegin << " and " 
+                                 << "TimeBegin: " << fTimeBegin << " and "
                                  << "TimeEnd: "   << fTimeEnd   << '\n'
                                  << "TimeBegin should be less than TimeEnd!\n";
 
