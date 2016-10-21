@@ -12,7 +12,7 @@ services:
   TimeTracker:       {}
   SimpleMemoryCheck:     { ignoreTotal: 1 } # default is one
   RandomNumberGenerator: {} #ART native random number generator
-  user:         @local::dune35t_simulation_services
+                @table::dune35t_simulation_services
   message:      @local::standard_info
 }
 
@@ -92,5 +92,5 @@ outputs:
    }
 }
 
-services.user.DetectorClocksService.FramePeriod: 1600.0      # Readout window end in us
-services.user.DetectorClocksService.ClockSpeedOptical: 150.0 # Sampling frequency in MHz
+services.DetectorClocksService.FramePeriod: 1600.0      # Readout window end in us
+services.DetectorClocksService.ClockSpeedOptical: 150.0 # Sampling frequency in MHz
