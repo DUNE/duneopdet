@@ -16,15 +16,15 @@ services:
   TFileService: { fileName: "dune35t_optical_tutorial_reco_hist.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} #ART native random number generator
-  user:         @local::dunefd_simulation_services
+                @table::dunefd_simulation_services
   message:      @local::standard_info
 }
 
 # DUNE 35ton w/o wires and mesh
-services.user.OpDigiProperties:        @local::dunefd_opdigiproperties
+services.OpDigiProperties:        @local::dunefd_opdigiproperties
 
-services.user.Geometry:		       @local::dune10kt_ganged_workspace_geo
-services.user.PhotonVisibilityService: @local::dune10kt_workspace_photonvisibilityservice
+services.Geometry:		       @local::dune10kt_ganged_workspace_geo
+services.PhotonVisibilityService: @local::dune10kt_workspace_photonvisibilityservice
 
 #source is now a root file
 source:

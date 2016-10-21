@@ -21,16 +21,16 @@ services:
   TFileService: { fileName: "PhotonLibraryFile.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} #ART native random number generator
-  user:          @local::dune35t_photolibbuild_services 
+                 @table::dune35t_photolibbuild_services 
   message:       @local::standard_info
 }
 
 
-services.user.Geometry.GDML: "dune4apa36deg.gdml"
-services.user.Geometry.ROOT: "dune4apa36deg.gdml"
-services.user.Geometry.SortingParameters.DetectorVersion: "dune4apa36deg"
+services.Geometry.GDML: "dune4apa36deg.gdml"
+services.Geometry.ROOT: "dune4apa36deg.gdml"
+services.Geometry.SortingParameters.DetectorVersion: "dune4apa36deg"
 
-services.user.OpDetResponseInterface.LongAxis: z
+services.OpDetResponseInterface.LongAxis: z
 
 #Start each new event with an empty event.
 source:
@@ -103,11 +103,11 @@ physics.analyzers.pmtresponse.MakeOpDetEventsTree: false
 
 
 # To disable wireplane absorption, uncomment this line
-#services.user.LArG4Parameters.OpticalParamModels: ["TransparentPlaneAction"]
+#services.LArG4Parameters.OpticalParamModels: ["TransparentPlaneAction"]
 
 
 
 # Number of voxels
-services.user.PhotonVisibilityService.NX: 100
-services.user.PhotonVisibilityService.NY: 100
-services.user.PhotonVisibilityService.NZ: 100
+services.PhotonVisibilityService.NX: 100
+services.PhotonVisibilityService.NY: 100
+services.PhotonVisibilityService.NZ: 100
