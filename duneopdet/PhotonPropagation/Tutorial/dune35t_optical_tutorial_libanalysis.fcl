@@ -19,7 +19,7 @@ services:
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "PhotonLibraryFile_dune35texample_hists.root" }
   TimeTracker:       {}
-  user:          @local::dune35t_simulation_services  # defined in services.fcl
+                 @table::dune35t_simulation_services  # defined in services.fcl
   message:       @local::standard_info
 }
 
@@ -54,20 +54,20 @@ physics:
 # Examine your own library file - need to customize the visibility service
 #
 
-#services.user.PhotonVisibilityService.LibraryFile: "PhotonLibraryFile_dune35ton.root"
+#services.PhotonVisibilityService.LibraryFile: "PhotonLibraryFile_dune35ton.root"
 
 # Number of voxels
-#services.user.PhotonVisibilityService.NX: 30
-#services.user.PhotonVisibilityService.NY: 30
-#services.user.PhotonVisibilityService.NZ: 30
+#services.PhotonVisibilityService.NX: 30
+#services.PhotonVisibilityService.NY: 30
+#services.PhotonVisibilityService.NZ: 30
 
-#services.user.PhotonVisibilityService.UseCryoBoundary: true
+#services.PhotonVisibilityService.UseCryoBoundary: true
 
 # IF UseCryoBoundary is set to false, so use the following parameters. 
-#services.user.PhotonVisibilityService.XMin:  -2.
-#services.user.PhotonVisibilityService.XMax:  2.
-#services.user.PhotonVisibilityService.YMin:  -1.
-#services.user.PhotonVisibilityService.YMax:  1.
-#services.user.PhotonVisibilityService.ZMin:  10.
-#services.user.PhotonVisibilityService.ZMax:  12.
+#services.PhotonVisibilityService.XMin:  -2.
+#services.PhotonVisibilityService.XMax:  2.
+#services.PhotonVisibilityService.YMin:  -1.
+#services.PhotonVisibilityService.YMax:  1.
+#services.PhotonVisibilityService.ZMin:  10.
+#services.PhotonVisibilityService.ZMax:  12.
 
