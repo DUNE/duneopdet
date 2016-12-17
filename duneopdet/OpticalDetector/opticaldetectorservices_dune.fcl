@@ -1,4 +1,5 @@
 #include "opticaldetectorservices.fcl"
+#include "photonbacktracker.fcl"
 
 BEGIN_PROLOG
 
@@ -28,8 +29,13 @@ dunefd_photonbacktracker:
                                         # counted in hit based efficiency and purity calculations
    Delay:                    260          #This number is the difference between when light arrives at the detector, and the time recorded in OpHits. This number is experiment specific and should be set by each experiment.
 }
-##There is nothing geometry specific in the service. Copy the FD backtracker as the 35T backtracker
-dune35t_photonbacktracker: @local::dunefd_photonbacktracker:
+dune35t_photonbacktracker:
+{
+   G4ModuleLabel:            "largeant" # module that produced the sim::Particle and sim::SimChannel objects
+   MinimumHitEnergyFraction: 0.1        # minimum fraction of energy a G4 trackID contributes to a hit to be
+                                        # counted in hit based efficiency and purity calculations
+   Delay:                    260          #This number is the difference between when light arrives at the detector, and the time recorded in OpHits. This number is experiment specific and should be set by each experiment.
+}
 
 ##
 # FD op det response services, nominal and reference
