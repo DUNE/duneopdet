@@ -16,13 +16,15 @@ services:
   TFileService: { fileName: "dune35t_optical_tutorial_digi_hist.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} #ART native random number generator
-  user:         @local::dune35t_simulation_services
+                @table::dunefd_simulation_services
   message:      @local::standard_info
 }
 
 # DUNE 35ton w/o wires and mesh
-services.user.OpDigiProperties:        @local::dune35t_opdigiproperties
+services.OpDigiProperties:        @local::dunefd_opdigiproperties
 
+services.Geometry:		       @local::dune10kt_ganged_workspace_geo
+services.PhotonVisibilityService: @local::dune10kt_workspace_photonvisibilityservice
 
 #source is now a root file
 source:
@@ -42,14 +44,14 @@ physics:
    
    producers:
    {
-      opdigi:    @local::dune35t_opdigi    # simple digitizer with no noise and high saturation
+      opdigi:    @local::dunefd_opdigi_threegang    # simple digitizer with no noise and high saturation
       rns:       { module_type: "RandomNumberSaver" }
    }
 
    analyzers:
    {
-      opdigiana:   @local::dune35t_opdigiana
-      #ophitana:    @local::dune35t_ophitana
+      opdigiana:   @local::dunefd_opdigiana
+      #ophitana:    @local::dunefd_ophitana
    }
    
    

@@ -23,7 +23,7 @@
 #include "fhiclcpp/ParameterSet.h"
 
 // ART extensions
-#include "larsim/RandomUtils/LArSeedService.h"
+#include "nutools/RandomUtils/NuRandomService.h"
 
 // LArSoft includes
 
@@ -226,6 +226,12 @@ namespace opdet {
 
     fPadding            = pset.get< int    >("Padding"           );
 
+    fPulseLength        = pset.get< double >("PulseLength"       );
+    fPeakTime           = pset.get< double >("PeakTime"          );
+    fMaxAmplitude       = pset.get< double >("MaxAmplitude"      );
+    fFrontTime          = pset.get< double >("FrontTime"         );
+    fBackTime           = pset.get< double >("BackTime"          );
+
     fThreshAlg = std::make_unique< pmtana::AlgoSiPM >
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
 
@@ -264,11 +270,11 @@ namespace opdet {
 
     // Creating a single photoelectron waveform
     // Hardcoded, probably need to read them from the FHiCL file
-    fPulseLength  = 4.0;
-    fPeakTime     = 0.260;
-    fMaxAmplitude = 0.12;
-    fFrontTime    = 0.009;
-    fBackTime     = 0.476;
+    //fPulseLength  = 4.0;
+    //fPeakTime     = 0.260;
+    //fMaxAmplitude = 0.12;
+    //fFrontTime    = 0.009;
+    //fBackTime     = 0.476;
     CreateSinglePEWaveform();
 
   }
