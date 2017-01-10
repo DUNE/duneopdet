@@ -23,7 +23,7 @@
 #include "fhiclcpp/ParameterSet.h"
 
 // ART extensions
-#include "larsim/RandomUtils/LArSeedService.h"
+#include "nutools/RandomUtils/NuRandomService.h"
 
 // LArSoft includes
 

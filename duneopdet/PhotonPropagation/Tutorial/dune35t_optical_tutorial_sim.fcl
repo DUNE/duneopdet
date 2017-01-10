@@ -16,12 +16,12 @@ services:
   TFileService: { fileName: "dune35t_optical_tutorial_sim_hist.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} #ART native random number generator
-  user:         @local::dunefd_simulation_services
+                @table::dunefd_simulation_services
   message:      @local::standard_info
 }
 
-services.user.Geometry:	@local::dune10kt_ganged_workspace_geo
-services.user.PhotonVisibilityService:	@local::dune10kt_workspace_photonvisibilityservice
+services.Geometry:	@local::dune10kt_ganged_workspace_geo
+services.PhotonVisibilityService:	@local::dune10kt_workspace_photonvisibilityservice
 
 
 #Start each new event with an empty event.
@@ -126,8 +126,8 @@ outputs:
 
 # Custom Physics List
 
-services.user.LArG4Parameters.UseCustomPhysics: true
-services.user.LArG4Parameters.EnabledPhysics: [ "Em",
+services.LArG4Parameters.UseCustomPhysics: true
+services.LArG4Parameters.EnabledPhysics: [ "Em",
                                                       "FastOptical",
                                                       "SynchrotronAndGN",
                                                       "Ion",
