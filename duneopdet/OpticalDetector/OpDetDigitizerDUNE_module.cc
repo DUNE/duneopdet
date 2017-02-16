@@ -464,9 +464,10 @@ namespace opdet {
             AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
           }
         }
-        else
-          mf::LogInfo("OpDetDigitizerDUNE")
-            << "Throwing away an out-of-time photon at " << photonTime << '\n';
+        // else
+	  // remove this as it fills up logfiles for cosmic-ray runs
+          //mf::LogInfo("OpDetDigitizerDUNE")
+          //  << "Throwing away an out-of-time photon at " << photonTime << '\n';
       }
     }
 
