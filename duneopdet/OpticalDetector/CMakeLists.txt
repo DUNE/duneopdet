@@ -12,12 +12,12 @@ art_make( BASENAME_ONLY
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
-			                  art_Persistency_Common canvas_Persistency_Common
-			                  art_Utilities canvas_Utilities
+			                  art_Persistency_Common canvas
+			                  art_Utilities canvas
 			                  ${MF_MESSAGELOGGER}
 			                  ${MF_UTILITIES}
 	                      ${FHICLCPP}
-			                  ${CETLIB}
+			                  cetlib cetlib_except
                         ${ROOT_BASIC_LIB_LIST}
           MODULE_LIBRARIES 
 	                larana_OpticalDetector
@@ -32,12 +32,12 @@ art_make( BASENAME_ONLY
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
-			                  art_Persistency_Common canvas_Persistency_Common
-			                  art_Utilities canvas_Utilities
+			                  art_Persistency_Common canvas
+			                  art_Utilities canvas
 			                  ${MF_MESSAGELOGGER}
 			                  ${MF_UTILITIES}
 	                      ${FHICLCPP}
-			                  ${CETLIB}
+			                  cetlib cetlib_except
                         ${CLHEP}
                         ${ROOT_BASIC_LIB_LIST}
           SERVICE_LIBRARIES
@@ -49,12 +49,12 @@ art_make( BASENAME_ONLY
 			                  ${ART_FRAMEWORK_SERVICES_BASIC}
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL}
 			                  ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
-			                  art_Persistency_Common canvas_Persistency_Common
-			                  art_Utilities canvas_Utilities
+			                  art_Persistency_Common canvas
+			                  art_Utilities canvas
 			                  ${MF_MESSAGELOGGER}
 			                  ${MF_UTILITIES}
 	                      ${FHICLCPP}
-			                  ${CETLIB}
+			                  cetlib cetlib_except
                         ${CLHEP}
                         ${ROOT_BASIC_LIB_LIST}
          )
