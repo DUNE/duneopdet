@@ -4,6 +4,16 @@ script=OpticalLibraryBuild_Grid_dune.sh
 outdir=/pnfs/lbne/scratch/users/ahimmel/OpticalLibraries/OpticalLib_dune10kt_v1_1x2x6
 fcl=$outdir/dune10kt_v1_1x2x6_buildopticallibrary_grid.fcl
 
+if [ ! -d $outdir/root ]; then
+    mkdir -p $outdir/root
+    mkdir -p $outdir/fcl
+    mkdir -p $outdir/log
+fi
+
+if [ ! -e $fcl ]; then
+    cp `basename $fcl` $fcl
+fi
+
 # 57600 seconds = 16 hours, but it will not be a sharp cut-off
 clientargs="--resource-provides=usage_model=DEDICATED,OPPORTUNISTIC --OS=SL6 --group=dune -f $fcl --role=Analysis --memory=2500MB --expected-lifetime=0s --append_condor_requirements='((TARGET.GLIDEIN_ToDie-CurrentTime)>57600)'"
 toolsargs="-q -g --opportunistic --OS=SL6 "
