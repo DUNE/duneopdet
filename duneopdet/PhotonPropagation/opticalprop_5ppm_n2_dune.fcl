@@ -1,0 +1,16 @@
+
+# From A. Neumeier et al., The European Physical Journal C 72, 2190 (2012).
+# 165 cm scattering length at 128 nm (9.7 eV)
+services.LArPropertiesService.RayleighEnergies:       [   2.80,    3.00,    3.50,    4.00,    5.00,    6.00,    7.00,    8.00,    8.50,    9.00,    9.20,    9.40,    9.50,    9.60,    9.70,    9.80,    9.90,    10.0,    10.2,    10.4,    10.6,    10.8 ]
+services.LArPropertiesService.RayleighSpectrum:       [163172., 147515., 116200., 92714.0, 59833.6, 37913.3, 22256.0, 10513.0, 5677.64, 1543.77, 787.973, 414.094, 302.568, 222.726, 164.491, 122.213, 91.0169, 68.0644, 38.2869, 21.4133, 9.75654, 1.44185 ]
+
+# From B. J. P. Jones et al., Journal of Instrumentation 8, P07011 (2013).
+# 89.2 m attenuation length with low (0.1 PPM) concentration of nitrogen
+services.LArPropertiesService.AbsLengthEnergies:       [ 4,     5,     6,     7,     8,     9,     10,    11   ]       
+services.LArPropertiesService.AbsLengthSpectrum:       [ 1211., 1211., 1211., 1211., 1211., 1211., 1211., 1211.]
+
+# From WArP, R. Acciarri et al., JINST 5, P06003 (2010), 0804.1217.
+# Full yield, 73.4% triplet, at low (0.1 PPM) concentration of nitrogen
+services.LArPropertiesService.ScintYield:            16726.
+services.LArPropertiesService.ScintYieldRatio:       0.548
+services.LArPropertiesService.ScintByParticleType:   false
