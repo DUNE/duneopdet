@@ -108,8 +108,8 @@ mrb_version=$5
 mrb_quals=$6
 
 echo "> Setup $GROUP environment"                                                              1>> ${LOG} 2>&1
-echo "> source /grid/fermiapp/products/dune/setup_dune.sh"                                     1>> ${LOG} 2>&1
-source /grid/fermiapp/products/dune/setup_dune.sh                                              1>> ${LOG} 2>&1
+echo "> source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"                    1>> ${LOG} 2>&1
+source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh                             1>> ${LOG} 2>&1
 
 #echo "> source ${mrb_top}/localProducts_${mrb_project}_${mrb_version}_${mrb_quals/:/_}/setup"  1>> ${LOG} 2>&1
 #source ${mrb_top}/localProducts_${mrb_project}_${mrb_version}_${mrb_quals/:/_}/setup           1>> ${LOG} 2>&1
