@@ -1,11 +1,16 @@
+#include "TChain.h"
+#include "TFile.h"
+#include "TTree.h"
+#include <iostream>
+#include <fstream>
+
+void AssembleSingleFile(std::string FileList, std::string BaseDirectory, std::string OutputName);
 TChain * CreateChainFromList_opt(std::string ListFileName, std::string ChainName, std::string BaseDirectory, bool DoCheck=false);
-void MakeCombinedFile(std::string FileList, std::string BaseDirectory, std::string OutputName);
 
 
 void AssembleSingleFile(std::string FileList, std::string BaseDirectory, std::string OutputName)
 {
   
-  TFile *f = TFile::Open(OutputName.c_str(),"RECREATE");
   TChain * ch = CreateChainFromList_opt(FileList.c_str(),BaseDirectory.c_str(),"pmtresponse/PhotonLibraryData",false);
   
   Int_t Voxel, OpChannel;
@@ -14,6 +19,7 @@ void AssembleSingleFile(std::string FileList, std::string BaseDirectory, std::st
   ch->SetBranchAddress("OpChannel",  &OpChannel);
   ch->SetBranchAddress("Visibility", &Visibility);
 
+  TFile *f = new TFile(OutputName.c_str(),"RECREATE");
   TTree * tt = new TTree("PhotonLibraryData","PhotonLibraryData");
   tt->Branch("Voxel",      &Voxel,      "Voxel/I");
   tt->Branch("OpChannel",  &OpChannel,  "OpChannel/I");
