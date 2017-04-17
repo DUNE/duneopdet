@@ -28,7 +28,7 @@ larsoft="$MRB_TOP dunetpc $MRB_PROJECT_VERSION $MRB_QUALS"
 #thisjob="-M -N 1 file://$PWD/$script $njobs $nphotons"
 
 #Real job - jobsub_client
-njobs=1500
+njobs=6000
 nphotons=50000
 thisjob="-N $njobs file://$PWD/$script $njobs $nphotons"
 
