@@ -13,11 +13,11 @@ process_name: LibraryTest
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "libanalysis_dune10kt_v1_1x2x6_20170322_hists.root" }
+  TFileService: { fileName: "libanalysis_protodune_%tc_hists.root" }
   TimeTracker:       {}
   message:       @local::standard_info
-  @table::dunefd_simulation_services  # defined in services.fcl
-  PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice
+  @table::protodune_simulation_services  # defined in services.fcl
+  PhotonVisibilityService: @local::protodune_photonvisibilityservice
 }
 
 physics:
@@ -43,9 +43,13 @@ physics:
  end_paths:     [analyzeIt]  
 }
 
-services.Geometry.GDML: "dune10kt_v1_1x2x6.gdml"
-services.Geometry.ROOT: "dune10kt_v1_1x2x6.gdml"
+services.Geometry.GDML: "protodune_v3.gdml"
+services.Geometry.ROOT: "protodune_v3.gdml"
 services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
 
-services.PhotonVisibilityService.LibraryFile: "lib_dune10kt_v1_1x2x6_20170322.root"
+#services.Geometry.GDML: "protodune_v2.gdml"
+#services.Geometry.ROOT: "protodune_v2.gdml"
+#services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
+
+services.PhotonVisibilityService.LibraryFile: "lib_protodune_0ppmn2.root"
 
