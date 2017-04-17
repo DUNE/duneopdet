@@ -2,7 +2,7 @@
 
 BEGIN_PROLOG
 
-dunefd_opdigi:
+dunefd_opdigi_unganged:
 {
    module_type:          "OpDetDigitizerDUNE"
    InputModule:          "largeant" # Module that created simphotons
@@ -42,7 +42,18 @@ dunefd_opdigi:
    # ReadoutPretrigger:   100
    
    # SaturationScale:         16383 # 2^14 - 1, based on SSP Data
-} 
+}
+
+dunefd_opdigi_threegang:	        @local::dunefd_opdigi_unganged
+dunefd_opdigi_threegang.PulseLength:	0.876
+dunefd_opdigi_threegang.PeakTime:	0.028
+dunefd_opdigi_threegang.MaxAmplitude:	0.0594
+dunefd_opdigi_threegang.FrontTime:	0.013
+dunefd_opdigi_threegang.BackTime:	0.386
+
+dunefd_opdigi: @local::dunefd_opdigi_threegang
+
+
 
 dunefd_simphotoncounter:
 {
@@ -58,13 +69,20 @@ dunefd_simphotoncounter:
   WavelengthCutHigh:       10000
 }
 
-dunefd_tracktimeassoc:          @local::standard_tracktimeassoc
-dunefd_ophit:                   @local::standard_ophit
-dunefd_ophit.InputModule:       "opdigi"
-dunefd_ophit.HitAlgoPset:       @local::standard_algo_sipm
-dunefd_ophit.AreaToPE:          true
-dunefd_ophit.SPEArea:           1106
-dunefd_ophit.SPEShift:          0.304
+dunefd_tracktimeassoc:           @local::standard_tracktimeassoc
+dunefd_ophit_single:             @local::standard_ophit
+dunefd_ophit_single.InputModule: "opdigi"
+dunefd_ophit_single.HitAlgoPset: @local::standard_algo_sipm
+dunefd_ophit_single.AreaToPE:    true
+dunefd_ophit_single.SPEArea:     1106
+dunefd_ophit_single.SPEShift:    0.304
+
+dunefd_ophit_threegang:          @local::dunefd_ophit_single
+dunefd_ophit_threegang.SPEArea:  1035
+dunefd_ophit_threegang.SPEShift: 0.603
+
+dunefd_ophit: @local::dunefd_ophit_threegang
+
 dunefd_opflash:                 @local::standard_opflash
 dunefd_opflash.FlashThreshold:  3.5
 
@@ -91,13 +109,6 @@ dunefd_calibrationanalysis:
    OpHitModule:  "ophit"   # Module that created recob::OpHits
    InstanceName: ""     
 }
-
-dunefd_opdigi_threegang:	@local::dunefd_opdigi
-dunefd_opdigi_threegang.PulseLength:	0.876
-dunefd_opdigi_threegang.PeakTime:	0.028
-dunefd_opdigi_threegang.MaxAmplitude:	0.0594
-dunefd_opdigi_threegang.FrontTime:	0.013
-dunefd_opdigi_threegang.BackTime:	0.386
 
 dune35t_simphotoncounter: @local::standard_simphotoncounter
 
