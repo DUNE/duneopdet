@@ -6,10 +6,16 @@ dunefd_opdigi_unganged:
 {
    module_type:          "OpDetDigitizerDUNE"
    InputModule:          "largeant" # Module that created simphotons
+
+   # Assume 25 V bias with Sensl C-series SiPMs
+   # Gain at this voltage is 4e6 -- that this corresponds to
+   # the MaxAmplitude and VoltageToADC below has not been confirmed.
+   
    VoltageToADC:         151.5      # Converting mV to ADC counts (counts in 1 mV)
-   LineNoiseRMS:           2.6      # Pedestal RMS in ADC counts
+   LineNoiseRMS:           2.6      # Pedestal RMS in ADC counts, likely an underestimate
    DarkNoiseRate:         10.0      # In Hz, Ranges 2-50 depending on Vbias
-   CrossTalk:              0.165    # Probability of producing 2 PE for 1 incident photon
+   CrossTalk:              0.20     # Probability of producing 2 PE for 1 incident photon
+   # Afterpulsing:         0.006    # Afterpulsing is not yet simulated
    Pedestal:            1500        # in ADC counts
    DefaultSimWindow:    true        # Use -1*drift window as the start time and
                                     # the TPC readout window end time as the end time
@@ -29,6 +35,7 @@ dunefd_opdigi_unganged:
    FrontTime:		 0.009
    BackTime:		 0.476
 
+   
    # readout window in optical ticks
    # buffer before waveform
    # see SSP manual, dune-doc-9928, p. 58
