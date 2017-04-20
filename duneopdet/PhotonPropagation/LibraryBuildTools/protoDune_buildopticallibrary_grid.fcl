@@ -129,7 +129,6 @@ services.LArPropertiesService.ScintYieldRatio:       0.266
 services.LArPropertiesService.ScintByParticleType:   false
 
 # New IU Radiator Parameters
-services.OpDetResponseInterface.QuantumEfficiency:       0.0035
 services.OpDetResponseInterface.LambdaShort:                3.2 # cm
 services.OpDetResponseInterface.LambdaLong:               225.2 # cm
 services.OpDetResponseInterface.FracShort:                0.435
