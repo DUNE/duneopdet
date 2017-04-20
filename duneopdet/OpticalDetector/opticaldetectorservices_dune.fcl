@@ -41,18 +41,18 @@ dune35t_photonbacktracker:
 # FD op det response services, nominal and reference
 ##
 
-dunefd_opdetresponse_reference:
+dunefd_opdetresponse_iuradiator:
 {
    service_provider:        DUNEOpDetResponse
-   QuantumEfficiency:       0.0016
+   QuantumEfficiency:       0.0035
    WavelengthCutLow:        0 
    WavelengthCutHigh:       10000
    
    LightGuideAttenuation:   true
-   LambdaShort:              5.56 # cm
-   LambdaLong:              44.13 # cm
-   FracShort:                0.40
-   FracLong:                 0.60
+   LambdaShort:                3.2 # cm
+   LambdaLong:               225.2 # cm
+   FracShort:                0.435
+   FracLong:                 0.565
 
    LongAxis:                z
    
@@ -61,21 +61,14 @@ dunefd_opdetresponse_reference:
    ChannelConversion:       fast
 
    # QE here includes:
-   #   SiPMQE: 35%
-   #   SiPM Coverage: 71%
-   #   Surface Conversion: 0.92%
+   #   Measured response at SiPM end, corrected for 12-SiPM coverage: 0.005
    #   Mesh transmission: 70%
    #   Attenuation in bars already in library response
 
 }
 
-dunefd_opdetresponse_alternative: @local::dunefd_opdetresponse_reference
-dunefd_opdetresponse_alternative.QuantumEfficiency:   0.0057 # Surface conversion -> 3.3%
-dunefd_opdetresponse_alternative.LambdaShort:        66.0 #cm
-dunefd_opdetresponse_alternative.LambdaLong:        350.0 #cm
-
-# Use the alternative design by default
-dunefd_opdetresponse: @local::dunefd_opdetresponse_alternative
+# Use the IU radiator design by default
+dunefd_opdetresponse: @local::dunefd_opdetresponse_iuradiator
 
 
 
