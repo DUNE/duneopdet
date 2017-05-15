@@ -1,4 +1,5 @@
 #include "services_dune.fcl"
+#include "backtracker.fcl"
 #include "opticaldetectormodules_dune.fcl"
 #include "opticaldetectorservices_dune.fcl"
 
@@ -14,6 +15,7 @@ services:
   RandomNumberGenerator: {} #ART native random number generator
                 @table::dune35t_simulation_services
   message:      @local::standard_info
+  BackTracker:   @local::dune35t_backtracker # defined in backtracker.fcl
 }
 
 #source is now a root file
