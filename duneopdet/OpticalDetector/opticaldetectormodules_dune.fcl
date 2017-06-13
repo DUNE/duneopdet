@@ -85,8 +85,8 @@ dunefd_ophit_single.SPEArea:     1106
 dunefd_ophit_single.SPEShift:    0.304
 
 dunefd_ophit_threegang:          @local::dunefd_ophit_single
-dunefd_ophit_threegang.SPEArea:  1035
-dunefd_ophit_threegang.SPEShift: 0.603
+dunefd_ophit_threegang.SPEArea:  410
+dunefd_ophit_threegang.SPEShift: 0.451
 
 dunefd_ophit: @local::dunefd_ophit_threegang
 
