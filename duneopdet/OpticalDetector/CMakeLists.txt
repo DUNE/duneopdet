@@ -2,7 +2,7 @@ art_make( BASENAME_ONLY
           LIBRARY_NAME larana_OpticalDetector
           LIB_LIBRARIES 
                         lardataobj_RecoBase
-                        larcore_Geometry
+                        larcorealg_Geometry
                         larcore_Geometry_Geometry_service
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
@@ -22,7 +22,7 @@ art_make( BASENAME_ONLY
           MODULE_LIBRARIES 
 	                larana_OpticalDetector
 	  		larana_OpticalDetector_OpHitFinder
-                        larcore_Geometry
+                        larcorealg_Geometry
                         larcore_Geometry_Geometry_service
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
@@ -41,7 +41,7 @@ art_make( BASENAME_ONLY
                         ${CLHEP}
                         ${ROOT_BASIC_LIB_LIST}
           SERVICE_LIBRARIES
-                        larcore_Geometry
+                        larcorealg_Geometry
                         larcore_Geometry_Geometry_service
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
