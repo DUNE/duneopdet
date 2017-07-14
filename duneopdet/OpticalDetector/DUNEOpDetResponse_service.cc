@@ -9,7 +9,7 @@
 #include "dune/OpticalDetector/DUNEOpDetResponse.h"
 #include "TGeoNode.h"
 #include "TGeoBBox.h"
-#include "larcore/Geometry/OpDetGeo.h"
+#include "larcorealg/Geometry/OpDetGeo.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "CLHEP/Random/RandFlat.h"
