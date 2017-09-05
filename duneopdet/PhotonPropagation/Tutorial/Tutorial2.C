@@ -6,8 +6,8 @@ void Tutorial2()
     TFile *fin = new TFile("dune35t_optical_example_yscan_hist.root");
 
     // Load the trees
-    TTree *pdtree = fin->Get("pmtresponse/OpDets");
-    TTree *mctree = fin->Get("AnalysisExample/AnalysisExampleSimulation");
+    TTree *pdtree = (TTree*)fin->Get("pmtresponse/OpDets");
+    TTree *mctree = (TTree*)fin->Get("AnalysisExample/AnalysisExampleSimulation");
 
     // Attach variables to the branches we need
     int    EventID;        pdtree->SetBranchAddress("EventID",       &EventID);
