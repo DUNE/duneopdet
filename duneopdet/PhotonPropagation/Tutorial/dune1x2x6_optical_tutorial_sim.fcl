@@ -20,8 +20,24 @@ services:
   @table::dunefd_simulation_services
 }
 
+# DUNE FD 1x2x6 workspace geometry
 services.Geometry:                @local::dune10kt_1x2x6_geo
+
+# Enable photon simulation for the 1x2x6 geometry.
+# This is turned off by default in dunefd_simulation_services
+# since the full FD cannot be simulated for photon signals.
+
 services.PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice
+services.LArG4Parameters.UseCustomPhysics: true
+services.LArG4Parameters.EnabledPhysics: [ "Em",
+                                           "FastOptical",
+                                           "SynchrotronAndGN",
+                                           "Ion",
+                                           "Hadron",
+                                           "Decay",
+                                           "HadronElastic",
+                                           "Stopping",
+                                           "NeutronTrackingCut" ]
 
 
 #Start each new event with an empty event.
@@ -50,6 +66,8 @@ physics:
  analyzers:
  {
    pmtresponse: @local::dunefd_simphotoncounter
+
+      
    # This name defines a job step below, and will appear as a directory 
    # in the output histogram file. 
    AnalysisExample: 
@@ -123,18 +141,6 @@ outputs:
    fileName:    "dune1x2x6_optical_tutorial_sim_gen.root" #default file name, can override from command line with -o or --output
  }
 }
-
-# Custom Physics List
-services.LArG4Parameters.UseCustomPhysics: true
-services.LArG4Parameters.EnabledPhysics: [ "Em",
-                                           "FastOptical",
-                                           "SynchrotronAndGN",
-                                           "Ion",
-                                           "Hadron",
-                                           "Decay",
-                                           "HadronElastic",
-                                           "Stopping",
-                                           "NeutronTrackingCut" ]
 
 
 #
