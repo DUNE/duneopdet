@@ -37,6 +37,7 @@ export CONDOR_SCRATCH_DIR=$TEMP
 
 LOG=${CONDOR_DIR_LOG}/pd_library_gen_${label}.log
 FCL=${CONDOR_DIR_FCL}/pd_library_gen_${label}.fcl
+RTF=${CONDOR_DIR_ROOT}/pd_library_gen_${label}.root
 
 #
 # Prepare to run
@@ -152,8 +153,8 @@ fi
           # Run the job
           echo ""                                                                 1>> ${LOG} 2>&1
           echo "***** Starting job"                                               1>> ${LOG} 2>&1
-          echo "lar -c $FCL -n $NVoxelsPerJob -T PhotonLibraryFile_${label}.root" 1>> ${LOG} 2>&1
-          lar -c $FCL -n $NVoxelsPerJob -T PhotonLibraryFile_${label}.root        1>> ${LOG} 2>&1
+          echo "lar -c $FCL -n $NVoxelsPerJob -T ${RTF}" 1>> ${LOG} 2>&1
+          lar -c $FCL -n $NVoxelsPerJob -T ${RTF}        1>> ${LOG} 2>&1
           ret=$?
           echo   "***** Job completed ($ret)"                                     1>> ${LOG} 2>&1
           echo                                                                    1>> ${LOG} 2>&1
