@@ -1,6 +1,7 @@
 #!/bin/bash
 
 tarfile=
+debugVar=0
 USER=${USER} #Set the user to the default USER from the environment unless over ridder
 
 ##This block handles flags given to the program.
@@ -8,6 +9,7 @@ USER=${USER} #Set the user to the default USER from the environment unless over 
 #    -t | --tar    : Pass a tarfile of a larsoft installation to be setup on the cluster.
 #                     User full path to file.
 #    -u | --user   : Over ride the user directory to write to on dCache *NOT RECOMENDED
+#    -d | --test   : run the test fcl file and a single job with short run time instead of building a new library
 while :; do
   case $1 in
     --tar|-t)
@@ -18,6 +20,9 @@ while :; do
         printf 'ERROR: "--tar" requires a path to a tar file of a larsoft installation.\n' >&2
         exit 10
       fi
+      ;;
+    --test|-d)
+      debugVar=1
       ;;
     --tar=?*)
       tarfile=${1#*=}
@@ -77,20 +82,24 @@ fi
 toolsargs="-q -g --opportunistic --OS=SL6 "
 fileargs="-dROOT $outdir/root -dFCL $outdir/fcl -dLOG $outdir/log "
 
+#Test job vs real job
+if [ $debugVar -ne 0 ]; then
+  echo "test Job"
+  #Test job 1 - jobsub_client
+  njobs=7200
+  nphotons=10
+  clientargs="$clientargs --expected-lifetime=600 "
+  thisjob="-Q -N 1 file://$PWD/$script $njobs $nphotons"
+else
+  echo "Building Library"
+  #Real job - jobsub_client
+  njobs=6000
+  nphotons=50000
+  clientargs="$clientargs --expected-lifetime=16h "
+  thisjob="-N $njobs file://$PWD/$script $njobs $nphotons"
+fi
 
-#Test job 1 - jobsub_client
-#njobs=7200
-#nphotons=10
-#clientargs="$clientargs --expected-lifetime=600 "
-#thisjob="-Q -N 1 file://$PWD/$script $njobs $nphotons"
-
-#Real job - jobsub_client
-njobs=6000
-nphotons=50000
-clientargs="$clientargs --expected-lifetime=16h "
-thisjob="-N $njobs file://$PWD/$script $njobs $nphotons"
-
-if [ x$tarfile != x]; then
+if [ x$tarfile != x ]; then
   echo "jobsub_submit $environmentVars $clientargs $fileargs $thisjob "
   jobsub_submit $environmentVars $clientargs $fileargs $thisjob 
   ret=$?
