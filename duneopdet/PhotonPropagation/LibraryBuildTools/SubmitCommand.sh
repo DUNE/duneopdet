@@ -14,13 +14,11 @@
 ############################################################################
 ############################################################################
 
-
-
-
 #!/bin/bash
 
 tarfile=
 debugVar=0
+memory=2500MB
 USER=${USER} #Set the user to the default USER from the environment unless over ridder
 
 ##This block handles flags given to the program.
@@ -29,8 +27,21 @@ USER=${USER} #Set the user to the default USER from the environment unless over 
 #                     User full path to file.
 #    -u | --user   : Over ride the user directory to write to on dCache *NOT RECOMENDED
 #    -d | --test   : run the test fcl file and a single job with short run time instead of building a new library
+#    -m | --memory : the amount of memory to request from each node on the cluster. *NOT RECOMENDED 
+#                     Allowed units are MB and GB
 while :; do
   case $1 in
+    --memory|-m)
+      if [ "$2" ]; then
+        memory=$2
+      else
+        printf 'ERROR: "--memory" requires an input value to pass on to the cluster.\n' >&2
+        exit 10
+      fi
+      ;;
+    --memory=?*)
+      memory=${1#*=}
+      ;;
     --tar|-t)
       if [ "$2" ]; then
         tarfile=$2
@@ -89,7 +100,7 @@ fi
 
 # 57600 seconds = 16 hours, but it will not be a sharp cut-off
 environmentVars="-e IFDH_CP_MAXRETRIES=5"
-clientargs="--resource-provides=usage_model=DEDICATED,OPPORTUNISTIC --OS=SL6 --group=dune -f $fcl --role=Analysis --memory=2500MB "
+clientargs="--resource-provides=usage_model=DEDICATED,OPPORTUNISTIC --OS=SL6 --group=dune -f $fcl --role=Analysis --memory=$memory "
 if [ x$tarfile != x ]; then
   echo "Using tarball. Not setting LArSoft environment variables"
   larsoft=
@@ -109,12 +120,12 @@ if [ $debugVar -ne 0 ]; then
   nphotons=10
   clientargs="$clientargs --expected-lifetime=600 "
   thisjob="-Q -N 1 file://$PWD/$script $njobs $nphotons"
-else
+else  #Debug var is set. Run the test job
   echo "Building Library"
   #Real job - jobsub_client
   njobs=6000
   nphotons=50000
-  clientargs="$clientargs --expected-lifetime=16h "
+  clientargs="$clientargs --expected-lifetime=6h "
   thisjob="-N $njobs file://$PWD/$script $njobs $nphotons"
 fi
 
