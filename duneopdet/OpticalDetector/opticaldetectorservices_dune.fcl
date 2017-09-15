@@ -49,13 +49,22 @@ dunefd_opdetresponse_iuradiator:
    WavelengthCutLow:        0 
    WavelengthCutHigh:       10000
    
-   # Updated numbers from 2017 IU lightguide paper
    LightGuideAttenuation:   true
-   QuantumEfficiency:       0.00294 # 0.0042 * 70% for mesh transmission
-   LambdaShort:                2.2  # cm
-   LambdaLong:               229.0  # cm
-   FracShort:                 0.72
-   FracLong:                  0.28
+
+   # Updated numbers from 2017 IU lightguide paper
+   # Pending a new library to go along with them
+   #QuantumEfficiency:       0.00294 # 0.0042 * 70% for mesh transmission
+   #LambdaShort:                2.2  # cm
+   #LambdaLong:               229.0  # cm
+   #FracShort:                 0.72
+   #FracLong:                  0.28
+
+   QuantumEfficiency:       0.0035  #
+   LambdaShort:                3.2  # cm
+   LambdaLong:               225.2  # cm
+   FracShort:                 0.435
+   FracLong:                  0.565
+   
    
    LongAxis:                z
    
