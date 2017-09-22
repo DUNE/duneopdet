@@ -128,18 +128,24 @@ if [ x$INPUT_TAR_FILE != x ]; then
      echo "TEMP=$TEMP"  1>>${LOG} 2>&1
      mkdir $CONDOR_SCRATCH_DIR/local 1>>${LOG} 2>&1
      cd $CONDOR_SCRATCH_DIR/local  1>>${LOG} 2>&1
-     pwd                      1>>${LOG} 2>&1
-     echo "Extracting TAR"
-     tar -xf $INPUT_TAR_FILE -C ${CONDOR_SCRATCH_DIR}/local/  1>>${LOG} 2>&1
-     echo "Extracted TAR"
-     echo "Files extracted are:"
+     pwd                         1>>${LOG} 2>&1
+     echo "Extracting TAR"      1>>${LOG} 2>&1
+     cd ${TMP}/local
+     tar -xf $INPUT_TAR_FILE   1>>${LOG} 2>&1
+
+     echo "Extracted TAR"     1>>${LOG} 2>&1
+     echo "Files extracted are:"     1>>${LOG} 2>&1
      ls                       1>>${LOG} 2>&1
-     echo "Initializing localProducts from tarball ${INPUT_TAR_FILE}."
-     sed "s@setenv MRB_INSTALL.*@setenv MRB_INSTALL ${CONDOR_SCRATCH_DIR}/local@" $CONDOR_SCRATCH_DIR/local/setup | \
-     sed "s@setenv MRB_TOP.*@setenv MRB_TOP ${CONDOR_SCRATCH_DIR}@" > $CONDOR_SCRATCH_DIR/local/setup.local
-     echo "Setting up products"
-     . $CONDOR_SCRATCH_DIR/local/setup             1>>${LOG} 2>&1
-     echo "mrbslp next"
+     echo "Initializing localProducts from tarball ${INPUT_TAR_FILE}."     1>>${LOG} 2>&1
+      sed "s@setenv MRB_INSTALL.*@setenv MRB_INSTALL ${TMP}/local@" $TMP/     local/setup | \
+      sed "s@setenv MRB_TOP.*@setenv MRB_TOP ${TMP}@" > $TMP/local/setup.local
+
+
+     echo "Setting up products"     1>>${LOG} 2>&1
+     echo "ls of local dir: "       1>>${LOG} 2>&1
+     #. ${TMP}/local/setup             1>>${LOG} 2>&1
+     . ${TMP}/local/setup.local             1>>${LOG} 2>&1
+     echo "mrbslp next"     1>>${LOG} 2>&1
      mrbslp 1>>${LOG} 2>&1
      echo "Setup tarbal done" 1>>${LOG} 2>&1
 else
