@@ -98,7 +98,6 @@ if [ ! -e $fcl ]; then
     cp `basename $fcl` $fcl
 fi
 
-# 57600 seconds = 16 hours, but it will not be a sharp cut-off
 environmentVars="-e IFDH_CP_MAXRETRIES=5"
 clientargs="--resource-provides=usage_model=DEDICATED,OPPORTUNISTIC --OS=SL6 --group=dune -f $fcl --role=Analysis --memory=$memory "
 if [ x$tarfile != x ]; then
