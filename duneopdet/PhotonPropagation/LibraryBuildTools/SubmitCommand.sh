@@ -85,7 +85,7 @@ done
 
 
 script=OpticalLibraryBuild_Grid_dune.sh
-outdir=/pnfs/dune/scratch/users/${USER}/OpticalLibraries/OpticalLib_dune10kt_v1_1x2x6
+outdir=/pnfs/dune/scratch/users/${USER}/OpticalLibraries/OpticalLib_dune10kt_v2_1x2x6
 fcl=$outdir/dune10kt_v2_1x2x6_buildopticallibrary_grid.fcl
 
 if [ ! -d $outdir/root ]; then
@@ -125,7 +125,7 @@ else  #Debug var is set. Run the test job
   #Real job - jobsub_client
   njobs=6000
   nphotons=50000
-  clientargs="$clientargs --expected-lifetime=6h "
+  clientargs="$clientargs --expected-lifetime=10h "
   thisjob="-N $njobs file://$PWD/$script $njobs $nphotons"
 fi
 

@@ -15,6 +15,14 @@
 # dedicated stitching script.
 #
 
+#missing="4070 4117"
+#
+#
+##
+#if ! echo $missing | grep -w "$PROCESS" > /dev/null; then
+#  echo "Exiting since $PROCESS is already complete."
+#  exit 0
+#fi
 
 
 #
@@ -124,6 +132,7 @@ if [ x$INPUT_TAR_FILE != x ]; then
      echo "Extracting TAR"
      tar -xf $INPUT_TAR_FILE -C ${CONDOR_SCRATCH_DIR}/local/  1>>${LOG} 2>&1
      echo "Extracted TAR"
+     echo "Files extracted are:"
      ls                       1>>${LOG} 2>&1
      echo "Initializing localProducts from tarball ${INPUT_TAR_FILE}."
      sed "s@setenv MRB_INSTALL.*@setenv MRB_INSTALL ${CONDOR_SCRATCH_DIR}/local@" $CONDOR_SCRATCH_DIR/local/setup | \
