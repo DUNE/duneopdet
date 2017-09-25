@@ -24,13 +24,31 @@ process_name: TextGen
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "dune35t_optical_example_yscan_hist.root" }
+  TFileService: { fileName: "dune1x2x6_optical_example_yscan_hist.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} #ART native random number generator
-                @table::dune35t_simulation_services
   message:      @local::standard_info
+  @table::dunefd_simulation_services
 }
 
+# DUNE FD 1x2x6 workspace geometry
+services.Geometry:                @local::dune10kt_1x2x6_geo
+
+# Enable photon simulation for the 1x2x6 geometry.
+# This is turned off by default in dunefd_simulation_services
+# since the full FD cannot be simulated for photon signals.
+
+services.PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice
+services.LArG4Parameters.UseCustomPhysics: true
+services.LArG4Parameters.EnabledPhysics: [ "Em",
+                                           "FastOptical",
+                                           "SynchrotronAndGN",
+                                           "Ion",
+                                           "Hadron",
+                                           "Decay",
+                                           "HadronElastic",
+                                           "Stopping",
+                                           "NeutronTrackingCut" ]
 
 
 #Start each new event with an empty event.
@@ -52,16 +70,15 @@ physics:
  producers:
  {
    generator: @local::standard_textfilegen
-   largeant:  @local::dune35t_largeant	  
-   #generator: @local::dune35t_singlep	  
-   #daq:       @local::dune35t_simwire       
+   largeant:  @local::dunefd_largeant	  
    rns:       { module_type: "RandomNumberSaver" }
  }
 
  analyzers:
  {
-   #largana:   @local::dune35t_largeantana
-   pmtresponse: @local::dune35t_simphotoncounter
+   pmtresponse: @local::dunefd_simphotoncounter
+
+      
    # This name defines a job step below, and will appear as a directory 
    # in the output histogram file. 
    AnalysisExample: 
@@ -103,7 +120,6 @@ physics:
       # dx used for the dE/dx calculation; units are cm. 
       BinSize:          0.3
    }
-   #opdigiana: @local::microboone_opdigiana
  }
 
 
@@ -111,7 +127,6 @@ physics:
  #filters reject all following items.  see lines starting physics.producers below
  # simulate: [ generator, largeant, daq, rns ] 
  simulate: [ generator, largeant, rns ] 
-#analyzeIt:  [ largana, AnalysisExample, pmtresponse]
  analyzeIt:  [ AnalysisExample, pmtresponse]
  
  #define the output stream, there could be more than one if using filters 
@@ -134,7 +149,7 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "dune35t_optical_example_yscan_gen.root" #default file name, can override from command line with -o or --output
+   fileName:    "dune1x2x6_optical_example_yscan_gen.root" #default file name, can override from command line with -o or --output
  }
 }
 
