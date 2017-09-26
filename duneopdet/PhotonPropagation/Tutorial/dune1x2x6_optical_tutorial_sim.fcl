@@ -13,15 +13,31 @@ process_name: SinglesGen
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "dune35t_optical_tutorial_sim_hist.root" }
+  TFileService: { fileName: "dune1x2x6_optical_tutorial_sim_hist.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} #ART native random number generator
-                @table::dune35t_simulation_services
   message:      @local::standard_info
+  @table::dunefd_simulation_services
 }
 
-services.Geometry:	@local::dune10kt_workspace_geo
-services.PhotonVisibilityService:	@local::dune10kt_workspace_photonvisibilityservice
+# DUNE FD 1x2x6 workspace geometry
+services.Geometry:                @local::dune10kt_1x2x6_geo
+
+# Enable photon simulation for the 1x2x6 geometry.
+# This is turned off by default in dunefd_simulation_services
+# since the full FD cannot be simulated for photon signals.
+
+services.PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice
+services.LArG4Parameters.UseCustomPhysics: true
+services.LArG4Parameters.EnabledPhysics: [ "Em",
+                                           "FastOptical",
+                                           "SynchrotronAndGN",
+                                           "Ion",
+                                           "Hadron",
+                                           "Decay",
+                                           "HadronElastic",
+                                           "Stopping",
+                                           "NeutronTrackingCut" ]
 
 
 #Start each new event with an empty event.
@@ -50,6 +66,8 @@ physics:
  analyzers:
  {
    pmtresponse: @local::dunefd_simphotoncounter
+
+      
    # This name defines a job step below, and will appear as a directory 
    # in the output histogram file. 
    AnalysisExample: 
@@ -120,22 +138,9 @@ outputs:
  out1:
  {
    module_type: RootOutput
-   fileName:    "dune35t_optical_tutorial_sim_gen.root" #default file name, can override from command line with -o or --output
+   fileName:    "dune1x2x6_optical_tutorial_sim_gen.root" #default file name, can override from command line with -o or --output
  }
 }
-
-# Custom Physics List
-
-services.LArG4Parameters.UseCustomPhysics: true
-services.LArG4Parameters.EnabledPhysics: [ "Em",
-                                                      "FastOptical",
-                                                      "SynchrotronAndGN",
-                                                      "Ion",
-                                                      "Hadron",
-                                                      "Decay",
-                                                      "HadronElastic",
-                                                      "Stopping",
-                                                      "NeutronTrackingCut" ]
 
 
 #
@@ -147,11 +152,11 @@ physics.producers.generator.Theta0YZ: [ 0 ]
 #physics.producers.generator.SigmaThetaXZ: [ 0 ]
 #physics.producers.generator.SigmaThetaYZ: [ 0 ]
 
-physics.producers.generator.X0:     [ 20.0 ] # Middle in X
+physics.producers.generator.X0:     [ 120.0 ] # 120 cm from wire plan
 #physics.producers.generator.SigmaX: [  1.0 ] # fraction with uniform
-physics.producers.generator.Y0:     [  0.0 ] # slight offset in y
+physics.producers.generator.Y0:     [  50.0 ] # slightly above center in y
 #physics.producers.generator.SigmaY: [ 50.0 ] # fraction with uniform
-physics.producers.generator.Z0:     [  20.0 ]
+physics.producers.generator.Z0:     [   0.0 ] # 1 m into the cryostat
 #physics.producers.generator.SigmaZ: [  0.0 ]
 #physics.producers.generator.PDist:     0 # uniform
 #physics.producers.generator.PosDist:   0 # uniform
