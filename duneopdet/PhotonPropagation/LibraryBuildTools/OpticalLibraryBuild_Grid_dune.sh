@@ -15,7 +15,6 @@
 # dedicated stitching script.
 #
 
-#missing="4070 4117"
 #
 #
 ##
@@ -36,6 +35,7 @@ label=${CLUSTER}_$(printf '%04d' $PROCESS)
 
 # In each voxel, run this many photons:
 NPhotonsPerVoxel=$2
+fclIn=$3
 
 umask 0002
 
@@ -63,7 +63,8 @@ cd $CONDOR_DIR_ROOT
 
 # Copy fcl file and configure for this PROCESS 
           echo "Create this job's fhicl file" 1>> ${LOG} 2>&1
-          mv -v ${CONDOR_DIR_INPUT}/*.fcl $FCL 1>> ${LOG} 2>&1
+          #mv -v ${CONDOR_DIR_INPUT}/*.fcl $FCL 1>> ${LOG} 2>&1
+          cp -v ${CONDOR_DIR_FCL}/$fclIn $FCL 1>> ${LOG} 2>&1
           
 NX=`awk '/NX/{ print $2 }' $FCL`
           NY=`awk '/NY/{ print $2 }' $FCL`
@@ -81,6 +82,7 @@ echo "Voxels: $NTopVoxel = $NX * $NY * $NZ" 1>> ${LOG} 2>&1
 
 # In each grid job, do this many voxels:
 NVoxelsPerJob=`echo "$NTopVoxel/$njobs" | bc`
+echo "NVoxelsPerJob=$NVoxelsPerJob" 1>>${LOG} 2>&1
           
 # This works out which voxels this job should focus on: 
 FirstVoxel=`echo "($NVoxelsPerJob * $PROCESS ) % $NTopVoxel" | bc` 
@@ -112,8 +114,6 @@ echo "physics.producers.generator.FirstVoxel: $FirstVoxel" >> $FCL
 #echo "physics.producers.largeant.RandomSeed: $g4Seed">> $FCL
 
 
-
-
 echo "> Setup $GROUP environment"                                                              1>> ${LOG} 2>&1
           echo "> source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh"                    1>> ${LOG} 2>&1
           source /cvmfs/dune.opensciencegrid.org/products/dune/setup_dune.sh                             1>> ${LOG} 2>&1
@@ -122,7 +122,7 @@ echo "> INPUT_TAR_FILE=$INPUT_TAR_FILE"                                         
           echo ">x\$INPUT_TAR_FILE={x$INPUT_TAR_FILE}"                                                      1>> ${LOG} 2>&1
           echo "Bool {x$INPUT_TAR_FILE != x}"                                                              1>>${LOG} 2>&1
           
-if [ x$INPUT_TAR_FILE != x ]; then
+if [ x$INPUT_TAR_FILE != x ]; then #This is how we handle users trying to pass their local installation as a tarball.
      echo "CONDOR_SCRATCH_DIR=$CONDOR_SCRATCH_DIR"   1>>${LOG} 2>&1
      echo "TMP=$TMP"  1>>${LOG} 2>&1
      echo "TEMP=$TEMP"  1>>${LOG} 2>&1
@@ -137,22 +137,30 @@ if [ x$INPUT_TAR_FILE != x ]; then
      echo "Files extracted are:"     1>>${LOG} 2>&1
      ls                       1>>${LOG} 2>&1
      echo "Initializing localProducts from tarball ${INPUT_TAR_FILE}."     1>>${LOG} 2>&1
-      sed "s@setenv MRB_INSTALL.*@setenv MRB_INSTALL ${TMP}/local@" $TMP/     local/setup | \
-      sed "s@setenv MRB_TOP.*@setenv MRB_TOP ${TMP}@" > $TMP/local/setup.local
-
+     echo 'sed "s@setenv MRB_INSTALL.*@setenv MRB_INSTALL ${TMP}/local@" $TMP/local/setup | \'
+     echo 'sed "s@setenv MRB_TOP.*@setenv MRB_TOP ${TMP}@" > $TMP/local/setup.local | \'
+     sed "s@setenv MRB_INSTALL.*@setenv MRB_INSTALL ${TMP}/local@" $TMP/local/setup | \
+     sed "s@setenv MRB_TOP.*@setenv MRB_TOP ${TMP}@" > $TMP/local/setup.local 
 
      echo "Setting up products"     1>>${LOG} 2>&1
-     echo "ls of local dir: "       1>>${LOG} 2>&1
      #. ${TMP}/local/setup             1>>${LOG} 2>&1
-     . ${TMP}/local/setup.local             1>>${LOG} 2>&1
-     echo "mrbslp next"     1>>${LOG} 2>&1
-     mrbslp 1>>${LOG} 2>&1
-     echo "Setup tarbal done" 1>>${LOG} 2>&1
-else
+     . ${TMP}/local/setup.local     1>>${LOG} 2>&1
+     echo "MRB_PROJECT=$MRB_PROJECT"                  1>>${LOG} 2>&1
+     echo "MRB_PROJECT_VERSION=$MRB_PROJECT_VERSION"  1>>${LOG} 2>&1
+     echo "MRB_QUALS=$MRB_QUALS"                      1>>${LOG} 2>&1
+     echo "MRB_TOP=$MRB_TOP"                          1>>${LOG} 2>&1
+     echo "MRB_SOURCE=$MRB_SOURCE"                    1>>${LOG} 2>&1
+     echo "MRB_BUILDDIR=$MRB_BUILDDIR"                1>>${LOG} 2>&1
+     echo "MRB_INSTALL=$MRB_INSTALL"                  1>>${LOG} 2>&1
+     
+     echo "mrbslp next"                               1>>${LOG} 2>&1
+     mrbslp                                           1>>${LOG} 2>&1
+     echo "Setup tarbal done"                         1>>${LOG} 2>&1
+else  #If we are not using a local install, setup becomes much easier.
   echo "> ups list -aK+ $mrb_project"                                                            1>> ${LOG} 2>&1
   ups list -aK+ $mrb_project                                                                     1>> ${LOG} 2>&1
   echo "> setup $mrb_project $mrb_version -q$mrb_quals"                                          1>> ${LOG} 2>&1
-  setup $mrb_project $mrb_version -q $mrb_quals                                                   1>> ${LOG} 2>&1
+  setup $mrb_project $mrb_version -q $mrb_quals                                                  1>> ${LOG} 2>&1
 fi
           
           echo "Setting up environment log" 1>>${LOG} 2>&1
