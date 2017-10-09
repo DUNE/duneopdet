@@ -20,9 +20,9 @@ tarfile=
 debugVar=0
 memory=2500MB
 expectedlifetime=8h
-script=OpticalLibraryBuild_Grid_dune.sh
+scriptIn=OpticalLibraryBuild_Grid_dune.sh
 outdir=/pnfs/dune/scratch/users/${USER}/OpticalLibraries/OpticalLib_dune10kt_v2_1x2x6
-fcl=$outdir/dune10kt_v2_1x2x6_buildopticallibrary_grid.fcl
+fclIn=dune10kt_v2_1x2x6_buildopticallibrary_grid.fcl
 USER=${USER} #Set the user to the default USER from the environment unless over ridder
 
 ##This block handles flags given to the program.
@@ -42,23 +42,23 @@ while :; do
   case $1 in
     --script|-s)
       if [ "$2" ]; then
-        script=$2
+        scriptIn=$2
       else
         printf 'ERROR: "--script" requires an input parameter to give the script to be executed on the grid nodes.\n' >&2
       fi
       ;;
     --script=?*)
-      script=${1#*=}
+      scriptIn=${1#*=}
       ;;
     --fcl|-f)
       if [ "$2" ]; then
-        fcl=$fcl
+        fclIn=$fcl
       else
         printf 'ERROR: "--fcl" requires and input with the full path of the fcl file to be passed as the template for each grid job.\n' >&2
       fi
       ;;
     --fcl=?*)
-      fcl=${1#*=}
+      fclIn=${1#*=}
       ;;
     --outdir|-o)
       if [ "$2" ]; then
@@ -141,8 +141,14 @@ if [ ! -d $outdir/root ]; then
     mkdir -p $outdir/log
 fi
 
+fcl="$outdir/`basename $fclIn`
+script="$outdir/`basename $scriptIn`
+
 if [ ! -e $fcl ]; then
-    cp `basename $fcl` $fcl
+    cp $fclIn $fcl
+fi
+if [ ! -e $script ]; then
+    cp $scriptIn $script
 fi
 
 environmentVars="-e IFDH_CP_MAXRETRIES=5"
@@ -165,15 +171,15 @@ if [ $debugVar -ne 0 ]; then #DEBUG VAR IS SET. Run the test job
   njobs=300000 #This is picked to select 10 voxels for 100x100x300 bins
   nphotons=10
   clientargs="$clientargs --expected-lifetime=600 "
-  thisjob="-Q -N 1 file://$PWD/$script $njobs $nphotons"
+  thisjob="-Q -N 1 file://$script $njobs $nphotons"
 else  
   echo "Building Library"
   #Real job - jobsub_client
   njobs=6000
   nphotons=50000
   clientargs="$clientargs --expected-lifetime=$lifetime "
-#  thisjob="-N $njobs file://$PWD/$script $njobs $nphotons"
-  thisjob="-N 12 file://$PWD/$script $njobs $nphotons"
+#  thisjob="-N $njobs file://$script $njobs $nphotons"
+  thisjob="-N 12 file://$script $njobs $nphotons"
 fi
 
 if [ x$tarfile != x ]; then
