@@ -171,15 +171,15 @@ if [ $debugVar -ne 0 ]; then #DEBUG VAR IS SET. Run the test job
   njobs=300000 #This is picked to select 10 voxels for 100x100x300 bins
   nphotons=10
   clientargs="$clientargs --expected-lifetime=600 "
-  thisjob="-Q -N 1 file://$script $njobs $nphotons"
+  thisjob="-Q -N 1 file://$script $njobs $nphotons $(basename $fcl)"
 else  
   echo "Building Library"
   #Real job - jobsub_client
   njobs=6000
   nphotons=50000
   clientargs="$clientargs --expected-lifetime=$lifetime "
-#  thisjob="-N $njobs file://$script $njobs $nphotons"
-  thisjob="-N 12 file://$script $njobs $nphotons"
+  #  thisjob="-N $njobs file://$script $njobs $nphotons"
+  thisjob="-N 12 file://$script $njobs $nphotons $(basename $fcl)"
 fi
 
 if [ x$tarfile != x ]; then
