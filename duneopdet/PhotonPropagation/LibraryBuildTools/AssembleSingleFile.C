@@ -62,8 +62,8 @@ TChain * CreateChainFromList_opt(std::string ListFileName, std::string BaseDirec
     {
       while(getline(InputFile, FileName))
         {
-	  FileName=BaseDirectory+FileName;
-	  std::cout<<FileName.c_str()<<std::endl;
+          FileName=BaseDirectory+FileName;
+          std::cout<<"Adding file "<< FileName.c_str()<<" to the TChain"<<std::endl;
           TheChain->Add(FileName.c_str());
         }
     }
@@ -71,13 +71,12 @@ TChain * CreateChainFromList_opt(std::string ListFileName, std::string BaseDirec
     {
       while(getline(InputFile, FileName))
         {
-	  FileName=BaseDirectory+FileName;
+          FileName=BaseDirectory+FileName;
           TFile*f=TFile::Open(FileName.c_str());
           if(f->Get(ChainName.c_str()))
             {
-	      std::cout<<FileName.c_str()<<std::endl;
               TheChain->Add(FileName.c_str());
-              std::cout<<"Added to TChain\n";
+              std::cout<<"Adding file "<< FileName.c_str()<<" to the TChain"<<std::endl;
             }
           else std::cout<<"Chain " <<ChainName << " not found in file " << FileName<<std::endl;
         }
