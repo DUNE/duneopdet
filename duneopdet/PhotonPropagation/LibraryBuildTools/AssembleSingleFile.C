@@ -10,6 +10,7 @@ TChain * CreateChainFromList_opt(std::string ListFileName, std::string ChainName
 
 void AssembleSingleFile(std::string FileList, std::string BaseDirectory, std::string OutputName)
 {
+  std::cout<<"Begining AssembleSingleFile.C\n";
   
   TChain * ch = CreateChainFromList_opt(FileList.c_str(),BaseDirectory.c_str(),"pmtresponse/PhotonLibraryData",false);
   
@@ -19,18 +20,31 @@ void AssembleSingleFile(std::string FileList, std::string BaseDirectory, std::st
   ch->SetBranchAddress("OpChannel",  &OpChannel);
   ch->SetBranchAddress("Visibility", &Visibility);
 
+  std::cout<<"Create Output File\n";
   TFile *f = new TFile(OutputName.c_str(),"RECREATE");
   TTree * tt = new TTree("PhotonLibraryData","PhotonLibraryData");
   tt->Branch("Voxel",      &Voxel,      "Voxel/I");
   tt->Branch("OpChannel",  &OpChannel,  "OpChannel/I");
   tt->Branch("Visibility", &Visibility, "Visibility/F");
   
-  for(int i=0; i!=ch->GetEntries(); ++i)
+  std::cout<<"Start Fill of output file branches\n";
+  long int nEnt = ch->GetEntries();
+  std::cout<<"Need to loop over "<<nEnt<<" entries.";
+  for(long int i=0; i<nEnt; ++i)
     {
+      if( i%1000==0) {
+        std::cout<<"Now on entry "<<i<<" of "<<nEnt<<"\n";
+      }else if( i>nEnt || i<0 ){
+        std::cout<<"ERROR: i="<<i<<" does not fall in the range 0 to "<<nEnt<<". Aborting.\n";
+//        throw std::logic_error();
+        throw 20;
+      }
+
       ch->GetEntry(i);
       tt->Fill();
     }
   
+  std::cout<<"write output file\n";
   f->Write();
   f->Close();
 }
@@ -63,6 +77,7 @@ TChain * CreateChainFromList_opt(std::string ListFileName, std::string BaseDirec
             {
 	      std::cout<<FileName.c_str()<<std::endl;
               TheChain->Add(FileName.c_str());
+              std::cout<<"Added to TChain\n";
             }
           else std::cout<<"Chain " <<ChainName << " not found in file " << FileName<<std::endl;
         }

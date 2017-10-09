@@ -43,9 +43,9 @@ physics:
  end_paths:     [analyzeIt]  
 }
 
-services.Geometry.GDML: "dune10kt_v1_1x2x6.gdml"
-services.Geometry.ROOT: "dune10kt_v1_1x2x6.gdml"
-services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
+services.Geometry.GDML: "dune10kt_v2_1x2x6.gdml"                                                                  
+services.Geometry.ROOT: "dune10kt_v2_1x2x6.gdml"             
+services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v2"
 
-services.PhotonVisibilityService.LibraryFile: "lib_dune10kt_v1_1x2x6_20170322.root"
+services.PhotonVisibilityService.LibraryFile: "lib_dune10kt_v2_1x2x6_20171001.root"
 
