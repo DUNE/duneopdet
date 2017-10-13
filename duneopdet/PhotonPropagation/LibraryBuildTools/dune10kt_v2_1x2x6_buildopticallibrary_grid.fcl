@@ -107,7 +107,11 @@ physics.analyzers.pmtresponse.MakeOpDetEventsTree: false
 # To disable wireplane absorption, uncomment this line
 #services.LArG4Parameters.OpticalParamModels: ["TransparentPlaneAction"]
 
-
+services.OpDetResponseInterface.QuantumEfficiency:       0.00294 # 0.0042 * 70% for mesh transmission
+services.OpDetResponseInterface.LambdaShort:                4.3  # cm
+services.OpDetResponseInterface.LambdaLong:               225.0  # cm
+services.OpDetResponseInterface.FracShort:                 0.29
+services.OpDetResponseInterface.FracLong:                  0.71
 
 # Number of voxels
 services.PhotonVisibilityService.NX: 100
