@@ -24,6 +24,7 @@ scriptIn=OpticalLibraryBuild_Grid_dune.sh
 outdir=/pnfs/dune/scratch/users/${USER}/OpticalLibraries/OpticalLib_dune10kt_v2_1x2x6
 fclIn=dune10kt_v2_1x2x6_buildopticallibrary_grid.fcl
 USER=${USER} #Set the user to the default USER from the environment unless over ridder
+HELPFILE=SubmitCommand.hlp
 
 ##This block handles flags given to the program.
 # Allowed flags are:
@@ -40,6 +41,15 @@ USER=${USER} #Set the user to the default USER from the environment unless over 
 #                       Allowed units are MB and GB
 while :; do
   case $1 in
+    --help|-h)
+      if [ -f $HELPFILE ]; then
+        cat $HELPFILE
+      else
+        echo "Help File not found." >&2
+        exit 1
+      fi
+      exit 0
+      ;;
     --script|-s)
       if [ "$2" ]; then
         scriptIn=$2
@@ -136,19 +146,19 @@ done
 
 
 if [ ! -d $outdir/root ]; then
-    mkdir -p $outdir/root
-    mkdir -p $outdir/fcl
-    mkdir -p $outdir/log
+  mkdir -p $outdir/root
+  mkdir -p $outdir/fcl
+  mkdir -p $outdir/log
 fi
 
 fcl="$outdir/`basename $fclIn`
 script="$outdir/`basename $scriptIn`
 
 if [ ! -e $fcl ]; then
-    cp $fclIn $fcl
+  cp $fclIn $fcl
 fi
 if [ ! -e $script ]; then
-    cp $scriptIn $script
+  cp $scriptIn $script
 fi
 
 environmentVars="-e IFDH_CP_MAXRETRIES=5"
