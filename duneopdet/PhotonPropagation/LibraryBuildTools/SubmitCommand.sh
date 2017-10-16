@@ -151,8 +151,10 @@ if [ ! -d $outdir/root ]; then
   mkdir -p $outdir/log
 fi
 
-fcl="$outdir/`basename $fclIn`
-script="$outdir/`basename $scriptIn`
+fcl="$outdir/`basename $fclIn`"
+script="$outdir/`basename $scriptIn`"
+echo "fcl=\"$outdir/`basename $fclIn`\""
+echo "script=\"$outdir/`basename $scriptIn`\""
 
 if [ ! -e $fcl ]; then
   cp $fclIn $fcl
@@ -189,7 +191,7 @@ else
   nphotons=50000
   clientargs="$clientargs --expected-lifetime=$lifetime "
   #  thisjob="-N $njobs file://$script $njobs $nphotons"
-  thisjob="-N 12 file://$script $njobs $nphotons $(basename $fcl)"
+  thisjob="-N $njobs file://$script $njobs $nphotons $(basename $fcl)"
 fi
 
 if [ x$tarfile != x ]; then
