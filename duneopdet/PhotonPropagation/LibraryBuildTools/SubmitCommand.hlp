@@ -1,0 +1,29 @@
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+DUNETPC Photon Library Build Tools Library Generation Submission Script.
+Author: A Himmel (ahimmel@fnal.gov)
+Heavily modified by J Stock (jason.stock@mines.sdsmt.edu) 09/2017
+For additional instructions see the DUNETPC Wiki: 
+https://cdcvs.fnal.gov/redmine/projects/dunetpc/wiki/How_to_make_a_photon_library
+For questions please contact Jason or Alex.
+-----------------------------------------------------------------------------
+This program is designed to take several input flags to correctly configure how the library build jobs are sent to the FNAL Grid.
+-----------------------------------------------------------------------------
+Usage:     
+    SubmitCommand.sh 
+    SubmitCommand.sh [OptionalFlags]
+-----------------------------------------------------------------------------
+Arguments:
+    -u | --user     : Over ride the user directory to write to on dCache *NOT RECOMENDED
+                        Make sure that the user submitting jobs to the grid has write access to the intended output directory
+    -d | --test     : run the test fcl file and a single job with short run time instead of building a new library
+    -d | --debug    : Alternative --test
+    -l | --lifetime : The amount of time a job should be expected to run on the cluster. This is overwritten in test mode.
+    -s | --script   : The script to run on the grid for each job (By default OpticalLibraryBuild_Grid_dune.sh)
+                        This flag should only be used by advanced users with a strong knowledge of the photon library generation.
+                        This flag may cause other flags to misbehave.
+    -f | --fcl      : The fcl file template to be given to $script. This will be used to build the individual fcl files for each grid job.
+    -o | --outdir   : The output directory for the results from the simulation. The default is the scratch space of the user who submitted the jobs.
+    -m | --memory   : the amount of memory to request from each node on the cluster. *NOT RECOMENDED 
+    -t | --tar      : Pass a tarfile of a larsoft installation to be setup on the cluster.
+                        Use full path to file.
