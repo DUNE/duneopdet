@@ -8,20 +8,22 @@
 #include "lightsource.fcl"
 
 
-process_name: LibraryBuild
 
-
-
+process_name: LibraryAnalysis
 
 
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "PhotonLibraryFile_dune35texample_hists.root" }
-  TimeTracker:       {}
-                 @table::dune35t_simulation_services  # defined in services.fcl
-  message:       @local::standard_info
+  TFileService: { fileName: "PhotonLibraryFile_dune1x2x6texample_hists.root" }
+  message:      @local::standard_info
+  @table::dunefd_simulation_services
 }
+
+# DUNE FD 1x2x6 workspace geometry
+services.Geometry:                @local::dune10kt_1x2x6_geo
+services.PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice
+
 
 physics:
 {
@@ -32,7 +34,7 @@ physics:
 
  analyzers:
  {
-   libana: @local::dune35t_photonlibraryanalyzer
+   libana: @local::dunefd_photonlibraryanalyzer
  }
 
  analyzeIt:  [ libana ]
