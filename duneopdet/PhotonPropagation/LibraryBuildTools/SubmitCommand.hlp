@@ -7,23 +7,59 @@ For additional instructions see the DUNETPC Wiki:
 https://cdcvs.fnal.gov/redmine/projects/dunetpc/wiki/How_to_make_a_photon_library
 For questions please contact Jason or Alex.
 -----------------------------------------------------------------------------
-This program is designed to take several input flags to correctly configure how the library build jobs are sent to the FNAL Grid.
+This program is designed to take several input flags to correctly configure how
+the library build jobs are sent to the FNAL Grid.
 -----------------------------------------------------------------------------
 Usage:     
     SubmitCommand.sh 
     SubmitCommand.sh [OptionalFlags]
 -----------------------------------------------------------------------------
 Arguments:
-    -u | --user     : Over ride the user directory to write to on dCache *NOT RECOMENDED
-                        Make sure that the user submitting jobs to the grid has write access to the intended output directory
-    -d | --test     : run the test fcl file and a single job with short run time instead of building a new library
-    -d | --debug    : Alternative --test
-    -l | --lifetime : The amount of time a job should be expected to run on the cluster. This is overwritten in test mode.
-    -s | --script   : The script to run on the grid for each job (By default OpticalLibraryBuild_Grid_dune.sh)
-                        This flag should only be used by advanced users with a strong knowledge of the photon library generation.
-                        This flag may cause other flags to misbehave.
-    -f | --fcl      : The fcl file template to be given to $script. This will be used to build the individual fcl files for each grid job.
-    -o | --outdir   : The output directory for the results from the simulation. The default is the scratch space of the user who submitted the jobs.
-    -m | --memory   : the amount of memory to request from each node on the cluster. *NOT RECOMENDED 
-    -t | --tar      : Pass a tarfile of a larsoft installation to be setup on the cluster.
-                        Use full path to file.
+*
+********************************************************************************
+| short | long form             |  Description                                 |
+********************************************************************************
+|       |                       |  This command will turns on Bash Script      |
+| XXXXX | --debugSubmitCommand  |  debugging. You probably don't need it unless|
+|       |                       |  you are actively modifying SubmitCommand.sh |
+********************************************************************************
+|  -h   | --help                |  Prints this helpfile with a description of  |
+|       |                       |  the flags availalbe from SubmitCommand.sh   |
+********************************************************************************
+|       |                       |  Passes explicitly which script you want to  |
+|  -s   | --script <X>          |  be run on each grid node. Default           |
+|       |                       |  OpticalLibraryBuild_Grid_dune               |
+********************************************************************************
+|       |                       |  Passes explicitly which fcl file you want   |
+|  -f   | --fcl <X>             |  to be used as the master for the GRID jobs. |
+|       |                       |  This file will be modified to each job to   |
+|       |                       |  select voxels correctly.                    |
+********************************************************************************
+|  -o   | --outdir <X>          |  Passes explicitly which directory you want  |
+|       |                       |  to use for all outputs.                     |
+********************************************************************************
+|  -m   | --memory <X>          |  Passes explicitly how much memory you wish  |
+|       |                       |  to request per grid job.                    |
+********************************************************************************
+|       |                       |  Turns on makeup jobs. Requires the number   |
+|  -n   | --makeup <X>          |  of jobs that need to be made up as an input |
+|       |                       |  *Note: you must manually eneter the makeup  | 
+|       |                       |  list in your grid script. -s Must be used   |
+|       |                       |  with this.                                  |
+********************************************************************************
+|  -t   | --tar <X>             |  Passes a tarball installation of LArSoft to |
+|       |                       |  the grid. use make_tarball.sh               |
+********************************************************************************
+|  -c   | --check               |  Do not start grid jobs. Just print the      |
+|       |                       |  jobsub command that would be run.           |
+********************************************************************************
+|  -s   | --test                |  Do not run the library generation. Instead  |
+|       |                       |  start only a single test job.               |
+********************************************************************************
+|  -l   | --lifetime <X>        |  Passes explicitly the ammount of time       |
+|       |                       |  requested for each grid job.                |
+********************************************************************************
+|       |                       |  Overrides the default USER for the output   |
+|  -u   | --user <X>            |  directory. *Note, you probably don't want   |
+|       |                       |  this flag.                                  |
+********************************************************************************

@@ -256,8 +256,8 @@ else
   clientargs="$clientargs --expected-lifetime=$expectedlifetime "
   #  thisjob="-N $njobs file://$script $njobs $nphotons"
   if [ 0 -ne $makeupJobs ]; then
-    echo "thisjob=\"-N $makeupJobs file://$script $njobs $nphotons $(basename $fcl)\""
-    thisjob="-N $makeupJobs file://$script $njobs $nphotons $(basename $fcl)"
+    echo "thisjob=\"-N $makeupJobs file://$script $njobs $nphotons $(basename $fcl) true\""
+    thisjob="-N $makeupJobs file://$script $njobs $nphotons $(basename $fcl) true"
   else
     thisjob="-N $njobs file://$script $njobs $nphotons $(basename $fcl)"
   fi
