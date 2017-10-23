@@ -75,7 +75,7 @@ export CONDOR_SCRATCH_DIR=$TEMP
 
 #we make a log here, just in case we need information from the process reassignment. This will make two log files for each makeup run. I can live with that.
 #Don't forget to modify the makeup function to have the right array of missing job numbers.
-if [ "$makeupControl" =="true" ]; then
+if [ "$makeupControl" == "true" ]; then
   echo "FIRST"
   echo "$PROCESS"
   LOG=${CONDOR_DIR_LOG}/pd_library_gen_${label}.log
