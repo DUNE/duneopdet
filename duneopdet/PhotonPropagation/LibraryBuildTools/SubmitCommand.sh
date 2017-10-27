@@ -21,6 +21,7 @@ checkVar=0
 testVar=0
 memory=2500MB
 expectedlifetime=8h
+makeupJobs=0
 scriptIn=OpticalLibraryBuild_Grid_dune.sh
 outdir=/pnfs/dune/scratch/users/${USER}/OpticalLibraries/OpticalLib_dune10kt_v2_1x2x6
 fclIn=dune10kt_v2_1x2x6_buildopticallibrary_grid.fcl
@@ -113,6 +114,20 @@ while :; do
     --memory=?*)
       memory=${1#*=}
         printf "\nCluster memory requirement set by user.\nmemory request will be $memory\n"
+      ;;
+    --makeup|-n)
+      if [ "$2" ]; then
+        makeupJobs=$2
+        printf "\nNumber Of Jobs required for Makeup Jobs set. Your OpticalLibraryBuild_Grid_dune.sh.\n If your OpticalLibraryBuild_Grid_dune.sh does not contain the correct makeup list, this step will not behave as expecte.\n"
+        shift
+      else
+        printf 'ERROR: "--makeup" requires the number of makeup jobs to process.\n'
+        exit 10
+      fi
+      ;;
+    --makeup=?*)
+        makeupJobs=${1#*=}
+        printf "\nNumber Of Jobs required for Makeup Jobs set. Your OpticalLibraryBuild_Grid_dune.sh.\n If your OpticalLibraryBuild_Grid_dune.sh does not contain the correct makeup list, this step will not behave as expecte.\n"
       ;;
     --tar|-t)
       if [ "$2" ]; then
@@ -231,16 +246,21 @@ if [ $testVar -ne 0 ]; then #TEST VAR IS SET. Run the test job
   #Test job 1 - jobsub_client
   njobs=300000 #This is picked to select 10 voxels for 100x100x300 bins with 10 photons each. 
   nphotons=10
-  clientargs="$clientargs --expected-lifetime=$lifetime "
+  clientargs="$clientargs --expected-lifetime=$expectedlifetime "
   thisjob="-Q -N 1 file://$script $njobs $nphotons $(basename $fcl)"
 else  
   printf "Building Library\n"
   #Real job - jobsub_client
   njobs=6000
   nphotons=50000
-  clientargs="$clientargs --expected-lifetime=$lifetime "
+  clientargs="$clientargs --expected-lifetime=$expectedlifetime "
   #  thisjob="-N $njobs file://$script $njobs $nphotons"
-  thisjob="-N $njobs file://$script $njobs $nphotons $(basename $fcl)"
+  if [ 0 -ne $makeupJobs ]; then
+    echo "thisjob=\"-N $makeupJobs file://$script $njobs $nphotons $(basename $fcl)\""
+    thisjob="-N $makeupJobs file://$script $njobs $nphotons $(basename $fcl)"
+  else
+    thisjob="-N $njobs file://$script $njobs $nphotons $(basename $fcl)"
+  fi
 fi
 
 if [ x$tarfile != x ]; then
