@@ -53,7 +53,7 @@ Arguments:
 |  -c   | --check               |  Do not start grid jobs. Just print the      |
 |       |                       |  jobsub command that would be run.           |
 ********************************************************************************
-|  -s   | --test                |  Do not run the library generation. Instead  |
+| XXXXX | --test                |  Do not run the library generation. Instead  |
 |       |                       |  start only a single test job.               |
 ********************************************************************************
 |  -l   | --lifetime <X>        |  Passes explicitly the ammount of time       |

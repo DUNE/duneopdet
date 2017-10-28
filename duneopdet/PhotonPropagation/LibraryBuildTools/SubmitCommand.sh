@@ -33,7 +33,7 @@ HELPFILE=SubmitCommand.hlp
 #    -t | --tar      : Pass a tarfile of a larsoft installation to be setup on the cluster.
 #                        User full path to file.
 #    -u | --user     : Over ride the user directory to write to on dCache *NOT RECOMENDED
-#    -s | --test     : run the test fcl file and a single job with short run time instead of building a new library
+#       | --test     : run the test fcl file and a single job with short run time instead of building a new library
 #    -c | --check    : Preform a dry run, returning the jobsub command, but not actually running any grid jobs.
 #    -l | --lifetime : The amount of time a job should be expected to run on the cluster. 
 #    -s | --script   : The script to run on the grid for each job (By default OpticalLibraryBuild_Grid_dune.sh)
@@ -147,7 +147,7 @@ while :; do
       checkVar=1
       printf "\nSetting check mode ON.\n"
       ;;
-    --test|-s)
+    --test)
       testVar=1
       printf "\nSetting test mode ON.\n"
       ;;
