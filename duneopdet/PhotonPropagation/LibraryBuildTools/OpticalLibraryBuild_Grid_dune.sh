@@ -24,18 +24,41 @@
 #fi
 
 
+#Define functions
+
+SetProcessNumber(){
+  #All of these outputs don't make much sense on the node, since they can't be written to log.
+  ourLog=$1
+  printf "Beginning with PROCESS# $PROCESS\n" 1>>${ourLog} 2>&1
+  printf "Correcting process number.\n" 1>>${ourLog} 2>&1
+  #using an indexed bash array to make up jobs. 1>>${ourLog} 2>&1
+  missingJobs=(1082 1086 1087 1088 1530 1532 1535 1542 1543 1545 1547 1549 1552 1554 1555 1562 1564 1572 1594 1596 1601 1604 1606 1623 1624 1625 1626 1627 1628 1635 1636 1643 1644 1645 1646 1651 1656 1657 1663 1665 1666 1668 1670 1671 1672 1674 1675 1676 1677 1683 1684 1703 1704 1705 1717 1722 1741 1742 1743 1755 1757 1761 1767 1773 1774 1775 1776 1781 1787 1793 1796 1803 1808 1822 1823 1828 1829 1832 1861 1864 1865 1869 1882 1886 1894 1895 1901 1906 1915 1916 1918 1922 1925 1932 1934 1936 1940 1944 1947 1948 1950 1955 1960 1964 1965 1972 1978 1980 1983 1985 1987 1990 1994 1996 1998 2000 2002 2003 2006 2011 2012 2013 2014 2017 2021 2025 2026 2027 2030 2038 2040 2041 2044 2050 2051 2054 2056 2067 2074 2076 2077 2078 2081 2083 2085 2086 2089 2090 2091 2092 2093 2095 2096 2097 2098 2100 2101 2102 2103 2106 2112 2114 2115 2120 2121 2122 2123 2124 2125 2126 2127 2129 2130 2135 2137 2138 2140 2141 2143 2154 2157 2160 2161 2166 2175 2178 2180 2182 2186 2192 2196 2198 2200 2201 2202 2204 2210 2212 2213 2214 2218 2219 2229 2230 2236 2238 2239 2240 2246 2255 2265 2278 2279 2283 2296 2302 2304 2305 2309 2312 2317 2318 2319 2320 2325 2329 2335 2337 2338 2340 2341 2342 2345 2347 2349 2355 2357 2358 2361 2362 2380 2392 2393 2394 2396 2399 2410 2418 2420 2438 2440 2454 2456 2458 2460 2461 2473 2474 2475 2476 2477 2478 2479 2480 2481 2482 2483 2484 2485 2486 2494 2496 2500 2501 2518 2538 2540 2575 2578 2580 2587 2617 2618 2620 2621 2623 2638 2639 2642 2658 2660 2671 2676 2677 2678 2680 2681 2682 2689 2690 2693 2696 2697 2698 2699 2700 2701 2702 2703 2718 2719 2720 2731 2737 2738 2739 2756 2758 2759 2778 2779 2780 2799 2818 2819 2820 2839 2858 2859 2879 2899) 1>>${ourLog} 2>&1
+  printf "Missing Job Numbers identified as \n" 1>>${ourLog} 2>&1
+  for jobNum in missingJobs; do
+    printf "$jobNum\n" 1>>${ourLog} 2>&1
+  done
+  printf "Old Process Number: $PROCESS\n" 1>>${ourLog} 2>&1
+  PROCESS=${missingJobs[$PROCESS]} 
+  printf "New Process Number: $PROCESS (for making the right voxels)\n"  1>>${ourLog} 2>&1
+}
+
+
 #
 # Set up our environment
 #
 
 njobs=$1
+NPhotonsPerVoxel=$2
+fclIn=$3
+if [ "$4" ]; then
+  makeupControl=$4 #this is intended to be a true/false bool telling the script weather or not to use the makeup list. For now the makup list is coded into the script (this is bad idea) above in the "SetProcessNumber" function. This is a bad idea moving forward. I would reccomend making this script intelligent, making the njobs, NPhotonsPerVoxel, and fclIn all flags passed to it, and also making a flag for the missingJobs list (which would need to be passed to the node, preferebly as a plain text file.
+fi
+
 label=${CLUSTER}_$(printf '%04d' $PROCESS)
 ## This sets all the needed FW and SRT and LD_LIBRARY_PATH envt variables. 
 ## Then we cd back to our TMP area. EC, 23-Nov-2010.
 
 # In each voxel, run this many photons:
-NPhotonsPerVoxel=$2
-fclIn=$3
 
 
 umask 0002
@@ -43,6 +66,13 @@ umask 0002
 export GROUP=dune
 export HOME=$CONDOR_DIR_ROOT
 export CONDOR_SCRATCH_DIR=$TEMP
+
+#we make a log here, just in case we need information from the process reassignment. This will make two log files for each makeup run. I can live with that.
+##############UNCOMMENT THESE LINES TO USE THE SetProcessNumber FUNCTION FOR MAKEUP JOBS
+#Don't forget to modify the makeup function to have the right array of missing job numbers.
+#LOG=${CONDOR_DIR_LOG}/pd_library_gen_${label}.log
+#touch ${LOG}
+#SetProcessNumber ${LOG}
 
 #LOG=./pd_library_gen_${label}.log
 #FCL=./pd_library_gen_${label}.fcl
@@ -56,7 +86,9 @@ RTF=${CONDOR_DIR_ROOT}/pd_library_gen_${label}.root
 cd $CONDOR_DIR_ROOT
 touch ${LOG}
 
+
 echo "Writing log to ${LOG}"        1>>${LOG} 2>&1 
+#this should be behind a gate checking makeupControl
 echo "OpticalLibraryBuild_Grid_dune.sh command is:"     1>>${LOG} 2>&1 
 echo "OpticalLibraryBuild_Grid_dune.sh $1 $2 $3"       1>>${LOG} 2>&1 
 echo "njobs=$njobs"          1>>${LOG} 2>&1 
@@ -91,8 +123,8 @@ ls ${CONDOR_DIR_ROOT} 1>>${LOG} 2>&1
 echo "CONDOR_DIR_INPUT=${CONDOR_DIR_INPUT}" 2>>${LOG} 2>&1
 ls ${CONDOR_DIR_INPUT} 1>>${LOG} 2>&1
 
-
 cp -v ${CONDOR_DIR_INPUT}/$fclIn $FCL 1>> ${LOG} 2>&1
+
 #cp -v ${CONDOR_DIR_FCL}/$fclIn $FCL 1>> ${LOG} 2>&1
 
 NX=`awk '/NX/{ print $2 }' $FCL`
@@ -101,7 +133,6 @@ NZ=`awk '/NZ/{ print $2 }' $FCL`
 echo "NX=$NX"
 echo "NY=$NY"
 echo "NZ=$NZ"
-
 # Total number of voxels
 #NTopVoxel=216000
 NTopVoxel=`echo "$NX*$NY*$NZ" | bc`
