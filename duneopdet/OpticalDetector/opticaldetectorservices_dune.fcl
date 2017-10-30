@@ -1,5 +1,5 @@
 #include "opticaldetectorservices.fcl"
-#include "photonbacktrackerservice.fcl"
+#include "photonbacktracker.fcl"
 
 BEGIN_PROLOG
 
