@@ -264,24 +264,24 @@ else
 fi
 
 if [ x$tarfile != x ]; then
-  printf "jobsub_submit $environmentVars $clientargs $fileargs $thisjob \n"
+  printf "\n\njobsub_submit $environmentVars $clientargs $fileargs $thisjob \n\n\n"
   if [ $checkVar -ne 0 ]; then
     printf "CHECK Mode is set. The jobsub command will be printed, but will not be executed. Please check the command and run again without check mode. If you are trying to submit test jobs instead, the correct flag is -s or --test.\n"
   else
     jobsub_submit $environmentVars $clientargs $fileargs $thisjob 
   fi
   ret=$?
-  printf "Exiting with status $ret\n"
+  printf "\nExiting with status $ret\n"
   exit $ret
 else
   printf "jobsub_submit $environmentVars $larsoft $clientargs $fileargs $thisjob\n"
   if [ $checkVar -ne 0 ]; then
-    printf "CHECK Mode is set. The jobsub command will be printed, but will not be executed. Please check the command and run again without check mode. If you are trying to submit test jobs instead, the correct flag is -s or --test.\n"
+    printf "\n\nCHECK Mode is set. The jobsub command will be printed, but will not be executed. Please check the command and run again without check mode. If you are trying to submit test jobs instead, the correct flag is -s or --test.\n\n\n"
   else
     jobsub_submit $environmentVars $larsoft $clientargs $fileargs $thisjob 
   fi
   ret=$?
-  printf "Exiting with status $ret\n"
+  printf "\nExiting with status $ret\n"
   exit $ret
 fi
 
