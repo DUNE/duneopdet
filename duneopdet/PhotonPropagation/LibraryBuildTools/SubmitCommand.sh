@@ -219,13 +219,24 @@ if [ -e $fcl ]; then
   rm -f $fcl
 fi
 printf "\nPreparing fcl for transfer to the grid.\ncp $fclIn $fcl\n"
-cp $fclIn $fcl
+if [ -e $fclIn ]; then
+  cp $fclIn $fcl
+else
+  printf "\nExiting with error. Source file for fcl not found. \nPlease make sure the fcl \n$fclIn \nexists.\n"
+  exit 10
+fi
+
 if [ -e $script ]; then
   printf "\n$script already exists. Removing old file and replacing with new.\n"
   rm -f $script
 fi
 printf "\nPreparing script for transfer to the grid.\ncp $scriptIn $script\n"
-cp $scriptIn $script
+if [ -e $scriptIn ]; then
+  cp $scriptIn $script
+else
+  printf "\nExiting with error. Source file for Script not found. \nPlease make sure the script \n$scriptIn \nexists.\n"
+  exit 10
+fi
 
 environmentVars="-e IFDH_CP_MAXRETRIES=5"
 clientargs="--resource-provides=usage_model=DEDICATED,OPPORTUNISTIC --OS=SL6 --group=dune -f $fcl --role=Analysis --memory=$memory "
