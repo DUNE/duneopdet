@@ -1,5 +1,5 @@
 //=========================================================
-// SSPLeadingEdge.cc
+// AlgoSSPLeadingEdge.cc
 // This class provides the digital output for the 
 // Leading Edge Discrimintator, used in SSP module.
 //
@@ -9,12 +9,12 @@
 
 
 
-#include "dune/OpticalDetector/SSPLeadingEdge.h"
+#include "dune/OpticalDetector/AlgoSSPLeadingEdge.h"
 
 namespace pmtana {
 
   //---------------------------------------------------------------------------
-  SSPLeadingEdge::SSPLeadingEdge(const fhicl::ParameterSet &pset,const std::string name)
+  AlgoSSPLeadingEdge::AlgoSSPLeadingEdge(const fhicl::ParameterSet &pset,const std::string name)
     : PMTPulseRecoBase(name)
   {
 
@@ -30,11 +30,11 @@ namespace pmtana {
   }
 
   //---------------------------------------------------------------------------
-  SSPLeadingEdge::~SSPLeadingEdge()
+  AlgoSSPLeadingEdge::~AlgoSSPLeadingEdge()
   {}
 
   //---------------------------------------------------------------------------
-  void SSPLeadingEdge::Reset()
+  void AlgoSSPLeadingEdge::Reset()
   {
 
     PMTPulseRecoBase::Reset();
@@ -42,7 +42,7 @@ namespace pmtana {
   }
 
   //---------------------------------------------------------------------------
-  bool SSPLeadingEdge::RecoPulse( const pmtana::Waveform_t& wf,
+  bool AlgoSSPLeadingEdge::RecoPulse( const pmtana::Waveform_t& wf,
                             const pmtana::PedestalMean_t& ped_mean,
                             const pmtana::PedestalSigma_t& ped_rms )
   {

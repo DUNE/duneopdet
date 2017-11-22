@@ -1,5 +1,5 @@
 //=========================================================
-// SSPLeadingEdge.h
+// AlgoSSPLeadingEdge.h
 // This class provides the digital output for the 
 // Leading Edge Discrimintator, used in SSP module.
 //
@@ -9,8 +9,8 @@
 
 
 
-#ifndef SSPLeadingEdge_H
-#define SSPLeadingEdge_H 1
+#ifndef AlgoSSPLeadingEdge_H
+#define AlgoSSPLeadingEdge_H 1
 
 #include "fhiclcpp/ParameterSet.h"
 #include "larana/OpticalDetector/OpHitFinder/PMTPulseRecoBase.h"
@@ -18,15 +18,15 @@
 
 namespace pmtana {
 
-  class SSPLeadingEdge : public PMTPulseRecoBase {
+  class AlgoSSPLeadingEdge : public PMTPulseRecoBase {
 
   public:
 
     // Default constructor
-    SSPLeadingEdge(const fhicl::ParameterSet &pset,const std::string name="SSPLeadingEdge");
+    AlgoSSPLeadingEdge(const fhicl::ParameterSet &pset,const std::string name="AlgoSSPLeadingEdge");
    
     // Default destructor
-    ~SSPLeadingEdge();
+    ~AlgoSSPLeadingEdge();
    
     // Implementation of PMTPulseRecoBase::Reset() method
     void Reset();
