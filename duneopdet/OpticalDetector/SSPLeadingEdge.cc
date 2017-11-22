@@ -47,8 +47,8 @@ namespace pmtana {
     // Start recording hit information after this threshold is reached
     double _2nd_thres;
     
-     // Use this pedestal instead of the one given by the pedestal algorithm
-      double _pedestal;
+    // Use this pedestal instead of the one given by the pedestal algorithm
+    double _pedestal;
 
   };
 
@@ -104,12 +104,12 @@ namespace pmtana {
     double pre_threshold = _2nd_thres;
     pre_threshold       += pedestal;
 
-	int	   d_window	  = 10; //it needs to be provided by the fhicl file - VITOR
-	int	   timer	  = 0;  //time to delay the waveform and compare amplitudes
-	int	   readout_window = 700; //search in fhicl file (total size, can be adjusted from 0 to 2046 in SSP)
-	int    readout_pretrigger = 30; //search in fhicl file (from 0 to 2047 in SSP)
-	double threshold_cmp;
-	int    tamanho, cnt2;
+    int	   d_window	  = 10; //it needs to be provided by the fhicl file - VITOR
+    int	   timer	  = 0;  //time to delay the waveform and compare amplitudes
+    int	   readout_window = 700; //search in fhicl file (total size, can be adjusted from 0 to 2046 in SSP)
+    int    readout_pretrigger = 30; //search in fhicl file (from 0 to 2047 in SSP)
+    double threshold_cmp;
+    int    tamanho, cnt2;
 
     Reset();
     tamanho = wf.size();
@@ -154,11 +154,11 @@ namespace pmtana {
 
     }
 
- if (fire) { //It's not mine, but is a good strategy to handle the pulses at the end of waveform
+    if (fire) { //It's not mine, but is a good strategy to handle the pulses at the end of waveform
 
       // Take care of a pulse that did not finish within the readout window
    
-fire = false;
+      fire = false;
       _pulse.t_end = counter - 1;
       _pulse_v.push_back(_pulse);
       _pulse.reset_param();
