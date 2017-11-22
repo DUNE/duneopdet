@@ -35,6 +35,8 @@
 #include "larana/OpticalDetector/OpDetResponseInterface.h"
 #include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
+#include "dune/OpticalDetector/AlgoSSPLeadingEdge.h"
+
 
 // CLHEP includes
 
@@ -125,7 +127,7 @@ namespace opdet {
       int    fPadding;            // In ticks
 
       // Threshold algorithm
-      std::unique_ptr< pmtana::AlgoSiPM > fThreshAlg;
+      std::unique_ptr< pmtana::AlgoSSPLeadingEdge > fThreshAlg;
 
       // Random number engines
       std::unique_ptr< CLHEP::RandGauss       > fRandGauss;
@@ -232,7 +234,7 @@ namespace opdet {
     fFrontTime          = pset.get< double >("FrontTime"         );
     fBackTime           = pset.get< double >("BackTime"          );
 
-    fThreshAlg = std::make_unique< pmtana::AlgoSiPM >
+    fThreshAlg = std::make_unique< pmtana::AlgoSSPLeadingEdge >
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
 
 
