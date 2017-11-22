@@ -170,6 +170,3 @@ namespace pmtana {
   }
 
 }
-
-#endif
-
