@@ -1,5 +1,5 @@
 art_make( BASENAME_ONLY
-          LIBRARY_NAME larana_OpticalDetector
+          LIBRARY_NAME dune_OpticalDetector
           LIB_LIBRARIES 
                         lardataobj_RecoBase
                         larcorealg_Geometry
@@ -25,6 +25,7 @@ art_make( BASENAME_ONLY
 	  		larana_OpticalDetector_OpHitFinder
                         larcorealg_Geometry
                         larcore_Geometry_Geometry_service
+                        dune_OpticalDetector
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
