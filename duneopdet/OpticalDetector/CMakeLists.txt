@@ -4,6 +4,7 @@ art_make( BASENAME_ONLY
                         lardataobj_RecoBase
                         larcorealg_Geometry
                         larcore_Geometry_Geometry_service
+                        larana_OpticalDetector_OpHitFinder
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
