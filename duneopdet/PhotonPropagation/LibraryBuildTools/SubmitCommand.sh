@@ -21,6 +21,7 @@ checkVar=0
 testVar=0
 memory=2500MB
 expectedlifetime=8h
+makeupJobs=0
 scriptIn=OpticalLibraryBuild_Grid_dune.sh
 outdir=/pnfs/dune/scratch/users/${USER}/OpticalLibraries/OpticalLib_dune10kt_v2_1x2x6
 fclIn=dune10kt_v2_1x2x6_buildopticallibrary_grid.fcl
@@ -32,7 +33,7 @@ HELPFILE=SubmitCommand.hlp
 #    -t | --tar      : Pass a tarfile of a larsoft installation to be setup on the cluster.
 #                        User full path to file.
 #    -u | --user     : Over ride the user directory to write to on dCache *NOT RECOMENDED
-#    -s | --test     : run the test fcl file and a single job with short run time instead of building a new library
+#       | --test     : run the test fcl file and a single job with short run time instead of building a new library
 #    -c | --check    : Preform a dry run, returning the jobsub command, but not actually running any grid jobs.
 #    -l | --lifetime : The amount of time a job should be expected to run on the cluster. 
 #    -s | --script   : The script to run on the grid for each job (By default OpticalLibraryBuild_Grid_dune.sh)
@@ -114,6 +115,20 @@ while :; do
       memory=${1#*=}
         printf "\nCluster memory requirement set by user.\nmemory request will be $memory\n"
       ;;
+    --makeup|-n)
+      if [ "$2" ]; then
+        makeupJobs=$2
+        printf "\nNumber Of Jobs required for Makeup Jobs set. Your OpticalLibraryBuild_Grid_dune.sh.\n If your OpticalLibraryBuild_Grid_dune.sh does not contain the correct makeup list, this step will not behave as expecte.\n"
+        shift
+      else
+        printf 'ERROR: "--makeup" requires the number of makeup jobs to process.\n'
+        exit 10
+      fi
+      ;;
+    --makeup=?*)
+        makeupJobs=${1#*=}
+        printf "\nNumber Of Jobs required for Makeup Jobs set. Your OpticalLibraryBuild_Grid_dune.sh.\n If your OpticalLibraryBuild_Grid_dune.sh does not contain the correct makeup list, this step will not behave as expecte.\n"
+      ;;
     --tar|-t)
       if [ "$2" ]; then
         tarfile=$2
@@ -132,7 +147,7 @@ while :; do
       checkVar=1
       printf "\nSetting check mode ON.\n"
       ;;
-    --test|-s)
+    --test)
       testVar=1
       printf "\nSetting test mode ON.\n"
       ;;
@@ -204,13 +219,24 @@ if [ -e $fcl ]; then
   rm -f $fcl
 fi
 printf "\nPreparing fcl for transfer to the grid.\ncp $fclIn $fcl\n"
-cp $fclIn $fcl
+if [ -e $fclIn ]; then
+  cp $fclIn $fcl
+else
+  printf "\nExiting with error. Source file for fcl not found. \nPlease make sure the fcl \n$fclIn \nexists.\n"
+  exit 10
+fi
+
 if [ -e $script ]; then
   printf "\n$script already exists. Removing old file and replacing with new.\n"
   rm -f $script
 fi
 printf "\nPreparing script for transfer to the grid.\ncp $scriptIn $script\n"
-cp $scriptIn $script
+if [ -e $scriptIn ]; then
+  cp $scriptIn $script
+else
+  printf "\nExiting with error. Source file for Script not found. \nPlease make sure the script \n$scriptIn \nexists.\n"
+  exit 10
+fi
 
 environmentVars="-e IFDH_CP_MAXRETRIES=5"
 clientargs="--resource-provides=usage_model=DEDICATED,OPPORTUNISTIC --OS=SL6 --group=dune -f $fcl --role=Analysis --memory=$memory "
@@ -231,37 +257,42 @@ if [ $testVar -ne 0 ]; then #TEST VAR IS SET. Run the test job
   #Test job 1 - jobsub_client
   njobs=300000 #This is picked to select 10 voxels for 100x100x300 bins with 10 photons each. 
   nphotons=10
-  clientargs="$clientargs --expected-lifetime=$lifetime "
+  clientargs="$clientargs --expected-lifetime=$expectedlifetime "
   thisjob="-Q -N 1 file://$script $njobs $nphotons $(basename $fcl)"
 else  
   printf "Building Library\n"
   #Real job - jobsub_client
   njobs=6000
   nphotons=50000
-  clientargs="$clientargs --expected-lifetime=$lifetime "
+  clientargs="$clientargs --expected-lifetime=$expectedlifetime "
   #  thisjob="-N $njobs file://$script $njobs $nphotons"
-  thisjob="-N $njobs file://$script $njobs $nphotons $(basename $fcl)"
+  if [ 0 -ne $makeupJobs ]; then
+    echo "thisjob=\"-N $makeupJobs file://$script $njobs $nphotons $(basename $fcl) true\""
+    thisjob="-N $makeupJobs file://$script $njobs $nphotons $(basename $fcl) true"
+  else
+    thisjob="-N $njobs file://$script $njobs $nphotons $(basename $fcl)"
+  fi
 fi
 
 if [ x$tarfile != x ]; then
-  printf "jobsub_submit $environmentVars $clientargs $fileargs $thisjob \n"
+  printf "\n\njobsub_submit $environmentVars $clientargs $fileargs $thisjob \n\n\n"
   if [ $checkVar -ne 0 ]; then
     printf "CHECK Mode is set. The jobsub command will be printed, but will not be executed. Please check the command and run again without check mode. If you are trying to submit test jobs instead, the correct flag is -s or --test.\n"
   else
     jobsub_submit $environmentVars $clientargs $fileargs $thisjob 
   fi
   ret=$?
-  printf "Exiting with status $ret\n"
+  printf "\nExiting with status $ret\n"
   exit $ret
 else
   printf "jobsub_submit $environmentVars $larsoft $clientargs $fileargs $thisjob\n"
   if [ $checkVar -ne 0 ]; then
-    printf "CHECK Mode is set. The jobsub command will be printed, but will not be executed. Please check the command and run again without check mode. If you are trying to submit test jobs instead, the correct flag is -s or --test.\n"
+    printf "\n\nCHECK Mode is set. The jobsub command will be printed, but will not be executed. Please check the command and run again without check mode. If you are trying to submit test jobs instead, the correct flag is -s or --test.\n\n\n"
   else
     jobsub_submit $environmentVars $larsoft $clientargs $fileargs $thisjob 
   fi
   ret=$?
-  printf "Exiting with status $ret\n"
+  printf "\nExiting with status $ret\n"
   exit $ret
 fi
 
