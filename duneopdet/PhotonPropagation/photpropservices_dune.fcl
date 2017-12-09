@@ -68,15 +68,15 @@ protodunedp_photonvisibilityservice_buildlib:
 
   LibraryBuildJob: true
 
-  LibraryFile: "PhotonPropagation/LibraryData/photonlibrary_protodunedp_lightsim.root"
+  LibraryFile: "PhotonPropagation/LibraryData/lib_protodunedp_lightsim_20171204.root"
 
  #These are not used when usecryoboundary=true
   XMin: -396
   XMax: 300
   YMin: -300
   YMax: 300
-  ZMin: -300
-  ZMax: 300
+  ZMin: 0
+  ZMax: 600
 }
 
 # Copy the library build job so that number of voxels is matched correctly
