@@ -81,6 +81,7 @@ dunefd_opdetresponse_iuradiator:
 
 # Use the IU radiator design by default
 dunefd_opdetresponse: @local::dunefd_opdetresponse_iuradiator
+protodune_opdetresponse: @local::dunefd_opdetresponse_iuradiator
 
 
 
