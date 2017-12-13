@@ -51,20 +51,13 @@ dunefd_opdetresponse_iuradiator:
    
    LightGuideAttenuation:   true
 
-   # Updated numbers from 2017 IU lightguide paper
+   # New IU Radiator Parameters from arXiv:1710.11233
    # Pending a new library to go along with them
-   #QuantumEfficiency:       0.00294 # 0.0042 * 70% for mesh transmission
-   #LambdaShort:                2.2  # cm
-   #LambdaLong:               229.0  # cm
-   #FracShort:                 0.72
-   #FracLong:                  0.28
-
-   QuantumEfficiency:       0.0035  #
-   LambdaShort:                3.2  # cm
-   LambdaLong:               225.2  # cm
-   FracShort:                 0.435
-   FracLong:                  0.565
-   
+   QuantumEfficiency:       0.00287 # 0.0041 * 70% for mesh transmission
+   LambdaShort:                4.3 # cm
+   LambdaLong:               225.0 # cm
+   FracShort:                 0.29
+   FracLong:                  0.71
    
    LongAxis:                z
    
