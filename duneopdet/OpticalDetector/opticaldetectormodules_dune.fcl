@@ -91,6 +91,10 @@ dunefd_ophit: @local::dunefd_ophit_threegang
 dunefd_opflash:                 @local::standard_opflash
 dunefd_opflash.FlashThreshold:  3.5
 
+protodune_ophit: @local::dunefd_ophit
+protodune_opflash: @local::dunefd_opflash
+
+
 dunefd_opdigiana:
 {
    module_type:  "OpDetDigiAnaDUNE"
