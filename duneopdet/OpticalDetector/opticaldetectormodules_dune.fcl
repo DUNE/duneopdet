@@ -60,6 +60,7 @@ dunefd_opdigi_threegang.BackTime:	0.386
 
 dunefd_opdigi: @local::dunefd_opdigi_threegang
 
+protodune_opdigi: @local::dunefd_opdigi_threegang
 
 
 dunefd_simphotoncounter:
