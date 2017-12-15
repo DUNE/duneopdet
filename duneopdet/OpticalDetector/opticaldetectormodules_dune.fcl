@@ -60,6 +60,7 @@ dunefd_opdigi_threegang.BackTime:	0.386
 
 dunefd_opdigi: @local::dunefd_opdigi_threegang
 
+protodune_opdigi: @local::dunefd_opdigi_threegang
 
 
 dunefd_simphotoncounter:
@@ -89,6 +90,10 @@ dunefd_ophit: @local::dunefd_ophit_threegang
 
 dunefd_opflash:                 @local::standard_opflash
 dunefd_opflash.FlashThreshold:  3.5
+
+protodune_ophit: @local::dunefd_ophit
+protodune_opflash: @local::dunefd_opflash
+
 
 dunefd_opdigiana:
 {

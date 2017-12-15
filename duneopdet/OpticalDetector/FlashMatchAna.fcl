@@ -1,0 +1,15 @@
+#include "opticaldetectormodules.fcl"
+
+BEGIN_PROLOG
+
+standard_flashmatchana:
+{
+   module_type:          "FlashMatchAna"
+   OpFlashModuleLabel:   "opflash"  
+   OpHitModuleLabel:     "ophit"  
+   SignalLabel:          "generator"
+   GeantLabel:           "largeant"
+}
+
+
+END_PROLOG

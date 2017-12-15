@@ -56,6 +56,9 @@ Arguments:
 | XXXXX | --test                |  Do not run the library generation. Instead  |
 |       |                       |  start only a single test job.               |
 ********************************************************************************
+| XXXXX | --offsite             |  Allow jobs to run on the OSG.               |
+|       |                       |                                              |
+********************************************************************************
 |  -l   | --lifetime <X>        |  Passes explicitly the ammount of time       |
 |       |                       |  requested for each grid job.                |
 ********************************************************************************
