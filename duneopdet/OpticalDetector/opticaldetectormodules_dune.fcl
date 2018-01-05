@@ -1,4 +1,5 @@
 #include "opticaldetectormodules.fcl"
+#include "sspmodules.fcl"
 
 BEGIN_PROLOG
 
@@ -25,7 +26,7 @@ dunefd_opdigi_unganged:
    TimeEnd:             1600        # In us (not used if DefaultSimWindow is set to true)
    PreTrigger:           100        # In ticks
    ReadoutWindow:       1000        # In ticks
-   algo_threshold: @local::standard_algo_sipm
+   algo_threshold: @local::standard_algo_sspleadingedge
 
    Padding:              100        # In ticks
 

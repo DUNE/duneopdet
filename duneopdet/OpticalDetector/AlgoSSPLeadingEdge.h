@@ -40,13 +40,20 @@ namespace pmtana {
     double _adc_thres;
     
     // Minimum width for a hit to be recorded
-    int _min_width;
+    //int _min_width;
     
     // Start recording hit information after this threshold is reached
-    double _2nd_thres;
+    //double _2nd_thres;
     
     // Use this pedestal instead of the one given by the pedestal algorithm
     double _pedestal;
+
+    // Dealy window used in the Leading Edge Discriminator algorithm
+    int _dwindow;
+
+    // Readout window and pre trigger for the SSP Leading Edge Discriminator 
+    size_t _rdwindow;
+    size_t _pretrg;
 
   };
 

@@ -579,6 +579,14 @@ namespace opdet {
                               std::vector< short >(window_start, window_end));
       // Don't forget to check that the time output by the (new) algortihm
       // is < fTimeEnd and > fTimeBegin!
+      //
+      //mod - VLUZIO
+      //print the pulse.t_start given by the fThreshAlg->Reconstruct!
+      std::cout << "time start " << pulse.t_start << std::endl;
+      //mod - VLUZIO
+
+
+
     }
 
     return mapTickWaveform;
