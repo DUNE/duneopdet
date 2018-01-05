@@ -113,7 +113,7 @@ dune10kt_workspace_photonvisibilityservice.LibraryFile: "PhotonPropagation/Libra
 protodune_photonvisibilityservice: @local::dunefd_photonvisibilityservice_buildlib
 protodune_photonvisibilityservice.DoNotLoadLibrary: false
 protodune_photonvisibilityservice.LibraryBuildJob: false
-protodune_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_protodune_v3_0ppmn2_20170417.root"
+protodune_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_protodune_v4_20171214.root"
 
 protodunedp_photonvisibilityservice: @local::protodunedp_photonvisibilityservice_buildlib
 protodunedp_photonvisibilityservice.DoNotLoadLibrary: false
