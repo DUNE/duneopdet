@@ -173,18 +173,6 @@ namespace opdet {
     art::ServiceHandle< art::TFileService > tfs;
     //pbt->Rebuild(evt);
     
-    // Get flashes from event
-    art::Handle< std::vector< recob::OpFlash > > FlashHandle;
-    std::vector<art::Ptr<recob::OpFlash> > flashlist;
-    if (evt.getByLabel(fOpFlashModuleLabel, FlashHandle)) {
-      art::fill_ptr_vector(flashlist, FlashHandle);
-      std::sort(flashlist.begin(), flashlist.end(), recob::OpFlashPtrSortByPE);
-    }
-
-
-    
-    // Get assosciations between flashes and hits
-    art::FindManyP< recob::OpHit > Assns(FlashHandle, evt, fOpFlashModuleLabel);
 
     // Record the event ID
     fEventID = evt.id().event();
@@ -241,6 +229,18 @@ namespace opdet {
     // Access all the Flash Information //
     //////////////////////////////////////
 
+    // Get flashes from event
+    art::Handle< std::vector< recob::OpFlash > > FlashHandle;
+    std::vector<art::Ptr<recob::OpFlash> > flashlist;
+    if (evt.getByLabel(fOpFlashModuleLabel, FlashHandle)) {
+      art::fill_ptr_vector(flashlist, FlashHandle);
+      std::sort(flashlist.begin(), flashlist.end(), recob::OpFlashPtrSortByPE);
+    }
+    
+    // Get assosciations between flashes and hits
+    art::FindManyP< recob::OpHit > Assns(FlashHandle, evt, fOpFlashModuleLabel);
+
+
     fNOpDets   = geom->NOpDets();
     fNFlashes  = FlashHandle->size();
 
@@ -255,7 +255,6 @@ namespace opdet {
       // Get OpFlash and associated hits
       art::Ptr< recob::OpFlash > TheFlashPtr(FlashHandle, i);
       recob::OpFlash TheFlash = *TheFlashPtr;
-      art::FindManyP< recob::OpHit > Assns(FlashHandle, evt, fOpFlashModuleLabel);
       std::vector< art::Ptr<recob::OpHit> > matchedHits = Assns.at(i);
 
       // Calculate the flash purity
