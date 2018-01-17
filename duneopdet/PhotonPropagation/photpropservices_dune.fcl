@@ -83,8 +83,8 @@ dunedphase3x1x1_photonvisibilityservice_buildlib:
 {
 
   NX: 4
-  NY: 12
-  NZ: 4
+  NY: 4
+  NZ: 12
   UseCryoBoundary: false
 
   DoNotLoadLibrary: true
