@@ -10,7 +10,7 @@ services:
   TimeTracker:       {}
   RandomNumberGenerator: {}
   MemoryTracker:         { } # default is one
-  message:      @local::dune_message_services_prod
+  message:              @local::standard_info
   FileCatalogMetadata:  @local::art_file_catalog_mc
                         @table::dunefd_simulation_services
 }
@@ -22,7 +22,6 @@ services.Geometry:      @local::dune10kt_1x2x6_geo
 source:
 {
   module_type: RootInput
-  maxEvents:  100        # Number of events to create
 }
 
 # Define and configure some modules to do work on each event.
@@ -48,3 +47,5 @@ outputs:
 {
 }
 
+
+physics.analyzers.flashmatch.SignalLabel: marley
