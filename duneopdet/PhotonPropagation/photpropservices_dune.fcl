@@ -75,8 +75,8 @@ protodunedp_photonvisibilityservice_buildlib:
   XMax: 300
   YMin: -300
   YMax: 300
-  ZMin: -300
-  ZMax: 300
+  ZMin: 0
+  ZMax: 600
 }
 
 dunedphase3x1x1_photonvisibilityservice_buildlib:
