@@ -21,6 +21,10 @@
 #include "art/Framework/Services/Optional/RandomNumberGenerator.h"
 #include "canvas/Utilities/Exception.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "art/Framework/Services/Optional/TFileService.h" //vitor
+#include "art/Framework/Services/Optional/TFileDirectory.h"//vitor
+
+
 
 // ART extensions
 #include "nutools/RandomUtils/NuRandomService.h"
@@ -50,6 +54,11 @@
 #include <map>
 #include <cmath>
 #include <memory>
+
+// ROOT includes
+
+#include "TTree.h"
+
 
 namespace opdet {
 
@@ -126,6 +135,16 @@ namespace opdet {
 
       int    fPadding;            // In ticks
 
+      bool   fDigiTree_SSP_LED;   // To create a analysis Tree for SSP LED
+
+//-----------------------------------------------------
+      // Trigger analysis variables
+      std::vector<double> t_photon; // vitor
+      std::vector<int>    op_photon;
+
+      TTree *arvore2;
+//-----------------------------------------------------
+
       // Threshold algorithm
       std::unique_ptr< pmtana::AlgoSSPLeadingEdge > fThreshAlg;
 
@@ -162,7 +181,7 @@ namespace opdet {
                             opdet::OpDetResponseInterface const&,
                             geo::Geometry const&,
                             std::vector< std::vector< double > >&,
-                            std::vector<FocusList>&) const;
+                            std::vector<FocusList>&);
 
       // Vary the pedestal
       void AddLineNoise(std::vector< std::vector< double > >&,
@@ -182,7 +201,7 @@ namespace opdet {
       // recording also when they start in the long waveform
       std::map< size_t, std::vector< short > >
       SplitWaveform(std::vector< short > const&,
-                    const FocusList&) const;
+                    const FocusList&);
 
       double GetDriftWindow() const;
 
@@ -233,9 +252,18 @@ namespace opdet {
     fMaxAmplitude       = pset.get< double >("MaxAmplitude"      );
     fFrontTime          = pset.get< double >("FrontTime"         );
     fBackTime           = pset.get< double >("BackTime"          );
+    fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
 
     fThreshAlg = std::make_unique< pmtana::AlgoSSPLeadingEdge >
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
+
+    if(fDigiTree_SSP_LED){
+    	art::ServiceHandle< art::TFileService > tfs;
+    	arvore2 = tfs->make<TTree>("PhotonData", "Photon_analysis");
+    	arvore2->Branch("photon_opCh",&op_photon);
+    	arvore2->Branch("photon_pulse",&t_photon);    
+    }
+//
 
 
     // Obtaining parameters from the DetectorClocksService
@@ -285,6 +313,8 @@ namespace opdet {
   void OpDetDigitizerDUNE::produce(art::Event& evt)
   {
 
+    if(fDigiTree_SSP_LED) art::ServiceHandle< art::TFileService > tfs;
+
     // A pointer that will store produced OpDetWaveforms
     std::unique_ptr< std::vector< raw::OpDetWaveform > >
       pulseVecPtr(std::make_unique< std::vector< raw::OpDetWaveform > >());
@@ -312,6 +342,7 @@ namespace opdet {
     // Get SimPhotonsLite from the event
     art::Handle< std::vector< sim::SimPhotonsLite > > litePhotonHandle;
     evt.getByLabel(fInputModule, litePhotonHandle);
+
 
     // For every optical detector:
     for (auto const& litePhotons : (*litePhotonHandle))
@@ -373,17 +404,26 @@ namespace opdet {
             raw::OpDetWaveform adcVec(timeStamp, opChannel,
                                       pairTickWaveform.second.size());
 
-            for (short const& value : pairTickWaveform.second)
+            for (short const& value : pairTickWaveform.second){
               adcVec.emplace_back(value);
-
+	    }
+     	   
             pulseVecPtr->emplace_back(std::move(adcVec));
-          }
-        }
-      }
+	  }
+	}
+      }	
     }
+
+	if(fDigiTree_SSP_LED){
+	        arvore2->Fill();
+        	t_photon.clear();
+       		op_photon.clear();
+	}
+
 
     // Push the OpDetWaveforms into the event
     evt.put(std::move(pulseVecPtr));
+
 
   }
 
@@ -436,7 +476,7 @@ namespace opdet {
                               opdet::OpDetResponseInterface const& odResponse,
                               geo::Geometry const& geometry,
                               std::vector< std::vector< double > >& pdWaveforms,
-                              std::vector<FocusList>& fls) const
+                              std::vector<FocusList>& fls)
   {
 
     unsigned int const opDet = litePhotons.OpChannel;
@@ -464,7 +504,13 @@ namespace opdet {
             size_t timeBin = TimeToTick(photonTime);
             // Add 1 pulse to the waveform
             AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
-          }
+           
+	    unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
+	    if(fDigiTree_SSP_LED){
+	    	op_photon.emplace_back(opChannel);
+	    	t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
+	    }
+	  }
         }
         // else
 	  // remove this as it fills up logfiles for cosmic-ray runs
@@ -472,7 +518,7 @@ namespace opdet {
           //  << "Throwing away an out-of-time photon at " << photonTime << '\n';
       }
     }
-
+  
   }
 
 
@@ -548,7 +594,7 @@ namespace opdet {
   //---------------------------------------------------------------------------
   std::map< size_t, std::vector< short > > OpDetDigitizerDUNE::
   SplitWaveform(std::vector< short > const& waveform,
-                const FocusList& fl) const
+                const FocusList& fls) 
   {
 
     std::map< size_t, std::vector< short > > mapTickWaveform;
@@ -579,13 +625,6 @@ namespace opdet {
                               std::vector< short >(window_start, window_end));
       // Don't forget to check that the time output by the (new) algortihm
       // is < fTimeEnd and > fTimeBegin!
-      //
-      //mod - VLUZIO
-      //print the pulse.t_start given by the fThreshAlg->Reconstruct!
-      std::cout << "time start " << pulse.t_start << std::endl;
-      //mod - VLUZIO
-
-
 
     }
 

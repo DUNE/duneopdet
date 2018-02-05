@@ -26,12 +26,12 @@ namespace pmtana {
     _rdwindow  = pset.get< size_t >("ReadoutWd"      );
     _pretrg    = pset.get< size_t >("PreTrg"         );
 
-   std::cout << "VITOR DEBUG" << std::endl;
-   std::cout << "ADCThreshold = " << _adc_thres << std::endl;
-   std::cout << "DWindow = " << _dwindow << std::endl;
-   std::cout << "Readout Window = " << _rdwindow << std::endl;
-   std::cout << "Pre Trigger = " << _pretrg << std::endl;
-   std::cout << "VITOR DEBUG" << std::endl;
+ //  std::cout << "VITOR DEBUG" << std::endl;
+ //  std::cout << "ADCThreshold = " << _adc_thres << std::endl;
+ //  std::cout << "DWindow = " << _dwindow << std::endl;
+ //  std::cout << "Readout Window = " << _rdwindow << std::endl;
+ //  std::cout << "Pre Trigger = " << _pretrg << std::endl;
+ //  std::cout << "VITOR DEBUG" << std::endl;
 
 
 
@@ -91,6 +91,9 @@ namespace pmtana {
 			
 
 		if (threshold_cmp >= threshold2){
+			
+			if(timer==0){trg_wvf.emplace_back(counter+d_window);}
+
                         if(!fire && timer==0){
                                 fire = true;
 				if(readout_pretrigger < (counter + d_window)){

@@ -35,7 +35,7 @@ dunefd_opdigi_unganged:
    MaxAmplitude:	 0.12
    FrontTime:		 0.009
    BackTime:		 0.476
-
+   SSP_LED_DigiTree:     false	    #To create a SSP LED trigger Ttree
    
    # readout window in optical ticks
    # buffer before waveform
@@ -93,9 +93,10 @@ dunefd_opflash.FlashThreshold:  3.5
 
 dunefd_opdigiana:
 {
-   module_type:  "OpDetDigiAnaDUNE"
-   InputModule:  "opdigi"  # Module that created raw::OpDetWaveforms
-   InstanceName: ""     
+   module_type:      "OpDetDigiAnaDUNE"
+   InputModule:      "opdigi"  # Module that created raw::OpDetWaveforms
+   InstanceName:     ""    
+   SSP_LED_AnaTree:  false 
 }
 dunefd_opflashana:       @local::standard_opflashana
 
