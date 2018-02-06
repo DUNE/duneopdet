@@ -71,8 +71,8 @@ protodunedp_photonvisibilityservice_buildlib:
   LibraryFile: "PhotonPropagation/LibraryData/Not_A_Library.root"
 
  #These are not used when usecryoboundary=true
-  XMin: -425
-  XMax: 300
+  XMin: -420.5
+  XMax: 304.5
   YMin: -300
   YMax: 300
   ZMin: 0
