@@ -19,6 +19,7 @@
 tarfile=
 checkVar=0
 testVar=0
+offsiteVar=0
 memory=2500MB
 expectedlifetime=8h
 makeupJobs=0
@@ -151,6 +152,10 @@ while :; do
       testVar=1
       printf "\nSetting test mode ON.\n"
       ;;
+    --offsite)
+      offsiteVar=1
+      printf "\nAllow jobs to go offsite (e.g. the OSG).\n"
+      ;;
     --lifetime|-l)
       if [ "$2" ]; then
         expectedlifetime=$2
@@ -239,7 +244,11 @@ else
 fi
 
 environmentVars="-e IFDH_CP_MAXRETRIES=5"
-clientargs="--resource-provides=usage_model=DEDICATED,OPPORTUNISTIC --OS=SL6 --group=dune -f $fcl --role=Analysis --memory=$memory "
+usage="DEDICATED,OPPORTUNISTIC"
+if [ $offsiteVar -ne 0 ]; then
+    usage="DEDICATED,OPPORTUNISTIC,OFFSITE"
+fi
+clientargs="--resource-provides=usage_model=$usage --OS=SL6 --group=dune -f $fcl --role=Analysis --memory=$memory "
 if [ x$tarfile != x ]; then
   printf "\nUsing tarball. Not setting LArSoft environment variables\n"
   larsoft=
