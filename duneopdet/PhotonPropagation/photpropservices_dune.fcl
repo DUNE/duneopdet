@@ -68,11 +68,11 @@ protodunedp_photonvisibilityservice_buildlib:
 
   LibraryBuildJob: true
 
-  LibraryFile: "PhotonPropagation/LibraryData/lib_protodunedp_lightsim_nonuni_20171213.root"
+  LibraryFile: "PhotonPropagation/LibraryData/Not_A_Library.root"
 
  #These are not used when usecryoboundary=true
-  XMin: -396
-  XMax: 300
+  XMin: -420.5
+  XMax: 304.5
   YMin: -300
   YMax: 300
   ZMin: 0
@@ -91,7 +91,7 @@ dunedphase3x1x1_photonvisibilityservice_buildlib:
 
   LibraryBuildJob: true
 
-  LibraryFile: "PhotonPropagation/LibraryData/lib_dunedphase3x1x1_lightsim_20171213.root"
+  LibraryFile: "PhotonPropagation/LibraryData/Not_A_Library.root"
 
  #These are not used when usecryoboundary=true
   XMin: -50
