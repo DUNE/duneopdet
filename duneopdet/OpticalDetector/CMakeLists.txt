@@ -20,12 +20,15 @@ art_make( BASENAME_ONLY
 	                      ${FHICLCPP}
 			                  cetlib cetlib_except
                         ${ROOT_BASIC_LIB_LIST}
-          MODULE_LIBRARIES 
+          MODULE_LIBRARIES
+                        lardataobj_RecoBase
 	                larana_OpticalDetector
 	  		larana_OpticalDetector_OpHitFinder
                         larcorealg_Geometry
                         larcore_Geometry_Geometry_service
                         dune_OpticalDetector
+                        larsim_MCCheater_PhotonBackTracker_service 
+                        larsim_MCCheater_ParticleInventoryService_service
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}
