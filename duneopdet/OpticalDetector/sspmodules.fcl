@@ -1,0 +1,23 @@
+BEGIN_PROLOG
+
+##################################################
+#
+# SSP module algorithms
+#
+
+standard_algo_sspleadingedge:
+{
+    Name:        "SSP_LED"
+    ADCThreshold:      20
+   #MinWidth:          10
+   #SecondThreshold:    1
+    Pedestal:        1500
+    DWindow:           10
+    ReadoutWd:        700
+    PreTrg:            20
+}
+
+####################################################
+
+END_PROLOG
+
