@@ -1,7 +1,7 @@
 #include "services_dune.fcl"
 #include "FlashMatchAna.fcl"
 
-process_name: Mergeana
+process_name: FlashMatch
 
 services:
 {
@@ -48,4 +48,6 @@ outputs:
 }
 
 
+# Required when working with Supernova files.
+# Remove when working with other types of simulation
 physics.analyzers.flashmatch.SignalLabel: marley
