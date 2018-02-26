@@ -30,6 +30,7 @@
 // ROOT includes
 
 #include "TH1.h"
+#include "TTree.h" //Vitor Luzio
 
 // C++ includes
 
@@ -57,6 +58,15 @@ namespace opdet {
       std::string fInputModule;  // Module used to create OpDetWaveforms
       std::string fInstanceName; // Input tag for OpDetWaveforms collection
       double fSampleFreq;        // Sampling frequency in MHz 
+      bool fAnaTree_SSPLED;	 // Parameter to write a SSP LED Tree
+
+
+      std::vector<double> wf_start;
+      std::vector<int> canal_op;
+      std::vector<double> wf_inicio;
+      std::vector<double> wf_end;
+      std::vector<int> wf_size;
+      TTree *arvore;
 
   };
 
@@ -79,12 +89,25 @@ namespace opdet {
   {
 
     // Read the fcl-file
-    fInputModule  = pset.get< std::string >("InputModule");
-    fInstanceName = pset.get< std::string >("InstanceName");
-
+    fInputModule  =   pset.get< std::string >("InputModule");
+    fInstanceName =   pset.get< std::string >("InstanceName");
+    fAnaTree_SSPLED = pset.get< bool        >("SSP_LED_AnaTree"); 
     // Obtain parameters from DetectorClocksService
     auto const *timeService = lar::providerFrom< detinfo::DetectorClocksService >();
     fSampleFreq = timeService->OpticalClock().Frequency();
+  
+    art::ServiceHandle< art::TFileService > tfs;
+
+//	std::cout<<"Valor bool = "<<fAnaTree_SSPLED<<std::endl;
+
+    if(fAnaTree_SSPLED){
+	arvore = tfs->make<TTree>("TriggerData","TriggerInfo");
+    	arvore->Branch("OpticalCh",&canal_op);
+    	arvore->Branch("WfFirstTime",&wf_inicio);
+    	arvore->Branch("WfSize",&wf_size);
+    	arvore->Branch("Trg_PreTrg",&wf_start);
+    	arvore->Branch("WfEnd",&wf_end);
+    }
 
   }
 
@@ -109,6 +132,7 @@ namespace opdet {
     // histograms for us
     art::ServiceHandle< art::TFileService > tfs;
 
+
     double firstWaveformTime = -9999;
 
     for (auto const& waveform : *waveformHandle)
@@ -130,21 +154,35 @@ namespace opdet {
                << "_waveform_"  << mapChannelWF[channel];
       // Increase counter for number of waveforms on this optical channel
       mapChannelWF[channel]++;
-
  
       // Implement different end time for waveforms of variable length
       double startTime = waveform.TimeStamp() - firstWaveformTime;
       double endTime = double(waveform.size())/fSampleFreq + startTime;
 
+      if(fAnaTree_SSPLED){
+      	canal_op.emplace_back(channel);
+      	wf_inicio.emplace_back(firstWaveformTime);
+      	wf_start.emplace_back(startTime);
+      	wf_end.emplace_back(endTime);
+      	wf_size.emplace_back(waveform.size());
+      }
       // Create a new histogram
-      TH1D *waveformHist = tfs->make< TH1D >(histName.str().c_str(),
-           TString::Format(";t - %f (#mus);",firstWaveformTime), waveform.size(), startTime, endTime);
+      TH1D *waveformHist = tfs->make< TH1D >(histName.str().c_str(),                        TString::Format(";t - %f (#mus);",firstWaveformTime),                           waveform.size(), startTime, endTime);
 
-      // Copy values from the waveform into the histogram
-      for (size_t tick = 0; tick < waveform.size(); tick++)
-        waveformHist->SetBinContent(tick + 1, waveform[tick]);
+     // Copy values from the waveform into the histogram
+      for (size_t tick = 0; tick < waveform.size(); tick++){
+        waveformHist->SetBinContent(tick + 1, waveform[tick]);}
+ 
 
     }
+	if(fAnaTree_SSPLED){
+		arvore->Fill();
+        	canal_op.clear();
+        	wf_inicio.clear();
+        	wf_start.clear();
+        	wf_end.clear();
+        	wf_size.clear();
+	}
 
   }
 
