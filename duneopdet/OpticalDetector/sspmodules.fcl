@@ -8,7 +8,7 @@ BEGIN_PROLOG
 standard_algo_sspleadingedge:
 {
     Name:        "SSP_LED"
-    ADCThreshold:      20
+    ADCThreshold:      10
    #MinWidth:          10
    #SecondThreshold:    1
     Pedestal:        1500
