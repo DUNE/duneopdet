@@ -31,7 +31,9 @@ physics:
 {
  analyzers:
  {
-   flashmatch:      @local::standard_flashmatchana
+    # Configuration specific to supernova events.
+    # Switch to standard_flashmatchana for beam or NDK
+    flashmatch:      @local::marley_flashmatchana
  }
  ana:  [ flashmatch ]
 
@@ -46,8 +48,3 @@ physics:
 outputs:
 {
 }
-
-
-# Required when working with Supernova files.
-# Remove when working with other types of simulation
-physics.analyzers.flashmatch.SignalLabel: marley
