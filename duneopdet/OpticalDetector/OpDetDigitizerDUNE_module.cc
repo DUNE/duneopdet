@@ -503,6 +503,7 @@ namespace opdet {
             // Convert the time of the pulse to ticks
             size_t timeBin = TimeToTick(photonTime);
             // Add 1 pulse to the waveform
+            // The inputs to this function are a good place to start looking for the expanded BTR.
             AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
            
 	    unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
