@@ -343,7 +343,7 @@ namespace opdet {
     }
     
     // Get assosciations between flashes and hits
-    art::FindManyP< recob::OpHit > Assns(FlashHandle, evt, fOpFlashModuleLabel);
+    art::FindManyP< recob::OpHit > Assns(flashlist, evt, fOpFlashModuleLabel);
 
 
     // Set up some flags to fill as we loop
