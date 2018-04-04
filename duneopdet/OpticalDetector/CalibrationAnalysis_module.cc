@@ -50,7 +50,7 @@ namespace opdet {
         virtual ~CalibrationAnalysis();
 
         // The analyzer routine, called once per event
-        void analyze(art::Event const&);
+        void analyze(art::Event const&) override;
 
    
     private:
