@@ -8,9 +8,7 @@
 
 // ROOT includes
 #include "TH1.h"
-#include "TH2.h"
-#include "TLorentzVector.h"
-#include "TVector3.h"
+#include "TEfficiency.h"
 #include "TTree.h"
 
 // C++ includes
@@ -75,6 +73,24 @@ namespace opdet {
     std::string fGeantLabel;               // Input tag for GEANT
     
     TTree * fFlashMatchTree;
+    TTree * fLargestFlashTree;
+    TTree * fSelectedFlashTree;
+
+    TEfficiency * fRecoEfficiencyVsE;
+    TEfficiency * fRecoEfficiencyVsX;
+    TEfficiency * fLargestEfficiencyVsE;
+    TEfficiency * fLargestEfficiencyVsX;
+    TEfficiency * fSelectedEfficiencyVsE;
+    TEfficiency * fSelectedEfficiencyVsX;
+
+    // Parameters from the fhicl
+    int   fNBinsE;
+    float fLowE;
+    float fHighE;
+    int   fNBinsX;
+    float fLowX;
+    float fHighX;
+    float fDistanceCut;
 
     Int_t fEventID;
 
@@ -99,11 +115,29 @@ namespace opdet {
     std::vector< Bool_t >  fInBeamFrameVector;
     std::vector< Int_t >   fOnBeamTimeVector;
     std::vector< Float_t > fTotalPEVector;
-    std::vector< Bool_t >  fSignalVector;
     std::vector< Float_t > fPurityVector;
+    std::vector< Float_t > fDistanceVector;
     Int_t fNOpDets;
     std::vector<Int_t> fNHitOpDetVector;
-    //std::vector< std::vector<Float_t> > fPEsPerFlashPerOpDetVector;
+
+    Int_t    fFlashID;
+    Float_t  fYCenter;
+    Float_t  fZCenter;
+    Float_t  fYWidth;
+    Float_t  fZWidth;
+    Float_t  fTime;
+    Float_t  fTimeWidth;
+    Float_t  fTimeDiff;
+    Int_t    fFlashFrame;
+    Bool_t   fInBeamFrame;
+    Int_t    fOnBeamTime;
+    Float_t  fTotalPE;
+    Float_t  fPurity;
+    Float_t  fDistance;
+    Int_t    fNHitOpDets;
+    std::vector< Float_t > fPEsPerOpDetVector;
+
+    
   };
 
 } 
@@ -123,6 +157,15 @@ namespace opdet {
     fOpHitModuleLabel   = pset.get<std::string>("OpHitModuleLabel");
     fSignalLabel        = pset.get<std::string>("SignalLabel");
     fGeantLabel         = pset.get<std::string>("GeantLabel");
+    fNBinsE             = pset.get<int>("NBinsE");
+    fLowE               = pset.get<float>("LowE");
+    fHighE              = pset.get<float>("HighE");
+    fNBinsX             = pset.get<int>("NBinsX");
+    fLowX               = pset.get<float>("LowX");
+    fHighX              = pset.get<float>("HighX");
+    fDistanceCut        = pset.get<float>("DistanceCut");
+
+    
 
     art::ServiceHandle< art::TFileService > tfs;
 
@@ -147,9 +190,67 @@ namespace opdet {
     fFlashMatchTree->Branch("TotalPEVector",               &fTotalPEVector);
     fFlashMatchTree->Branch("NOpDets",                     &fNOpDets,    "NOpDets/I");
     fFlashMatchTree->Branch("NHitOpDetVector",             &fNHitOpDetVector);
-    //fFlashMatchTree->Branch("PEsPerFlashPerOpDetVector",   &fPEsPerFlashPerOpDetVector);
-    fFlashMatchTree->Branch("Signal",                      &fSignalVector);
     fFlashMatchTree->Branch("Purity",                      &fPurityVector);
+    fFlashMatchTree->Branch("Distance",                    &fDistanceVector);
+
+    fLargestFlashTree = tfs->make<TTree>("LargestFlashTree","LargestFlashTree");
+    fLargestFlashTree->Branch("EventID",                     &fEventID,   "EventID/I");
+    fLargestFlashTree->Branch("TrueX",                       &fTrueX,     "TrueX/F");
+    fLargestFlashTree->Branch("TrueY",                       &fTrueY,     "TrueY/F");
+    fLargestFlashTree->Branch("TrueZ",                       &fTrueZ,     "TrueZ/F");
+    fLargestFlashTree->Branch("TrueT",                       &fTrueT,     "TrueT/F");
+    fLargestFlashTree->Branch("DetectedT",                   &fDetectedT, "DetectedT/F");
+    fLargestFlashTree->Branch("TrueE",                       &fTrueE,     "TrueE/F");
+    fLargestFlashTree->Branch("TruePDG",                     &fTruePDG,   "TruePDG/I");
+    fLargestFlashTree->Branch("NFlashes",                    &fNFlashes,  "NFlashes/I");
+    fLargestFlashTree->Branch("FlashID",                     &fFlashID,   "FlashID/I");
+    fLargestFlashTree->Branch("YCenter",                     &fYCenter,   "YCenter/F");
+    fLargestFlashTree->Branch("ZCenter",                     &fZCenter,   "ZCenter/F");
+    fLargestFlashTree->Branch("YWidth",                      &fYWidth,    "YWidth/F");
+    fLargestFlashTree->Branch("ZWidth",                      &fZWidth,    "ZWidth/F");
+    fLargestFlashTree->Branch("Time",                        &fTime,      "Time/F");
+    fLargestFlashTree->Branch("TimeWidth",                   &fTimeWidth, "TimeWidth/F");
+    fLargestFlashTree->Branch("TimeDiff",                    &fTimeDiff,  "TimeDiff/F");
+    fLargestFlashTree->Branch("TotalPE",                     &fTotalPE,   "TotalPE/F");
+    fLargestFlashTree->Branch("NOpDets",                     &fNOpDets,   "NOpDets/I");
+    fLargestFlashTree->Branch("NHitOpDets",                  &fNHitOpDets,"NHitOpDets/I");
+    fLargestFlashTree->Branch("PEsPerOpDetVector",           &fPEsPerOpDetVector);
+    fLargestFlashTree->Branch("Purity",                      &fPurity,    "Purity/F");
+    fLargestFlashTree->Branch("Distance",                    &fDistance,  "Distance/F");
+
+
+    fSelectedFlashTree = tfs->make<TTree>("SelectedFlashTree","SelectedFlashTree");
+    fSelectedFlashTree->Branch("EventID",                     &fEventID,   "EventID/I");
+    fSelectedFlashTree->Branch("TrueX",                       &fTrueX,     "TrueX/F");
+    fSelectedFlashTree->Branch("TrueY",                       &fTrueY,     "TrueY/F");
+    fSelectedFlashTree->Branch("TrueZ",                       &fTrueZ,     "TrueZ/F");
+    fSelectedFlashTree->Branch("TrueT",                       &fTrueT,     "TrueT/F");
+    fSelectedFlashTree->Branch("DetectedT",                   &fDetectedT, "DetectedT/F");
+    fSelectedFlashTree->Branch("TrueE",                       &fTrueE,     "TrueE/F");
+    fSelectedFlashTree->Branch("TruePDG",                     &fTruePDG,   "TruePDG/I");
+    fSelectedFlashTree->Branch("NFlashes",                    &fNFlashes,  "NFlashes/I");
+    fSelectedFlashTree->Branch("FlashID",                     &fFlashID,   "FlashID/I");
+    fSelectedFlashTree->Branch("YCenter",                     &fYCenter,   "YCenter/F");
+    fSelectedFlashTree->Branch("ZCenter",                     &fZCenter,   "ZCenter/F");
+    fSelectedFlashTree->Branch("YWidth",                      &fYWidth,    "YWidth/F");
+    fSelectedFlashTree->Branch("ZWidth",                      &fZWidth,    "ZWidth/F");
+    fSelectedFlashTree->Branch("Time",                        &fTime,      "Time/F");
+    fSelectedFlashTree->Branch("TimeWidth",                   &fTimeWidth, "TimeWidth/F");
+    fSelectedFlashTree->Branch("TimeDiff",                    &fTimeDiff,  "TimeDiff/F");
+    fSelectedFlashTree->Branch("TotalPE",                     &fTotalPE,   "TotalPE/F");
+    fSelectedFlashTree->Branch("NOpDets",                     &fNOpDets,   "NOpDets/I");
+    fSelectedFlashTree->Branch("NHitOpDets",                  &fNHitOpDets,"NHitOpDets/I");
+    fSelectedFlashTree->Branch("PEsPerOpDetVector",           &fPEsPerOpDetVector);
+    fSelectedFlashTree->Branch("Purity",                      &fPurity,    "Purity/F");
+    fSelectedFlashTree->Branch("Distance",                    &fDistance,    "Distance/F");
+
+
+    fRecoEfficiencyVsE     = tfs->make<TEfficiency>("recoEfficiencyVsE",     ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
+    fRecoEfficiencyVsX     = tfs->make<TEfficiency>("recoEfficiencyVsX",     ";Position (cm);Efficiency", fNBinsX, fLowX, fHighX);
+    fLargestEfficiencyVsE  = tfs->make<TEfficiency>("largestEfficiencyVsE",  ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
+    fLargestEfficiencyVsX  = tfs->make<TEfficiency>("largestEfficiencyVsX",  ";Position (cm);Efficiency", fNBinsX, fLowX, fHighX);
+    fSelectedEfficiencyVsE = tfs->make<TEfficiency>("selectedEfficiencyVsE", ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
+    fSelectedEfficiencyVsX = tfs->make<TEfficiency>("selectedEfficiencyVsX", ";Position (cm);Efficiency", fNBinsX, fLowX, fHighX);
   }
 
   //-----------------------------------------------------------------------
@@ -236,84 +337,144 @@ namespace opdet {
       art::fill_ptr_vector(flashlist, FlashHandle);
       std::sort(flashlist.begin(), flashlist.end(), recob::OpFlashPtrSortByPE);
     }
+    else {
+      mf::LogError("FlashMatchAna") << "Cannot load any flashes. Failing";
+      abort();
+    }
     
     // Get assosciations between flashes and hits
-    art::FindManyP< recob::OpHit > Assns(FlashHandle, evt, fOpFlashModuleLabel);
+    art::FindManyP< recob::OpHit > Assns(flashlist, evt, fOpFlashModuleLabel);
 
 
+    // Set up some flags to fill as we loop
+    // through flashes. These will control
+    // filling of efficiency plots after the loop.
+    bool AnyReconstructed = false;
+    bool LargestFound     = false;
+    bool LargestRight     = false;
+    bool SelectedFound    = false;
+    bool SelectedRight    = false;
+    
+    
+    // For every OpFlash in the vector 
     fNOpDets   = geom->NOpDets();
-    fNFlashes  = FlashHandle->size();
-
-    double maxPurity = 0;
-    int maxPurityID = 0;
-    
-
-    
-    // For every OpFlash in the vector
-    for(unsigned int i = 0; i < FlashHandle->size(); ++i)
+    fNFlashes  = flashlist.size();
+    for(unsigned int i = 0; i < flashlist.size(); ++i)
     {
       // Get OpFlash and associated hits
-      art::Ptr< recob::OpFlash > TheFlashPtr(FlashHandle, i);
-      recob::OpFlash TheFlash = *TheFlashPtr;
+      recob::OpFlash TheFlash = *flashlist[i];
       std::vector< art::Ptr<recob::OpHit> > matchedHits = Assns.at(i);
 
       // Calculate the flash purity
       double purity = pbt->OpHitCollectionPurity(signal_trackids, matchedHits);
-
-      if (purity > maxPurity) {
-        maxPurity = purity;
-        maxPurityID = i;
-      }
       
       // Calcuate relative detection time
       double timeDiff = fDetectedT - TheFlash.Time();
       
       // Check if this is a possible flash (w/in 1 drift window)
-      // Otherwise, don't store it
+      // Otherwise, skip it
       if (timeDiff < -10 || timeDiff > maxT)
         continue;
-      
-      fFlashIDVector    .emplace_back(i);
-      fYCenterVector    .emplace_back(TheFlash.YCenter());
-      fZCenterVector    .emplace_back(TheFlash.ZCenter());
-      fYWidthVector     .emplace_back(TheFlash.YWidth());
-      fZWidthVector     .emplace_back(TheFlash.ZWidth());
-      fTimeVector       .emplace_back(TheFlash.Time());
-      fTimeWidthVector  .emplace_back(TheFlash.TimeWidth());
-      fTimeDiffVector   .emplace_back(timeDiff);
-      fTotalPEVector    .emplace_back(TheFlash.TotalPE());
-      fSignalVector     .emplace_back(false);
-      fPurityVector     .emplace_back(purity);
 
-      std::vector<Float_t> PEPerOpDet;
+      // Put flash info into variables
+      fFlashID     = i;
+      fYCenter     = TheFlash.YCenter();
+      fZCenter     = TheFlash.ZCenter();
+      fYWidth      = TheFlash.YWidth();
+      fZWidth      = TheFlash.ZWidth();
+      fTime        = TheFlash.Time();
+      fTimeWidth   = TheFlash.TimeWidth();
+      fTimeDiff    = timeDiff;
+      fTotalPE     = TheFlash.TotalPE();
+      fPurity      = purity;
+
+      // Calculate distance from MC truth vertex in the Y-Z plane
+      fDistance = sqrt( pow(fTrueY-fYCenter,2) +  pow(fTrueZ-fZCenter,2) );
+
+
+      // Loop through all the opdets with hits in this flash
+      fPEsPerOpDetVector.clear();
       for(unsigned int iOD = 0; iOD < geom->NOpDets(); ++iOD){
-        PEPerOpDet.emplace_back(0);
+        fPEsPerOpDetVector.emplace_back(0);
       }
       for(unsigned int iC=0; iC < geom->NOpChannels(); ++iC)
       {
         unsigned int iOD = geom->OpDetFromOpChannel(iC);
-        PEPerOpDet[iOD] += TheFlash.PE(iC);
+        fPEsPerOpDetVector[iOD] += TheFlash.PE(iC);
       }
       
-      int NHitOpDets = 0;
+      fNHitOpDets = 0;
       for(unsigned int iOD = 0; iOD < geom->NOpDets(); ++iOD){
-        if (PEPerOpDet[iOD] > 0) ++NHitOpDets;
+        if (fPEsPerOpDetVector[iOD] > 0) ++fNHitOpDets;
       }
-      fNHitOpDetVector.emplace_back(NHitOpDets);
-      //fPEsPerFlashPerOpDetVector.push_back(PEPerOpDet);
+      fNHitOpDetVector.emplace_back(fNHitOpDets);
+
+
+      // Add flash info to the tree of all possible flashes
+      fFlashIDVector    .emplace_back(fFlashID);
+      fYCenterVector    .emplace_back(fYCenter);
+      fZCenterVector    .emplace_back(fZCenter);
+      fYWidthVector     .emplace_back(fYWidth);
+      fZWidthVector     .emplace_back(fZWidth);
+      fTimeVector       .emplace_back(fTime);
+      fTimeWidthVector  .emplace_back(fTimeWidth);
+      fTimeDiffVector   .emplace_back(fTimeDiff);
+      fTotalPEVector    .emplace_back(fTotalPE);
+      fPurityVector     .emplace_back(fPurity);
+      fDistanceVector   .emplace_back(fDistance);
+
+
+      // Did we reconstruct any flashes with signal in them?
+      if (fPurity > 0) AnyReconstructed = true;
+
+        
+      // First == Largest, so if this is the first flash it is also the largest.
+      // So, fill the LargestFlash tree and the LargestFlash efficiency plots
+      if (!LargestFound) {
+
+        // Write out the info into the tree for the largest flash
+        fLargestFlashTree->Fill();
+
+        // Record that we found the largest flash
+        // and if we got it right
+        LargestFound = true;
+        if (fPurity > 0) LargestRight = true;
+      }
+
+
+      // The first time we get into here we have the largest flash that is
+      // within the distance cut. So, fill the SelectedFlash tree and the
+      // selected flash efficiency plots
+      if (!SelectedFound && fDistance < fDistanceCut) {
+
+        // Write out the info for the selected flash
+        fSelectedFlashTree->Fill();
+
+        // Record that we found the selected flash
+        // and if we got it right
+        SelectedFound = true;
+        if (fPurity > 0) SelectedRight = true;
+      }
+
     }
 
-    // Mark the flash with the highest purity as signal
-    auto it = std::find(fFlashIDVector.begin(), fFlashIDVector.end(), maxPurityID);
-    if (it != fFlashIDVector.end()) {
-      auto index = std::distance(fFlashIDVector.begin(), it);
-      fSignalVector[index] = true;
-    }
+    // Fill these TEfficiencies once for every event
+    // but use the booleans to decide if it was
+    // "selected" or not.
+    fRecoEfficiencyVsE->Fill(AnyReconstructed, fTrueE);
+    fRecoEfficiencyVsX ->Fill(AnyReconstructed, fTrueX);
+
+    fLargestEfficiencyVsE->Fill(LargestRight, fTrueE);
+    fLargestEfficiencyVsX->Fill(LargestRight, fTrueX);
     
+    fSelectedEfficiencyVsE->Fill(SelectedRight, fTrueE);
+    fSelectedEfficiencyVsX->Fill(SelectedRight, fTrueX);
 
-    ////////////////////////////
-    // Write out and clean up //
-    ////////////////////////////
+
+
+    ///////////////////////////////////////////////
+    // Write out the FlashMatchTree and clean up //
+    ///////////////////////////////////////////////
     
     fFlashMatchTree->Fill();
     fFlashIDVector              .clear();
@@ -326,9 +487,8 @@ namespace opdet {
     fTimeDiffVector             .clear();
     fTotalPEVector              .clear();
     fNHitOpDetVector            .clear();
-    //fPEsPerFlashPerOpDetVector  .clear();
-    fSignalVector               .clear();
     fPurityVector               .clear();
+    fDistanceVector             .clear();
   }
 } // namespace opdet
 
