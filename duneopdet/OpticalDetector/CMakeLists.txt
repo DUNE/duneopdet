@@ -62,6 +62,8 @@ art_make( BASENAME_ONLY
 			                  cetlib cetlib_except
                         ${CLHEP}
                         ${ROOT_BASIC_LIB_LIST}
+                        larsim_MCCheater_PhotonBackTrackerService_service 
+                        larsim_MCCheater_ParticleInventoryService_service
          )
 
 install_headers()
