@@ -60,7 +60,7 @@ physics:
    analyzers:
    {
       opflashana:  @local::dunefd_opflashana
-      flashmatch:  @local::standard_flashmatchana
+      flashmatch:  @local::marley_flashmatchana
    }
    
    simulate: [ opdigi, ophit, opflash, rns ] 
@@ -80,7 +80,3 @@ outputs:
       #default file name, can override from command line with -o or --output
    }
 }
-
-# Required when working with Supernova files.
-# Remove when working with other types of simulation
-physics.analyzers.flashmatch.SignalLabel: marley
