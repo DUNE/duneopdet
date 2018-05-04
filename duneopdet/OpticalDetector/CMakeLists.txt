@@ -26,9 +26,9 @@ art_make( BASENAME_ONLY
 	  		larana_OpticalDetector_OpHitFinder
                         larcorealg_Geometry
                         larcore_Geometry_Geometry_service
+                        larsim_MCCheater_ParticleInventoryService_service
                         larsim_MCCheater_PhotonBackTrackerService_service 
                         dune_OpticalDetector
-                        larsim_MCCheater_ParticleInventoryService_service
                         nusimdata_SimulationBase
                         ${ART_FRAMEWORK_CORE}
 			                  ${ART_FRAMEWORK_PRINCIPAL}

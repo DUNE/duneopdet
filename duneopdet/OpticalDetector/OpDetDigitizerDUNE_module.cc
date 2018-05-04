@@ -489,6 +489,7 @@ namespace opdet {
     // For every pair of (arrival time, number of photons) in the map:
     for (auto const& pulse : photonsMap)
     {
+      //Note* This time conversion should be updated to use the services.
       // Converting ns to us
       double photonTime = static_cast< double >(pulse.first)/1000.0;
       for (int i = 0; i < pulse.second; ++i)
