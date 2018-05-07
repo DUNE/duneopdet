@@ -27,7 +27,7 @@
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
-#include "larsim/MCCheater/PhotonBackTracker.h"
+#include "larsim/MCCheater/PhotonBackTrackerService.h"
 #include "larsim/MCCheater/ParticleInventoryService.h"
 #include "dune/OpticalDetector/OpFlashSort.h"
 
@@ -128,9 +128,9 @@ namespace opdet {
     Float_t  fTime;
     Float_t  fTimeWidth;
     Float_t  fTimeDiff;
-    Int_t    fFlashFrame;
-    Bool_t   fInBeamFrame;
-    Int_t    fOnBeamTime;
+    //Int_t    fFlashFrame; // unused
+    //Bool_t   fInBeamFrame; // unused
+    //Int_t    fOnBeamTime; // unused
     Float_t  fTotalPE;
     Float_t  fPurity;
     Float_t  fDistance;
@@ -269,7 +269,7 @@ namespace opdet {
     auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
     auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
     art::ServiceHandle< geo::Geometry > geom;
-    art::ServiceHandle< cheat::PhotonBackTracker > pbt;
+    art::ServiceHandle< cheat::PhotonBackTrackerService > pbt;
     art::ServiceHandle<cheat::ParticleInventoryService> pinv;
     art::ServiceHandle< art::TFileService > tfs;
     //pbt->Rebuild(evt);
