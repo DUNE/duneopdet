@@ -1,3 +1,5 @@
+add_subdirectory(BackTrackingTests)
+
 art_make( BASENAME_ONLY
           LIBRARY_NAME dune_OpticalDetector
           LIB_LIBRARIES 
