@@ -19,12 +19,12 @@ namespace opdet{
 
 
     //--------------------------------------------------------------------
-    DUNEOpDetResponse::DUNEOpDetResponse(fhicl::ParameterSet const& pset, 
+    DUNEOpDetResponse::DUNEOpDetResponse(fhicl::ParameterSet const& pset,
                                          art::ActivityRegistry &/*reg*/)
     {
         this->doReconfigure(pset);
     }
-    
+
     //--------------------------------------------------------------------
     DUNEOpDetResponse::~DUNEOpDetResponse() throw()
     { }
@@ -42,30 +42,30 @@ namespace opdet{
         fracShort =              pset.get<double>("FracShort");
         fracLong =               pset.get<double>("FracLong");
         fChannelConversion =     pset.get<std::string>("ChannelConversion");
-        std::string tmpAxis =    pset.get<std::string>("LongAxis"); 
+        std::string tmpAxis =    pset.get<std::string>("LongAxis");
 
         boost::algorithm::to_lower(tmpAxis);
 
         if (tmpAxis == "x") fLongAxis = 0;
         if (tmpAxis == "y") fLongAxis = 1;
         if (tmpAxis == "z") fLongAxis = 2;
-        
+
         // Only allow channel conversion once - so it must be set to happen
         // either during full simulation (library generation) or during
         // fast simulation (library use).
-        
+
         boost::algorithm::to_lower(fChannelConversion);
-        
+
         fFullSimChannelConvert = false;
         fFastSimChannelConvert = false;
-        
+
         if (fChannelConversion == "full") fFullSimChannelConvert = true;
         if (fChannelConversion == "fast") fFastSimChannelConvert = true;
 
         // Correct out the prescaling applied during simulation
         auto const *LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
         fQE = tempfQE / LarProp->ScintPreScale();
-        
+
         if (fQE > 1.0001 ) {
             mf::LogError("DUNEOpDetResponse_service") << "Quantum efficiency set in OpDetResponse_service, " << tempfQE
                                                       << " is too large.  It is larger than the prescaling applied during simulation, "
@@ -92,7 +92,7 @@ namespace opdet{
     //--------------------------------------------------------------------
     bool DUNEOpDetResponse::doDetected(int OpDet, const sim::OnePhoton& Phot, int &newOpChannel) const
     {
-        
+
         // Find the Optical Detector using the geometry service
         art::ServiceHandle<geo::Geometry> geom;
 
@@ -106,7 +106,7 @@ namespace opdet{
         else{
             newOpChannel = OpDet;
         }
-        
+
         // Check QE
         if ( CLHEP::RandFlat::shoot(1.0) > fQE ) return false;
 
@@ -143,18 +143,18 @@ namespace opdet{
 
             // Throw away some photons based on attenuation
             double AttenuationProb = fracShort*exp(-sipmDistance/lambdaShort) + fracLong*exp(-sipmDistance/lambdaLong);
-            
-            //mf::LogVerbatim("DUNEOpDetResponse") << "OpDet: " << OpDet 
+
+            //mf::LogVerbatim("DUNEOpDetResponse") << "OpDet: " << OpDet
             //                                     << " has length " << opdetLength << " in detector "
             //                                     << box->GetDX() << " x " << box->GetDY()  << " x " << box->GetDZ();
-            //mf::LogVerbatim("DUNEOpDetResponse") << "   Local Position = (" << Phot.FinalLocalPosition.x() 
+            //mf::LogVerbatim("DUNEOpDetResponse") << "   Local Position = (" << Phot.FinalLocalPosition.x()
             //                                     << ", " << Phot.FinalLocalPosition.y() << ", " << Phot.FinalLocalPosition.z() << ")";
             //mf::LogVerbatim("DUNEOpDetResponse") << "   Distance to SiPM = " << sipmDistance << " along axis " << fLongAxis;
             //mf::LogVerbatim("DUNEOpDetResponse") << "   Attenuation Probability = " << AttenuationProb;
-            
+
             if ( CLHEP::RandFlat::shoot(1.0) > AttenuationProb ) return false;
-            
-          
+
+
         }
 
         return true;
@@ -176,11 +176,11 @@ namespace opdet{
         else{
             newOpChannel = OpDet;
         }
-        
+
         // Check QE
         if ( CLHEP::RandFlat::shoot(1.0) > fQE ) return false;
 
-        
+
         return true;
     }
 
