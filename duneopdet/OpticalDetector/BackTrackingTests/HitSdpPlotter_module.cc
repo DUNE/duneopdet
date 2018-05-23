@@ -18,8 +18,8 @@ namespace HitSdpPlotter {
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   HitSdpPlotter::HitSdpPlotter(fhicl::ParameterSet const& pSet)
     :EDAnalyzer(pSet),
-    private_OpHitLabel(pSet.get<art::InputTag>("OpHitLabel","ophit")),
-    private_BtrLabel(pSet.get<art::InputTag>("BTRLabel","largeant"))
+    private_OpHitLabel(pSet.get<art::InputTag>("OpHitLabel", "ophit")),
+    private_BtrLabel(pSet.get<art::InputTag>("BTRLabel", "largeant"))
   {  }
 
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
@@ -34,8 +34,8 @@ namespace HitSdpPlotter {
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   void HitSdpPlotter::beginJob(){
 //int nOpDets=private_geom->NOpDets();
-    mDir = std::make_unique<art::TFileDirectory>(private_tfs->mkdir("hists","hists"));
-    widths = private_tfs->make<TH1D>("ophit_widths", "width of ophits", 1000, -1, 2001);
+    mDir = std::make_unique<art::TFileDirectory>(private_service_tfs->mkdir("hists","hists"));
+    widths = private_service_tfs->make<TH1D>("ophit_widths", "width of ophits", 1000, -1, 2001);
 
     //PEs On X Axis
   }
@@ -72,7 +72,7 @@ namespace HitSdpPlotter {
 
     for ( auto& ophit : ophitList ){
       TH1D* dummy = 0;
-      UInt_t opdet = private_geom->OpDetFromOpChannel(ophit->OpChannel());
+      UInt_t opdet = private_service_geom->OpDetFromOpChannel(ophit->OpChannel());
       auto empIt = detTimeHist.emplace(std::make_pair(opdet, dummy));
       //auto empIt = detTimeHist.emplace(std::make_pair(opdet, TH1D*(0)));
 //      auto empLowIt = detLowerTimeHist.emplace(std::make_pair(opdet, dummy));
@@ -82,10 +82,12 @@ namespace HitSdpPlotter {
       if(empIt.second==true){
         TString histName = TString("PD")+TString(std::to_string(opdet))+TString("Hist");
         TString histTitle = TString("PD ")+TString(std::to_string(opdet))+TString(" OpHit Times.");
+        /*
         TString histLowName = TString("PD")+TString(std::to_string(opdet))+TString("LowHist");
         TString histLowTitle = TString("PD ")+TString(std::to_string(opdet))+TString(" OpHit Lower Times.");
         TString histUpName = TString("PD")+TString(std::to_string(opdet))+TString("UpHist");
         TString histUpTitle = TString("PD ")+TString(std::to_string(opdet))+TString(" OpHit Upper Times.");
+        */
         TH1D* tmphist1 = mDir->make<TH1D>(histName, histTitle, 30000, -1500000, 1500000);
         empIt.first->second = std::move(tmphist1);
         //TH1D* tmphist2 = mDir->make<TH1D>(histLowName, histLowTitle, 3000000, -1500000, 1500000);
@@ -93,7 +95,7 @@ namespace HitSdpPlotter {
         //TH1D* tmphist3 = mDir->make<TH1D>(histUpName, histUpTitle, 3000000, -1500000, 1500000);
         //empUpIt.first->second = std::move(tmphist3);
       }
-      if((private_pbt->OpHitToSimSDPs_Ps(ophit)).size()>1){
+      if((private_service_pbt->OpHitToSimSDPs_Ps(ophit)).size()>1){
         double time = ophit->PeakTime() * 1000;
         double width = ophit->Width() * 1000;
         widths->Fill(width);

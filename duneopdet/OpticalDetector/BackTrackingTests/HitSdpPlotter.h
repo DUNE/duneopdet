@@ -62,9 +62,15 @@ namespace HitSdpPlotter {
 
     private:
 
-      art::InputTag private_Label;
+      art::InputTag private_OpHitLabel;
+      art::InputTag private_BtrLabel;
       art::ServiceHandle<art::TFileService> private_service_tfs;
-      TH2D* private_Hist;
+      art::ServiceHandle<geo::Geometry> private_service_geom;
+      art::ServiceHandle<cheat::PhotonBackTrackerService> private_service_pbt;
+      std::unique_ptr<art::TFileDirectory> mDir;
+      std::map<UInt_t, TH1D*> sdp_time_hists;
+      std::map<UInt_t, TH1D*> detTimeHist;
+      TH1D* widths;
 
 
       //Also need buffers

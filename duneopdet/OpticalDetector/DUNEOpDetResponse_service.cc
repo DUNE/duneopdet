@@ -184,7 +184,32 @@ namespace opdet{
         return true;
     }
 
+    //--------------------------------------------------------------------
+    bool DUNEOpDetResponse::doDetectedLite(int OpDet, int &newOpChannel, int &hardwareChannel) const
+    {
+        if (fFastSimChannelConvert){
+
+            // Find the Optical Detector using the geometry service
+            art::ServiceHandle<geo::Geometry> geom;
+            // Here OpDet must be opdet since we are introducing
+            // channel mapping here.
+            float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+            hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
+            newOpChannel = geom->OpChannel(OpDet, hardwareChannel);
+        }
+        else{
+            newOpChannel = OpDet;
+        }
+
+        // Check QE
+        if ( CLHEP::RandFlat::shoot(1.0) > fQE ) return false;
+
+
+        return true;
+    }
+
+
 } // namespace
 
-DEFINE_ART_SERVICE_INTERFACE_IMPL(opdet::DUNEOpDetResponse, opdet::OpDetResponseInterface)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(opdet::DUNEOpDetResponse, opdet::DUNEOpDetResponseInterface)
 
