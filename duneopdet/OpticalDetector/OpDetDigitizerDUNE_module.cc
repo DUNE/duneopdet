@@ -438,6 +438,8 @@ namespace opdet {
       art::fill_ptr_vector(btrs, btrHandle);
       for (auto const& btr : btrs)
       {
+        //Each BTR is an art::Ptr. I can make my assn with this.
+
         // OpChannel in SimPhotonsLite is actually the photon detector number
         unsigned int opDet = btr->OpDetNum();
 
@@ -501,8 +503,10 @@ namespace opdet {
 
               pulseVecPtr->emplace_back(std::move(adcVec));
             }
-          }
-        }
+            //This is where I have the wave form finished, and am about to move on, so here is where the Assn should be made.
+            //Things to know. CrossTalk live in CreatePDWaveForms (I will need it for the write out), dark noise will not be included in the first pass. exact splitup will be included (the result of flatshots).
+          }//This is the end of each channel
+        } //Here. This is the end of each BTR.
       }
     }//end else (useSDPs)
 
