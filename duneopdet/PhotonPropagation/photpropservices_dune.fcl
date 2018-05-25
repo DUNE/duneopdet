@@ -80,7 +80,7 @@ protodunedp_photonvisibilityservice_buildlib:
 
   ParametrisedTimePropagation: true
   ParametrisedTimePropagationNParameters: 3
-  PhotonVisibilityService.ParametrisedTimePropagationFittedFormula: "TMath::Landau(x,[0],[1])"
+  ParametrisedTimePropagationFittedFormula: "TMath::Landau(x,[0],[1])"
 }
 
 dunedphase3x1x1_photonvisibilityservice_buildlib:
@@ -107,7 +107,7 @@ dunedphase3x1x1_photonvisibilityservice_buildlib:
 
   ParametrisedTimePropagation: true
   ParametrisedTimePropagationNParameters: 4
-  PhotonVisibilityService.ParametrisedTimePropagationFittedFormula: "TMath::Exp([0]*x) + [1]*TMath::Exp([2]*x)"
+  ParametrisedTimePropagationFittedFormula: "TMath::Exp([0]*x) + [1]*TMath::Exp([2]*x)"
 
 }
 
