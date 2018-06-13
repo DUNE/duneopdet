@@ -211,5 +211,5 @@ namespace opdet{
 
 } // namespace
 
-DEFINE_ART_SERVICE_INTERFACE_IMPL(opdet::DUNEOpDetResponse, opdet::DUNEOpDetResponseInterface)
+DEFINE_ART_SERVICE_INTERFACE_IMPL(opdet::DUNEOpDetResponse, opdet::OpDetResponseInterface)
 

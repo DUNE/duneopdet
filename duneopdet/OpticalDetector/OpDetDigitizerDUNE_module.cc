@@ -182,10 +182,11 @@ namespace opdet {
 
       // Produce waveform on one of the optical detectors
       void CreatePDWaveform(art::Ptr<sim::OpDetBacktrackerRecord> const& btrs,
-          opdet::DUNEOpDetResponseInterface const&,
+          opdet::OpDetResponseInterface const&,
           geo::Geometry const&,
           std::vector< std::vector< double > >&,
-          std::vector<FocusList>&);
+          std::vector<FocusList>&,
+          std::vector<std::vector<int>>& PhotonsPerChannel);
 
       // Produce waveform on one of the optical detectors
       void CreatePDWaveform(sim::SimPhotonsLite const&,
@@ -243,6 +244,7 @@ namespace opdet {
 
     // This module produces (infrastructure piece)
     produces< std::vector< raw::OpDetWaveform > >();
+    //produces< art::Assns< sim::OpDetBacktrackerRecord, raw::OpDetWaveform,  > >();
 
     // Read the fcl-file
     fInputModule        = pset.get< std::string >("InputModule"  );
@@ -330,6 +332,7 @@ namespace opdet {
     // A pointer that will store produced OpDetWaveforms
     std::unique_ptr< std::vector< raw::OpDetWaveform > >
       pulseVecPtr(std::make_unique< std::vector< raw::OpDetWaveform > >());
+    //    auto assns = std::make_unique<art::Assns<recob:Cluster, raw::OpDetWaveform>>(); //This is used when producing assns with sdps
 
     art::ServiceHandle< sim::LArG4Parameters > lgp;
     bool fUseLitePhotons = lgp->UseLitePhotons();
@@ -350,12 +353,12 @@ namespace opdet {
 
     // Service for determining optical detector responses
     art::ServiceHandle< opdet::OpDetResponseInterface > odResponse;
-    art::ServiceHandle< opdet::DUNEOpDetResponseInterface > DUNEodResponse; //This is calling the DUNE OpDetResponse instead of the OpDetResponseInterface because I need to access the detectedLite method from our implimentation. This is not the correct structure, but it functions. This code can certainly be cleaned up.
+//    art::ServiceHandle< opdet::DUNEOpDetResponseInterface > DUNEodResponse; //This is calling the DUNE OpDetResponse instead of the OpDetResponseInterface because I need to access the detectedLite method from our implimentation. This is not the correct structure, but it functions. This code can certainly be cleaned up.
 
     art::Handle< std::vector< sim::SimPhotonsLite > > litePhotonHandle;
     art::Handle< std::vector< sim::OpDetBacktrackerRecord > > btrHandle;
     // Get SimPhotonsLite from the event
-    //}
+    //
 
 
     //I can't access the pointer here. This is unfortunate.
@@ -451,8 +454,8 @@ namespace opdet {
         // This vector stores waveforms created for each optical channel
         std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
             std::vector< double >(nSamples, static_cast< double >(fPedestal)));
-
-        CreatePDWaveform(btr, *DUNEodResponse, *geometry, pdWaveforms, fls);
+        std::vector<std::vector<int>> PhotonsPerChannel;
+//        CreatePDWaveform(btr, *DUNEodResponse, *geometry, pdWaveforms, fls, PhotonsPerChannel);
 
         // Generate dark noise
         if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls);
@@ -500,14 +503,14 @@ namespace opdet {
               for (short const& value : pairTickWaveform.second){
                 adcVec.emplace_back(value);
               }
-
               pulseVecPtr->emplace_back(std::move(adcVec));
+
             }
             //This is where I have the wave form finished, and am about to move on, so here is where the Assn should be made.
             //Things to know. CrossTalk live in CreatePDWaveForms (I will need it for the write out), dark noise will not be included in the first pass. exact splitup will be included (the result of flatshots).
-          }//This is the end of each channel
-        } //Here. This is the end of each BTR.
-      }
+          }
+        }//This is the end of each channel
+      }//Here. This is the end of each BTR.
     }//end else (useSDPs)
 
     if(fDigiTree_SSP_LED){
@@ -522,364 +525,371 @@ namespace opdet {
     //Make assn here to build new data product linking SDPs
 
 
-}
+  }
 
-//---------------------------------------------------------------------------
-void OpDetDigitizerDUNE::AddPulse(size_t timeBin,
-    int scale, std::vector< double >& waveform,
-    FocusList& fl) const
-{
-
-  // How many bins will be changed
-  size_t pulseLength = fSinglePEWaveform.size();
-  if ((timeBin + fSinglePEWaveform.size()) > waveform.size())
-    pulseLength = (waveform.size() - timeBin);
-
-  fl.AddRange(timeBin, timeBin+pulseLength-1);
-
-  // Adding a pulse to the waveform
-  for (size_t tick = 0; tick != pulseLength; ++tick)
-    waveform[timeBin + tick] += scale*fSinglePEWaveform[tick];
-
-}
-
-//---------------------------------------------------------------------------
-double OpDetDigitizerDUNE::Pulse1PE(double time) const
-{
-
-  if (time < fPeakTime) return
-    (fVoltageToADC*fMaxAmplitude*std::exp((time - fPeakTime)/fFrontTime));
-  else return
-    (fVoltageToADC*fMaxAmplitude*std::exp(-(time - fPeakTime)/fBackTime));
-
-}
-
-//---------------------------------------------------------------------------
-void OpDetDigitizerDUNE::CreateSinglePEWaveform()
-{
-
-  size_t length =
-    static_cast< size_t > (std::round(fPulseLength*fSampleFreq));
-  fSinglePEWaveform.resize(length);
-  for (size_t tick = 0; tick != length; ++tick)
-    fSinglePEWaveform[tick] =
-      Pulse1PE(static_cast< double >(tick)/fSampleFreq);
-
-}
-
-//---------------------------------------------------------------------------
-//Making it possible to use OpDetBTRs instead of SimPhotonsLite (Working towards a SimPhotonsLite removal.
-void OpDetDigitizerDUNE::CreatePDWaveform
-(art::Ptr<sim::OpDetBacktrackerRecord> const& btr,
- opdet::DUNEOpDetResponseInterface const& odResponse,
- geo::Geometry const& geometry,
- std::vector< std::vector< double > >& pdWaveforms,
- std::vector<FocusList>& fls)
-{
-
-//  unsigned int const opDet = btr->OpDetNum();
-  unsigned int const opDet(btr->OpDetNum());
-  // This is int because otherwise detectedLite doesn't work
-  int readoutChannel;//(-99999); //Initalize to bogus
-  // For a group of photons arriving at the same time this is a map
-  // of < arrival time (in ns), number of photons >
-  //std::map< int, int > const& photonsMap = litePhotons.DetectedPhotons;
-  //    std::vector<std::pair<double /*time*/, std::vector<sim::SDP> /*photons*/ > >
-  sim::OpDetBacktrackerRecord::timePDclockSDPs_t const& sdpsMap = btr->timePDclockSDPsMap();
-
-  // For every pair of (arrival time, number of photons) in the map:
-  for (auto const& time_and_SDPs : sdpsMap)
+  //---------------------------------------------------------------------------
+  void OpDetDigitizerDUNE::AddPulse(size_t timeBin,
+      int scale, std::vector< double >& waveform,
+      FocusList& fl) const
   {
-    //Note* This time conversion should be updated to use the services.
-    // Converting ns to us
-    //double photonTime = static_cast< double >(pulse.first)/1000.0;
-    double photonTime = time_and_SDPs.first / 1000.0; // what units are sdptime in ns.
-    for(auto const& sdp : time_and_SDPs.second)
-    {
-      //I am going to temporarily make a record here for what goes into each channel.
-      int OpChanPerOpDet = 0;
-      float NOpChannels_f = geometry.NOpHardwareChannels(opDet); //This is a float
-      if( (NOpChannels_f - float(std::floor(NOpChannels_f))) < 1.0e-6 && ( float(std::ceil(NOpChannels_f) - NOpChannels_f) ) < 1.0e-6 && NOpChannels_f>0){
-        OpChanPerOpDet = int( (NOpChannels_f>0)?(std::floor(NOpChannels_f+0.5)):(std::ceil(NOpChannels_f-0.5) ) );
-      }
-      std::vector<int> nPhotsPerChannel(OpChanPerOpDet,0);
-      /*
-         int OpChanPerOpDet = ( geometry.NOpChannels() / geometry.NOpDets() );
-         int check = ( geometry.NOpChannels() % geometry.NOpDets() );
-         if(check != 0 ){
-         throw art::Exception("OpDetDigitizerDUNE_module.cc")
-         << "The number of optical channels per optical detector does not make sense!\n";
-         }*/
-      for (int i = 0; i < sdp.numPhotons; ++i) //Loop over each individual photon
-      {
-        if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
-        {
-          // Sample a random subset according to QE
-          // readoutChannel will be assigned in odResponse.detectedLite
-          // I also want the channel used to make readout from detectedLite
-          int perdetchan=0;
-          if (odResponse.detectedLite(opDet, readoutChannel, perdetchan))
-          {
-            unsigned int hardwareChannel =
-              geometry.HardwareChannelFromOpChannel(readoutChannel);
-            // Convert the time of the pulse to ticks
-            size_t timeBin = TimeToTick(photonTime);
-            // Add 1 pulse to the waveform
-            // The inputs to this function are a good place to start looking for the expanded BTR.
-            AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
-            //Now stick this into my vector.
-            nPhotsPerChannel[perdetchan] += 1;
 
-            unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
-            if(fDigiTree_SSP_LED){
-              op_photon.emplace_back(opChannel);
-              t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
+    // How many bins will be changed
+    size_t pulseLength = fSinglePEWaveform.size();
+    if ((timeBin + fSinglePEWaveform.size()) > waveform.size())
+      pulseLength = (waveform.size() - timeBin);
+
+    fl.AddRange(timeBin, timeBin+pulseLength-1);
+
+    // Adding a pulse to the waveform
+    for (size_t tick = 0; tick != pulseLength; ++tick)
+      waveform[timeBin + tick] += scale*fSinglePEWaveform[tick];
+
+  }
+
+  //---------------------------------------------------------------------------
+  double OpDetDigitizerDUNE::Pulse1PE(double time) const
+  {
+
+    if (time < fPeakTime) return
+      (fVoltageToADC*fMaxAmplitude*std::exp((time - fPeakTime)/fFrontTime));
+    else return
+      (fVoltageToADC*fMaxAmplitude*std::exp(-(time - fPeakTime)/fBackTime));
+
+  }
+
+  //---------------------------------------------------------------------------
+  void OpDetDigitizerDUNE::CreateSinglePEWaveform()
+  {
+
+    size_t length =
+      static_cast< size_t > (std::round(fPulseLength*fSampleFreq));
+    fSinglePEWaveform.resize(length);
+    for (size_t tick = 0; tick != length; ++tick)
+      fSinglePEWaveform[tick] =
+        Pulse1PE(static_cast< double >(tick)/fSampleFreq);
+
+  }
+
+  //---------------------------------------------------------------------------
+  //Making it possible to use OpDetBTRs instead of SimPhotonsLite (Working towards a SimPhotonsLite removal.
+  void OpDetDigitizerDUNE::CreatePDWaveform
+    (art::Ptr<sim::OpDetBacktrackerRecord> const& btr,
+     opdet::DUNEOpDetResponseInterface const& odResponse,
+     geo::Geometry const& geometry,
+     std::vector< std::vector< double > >& pdWaveforms,
+     std::vector<FocusList>& fls,
+     std::vector<std::vector<int>>& PhotonsPerChannel)
+    {
+      //We clear photons per channel, since it is an important return.
+      PhotonsPerChannel.clear();
+
+      sim::OpDetBacktrackerRecord::timePDclockSDPs_t const& sdpsMap = btr->timePDclockSDPsMap();
+      PhotonsPerChannel.reserve(sdpsMap.size());
+
+      //  unsigned int const opDet = btr->OpDetNum();
+      unsigned int const opDet(btr->OpDetNum());
+      int OpChanPerOpDet = geometry.NOpHardwareChannels(opDet);
+      // This is int because otherwise detectedLite doesn't work
+      int readoutChannel;//(-99999); //Initalize to bogus
+      // For a group of photons arriving at the same time this is a map
+      // of < arrival time (in ns), number of photons >
+      //std::map< int, int > const& photonsMap = litePhotons.DetectedPhotons;
+      //    std::vector<std::pair<double , std::vector<sim::SDP> > >
+
+      // For every pair of (arrival time, number of photons) in the map:
+      for (unsigned int pos=0; pos<sdpsMap.size(); ++pos)
+      {
+        auto const& time_and_SDPs = sdpsMap.at(pos);
+        PhotonsPerChannel.at(pos).reserve(OpChanPerOpDet);
+        std::fill(PhotonsPerChannel.at(pos).begin(), PhotonsPerChannel.at(pos).end(), 0);
+        //Note* This time conversion should be updated to use the services.
+        // Converting ns to us
+        //double photonTime = static_cast< double >(pulse.first)/1000.0;
+        double photonTime = time_and_SDPs.first / 1000.0; // what units are sdptime in ns.
+        for(auto const& sdp : time_and_SDPs.second)
+        {
+          //I am going to temporarily make a record here for what goes into each channel.
+          //          float NOpChannels_f = float(OpChanPerOpDet);
+          std::vector<int> nPhotsPerChannel(OpChanPerOpDet,0);
+          //
+          //   int OpChanPerOpDet = ( geometry.NOpChannels() / geometry.NOpDets() );
+          //   int check = ( geometry.NOpChannels() % geometry.NOpDets() );
+          //   if(check != 0 ){
+          //   throw art::Exception("OpDetDigitizerDUNE_module.cc")
+          //   << "The number of optical channels per optical detector does not make sense!\n";
+          //   }
+          for (int i = 0; i < sdp.numPhotons; ++i) //Loop over each individual photon
+          {
+            if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
+            {
+              // Sample a random subset according to QE
+              // readoutChannel will be assigned in odResponse.detectedLite
+              // I also want the channel used to make readout from detectedLite
+              int perdetchan=0;
+              if (odResponse.detectedLite(opDet, readoutChannel, perdetchan))
+              {
+                PhotonsPerChannel.at(pos).at(perdetchan) += 1;
+                unsigned int hardwareChannel =
+                  geometry.HardwareChannelFromOpChannel(readoutChannel);
+                // Convert the time of the pulse to ticks
+                size_t timeBin = TimeToTick(photonTime);
+                // Add 1 pulse to the waveform
+                // The inputs to this function are a good place to start looking for the expanded BTR.
+                AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
+                //Now stick this into my vector.
+                nPhotsPerChannel[perdetchan] += 1;
+
+                unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
+                if(fDigiTree_SSP_LED){
+                  op_photon.emplace_back(opChannel);
+                  t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
+                }
+              }
+            }
+            // else
+            // remove this as it fills up logfiles for cosmic-ray runs
+            //mf::LogInfo("OpDetDigitizerDUNE")
+            //  << "Throwing away an out-of-time photon at " << photonTime << '\n';
+          }
+          //For loop of photons is over. Time to record data.
+          PhotonsPerChannel.at(pos) = std::move(nPhotsPerChannel);
+        }
+      }
+
+    }
+
+  //---------------------------------------------------------------------------
+  void OpDetDigitizerDUNE::CreatePDWaveform
+    (sim::SimPhotonsLite const& litePhotons,
+     opdet::OpDetResponseInterface const& odResponse,
+     geo::Geometry const& geometry,
+     std::vector< std::vector< double > >& pdWaveforms,
+     std::vector<FocusList>& fls)
+    {
+
+      unsigned int const opDet = litePhotons.OpChannel;
+      // This is int because otherwise detectedLite doesn't work
+      int readoutChannel;
+      // For a group of photons arriving at the same time this is a map
+      // of < arrival time (in ns), number of photons >
+      std::map< int, int > const& photonsMap = litePhotons.DetectedPhotons;
+
+      // For every pair of (arrival time, number of photons) in the map:
+      for (auto const& pulse : photonsMap)
+      {
+        //Note* This time conversion should be updated to use the services.
+        // Converting ns to us
+        double photonTime = static_cast< double >(pulse.first)/1000.0;
+        for (int i = 0; i < pulse.second; ++i)
+        {
+          if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
+          {
+            // Sample a random subset according to QE
+            if (odResponse.detectedLite(opDet, readoutChannel))
+            {
+              unsigned int hardwareChannel =
+                geometry.HardwareChannelFromOpChannel(readoutChannel);
+              // Convert the time of the pulse to ticks
+              size_t timeBin = TimeToTick(photonTime);
+              // Add 1 pulse to the waveform
+              // The inputs to this function are a good place to start looking for the expanded BTR.
+              AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
+
+              unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
+              if(fDigiTree_SSP_LED){
+                op_photon.emplace_back(opChannel);
+                t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
+              }
             }
           }
+          // else
+          // remove this as it fills up logfiles for cosmic-ray runs
+          //mf::LogInfo("OpDetDigitizerDUNE")
+          //  << "Throwing away an out-of-time photon at " << photonTime << '\n';
         }
-        // else
-        // remove this as it fills up logfiles for cosmic-ray runs
-        //mf::LogInfo("OpDetDigitizerDUNE")
-        //  << "Throwing away an out-of-time photon at " << photonTime << '\n';
       }
-      //For loop of photons is over. Time to record data.
+
     }
-  }
 
-}
 
-//---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::CreatePDWaveform
-(sim::SimPhotonsLite const& litePhotons,
- opdet::OpDetResponseInterface const& odResponse,
- geo::Geometry const& geometry,
- std::vector< std::vector< double > >& pdWaveforms,
- std::vector<FocusList>& fls)
-{
-
-  unsigned int const opDet = litePhotons.OpChannel;
-  // This is int because otherwise detectedLite doesn't work
-  int readoutChannel;
-  // For a group of photons arriving at the same time this is a map
-  // of < arrival time (in ns), number of photons >
-  std::map< int, int > const& photonsMap = litePhotons.DetectedPhotons;
-
-  // For every pair of (arrival time, number of photons) in the map:
-  for (auto const& pulse : photonsMap)
-  {
-    //Note* This time conversion should be updated to use the services.
-    // Converting ns to us
-    double photonTime = static_cast< double >(pulse.first)/1000.0;
-    for (int i = 0; i < pulse.second; ++i)
+  //---------------------------------------------------------------------------
+  void OpDetDigitizerDUNE::
+    AddLineNoise(std::vector< std::vector< double > >& waveforms,
+        const std::vector<FocusList>& fls) const
     {
-      if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
-      {
-        // Sample a random subset according to QE
-        if (odResponse.detectedLite(opDet, readoutChannel))
-        {
-          unsigned int hardwareChannel =
-            geometry.HardwareChannelFromOpChannel(readoutChannel);
-          // Convert the time of the pulse to ticks
-          size_t timeBin = TimeToTick(photonTime);
-          // Add 1 pulse to the waveform
-          // The inputs to this function are a good place to start looking for the expanded BTR.
-          AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
-
-          unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
-          if(fDigiTree_SSP_LED){
-            op_photon.emplace_back(opChannel);
-            t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
+      int i = 0;
+      for(auto& waveform : waveforms){
+        for(unsigned int j = 0; j < fls[i].ranges.size(); ++j){
+          const std::pair<int, int>& p = fls[i].ranges[j];
+          for(int k = p.first; k <= p.second; ++k){
+            waveform[k] += fRandGauss->fire(0, fLineNoiseRMS);
           }
         }
-      }
-      // else
-      // remove this as it fills up logfiles for cosmic-ray runs
-      //mf::LogInfo("OpDetDigitizerDUNE")
-      //  << "Throwing away an out-of-time photon at " << photonTime << '\n';
-    }
-  }
 
-}
-
-
-//---------------------------------------------------------------------------
-void OpDetDigitizerDUNE::
-AddLineNoise(std::vector< std::vector< double > >& waveforms,
-    const std::vector<FocusList>& fls) const
-{
-  int i = 0;
-  for(auto& waveform : waveforms){
-    for(unsigned int j = 0; j < fls[i].ranges.size(); ++j){
-      const std::pair<int, int>& p = fls[i].ranges[j];
-      for(int k = p.first; k <= p.second; ++k){
-        waveform[k] += fRandGauss->fire(0, fLineNoiseRMS);
+        ++i;
       }
     }
 
-    ++i;
-  }
-}
-
-//---------------------------------------------------------------------------
-void OpDetDigitizerDUNE::
-AddDarkNoise(std::vector< std::vector< double > >& waveforms,
-    std::vector<FocusList>& fls) const
-{
-  int i = 0;
-  for (auto& waveform : waveforms)
-  {
-    // Multiply by 10^6 since fDarkNoiseRate is in Hz
-    double darkNoiseTime = static_cast< double >(fRandExponential->
-        fire(1.0/fDarkNoiseRate)*1000000.0) + fTimeBegin;
-    while (darkNoiseTime < fTimeEnd)
+  //---------------------------------------------------------------------------
+  void OpDetDigitizerDUNE::
+    AddDarkNoise(std::vector< std::vector< double > >& waveforms,
+        std::vector<FocusList>& fls) const
     {
-      size_t timeBin = TimeToTick(darkNoiseTime);
-      AddPulse(timeBin, CrossTalk(), waveform, fls[i]);
-      // Find next time to simulate a single PE pulse
-      darkNoiseTime += static_cast< double >
-        (fRandExponential->fire(1.0/fDarkNoiseRate)*1000000.0);
+      int i = 0;
+      for (auto& waveform : waveforms)
+      {
+        // Multiply by 10^6 since fDarkNoiseRate is in Hz
+        double darkNoiseTime = static_cast< double >(fRandExponential->
+            fire(1.0/fDarkNoiseRate)*1000000.0) + fTimeBegin;
+        while (darkNoiseTime < fTimeEnd)
+        {
+          size_t timeBin = TimeToTick(darkNoiseTime);
+          AddPulse(timeBin, CrossTalk(), waveform, fls[i]);
+          // Find next time to simulate a single PE pulse
+          darkNoiseTime += static_cast< double >
+            (fRandExponential->fire(1.0/fDarkNoiseRate)*1000000.0);
+        }
+
+        ++i;
+      }
     }
 
-    ++i;
-  }
-}
-
-//---------------------------------------------------------------------------
-unsigned short OpDetDigitizerDUNE::CrossTalk() const
-{
-  // Sometimes this should produce 3 or more PEs (not implemented)
-  if      (fCrossTalk <= 0.0)                 return 1;
-  else if (fRandFlat->fire(1.0) > fCrossTalk) return 1;
-  else                                        return 2;
-}
-
-//---------------------------------------------------------------------------
-std::vector< short > OpDetDigitizerDUNE::VectorOfDoublesToVectorOfShorts
-(std::vector< double > const& vectorOfDoubles) const
-{
-  // Don't bother to round properly, it's faster this way
-  return std::vector<short>(vectorOfDoubles.begin(), vectorOfDoubles.end());
-
-  /*
-     std::vector< short > vectorOfShorts;
-     vectorOfShorts.reserve(vectorOfDoubles.size());
-
-     for (short const& value : vectorOfDoubles)
-     vectorOfShorts.emplace_back(static_cast< short >(std::round(value)));
-
-     return vectorOfShorts;
-     */
-}
-
-//---------------------------------------------------------------------------
-std::map< size_t, std::vector< short > > OpDetDigitizerDUNE::
-SplitWaveform(std::vector< short > const& waveform,
-    const FocusList& fls)
-{
-
-  std::map< size_t, std::vector< short > > mapTickWaveform;
-
-  ::pmtana::PedestalMean_t  ped_mean (waveform.size(),0);
-  ::pmtana::PedestalSigma_t ped_sigma(waveform.size(),0);
-
-  fThreshAlg->Reconstruct(waveform,ped_mean,ped_sigma);
-
-  std::vector< pmtana::pulse_param > pulses;
-  for (size_t pulseCounter = 0; pulseCounter < fThreshAlg->GetNPulse();
-      ++pulseCounter)
-    pulses.emplace_back(fThreshAlg->GetPulse(pulseCounter));
-
-  // We have to refine this algorithm later
-  for (pmtana::pulse_param const& pulse : pulses)
+  //---------------------------------------------------------------------------
+  unsigned short OpDetDigitizerDUNE::CrossTalk() const
   {
-    if (pulse.t_end <= pulse.t_start)
-      // Can I call it a logic error?
-      throw art::Exception(art::errors::LogicError)
-        << "Pulse ends before or at the same time it starts!\n";
+    // Sometimes this should produce 3 or more PEs (not implemented)
+    if      (fCrossTalk <= 0.0)                 return 1;
+    else if (fRandFlat->fire(1.0) > fCrossTalk) return 1;
+    else                                        return 2;
+  }
 
-    std::vector< short >::const_iterator window_start =
-      waveform.begin() + static_cast< size_t >(pulse.t_start);
-    std::vector< short >::const_iterator window_end   =
-      waveform.begin() + static_cast< size_t >(pulse.t_end  );
-    mapTickWaveform.emplace(static_cast< size_t >(pulse.t_start),
-        std::vector< short >(window_start, window_end));
-    // Don't forget to check that the time output by the (new) algortihm
-    // is < fTimeEnd and > fTimeBegin!
+  //---------------------------------------------------------------------------
+  std::vector< short > OpDetDigitizerDUNE::VectorOfDoublesToVectorOfShorts
+    (std::vector< double > const& vectorOfDoubles) const
+    {
+      // Don't bother to round properly, it's faster this way
+      return std::vector<short>(vectorOfDoubles.begin(), vectorOfDoubles.end());
+
+      /*
+         std::vector< short > vectorOfShorts;
+         vectorOfShorts.reserve(vectorOfDoubles.size());
+
+         for (short const& value : vectorOfDoubles)
+         vectorOfShorts.emplace_back(static_cast< short >(std::round(value)));
+
+         return vectorOfShorts;
+         */
+    }
+
+  //---------------------------------------------------------------------------
+  std::map< size_t, std::vector< short > > OpDetDigitizerDUNE::
+    SplitWaveform(std::vector< short > const& waveform,
+        const FocusList& fls)
+    {
+
+      std::map< size_t, std::vector< short > > mapTickWaveform;
+
+      ::pmtana::PedestalMean_t  ped_mean (waveform.size(),0);
+      ::pmtana::PedestalSigma_t ped_sigma(waveform.size(),0);
+
+      fThreshAlg->Reconstruct(waveform,ped_mean,ped_sigma);
+
+      std::vector< pmtana::pulse_param > pulses;
+      for (size_t pulseCounter = 0; pulseCounter < fThreshAlg->GetNPulse();
+          ++pulseCounter)
+        pulses.emplace_back(fThreshAlg->GetPulse(pulseCounter));
+
+      // We have to refine this algorithm later
+      for (pmtana::pulse_param const& pulse : pulses)
+      {
+        if (pulse.t_end <= pulse.t_start)
+          // Can I call it a logic error?
+          throw art::Exception(art::errors::LogicError)
+            << "Pulse ends before or at the same time it starts!\n";
+
+        std::vector< short >::const_iterator window_start =
+          waveform.begin() + static_cast< size_t >(pulse.t_start);
+        std::vector< short >::const_iterator window_end   =
+          waveform.begin() + static_cast< size_t >(pulse.t_end  );
+        mapTickWaveform.emplace(static_cast< size_t >(pulse.t_start),
+            std::vector< short >(window_start, window_end));
+        // Don't forget to check that the time output by the (new) algortihm
+        // is < fTimeEnd and > fTimeBegin!
+
+      }
+
+      return mapTickWaveform;
+
+    }
+
+  //---------------------------------------------------------------------------
+  double OpDetDigitizerDUNE::GetDriftWindow() const
+  {
+
+    double driftWindow;
+
+    double maxDrift = 0.0;
+    for (geo::TPCGeo const& tpc :
+        art::ServiceHandle< geo::Geometry >()->IterateTPCs())
+      if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
+
+    driftWindow =
+      maxDrift/lar::providerFrom< detinfo::DetectorPropertiesService >()->DriftVelocity();
+
+    return driftWindow;
 
   }
 
-  return mapTickWaveform;
+  //---------------------------------------------------------------------------
+  double OpDetDigitizerDUNE::TickToTime(size_t tick) const
+  {
 
-}
+    if (tick > fPreTrigger)
+      return (static_cast< double >(tick - fPreTrigger)/fSampleFreq
+          + fTimeBegin);
+    else
+      return (static_cast< double >(fPreTrigger - tick)/fSampleFreq*(-1.0)
+          + fTimeBegin);
 
-//---------------------------------------------------------------------------
-double OpDetDigitizerDUNE::GetDriftWindow() const
-{
+  }
 
-  double driftWindow;
+  //---------------------------------------------------------------------------
+  size_t OpDetDigitizerDUNE::TimeToTick(double time) const
+  {
 
-  double maxDrift = 0.0;
-  for (geo::TPCGeo const& tpc :
-      art::ServiceHandle< geo::Geometry >()->IterateTPCs())
-    if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
+    return static_cast< size_t >(std::round((time - fTimeBegin)*fSampleFreq
+          + fPreTrigger));
 
-  driftWindow =
-    maxDrift/lar::providerFrom< detinfo::DetectorPropertiesService >()->DriftVelocity();
+  }
 
-  return driftWindow;
+  //---------------------------------------------------------------------------
+  void OpDetDigitizerDUNE::CheckFHiCLParameters() const
+  {
 
-}
+    // Are all these logic errors?
 
-//---------------------------------------------------------------------------
-double OpDetDigitizerDUNE::TickToTime(size_t tick) const
-{
+    if (fLineNoiseRMS < 0.0)
+      throw art::Exception(art::errors::LogicError)
+        << "fLineNoiseRMS: " << fLineNoiseRMS << '\n'
+        << "Line noise RMS should be non-negative!\n";
 
-  if (tick > fPreTrigger)
-    return (static_cast< double >(tick - fPreTrigger)/fSampleFreq
-        + fTimeBegin);
-  else
-    return (static_cast< double >(fPreTrigger - tick)/fSampleFreq*(-1.0)
-        + fTimeBegin);
+    if (fDarkNoiseRate < 0.0)
+      throw art::Exception(art::errors::LogicError)
+        << "fDarkNoiseRate: " << fDarkNoiseRate << '\n'
+        << "Dark noise rate should be non-negative!\n";
 
-}
+    if (fPreTrigger >= fReadoutWindow)
+      throw art::Exception(art::errors::LogicError)
+        << "PreTrigger: "    << fPreTrigger    << " and "
+        << "ReadoutWindow: " << fReadoutWindow << '\n'
+        << "Pretrigger window has to be shorter than readout window!\n";
 
-//---------------------------------------------------------------------------
-size_t OpDetDigitizerDUNE::TimeToTick(double time) const
-{
+    if (fTimeBegin >= fTimeEnd)
+      throw art::Exception(art::errors::LogicError)
+        << "TimeBegin: " << fTimeBegin << " and "
+        << "TimeEnd: "   << fTimeEnd   << '\n'
+        << "TimeBegin should be less than TimeEnd!\n";
 
-  return static_cast< size_t >(std::round((time - fTimeBegin)*fSampleFreq
-        + fPreTrigger));
-
-}
-
-//---------------------------------------------------------------------------
-void OpDetDigitizerDUNE::CheckFHiCLParameters() const
-{
-
-  // Are all these logic errors?
-
-  if (fLineNoiseRMS < 0.0)
-    throw art::Exception(art::errors::LogicError)
-      << "fLineNoiseRMS: " << fLineNoiseRMS << '\n'
-      << "Line noise RMS should be non-negative!\n";
-
-  if (fDarkNoiseRate < 0.0)
-    throw art::Exception(art::errors::LogicError)
-      << "fDarkNoiseRate: " << fDarkNoiseRate << '\n'
-      << "Dark noise rate should be non-negative!\n";
-
-  if (fPreTrigger >= fReadoutWindow)
-    throw art::Exception(art::errors::LogicError)
-      << "PreTrigger: "    << fPreTrigger    << " and "
-      << "ReadoutWindow: " << fReadoutWindow << '\n'
-      << "Pretrigger window has to be shorter than readout window!\n";
-
-  if (fTimeBegin >= fTimeEnd)
-    throw art::Exception(art::errors::LogicError)
-      << "TimeBegin: " << fTimeBegin << " and "
-      << "TimeEnd: "   << fTimeEnd   << '\n'
-      << "TimeBegin should be less than TimeEnd!\n";
-
-}
+  }
 
 }

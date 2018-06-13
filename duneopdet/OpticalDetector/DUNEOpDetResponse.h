@@ -19,7 +19,7 @@
 
 namespace opdet
 {
-  class DUNEOpDetResponse : public opdet::DUNEOpDetResponseInterface {
+  class DUNEOpDetResponse : public opdet::OpDetResponseInterface {
     public:
 
       DUNEOpDetResponse(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
@@ -27,11 +27,11 @@ namespace opdet
 
       // virtual bool detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const;
       //bool DUNEOpDetResponse::detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const
-      /*
+
       virtual bool detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const
       {
         return doDetectedLite( OpDet, newOpChannel, hardwareChannel);
-      }*/
+      }
 
 
 
@@ -42,6 +42,7 @@ namespace opdet
       virtual int  doNOpChannels() const;
       virtual bool doDetected(int OpDet, const sim::OnePhoton& Phot, int &newOpChannel) const;
       virtual bool doDetectedLite(int OpDet, int &newOpChannel) const;
+    //bool DUNEOpDetResponse::doDetectedLite(int OpDet, int &newOpChannel, int &hardwareChannel) const
       virtual bool doDetectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const;
 
       float fQE;                     // Quantum efficiency of tube
@@ -68,6 +69,6 @@ namespace opdet
 } //namespace opdet
 
 
-DECLARE_ART_SERVICE_INTERFACE_IMPL(opdet::DUNEOpDetResponse, opdet::DUNEOpDetResponseInterface, LEGACY)
+DECLARE_ART_SERVICE_INTERFACE_IMPL(opdet::DUNEOpDetResponse, opdet::OpDetResponseInterface, LEGACY)
 
 #endif //OPDET_RESPONSE_DUNE_H
