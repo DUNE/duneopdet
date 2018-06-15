@@ -313,6 +313,10 @@ namespace opdet {
     int plane = 0;
     double loc[] = {part.Vx(), part.Vy(), part.Vz()};
     geo::TPCID tpc = geom->FindTPCAtPosition(loc);
+    if (! geom->HasTPC(tpc) ) {
+      mf::LogInfo("FlashMatchAna") << "No valid TPC for " << tpc;
+      return;
+    }
     geo::PlaneID planeid(tpc, plane);
 
     // Convert true X to would-be charge arrival time, and convert from ticks to us, add to MC time
