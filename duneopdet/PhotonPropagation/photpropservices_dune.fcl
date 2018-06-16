@@ -107,7 +107,7 @@ dunedphase3x1x1_photonvisibilityservice_buildlib:
 
   ParametrisedTimePropagation: true
   ParametrisedTimePropagationNParameters: 4
-  ParametrisedTimePropagationFittedFormula: "TMath::Exp([0]*x) + [1]*TMath::Exp([2]*x)"
+  ParametrisedTimePropagationFittedFormula: "TMath::Exp([0]*x) + [2]*TMath::Exp([1]*x)"
 
 }
 
