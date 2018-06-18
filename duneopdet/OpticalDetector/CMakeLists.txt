@@ -22,6 +22,7 @@ art_make( BASENAME_ONLY
 	                      ${FHICLCPP}
 			                  cetlib cetlib_except
                         ${ROOT_BASIC_LIB_LIST}
+                        dune_DuneObjBase
           MODULE_LIBRARIES
                         lardataobj_RecoBase
 	                larana_OpticalDetector
