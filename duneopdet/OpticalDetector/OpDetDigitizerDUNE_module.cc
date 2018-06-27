@@ -244,7 +244,8 @@ namespace opdet {
 
     // This module produces (infrastructure piece)
     produces< std::vector< raw::OpDetWaveform > >();
-    produces< art::Assns< sim::OpDetBacktrackerRecord, raw::OpDetWaveform, sim::OpDetDivRec > >();
+    //produces< art::Assns< sim::OpDetBacktrackerRecord, raw::OpDetWaveform, sim::OpDetDivRec > >();
+    produces< std::vector< sim::OpDetDivRec > >();
 
     // Read the fcl-file
     fInputModule        = pset.get< std::string >("InputModule"  );
@@ -331,8 +332,9 @@ namespace opdet {
     // A pointer that will store produced OpDetWaveforms
     //    std::unique_ptr< std::vector< raw::OpDetWaveform > > pulseVecPtr(std::make_unique< std::vector< raw::OpDetWaveform > >());
     auto wave_forms_p = std::make_unique< std::vector< raw::OpDetWaveform > >();
-    auto bt_wave_assns = std::make_unique< art::Assns< sim::OpDetBacktrackerRecord, raw::OpDetWaveform, sim::OpDetDivRec > >();
-    art::PtrMaker< raw::OpDetWaveform > make_wave_form_ptr(evt, *this);
+    auto bt_DivRec_p  = std::make_unique< std::vector< sim::OpDetDivRec > >();
+//    auto bt_wave_assns = std::make_unique< art::Assns< sim::OpDetBacktrackerRecord, raw::OpDetWaveform, sim::OpDetDivRec > >();
+//    art::PtrMaker< raw::OpDetWaveform > make_wave_form_ptr(evt, *this);
 
     art::ServiceHandle< sim::LArG4Parameters > lgp;
     bool fUseLitePhotons = lgp->UseLitePhotons();
@@ -370,14 +372,15 @@ namespace opdet {
       // For every optical detector:
       for (auto const& btr : btr_vec)
       {
-        unsigned int opDet = btr->OpDetNum();
+        int opDet = btr->OpDetNum();
+        //unsigned int opDet = btr->OpDetNum();
 
         // Get number of channels in this optical detector
         unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
 
         std::vector<FocusList> fls(nChannelsPerOpDet, FocusList(nSamples, fPadding));
         //std::vector<sim::OpDetDivRec> DivRec;
-        sim::OpDetDivRec DivRec;
+        sim::OpDetDivRec DivRec(opDet);
         //DivRec.chans.resize(nChannelsPerOpDet);
 
         // This vector stores waveforms created for each optical channel
@@ -386,6 +389,7 @@ namespace opdet {
 
         CreatePDWaveform(btr, *odResponse, *geometry, pdWaveforms, fls, DivRec);
         //DivRec comes out with all of the ticks filled correctly, with each channel filled in it's map.
+        //Break here to investigate div recs as they are made and compare them to btrs
 
 
         // Generate dark noise //I will not at this time include dark noise in my split backtracking records.
@@ -437,11 +441,12 @@ namespace opdet {
 
               //              pulseVecPtr->emplace_back(std::move(adcVec));
               wave_forms_p->push_back(std::move(adcVec));
-              art::Ptr< raw::OpDetWaveform > wave_form_p = make_wave_form_ptr(wave_forms_p->size()-1);
-              bt_wave_assns->addSingle(btr, wave_form_p, DivRec/*DIVREC*/);
+              //art::Ptr< raw::OpDetWaveform > wave_form_p = make_wave_form_ptr(wave_forms_p->size()-1);
+              //bt_wave_assns->addSingle(btr, wave_form_p, DivRec/*DIVREC*/);
             }
           }
         }
+        bt_DivRec_p->push_back(std::move(DivRec));
       }
     }else{
       throw art::Exception(art::errors::UnimplementedFeature)
@@ -458,7 +463,8 @@ namespace opdet {
 
     // Push the OpDetWaveforms into the event
     evt.put(std::move(wave_forms_p));
-    evt.put(std::move(bt_wave_assns));
+    evt.put(std::move(bt_DivRec_p));
+    //evt.put(std::move(bt_wave_assns));
 
 
   }
@@ -516,7 +522,8 @@ namespace opdet {
      sim::OpDetDivRec& DivRec)
     {
 
-      unsigned int const opDet = btr_p->OpDetNum();
+      int const opDet = btr_p->OpDetNum();
+      //unsigned int const opDet = btr_p->OpDetNum();
       // This is int because otherwise detectedLite doesn't work
       int readoutChannel;
       // For a group of photons arriving at the same time this is a map
@@ -525,7 +532,6 @@ namespace opdet {
       //sim::timePDclockSDPs_t time_sdps_vector = btr_p->timePDclockSDPsMap();
       //int time_sdps_vector = btr_p->timePDclockSDPsMap();
       auto time_sdps_vector = btr_p->timePDclockSDPsMap();
-      DivRec.tick_chans.second.resize(time_sdps_vector.size());
       /*
       for(auto& divchan : DivRec.chans){
         if(divchan.tick_photons_frac.size()<time_sdps_vector.size())
@@ -540,6 +546,7 @@ namespace opdet {
         auto time_sdps = time_sdps_vector[i];
         // Converting ns to us
         //        double photonTime = static_cast< double >(time_sdps.first)/1000.0;
+        //Really need to do something better here. This conversion is fragile, and makes the populating of the DivRecs confusing.
         double photonTime = time_sdps.first/1000.0;//This should be done with the timing service
         //for (int i = 0; i < pulse.second; ++i)
         //for (size_t i = 0; i < time_sdps.second.size(); ++i)
@@ -550,9 +557,9 @@ namespace opdet {
             if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
             {
               // Sample a random subset according to QE
+              //DivRec.tick_chans[i].time=time_sdps.first;
               if (odResponse.detectedLite(opDet, readoutChannel))
               {
-                //+1 to readout channel in DivRec should be here
                 unsigned int hardwareChannel =
                   geometry.HardwareChannelFromOpChannel(readoutChannel);
                 // Convert the time of the pulse to ticks
@@ -562,13 +569,19 @@ namespace opdet {
                 AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
 
                 unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
-                DivRec.tick_chans.first=time_sdps.first;//Redundant, but needed to sort and match indexing against btrs later.
-                DivRec.tick_chans.second[i][opChannel].tick_photons_frac+=1.0;
+                //Set/find tick. Set/find Channel
+                //DivRec.tick_chans[i].DivChans.PlusOnePhoton(opChannel);
+                DivRec.add_photon(opChannel, time_sdps.first);
                 if(fDigiTree_SSP_LED){
                   op_photon.emplace_back(opChannel);
                   t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
                 }
-              }
+              }//else{
+              /*  unsigned int hardwareChannel =
+                  geometry.HardwareChannelFromOpChannel(readoutChannel);
+                unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
+                DivRec.tick_chans[i].DivChans.IfNotInit(opChannel);
+              }*/
             }
             // else
             // remove this as it fills up logfiles for cosmic-ray runs
@@ -576,16 +589,16 @@ namespace opdet {
             //  << "Throwing away an out-of-time photon at " << photonTime << '\n';
           }
         }//end of this sdp.
-        //Sum up photons in this time tick across all channels. Records fractions.
-        double total=0.0;
-        for(auto& cpair : DivRec.tick_chans.second[i]){ //With a bit of work, we could avoid this loop by remembering this number from above.
-          auto& chan = cpair.second;
-          total+=chan.tick_photons_frac;
+        /*double total=0.0; //This section is no longer needed. I store the un-normalized values, and normalize them at retrieval.
+        for(auto it=DivRec.tick_chans[i].DivChans.bit(); it!= DivRec.tick_chans[i].DivChans.lit(); ++it)
+        { //With a bit of work, we could avoid this loop by remembering this number from above.
+          total+=it->second.tick_photons_frac;
         }
-        for(auto& cpair : DivRec.tick_chans.second[i]){
-          auto& chan = cpair.second;
-          chan.tick_photons_frac/=total;
+        for(auto chan : DivRec.tick_chans[i].DivChans.chans())
+        {
+          DivRec.tick_chans[i].DivChans.NormPhotonFrac(chan, total);
         }
+        total=0.0; // This isn't actually needed.*/
       }//End this time tick.
 
     }
