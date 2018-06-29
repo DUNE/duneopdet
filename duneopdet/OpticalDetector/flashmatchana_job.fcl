@@ -1,0 +1,33 @@
+#include "services_dune.fcl"
+#include "FlashMatchAna.fcl"
+
+process_name: FlashMatchAna
+
+services:
+{
+  @table::dunefd_services
+  TFileService:          { fileName: "FlashMatchAna_hist.root" }
+  TimeTracker:           {}
+  MemoryTracker:         {}
+  RandomNumberGenerator: {} #ART native random number generator
+  FileCatalogMetadata:   @local::art_file_catalog_mc
+  Geometry:              @local::dune10kt_1x2x6_geo
+}
+
+physics:
+{
+  analyzers:
+  {
+    flashmatchana:   @local::marley_flashmatchana
+  }
+
+  ana: [ flashmatchana ]
+  end_paths: [ ana ] 
+
+}
+
+source:
+{
+  module_type: RootInput
+  maxEvents:   -1
+}
