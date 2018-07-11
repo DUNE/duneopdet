@@ -571,7 +571,7 @@ namespace opdet {
                 unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
                 //Set/find tick. Set/find Channel
                 //DivRec.tick_chans[i].DivChans.PlusOnePhoton(opChannel);
-                DivRec.add_photon(opChannel, time_sdps.first);
+                DivRec.AddPhoton(opChannel, time_sdps.first);
                 if(fDigiTree_SSP_LED){
                   op_photon.emplace_back(opChannel);
                   t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
