@@ -43,7 +43,7 @@
 #include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
 #include "dune/OpticalDetector/AlgoSSPLeadingEdge.h"
-#include "dune/DuneObjBase/OpDetDivRec.h"
+#include "dune/DuneObj/OpDetDivRec.h"
 
 
 // CLHEP includes
@@ -338,7 +338,15 @@ namespace opdet {
     auto bt_DivRec_p  = std::make_unique< std::vector< sim::OpDetDivRec > >();
 
     art::ServiceHandle< sim::LArG4Parameters > lgp;
-    bool fUseLitePhotons = lgp->UseLitePhotons();
+    //Because this can't be set after the fact, and because we aren't going to tinker with the g4 stage yet, we need to over-ride UseLites if we are going to use SDPs
+    bool fUseLitePhotons=0;
+    if( lgp->UseLitePhotons() && fUseSDPs ) {
+      mf::LogWarning("OpDetDigitizer")<<"Both UseLitePhotons and UseSDPs set for DetSim. UseSDPs will be used, over-riding the directive for LitePhotons.\n";
+      fUseLitePhotons = false;
+    }else{
+      fUseLitePhotons = lgp->UseLitePhotons();
+    }
+    //bool fUseLitePhotons = lgp->UseLitePhotons();
     if (!fUseLitePhotons && !fUseSDPs){
       throw art::Exception(art::errors::UnimplementedFeature)
         << "Sorry, but for now only Lite Photon digitization and SDP digitization are implemented!"
@@ -632,26 +640,25 @@ namespace opdet {
         //for (size_t i = 0; i < time_sdps.second.size(); ++i)
         for (auto const& sdp : time_sdps.second)
         {
+          int tid = sdp.trackID;
           for(int j=0; j<sdp.numPhotons;++j)
           {
             if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
             {
               // Sample a random subset according to QE
-              //DivRec.tick_chans[i].time=time_sdps.first;
               if (odResponse.detectedLite(opDet, readoutChannel))
               {
                 unsigned int hardwareChannel =
                   geometry.HardwareChannelFromOpChannel(readoutChannel);
                 // Convert the time of the pulse to ticks
                 size_t timeBin = TimeToTick(photonTime);
-                //DivRec.chans[readoutChannel].tick_photons_frac[i]+=1.0;
                 // Add 1 pulse to the waveform
                 AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
 
                 unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
                 //Set/find tick. Set/find Channel
-                //DivRec.tick_chans[i].DivChans.PlusOnePhoton(opChannel);
-                DivRec.AddPhoton(opChannel, time_sdps.first);
+                sim::OpDet_Time_Chans::stored_time_t tmp_time=time_sdps.first;
+                DivRec.AddPhoton(opChannel, tid, tmp_time);
                 if(fDigiTree_SSP_LED){
                   op_photon.emplace_back(opChannel);
                   t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
