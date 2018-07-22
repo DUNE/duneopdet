@@ -153,5 +153,47 @@ dune10kt_v1_1x2x6_photonvisibilityservice.LibraryFile: "PhotonPropagation/Librar
 
 dune10kt_v2_1x2x6_photonvisibilityservice: @local::dune10kt_1x2x6_photonvisibilityservice_buildlib
 
+###--S2 visibility service parameters--###
+
+dunedphase3x1x1_photonvisibilityserviceS2:
+{
+  NX: 1
+  NY: 4
+  NZ: 12
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  LibraryFile: "libext_dunedphase3x1x1_lightsim_20171213.root"
+ #These are not used when usecryoboundary=true
+  XMin: 50
+  XMax: 52
+  YMin: -50
+  YMax: 50
+  ZMin: 0
+  ZMax: 300
+  ParametrisedTimePropagation: true
+  ParametrisedTimePropagationNParameters: 4
+}
+
+protodunedp_photonvisibilityserviceS2:
+{
+
+  NX: 1
+  NY: 24
+  NZ: 24
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  LibraryFile: "libext_protodunedp_lightsim_S2_20171213.root"
+ #These are not used when usecryoboundary=true
+  XMin: 300
+  XMax: 305
+  YMin: -300
+  YMax: 300
+  ZMin: 0
+  ZMax: 300
+  ParametrisedTimePropagation: true
+  ParametrisedTimePropagationNParameters: 3
+}
 
 END_PROLOG
