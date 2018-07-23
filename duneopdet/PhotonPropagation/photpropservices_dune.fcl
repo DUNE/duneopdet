@@ -186,8 +186,8 @@ protodunedp_photonvisibilityserviceS2:
   LibraryBuildJob: false
   LibraryFile: "libext_protodunedp_lightsim_S2_20171213.root"
  #These are not used when usecryoboundary=true
-  XMin: 296
-  XMax: 302
+  XMin: 300
+  XMax: 305
   YMin: -300
   YMax: 300
   ZMin: 0
