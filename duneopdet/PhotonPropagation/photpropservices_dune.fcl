@@ -163,7 +163,7 @@ dunedphase3x1x1_photonvisibilityserviceS2:
   UseCryoBoundary: false
   DoNotLoadLibrary: false
   LibraryBuildJob: false
-  LibraryFile: "libext_dunedphase3x1x1_lightsim_20171213.root"
+  LibraryFile: "libext_dunedphase3x1x1_lightsim_S2_20171213.root"
  #These are not used when usecryoboundary=true
   XMin: 50
   XMax: 52
@@ -184,7 +184,7 @@ protodunedp_photonvisibilityserviceS2:
   UseCryoBoundary: false
   DoNotLoadLibrary: false
   LibraryBuildJob: false
-  LibraryFile: "libext_protodunedp_lightsim_S2_20171213.root"
+  LibraryFile: "libext_protodunedp_lightsim_S2_20171220.root"
  #These are not used when usecryoboundary=true
   XMin: 296
   XMax: 302
