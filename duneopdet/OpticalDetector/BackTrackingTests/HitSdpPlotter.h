@@ -9,7 +9,7 @@
 #define TOY_H
 
 //Includes
-#include "dune/DuneObj/EventRecord.h"
+#include "dune/DuneObj/CalibTreeRecord.h"
 
 //LArSoft Includes
 #include "lardataobj/RecoBase/Track.h"
