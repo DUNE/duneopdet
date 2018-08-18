@@ -1,0 +1,72 @@
+#include "services_dune.fcl"
+#include "singles.fcl"
+#include "largeantmodules.fcl"
+#include "detsimmodules.fcl"
+#include "opticaldetectormodules.fcl"
+#include "photpropservices_dune.fcl"
+#include "photpropmodules_dune.fcl"
+#include "lightsource.fcl"
+
+
+
+process_name: LibraryAnalysis
+
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "PhotonLibraryFile_protodunetexample_hists.root" }
+  message:      @local::standard_info
+  @table::protodune_simulation_services
+}
+
+
+physics:
+{
+
+ producers:
+ {
+ }
+
+ analyzers:
+ {
+   libana: @local::dunefd_photonlibraryanalyzer
+ }
+
+ analyzeIt:  [ libana ]
+
+ #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #ie filters and producers
+ trigger_paths: [] 
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [analyzeIt]  
+}
+
+physics.analyzers.libana.each_detector: true
+
+
+# Begin optical specific parts:
+
+#
+# Examine your own library file - need to customize the visibility service
+#
+
+#services.PhotonVisibilityService.LibraryFile: "PhotonLibraryFile_dune35ton.root"
+
+# Number of voxels
+#services.PhotonVisibilityService.NX: 30
+#services.PhotonVisibilityService.NY: 30
+#services.PhotonVisibilityService.NZ: 30
+
+#services.PhotonVisibilityService.UseCryoBoundary: true
+
+# IF UseCryoBoundary is set to false, so use the following parameters. 
+#services.PhotonVisibilityService.XMin:  -2.
+#services.PhotonVisibilityService.XMax:  2.
+#services.PhotonVisibilityService.YMin:  -1.
+#services.PhotonVisibilityService.YMax:  1.
+#services.PhotonVisibilityService.ZMin:  10.
+#services.PhotonVisibilityService.ZMax:  12.
+
