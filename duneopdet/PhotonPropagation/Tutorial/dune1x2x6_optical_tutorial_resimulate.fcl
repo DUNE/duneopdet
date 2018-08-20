@@ -32,7 +32,13 @@ services.OpDigiProperties:        @local::dunefd_opdigiproperties
 # Set a new photon detector efficiency #
 ########################################
 
-services.OpDetResponseInterface.QuantumEfficiency: 0.00574  # This is 2x the nominal
+#                                                            Effecitve Area  Comment
+#services.OpDetResponseInterface.QuantumEfficiency: 0.00287   # 4.05 cm2     This is the nominal
+#services.OpDetResponseInterface.QuantumEfficiency: 0.00361   # 5.10 cm2     Improved dip-coated desing
+#services.OpDetResponseInterface.QuantumEfficiency: 0.005265  # 7.44 cm2     Current double-shift
+services.OpDetResponseInterface.QuantumEfficiency:  0.009059  # 12.8 cm2     Highest ARAPUCA at Tallbo
+#services.OpDetResponseInterface.QuantumEfficiency: 0.01063   # 15.0 cm2     Potential improved double-shift
+#services.OpDetResponseInterface.QuantumEfficiency: 0.016277  # 23.0 cm2     1.3% efficiency ARAPUCA
 
 
 source:
