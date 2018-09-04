@@ -1,0 +1,49 @@
+#include "services_dune.fcl"
+#include "FlashMatchAna.fcl"
+
+process_name: FlashMatch
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "protodune_optical_tutorial_flashmatch_hist.root" }
+  TimeTracker:       {}
+  RandomNumberGenerator: {}
+  MemoryTracker:         { } # default is one
+  message:              @local::standard_info
+  FileCatalogMetadata:  @local::art_file_catalog_mc
+  @table::protodune_simulation_services
+}
+
+
+
+#source is now a root file
+source:
+{
+  module_type: RootInput
+}
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
+ analyzers:
+ {
+    # Configuration specific to supernova events.
+    # Switch to standard_flashmatchana for beam or NDK
+    flashmatch:      @local::standard_flashmatchana
+ }
+ ana:  [ flashmatch ]
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [ana]  
+}
+
+#block to define where the output goes.  if you defined a filter in the physics
+#block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
+#entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
+outputs:
+{
+}
