@@ -185,7 +185,7 @@ namespace opdet{
     }
 
     //--------------------------------------------------------------------
-    bool DUNEOpDetResponse::doDetectedLite(int OpDet, int &newOpChannel, int &hardwareChannel) const
+    bool DUNEOpDetResponse::doDetectedLiteWithChannel(int OpDet, int &newOpChannel, int &hardwareChannel) const
     {
         if (fFastSimChannelConvert){
 

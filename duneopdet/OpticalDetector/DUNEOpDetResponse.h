@@ -28,9 +28,9 @@ namespace opdet
       // virtual bool detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const;
       //bool DUNEOpDetResponse::detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const
 
-      virtual bool detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const
+      bool detectedLiteWithChannel(int OpDet, int &newOpChannel, int& hardwareChannel) const
       {
-        return doDetectedLite( OpDet, newOpChannel, hardwareChannel);
+        return doDetectedLiteWithChannel( OpDet, newOpChannel, hardwareChannel);
       }
 
 
@@ -43,7 +43,7 @@ namespace opdet
       virtual bool doDetected(int OpDet, const sim::OnePhoton& Phot, int &newOpChannel) const;
       virtual bool doDetectedLite(int OpDet, int &newOpChannel) const;
     //bool DUNEOpDetResponse::doDetectedLite(int OpDet, int &newOpChannel, int &hardwareChannel) const
-      virtual bool doDetectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const;
+      bool doDetectedLiteWithChannel(int OpDet, int &newOpChannel, int& hardwareChannel) const;
 
       float fQE;                     // Quantum efficiency of tube
 

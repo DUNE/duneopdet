@@ -14,12 +14,12 @@ namespace opdet
 {
   class DUNEOpDetResponseInterface : public opdet::OpDetResponseInterface {
     public:
-      virtual bool detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const
+      bool detectedLiteWithChannel(int OpDet, int &newOpChannel, int& hardwareChannel) const
       {
-        return doDetectedLite( OpDet, newOpChannel, hardwareChannel);
+        return doDetectedLiteWithChannel( OpDet, newOpChannel, hardwareChannel);
       }
     private:
-      virtual bool doDetectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const = 0;
+      bool doDetectedLiteWithChannel(int OpDet, int &newOpChannel, int& hardwareChannel) const;
   };
 }
 
