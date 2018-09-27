@@ -13,48 +13,59 @@
 // LArSoft includes
 #include "lardataobj/Simulation/SimPhotons.h"
 #include "larana/OpticalDetector/OpDetResponseInterface.h"
+#include "dune/OpticalDetector/DUNEOpDetResponseInterface.h"
 
 
 
 namespace opdet
 {
-    class DUNEOpDetResponse : public opdet::OpDetResponseInterface {
+  class DUNEOpDetResponse : public opdet::OpDetResponseInterface {
     public:
 
-        DUNEOpDetResponse(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-        ~DUNEOpDetResponse() throw();
+      DUNEOpDetResponse(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
+      ~DUNEOpDetResponse() throw();
+
+      // virtual bool detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const;
+      //bool DUNEOpDetResponse::detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const
+
+      bool detectedLiteWithChannel(int OpDet, int &newOpChannel, int& hardwareChannel) const
+      {
+        return doDetectedLiteWithChannel( OpDet, newOpChannel, hardwareChannel);
+      }
 
 
 
     private:
 
-        virtual void doReconfigure(fhicl::ParameterSet const& p);
+      virtual void doReconfigure(fhicl::ParameterSet const& p);
 
-        virtual int  doNOpChannels() const;
-        virtual bool doDetected(int OpDet, const sim::OnePhoton& Phot, int &newOpChannel) const;
-        virtual bool doDetectedLite(int OpDet, int &newOpChannel) const;
+      virtual int  doNOpChannels() const;
+      virtual bool doDetected(int OpDet, const sim::OnePhoton& Phot, int &newOpChannel) const;
+      virtual bool doDetectedLite(int OpDet, int &newOpChannel) const;
+    //bool DUNEOpDetResponse::doDetectedLite(int OpDet, int &newOpChannel, int &hardwareChannel) const
+      bool doDetectedLiteWithChannel(int OpDet, int &newOpChannel, int& hardwareChannel) const;
 
-        float fQE;                     // Quantum efficiency of tube
-        
-        float fWavelengthCutLow;       // Sensitive wavelength range 
-        float fWavelengthCutHigh;      // 
-        
-        bool fLightGuideAttenuation;   // Flag to turn on position-dependent sensitivity
-        double lambdaShort;
-        double lambdaLong;
-        double fracShort;
-        double fracLong;
+      float fQE;                     // Quantum efficiency of tube
+
+      float fWavelengthCutLow;       // Sensitive wavelength range
+      float fWavelengthCutHigh;      //
+
+      bool fLightGuideAttenuation;   // Flag to turn on position-dependent sensitivity
+      double lambdaShort;
+      double lambdaLong;
+      double fracShort;
+      double fracLong;
 
 
-        std::string fChannelConversion;
-        bool fFullSimChannelConvert;   // Flag to conver detector->electronics channels in full optical sim
-        bool fFastSimChannelConvert;   // Flag to conver detector->electronics channels in fast optical sim
+      std::string fChannelConversion;
+      bool fFullSimChannelConvert;   // Flag to conver detector->electronics channels in full optical sim
+      bool fFastSimChannelConvert;   // Flag to conver detector->electronics channels in fast optical sim
 
-        int fLongAxis;                 // 0 = x, 1 = y, 2 = z
+      int fLongAxis;                 // 0 = x, 1 = y, 2 = z
 
-    }; // class DUNEOpDetResponse
+  }; // class DUNEOpDetResponse
 
-    
+
 } //namespace opdet
 
 
