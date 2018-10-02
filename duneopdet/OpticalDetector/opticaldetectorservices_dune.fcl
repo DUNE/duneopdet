@@ -106,5 +106,44 @@ dune35t_opdetresponse:
 
 }
 
+dunedphase3x1x1_OpDigiProperties:
+{
+  SampleFreq:    64       # ADC sampling frequency in MHz
+  TimeBegin:     0        # Where readout frame starts, relative to simulation t0 in micro-seconds
+  TimeEnd:       1000     # Where readout frame ends, relative to simulation t0 in micro-seconds
+  # Parameter of PMT & shaper
+  UseEmpiricalGain:        false # boolean control to load empirical gain or not
+  QE:                      0.2  # Quantum efficiency
+  DarkRate:                2.e3  # Dark noise rate in Hz
+  GainSpread:              0.05  # Intrinsic spread in each PMT's gain in fraction (percentile/100)
+  GainSpread_PMT2PMT:      0.05  # PMT-to-PMT spread in the gain mean values in fraction (percentile/100)
+  HighGainMean:            20    # ADC count per p.e.
+  LowGainMean:             2     # ADC count per p.e
+
+  # Option to provide empirical data files
+  HighGainFile:            ""   # PMT high gain given in a file
+  LowGainFile:             ""    # PMT low gain given in a file
+  GainSpreadFile:          "" # PMT intrinsic gain spread in a file
+  # Parameter of digitizer
+  SaturationScale:         4096  # waveform saturation point
+  PedFlucRate:             1.e7  # Rate of ADC count fluctuation in Hz
+  PedFlucAmp:              1     # Amplitude of ADC count fluctuation
+  ADCBaseline:             100  # ADC Basline
+  ADCBaseSpread:           3.4   # ADC Basline mean spread in double
+
+  # Parameters for waveform generation
+  UseEmpiricalShape: true # true = use text file SPE shape, false = use an analytical model
+  WFLength:          2     # Maximum Duration of sahpe sampling period [us]
+  PERescale:         4.1   # Rescaling factor to be applied on file input 4.1 for a gain of 1.e6
+  WaveformFile:  "PhotonPropagation/PMTResponse/protoDUNEDP_waveform_20180927.txt" # a toy text file for SPE shape
+
+  # Parameters for analytical waveform
+  WFPowerFactor:           10    # "(n-1)" factor in shape
+  WFTimeConstant:          0.006 # 60 ns
+  VoltageAmpForSPE:        0.04  # 40mV/p.e.
+  WaveformChargeNormalized: true
+}
+
+dunefddphase_opdigiproperties:           @local::dunedphase3x1x1_opdigiproperties
 
 END_PROLOG
