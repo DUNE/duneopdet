@@ -106,7 +106,7 @@ dune35t_opdetresponse:
 
 }
 
-dunedphase3x1x1_OpDigiProperties:
+dunedphase3x1x1_opdigiproperties:
 {
   SampleFreq:    64       # ADC sampling frequency in MHz
   TimeBegin:     0        # Where readout frame starts, relative to simulation t0 in micro-seconds
