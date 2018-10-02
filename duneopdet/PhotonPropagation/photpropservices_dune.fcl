@@ -111,6 +111,30 @@ dunedphase3x1x1_photonvisibilityservice_buildlib:
 
 }
 
+dunefddphase_photonvisibilityservice_buildlib:
+{
+
+  NX: 16
+  NY: 16
+  NZ: 81
+  UseCryoBoundary: false
+
+  DoNotLoadLibrary: true
+
+  LibraryBuildJob: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/Not_A_Library.root"
+
+ #These are not used when usecryoboundary=true
+  XMin: -600
+  XMax: 600
+  YMin: -600
+  YMax: 600
+  ZMin: 0
+  ZMax: 6000
+
+  ParametrisedTimePropagation: false
+}
 
 # Copy the library build job so that number of voxels is matched correctly
 
@@ -138,6 +162,13 @@ dunedphase3x1x1_photonvisibilityservice.Interpolate: true
 dunedphase3x1x1_photonvisibilityservice.LibraryBuildJob: false
 #dunedphase3x1x1_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_dunedphase3x1x1_lightsim_20171213.root"
 dunedphase3x1x1_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/libext_dunedphase3x1x1_lightsim_20171213.root"
+
+
+dunefddphase_photonvisibilityservice: @local::dunefddphase_photonvisibilityservice_buildlib
+dunefddphase_photonvisibilityservice.DoNotLoadLibrary: false
+dunefddphase_photonvisibilityservice.Interpolate: true
+dunefddphase_photonvisibilityservice.LibraryBuildJob: false
+dunefddphase_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_FD_300_000_16_16_81.root"
 
 dune10kt_1x2x6_photonvisibilityservice_buildlib: @local::dunefd_photonvisibilityservice_buildlib
 dune10kt_1x2x6_photonvisibilityservice_buildlib.NZ: 300
