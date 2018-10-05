@@ -168,4 +168,43 @@ dune35t_calibrationanalysis_data.OpHitModule: ophit
 dune35t_calibrationanalysis_data.InstanceName: offlinePhoton
 
 
+
+dunedphase3x1x1_opdigi:
+{
+   module_type:          "OpDetDigitizerDUNEDP"
+#  InputModule:          ["largeant","photPropS2"] # Module that created simphotons - Use this when simulating S2 light
+   InputModule:          ["largeant"] # Module that created simphotons
+   VoltageToADC:         2.048      # Converting mV to ADC counts (counts in 1 mV)
+   LineNoiseRMS:           0.8      # Pedestal RMS in ADC counts, likely an underestimate
+   DarkNoiseRate:          2.e3      # In Hz, Ranges 2-50 depending on Vbias
+   CrossTalk:              0#0.20     # Probability of producing 2 PE for 1 incident photon
+   Pedestal:            100        # in ADC counts
+   Gain:            4.1        # in ADC counts
+   DefaultSimWindow:    false        # Use -1*drift window as the start time and
+                                    # the TPC readout window end time as the end time
+   FullWaveformOutput: true        # Output full waveform. Be careful with this option:
+                                    # setting it to "true" can result in large output files
+   NegativeSignal: false
+   PreTrigger:           5e4        # In ticks
+   ReadoutWindow:       25e4        # In ticks
+   algo_threshold: @local::standard_algo_sspleadingedge
+
+   Padding:              250000        # In ticks
+
+   PulseLength:		 4.0
+   PeakTime:		 0.260
+   MaxAmplitude:	 0.12
+   FrontTime:		 0.009
+   BackTime:		 0.476
+   SSP_LED_DigiTree:     false	    #To create a SSP LED trigger Ttree
+}
+
+dunedphase3x1x1_opdigiana: @local::dunefd_opdigiana
+
+dunefddphase_opdigi: @local::dunedphase3x1x1_opdigi
+dunefddphase_opdigi.FullWaveformOutput: false
+
+dunefddphase_opdigiana: @local::dunefd_opdigiana
+
+
 END_PROLOG
