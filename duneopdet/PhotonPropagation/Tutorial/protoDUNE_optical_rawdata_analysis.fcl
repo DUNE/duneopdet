@@ -10,11 +10,11 @@ services:
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "opdigiana_hist.root" }
   TimeTracker:       {}
-                @table::dune35t_services
+                @table::protodune_data_services
   message:      @local::standard_info 
 }
 
-services.OpDigiProperties:        @local::dune35t_opdigiproperties
+#services.OpDigiProperties:        @local::dunefd_opdigiproperties
 
 source:
 {
@@ -36,7 +36,7 @@ physics:
 
  analyzers:
  {
-   opdigiana:   @local::dune35t_opdigiana
+   opdigiana:   @local::dunefd_opdigiana
    opflashana:  @local::standard_opflashana
  }
  produceIt: [ophit,opflash]
