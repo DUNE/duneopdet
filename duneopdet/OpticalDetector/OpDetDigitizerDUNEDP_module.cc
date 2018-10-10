@@ -23,7 +23,7 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Optional/TFileService.h" //vitor
 #include "art/Framework/Services/Optional/TFileDirectory.h"//vitor
-
+#include "CLHEP/Random/RandFlat.h"
 
 
 // ART extensions
@@ -170,6 +170,7 @@ namespace opdet {
                             // of the leading edge in us
       double fBackTime;      // Constant in the exponential function
                             // of the tail in us
+      double fQE;
 
       // Make sure the FHiCL parameters make sense
       void CheckFHiCLParameters() const;
@@ -245,7 +246,6 @@ namespace opdet {
 //    fInputModule        = pset.get< std::vector<string> >("InputModule"  );
     fVoltageToADC       = pset.get< double  >("VoltageToADC"      );
     fLineNoiseRMS       = pset.get< double  >("LineNoiseRMS"      );
-    fDarkNoiseRate      = pset.get< double  >("DarkNoiseRate"     );
     fCrossTalk          = pset.get< double  >("CrossTalk"         );
     fPedestal           = pset.get< short  >("Pedestal"          );
     fDefaultSimWindow   = pset.get< bool   >("DefaultSimWindow"  );
@@ -277,7 +277,9 @@ namespace opdet {
 
     // Obtaining parameters from the DetectorClocksService
     auto const *timeService = lar::providerFrom< detinfo::DetectorClocksService >();
-    fSampleFreq = timeService->OpticalClock().Frequency();
+    fSampleFreq    = timeService->OpticalClock().Frequency();
+    fDarkNoiseRate =  odp->DarkRate();
+    fQE = odp->QE();
 
 //    fSampleFreq = odp->SampleFreq(); //Sample Freq in MHz
 
@@ -553,10 +555,11 @@ namespace opdet {
         if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
         {
           // Sample a random subset according to QE
-          if (odResponse.detectedLite(opDet, readoutChannel))
+//          if ()
+          if (CLHEP::RandFlat::shoot(1.0) <fQE)
           {
-            unsigned int hardwareChannel =
-                      geometry.HardwareChannelFromOpChannel(readoutChannel);
+	    odResponse.detectedLite(opDet, readoutChannel);
+            unsigned int hardwareChannel = geometry.HardwareChannelFromOpChannel(readoutChannel);
             // Convert the time of the pulse to ticks
             size_t timeBin = TimeToTick(photonTime);
             // Add 1 pulse to the waveform
@@ -565,10 +568,10 @@ namespace opdet {
 	    unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
 	    if(fDigiTree_SSP_LED){
 	    	op_photon.emplace_back(opChannel);
-	    	t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
+	    	t_photon.emplace_back(photonTime);
 	    }
 	  }
-	  else std::cout << "ATENCION NO HE ENTRADO "<< std::endl;
+	  //else std::cout << "photon not detected "<< std::endl;
         }
       }
     }

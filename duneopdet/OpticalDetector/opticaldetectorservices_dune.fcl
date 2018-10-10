@@ -114,7 +114,7 @@ dunedphase3x1x1_opdigiproperties:
   # Parameter of PMT & shaper
   UseEmpiricalGain:        false # boolean control to load empirical gain or not
   QE:                      0.2  # Quantum efficiency
-  DarkRate:                2.e3  # Dark noise rate in Hz
+  DarkRate:                1.7e3  # Dark noise rate in Hz
   GainSpread:              0.05  # Intrinsic spread in each PMT's gain in fraction (percentile/100)
   GainSpread_PMT2PMT:      0.05  # PMT-to-PMT spread in the gain mean values in fraction (percentile/100)
   HighGainMean:            20    # ADC count per p.e.
@@ -145,5 +145,5 @@ dunedphase3x1x1_opdigiproperties:
 }
 
 dunefddphase_opdigiproperties:           @local::dunedphase3x1x1_opdigiproperties
-
+dunefddphase_opdigiproperties.QE: 0.12
 END_PROLOG
