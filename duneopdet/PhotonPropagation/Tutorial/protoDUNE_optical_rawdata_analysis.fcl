@@ -1,4 +1,5 @@
 #include "services_dune.fcl"
+#include "RawDecoder.fcl"
 #include "opticaldetectormodules_dune.fcl"
 #include "opticaldetectorservices_dune.fcl"
 
@@ -8,9 +9,9 @@ process_name: OpDigiAnalysis
 services:
 {
   # Load the service that manages root files for histograms.
-  TFileService: { fileName: "opdigiana_hist.root" }
+  TFileService: { fileName: "protodune_optical_data_reco_hist.root" }
   TimeTracker:       {}
-                @table::protodune_data_services
+  @table::protodune_rawdecoding_services
   message:      @local::standard_info 
 }
 
@@ -23,39 +24,65 @@ source:
 }
 
 
+outputs:
+{
+   out1:
+   {
+      module_type: RootOutput
+      fileName:    "protodune_optical_data_reco.root"
+      
+      # Drop the raw data and just keep the decoded and reconstructed data
+      outputCommands: [ "keep *", "drop artdaq::Fragments_*_*_*" ]
+   }
+}
+
 physics:
 {
 
  producers:
    {
       # photon detector reconstruction
-      ophit:     @local::dunefd_ophit
-      opflash:   @local::dunefd_opflash
+      ssprawdecoder:   @local::ssp_raw_decoder_split
+      ophitInternal:   @local::protodune_ophit_data_internal
+      ophitExternal:   @local::protodune_ophit_data_external
+      opflashInternal: @local::protodune_opflash_data_internal
+      opflashExternal: @local::protodune_opflash_data_external
       rns:       { module_type: "RandomNumberSaver" }
    }
 
  analyzers:
  {
-   opdigiana:   @local::dunefd_opdigiana
-   opflashana:  @local::standard_opflashana
+   opdigianaInternal:   @local::dunefd_opdigiana
+   opdigianaExternal:   @local::dunefd_opdigiana
+   opflashanaInternal:  @local::standard_opflashana
+   opflashanaExternal:  @local::standard_opflashana
  }
- produceIt: [ophit,opflash]
- analyzeIt: [opdigiana,opflashana]
+ produceIt: [ssprawdecoder, ophitInternal, ophitExternal, opflashInternal, opflashExternal]
+ analyzeIt: [opflashanaInternal, opflashanaExternal]
+ #analyzeIt: [opdigianaInternal, opdigianaExternal] 
 
+   
  #define the output stream, there could be more than one if using filters 
- #stream1:  [ out1 ]
+ stream1:  [ out1 ]
 
  #trigger_paths is a keyword and contains the paths that modify the art::event, 
  #ie filters and producers
- trigger_paths: [produceIt] 
+ trigger_paths: [produceIt]
 
  #end_paths is a keyword and contains the paths that do not modify the art::Event, 
  #ie analyzers and output streams.  these all run simultaneously
- end_paths:     [analyzeIt]  
+ end_paths:     [analyzeIt, stream1]  
 }
 
-physics.analyzers.opdigiana.InputModule: ssprawdecoder
-physics.analyzers.opdigiana.InstanceName: daq
+physics.analyzers.opdigianaInternal.InputModule:  "ssprawdecoder"
+physics.analyzers.opdigianaInternal.InstanceName: "internal"
 
-physics.producers.ophit.InputModule: ssprawdecoder
-physics.producers.ophit.InstanceName: daq
+physics.analyzers.opdigianaExternal.InputModule:  "ssprawdecoder"
+physics.analyzers.opdigianaExternal.InstanceName: "external"
+
+physics.analyzers.opflashanaInternal.OpHitModuleLabel:   "ophitInternal"
+physics.analyzers.opflashanaInternal.OpFlashModuleLabel: "opflashInternal"
+physics.analyzers.opflashanaExternal.OpHitModuleLabel:   "ophitExternal"
+physics.analyzers.opflashanaExternal.OpFlashModuleLabel: "opflashExternal"
+
+
