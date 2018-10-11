@@ -312,25 +312,8 @@ namespace opdet {
     fRandExponential = std::make_unique< CLHEP::RandExponential >(engine);
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
 
-    // Creating a single photoelectron waveform
-    // Hardcoded, probably need to read them from the FHiCL file
-    //fPulseLength  = 4.0;
-    //fPeakTime     = 0.260;
-    //fMaxAmplitude = 0.12;
-    //fFrontTime    = 0.009;
-    //fBackTime     = 0.476;
-
-    //CreateSinglePEWaveform();
     fSinglePEWaveform = odp->SinglePEWaveform();
 
-//    std::cout << "SPE AREA value is "<< odp->GetSPEArea() << std::endl;
-//    std::cout << "SPE AREA value is "<< std::accumulate(fSinglePEWaveform.begin(), fSinglePEWaveform.end(), 0) << std::endl;
-   // std::cout << "this is my spe " << SumOfElements(fSinglePEWaveform) << std::endl;
-
-//    double sum=0;
-//    for (auto& n : fSinglePEWaveform){    sum+=n;std::cout << "this is my spe " << Form("%.4f",n) << std::endl;}
-
-//    std::cout << "SPE AREA value is "<< Form("%.4f",sum) << std::endl;
   }
 
   //---------------------------------------------------------------------------
@@ -359,12 +342,12 @@ namespace opdet {
 
  unsigned int nSamples = fReadoutWindow;
 
-    std::cout << "Generating a waveform of " << nSamples <<" Samples"<< std::endl;
-    std::cout << "\tTimeBegin" << fTimeBegin <<" "<< std::endl;
-    std::cout << "\tfTimeEnd" << fTimeEnd <<" "<< std::endl;
-    std::cout << "\tSampleFreq" << fSampleFreq <<" "<< std::endl;
-    std::cout << "\tReadoutWindow" << fReadoutWindow <<" "<< std::endl;
-    std::cout << "\tfPreTrigger" << fPreTrigger <<" "<< std::endl;
+//    std::cout << "Generating a waveform of " << nSamples <<" Samples"<< std::endl;
+//    std::cout << "\tTimeBegin" << fTimeBegin <<" "<< std::endl;
+//    std::cout << "\tfTimeEnd" << fTimeEnd <<" "<< std::endl;
+//    std::cout << "\tSampleFreq" << fSampleFreq <<" "<< std::endl;
+//    std::cout << "\tReadoutWindow" << fReadoutWindow <<" "<< std::endl;
+//    std::cout << "\tfPreTrigger" << fPreTrigger <<" "<< std::endl;
     // Geometry service
     art::ServiceHandle< geo::Geometry > geometry;
 
@@ -555,7 +538,6 @@ namespace opdet {
         if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
         {
           // Sample a random subset according to QE
-//          if ()
           if (CLHEP::RandFlat::shoot(1.0) <fQE)
           {
 	    odResponse.detectedLite(opDet, readoutChannel);
