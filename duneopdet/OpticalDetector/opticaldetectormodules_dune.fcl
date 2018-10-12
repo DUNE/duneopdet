@@ -92,8 +92,26 @@ dunefd_ophit: @local::dunefd_ophit_threegang
 dunefd_opflash:                 @local::standard_opflash
 dunefd_opflash.FlashThreshold:  3.5
 
+
+
 protodune_ophit: @local::dunefd_ophit
 protodune_opflash: @local::dunefd_opflash
+
+protodune_ophit_data_unsplit: @local::protodune_ophit
+protodune_ophit_data_unsplit.InputModule:  ssprawdecoder
+protodune_ophit_data_unsplit.InputLabels: [ "daq" ]
+
+protodune_ophit_data_internal: @local::protodune_ophit_data_unsplit
+protodune_ophit_data_external: @local::protodune_ophit_data_unsplit
+protodune_ophit_data_both:     @local::protodune_ophit_data_unsplit
+protodune_ophit_data_internal.InputLabels: [ "internal" ]
+protodune_ophit_data_external.InputLabels: [ "external" ]
+protodune_ophit_data_both.InputLabels:     [ "internal", "external" ]
+
+protodune_opflash_data_internal: @local::protodune_opflash
+protodune_opflash_data_internal.InputModule: "ophitInternal"
+protodune_opflash_data_external: @local::protodune_opflash
+protodune_opflash_data_external.InputModule: "ophitExternal"
 
 
 dunefd_opdigiana:

@@ -23,7 +23,7 @@
 #include "fhiclcpp/ParameterSet.h"
 #include "art/Framework/Services/Optional/TFileService.h" //vitor
 #include "art/Framework/Services/Optional/TFileDirectory.h"//vitor
-
+#include "CLHEP/Random/RandFlat.h"
 
 
 // ART extensions
@@ -170,6 +170,7 @@ namespace opdet {
                             // of the leading edge in us
       double fBackTime;      // Constant in the exponential function
                             // of the tail in us
+      double fQE;
 
       // Make sure the FHiCL parameters make sense
       void CheckFHiCLParameters() const;
@@ -245,7 +246,6 @@ namespace opdet {
 //    fInputModule        = pset.get< std::vector<string> >("InputModule"  );
     fVoltageToADC       = pset.get< double  >("VoltageToADC"      );
     fLineNoiseRMS       = pset.get< double  >("LineNoiseRMS"      );
-    fDarkNoiseRate      = pset.get< double  >("DarkNoiseRate"     );
     fCrossTalk          = pset.get< double  >("CrossTalk"         );
     fPedestal           = pset.get< short  >("Pedestal"          );
     fDefaultSimWindow   = pset.get< bool   >("DefaultSimWindow"  );
@@ -277,7 +277,9 @@ namespace opdet {
 
     // Obtaining parameters from the DetectorClocksService
     auto const *timeService = lar::providerFrom< detinfo::DetectorClocksService >();
-    fSampleFreq = timeService->OpticalClock().Frequency();
+    fSampleFreq    = timeService->OpticalClock().Frequency();
+    fDarkNoiseRate =  odp->DarkRate();
+    fQE = odp->QE();
 
 //    fSampleFreq = odp->SampleFreq(); //Sample Freq in MHz
 
@@ -310,25 +312,8 @@ namespace opdet {
     fRandExponential = std::make_unique< CLHEP::RandExponential >(engine);
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
 
-    // Creating a single photoelectron waveform
-    // Hardcoded, probably need to read them from the FHiCL file
-    //fPulseLength  = 4.0;
-    //fPeakTime     = 0.260;
-    //fMaxAmplitude = 0.12;
-    //fFrontTime    = 0.009;
-    //fBackTime     = 0.476;
-
-    //CreateSinglePEWaveform();
     fSinglePEWaveform = odp->SinglePEWaveform();
 
-//    std::cout << "SPE AREA value is "<< odp->GetSPEArea() << std::endl;
-//    std::cout << "SPE AREA value is "<< std::accumulate(fSinglePEWaveform.begin(), fSinglePEWaveform.end(), 0) << std::endl;
-   // std::cout << "this is my spe " << SumOfElements(fSinglePEWaveform) << std::endl;
-
-//    double sum=0;
-//    for (auto& n : fSinglePEWaveform){    sum+=n;std::cout << "this is my spe " << Form("%.4f",n) << std::endl;}
-
-//    std::cout << "SPE AREA value is "<< Form("%.4f",sum) << std::endl;
   }
 
   //---------------------------------------------------------------------------
@@ -357,12 +342,12 @@ namespace opdet {
 
  unsigned int nSamples = fReadoutWindow;
 
-    std::cout << "Generating a waveform of " << nSamples <<" Samples"<< std::endl;
-    std::cout << "\tTimeBegin" << fTimeBegin <<" "<< std::endl;
-    std::cout << "\tfTimeEnd" << fTimeEnd <<" "<< std::endl;
-    std::cout << "\tSampleFreq" << fSampleFreq <<" "<< std::endl;
-    std::cout << "\tReadoutWindow" << fReadoutWindow <<" "<< std::endl;
-    std::cout << "\tfPreTrigger" << fPreTrigger <<" "<< std::endl;
+//    std::cout << "Generating a waveform of " << nSamples <<" Samples"<< std::endl;
+//    std::cout << "\tTimeBegin" << fTimeBegin <<" "<< std::endl;
+//    std::cout << "\tfTimeEnd" << fTimeEnd <<" "<< std::endl;
+//    std::cout << "\tSampleFreq" << fSampleFreq <<" "<< std::endl;
+//    std::cout << "\tReadoutWindow" << fReadoutWindow <<" "<< std::endl;
+//    std::cout << "\tfPreTrigger" << fPreTrigger <<" "<< std::endl;
     // Geometry service
     art::ServiceHandle< geo::Geometry > geometry;
 
@@ -553,10 +538,10 @@ namespace opdet {
         if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
         {
           // Sample a random subset according to QE
-          if (odResponse.detectedLite(opDet, readoutChannel))
+          if (CLHEP::RandFlat::shoot(1.0) <fQE)
           {
-            unsigned int hardwareChannel =
-                      geometry.HardwareChannelFromOpChannel(readoutChannel);
+	    odResponse.detectedLite(opDet, readoutChannel);
+            unsigned int hardwareChannel = geometry.HardwareChannelFromOpChannel(readoutChannel);
             // Convert the time of the pulse to ticks
             size_t timeBin = TimeToTick(photonTime);
             // Add 1 pulse to the waveform
@@ -565,10 +550,10 @@ namespace opdet {
 	    unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
 	    if(fDigiTree_SSP_LED){
 	    	op_photon.emplace_back(opChannel);
-	    	t_photon.emplace_back(photonTime); //vitor: devo usar o time ou o tick?
+	    	t_photon.emplace_back(photonTime);
 	    }
 	  }
-	  else std::cout << "ATENCION NO HE ENTRADO "<< std::endl;
+	  //else std::cout << "photon not detected "<< std::endl;
         }
       }
     }
