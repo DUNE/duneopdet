@@ -309,7 +309,8 @@ namespace opdet {
     createEngine(seed);
 
     art::ServiceHandle< art::RandomNumberGenerator > rng;
-    CLHEP::HepRandomEngine &engine = rng->getEngine();
+    CLHEP::HepRandomEngine &engine = rng->getEngine(art::ScheduleID::first(),
+                                                    moduleDescription().moduleLabel());
     fRandGauss       = std::make_unique< CLHEP::RandGauss       >(engine);
     fRandExponential = std::make_unique< CLHEP::RandExponential >(engine);
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
