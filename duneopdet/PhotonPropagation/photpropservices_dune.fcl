@@ -184,6 +184,46 @@ dune10kt_v1_1x2x6_photonvisibilityservice.LibraryFile: "PhotonPropagation/Librar
 
 dune10kt_v2_1x2x6_photonvisibilityservice: @local::dune10kt_1x2x6_photonvisibilityservice_buildlib
 
+
+### Visibility services with ARAPUCAs and reflector foils
+dune10kt_1x2x6_refl_v1_photonvisibilityservice: {
+
+   NX: 75
+   NY: 125
+   NZ: 300
+
+   # The boundaries of the cryostat are:
+   # X = [-379.662, 379.662] cm
+   # Y = [-658.099, 699.599] cm
+   # Z = [-302.946, 1443.53] cm
+   UseCryoBoundary: false
+   XMin: 0
+   XMax: 379.662
+   YMin: -658.09
+   YMax: 699.59
+   ZMin: -302.946
+   ZMax: 1443.5
+   ReflectOverZeroX: true
+
+   StoreReflected: true
+   StoreReflT0: true
+   IncludePropTime: false
+
+   DoNotLoadLibrary: false
+   LibraryBuildJob: false
+
+   LibraryFile: "dune10kt_v1_1x2x6_withfoils_lib.root"
+}
+
+
+
+
+
+
+
+
+
+
 ###--S2 visibility service parameters--###
 
 dunedphase3x1x1_photonvisibilityserviceS2:
