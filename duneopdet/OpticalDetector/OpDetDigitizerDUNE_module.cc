@@ -44,7 +44,7 @@
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
 #include "dune/OpticalDetector/AlgoSSPLeadingEdge.h"
 #include "dune/DuneObj/OpDetDivRec.h"
-
+#include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
 // CLHEP includes
 
@@ -142,6 +142,8 @@ namespace opdet {
       bool   fDigiTree_SSP_LED;   // To create a analysis Tree for SSP LED
       bool   fUseSDPs;//            = pset.get< bool   >("UseSDPs", true);
 
+      double  fQEOverride;
+
       //-----------------------------------------------------
       // Trigger analysis variables
       std::vector<double> t_photon; // vitor
@@ -183,7 +185,6 @@ namespace opdet {
 
       // Produce waveform on one of the optical detectors
       void CreatePDWaveform(sim::SimPhotonsLite const&,
-          opdet::OpDetResponseInterface const&,
           geo::Geometry const&,
           std::vector< std::vector< double > >&,
           std::vector<FocusList>&);
@@ -191,7 +192,6 @@ namespace opdet {
       // Produce waveform on one of the optical detectors
       void CreatePDWaveform
         (art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,
-         opdet::OpDetResponseInterface const& odResponse,
          geo::Geometry const& geometry,
          std::vector< std::vector< double > >& pdWaveforms,
          std::vector<FocusList>& fls,
@@ -223,7 +223,9 @@ namespace opdet {
       // without any checks
       double  TickToTime(size_t tick) const;
       size_t TimeToTick(double  time) const;
+    
 
+      bool Detected(int opDet, int &readoutChannel);
   };
 
 }
@@ -265,7 +267,25 @@ namespace opdet {
     fFrontTime          = pset.get< double >("FrontTime"         );
     fBackTime           = pset.get< double >("BackTime"          );
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
-    fUseSDPs            = pset.get< bool   >("UseSDPs", true);
+    fUseSDPs            = pset.get< bool   >("UseSDPs", true     );
+
+    double tempQE       = pset.get< double >("QEOverride", 0     );
+
+    if (tempQE > 0) {
+      mf::LogInfo("OpDetDigitizerDUNE") << "Overriding QE. All the functions of OpDetResponseService being ignored.";
+        
+      // Correct out the prescaling applied during simulation
+      auto const *LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
+      fQEOverride = tempQE / LarProp->ScintPreScale();
+      
+      if (fQEOverride > 1.0001 ) {
+        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set in OpDetResponse_service, " << tempQE
+                                           << " is too large.  It is larger than the prescaling applied during simulation, "
+                                           << LarProp->ScintPreScale()
+                                           << ".  Final QE must be equalt to or smaller than the QE applied at simulation time.";
+        assert(false);
+      }
+    }
 
     fThreshAlg = std::make_unique< pmtana::AlgoSSPLeadingEdge >
       (pset.get< fhicl::ParameterSet >("algo_threshold"));
@@ -369,9 +389,6 @@ namespace opdet {
     // Geometry service
     art::ServiceHandle< geo::Geometry > geometry;
 
-    // Service for determining optical detector responses
-    art::ServiceHandle< opdet::OpDetResponseInterface > odResponse;
-
     // Get SimPhotonsLite from the event
     if(fUseLitePhotons && !fUseSDPs){
       art::Handle< std::vector< sim::SimPhotonsLite > > litePhotonHandle;
@@ -393,7 +410,7 @@ namespace opdet {
         std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
             std::vector< double >(nSamples, static_cast< double >(fPedestal)));
 
-        CreatePDWaveform(litePhotons, *odResponse, *geometry, pdWaveforms, fls);
+        CreatePDWaveform(litePhotons, *geometry, pdWaveforms, fls);
 
         // Generate dark noise
         if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls);
@@ -476,7 +493,7 @@ namespace opdet {
         std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
             std::vector< double >(nSamples, static_cast< double >(fPedestal)));
 
-        CreatePDWaveform(btr, *odResponse, *geometry, pdWaveforms, fls, DivRec);
+        CreatePDWaveform(btr, *geometry, pdWaveforms, fls, DivRec);
         //DivRec comes out with all of the ticks filled correctly, with each channel filled in it's map.
         //Break here to investigate div recs as they are made and compare them to btrs
 
@@ -603,7 +620,6 @@ namespace opdet {
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::CreatePDWaveform
     (art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,
-     opdet::OpDetResponseInterface const& odResponse,
      geo::Geometry const& geometry,
      std::vector< std::vector< double > >& pdWaveforms,
      std::vector<FocusList>& fls,
@@ -646,7 +662,7 @@ namespace opdet {
             if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
             {
               // Sample a random subset according to QE
-              if (odResponse.detectedLite(opDet, readoutChannel))
+              if ( Detected(opDet, readoutChannel) )
               {
                 unsigned int hardwareChannel =
                   geometry.HardwareChannelFromOpChannel(readoutChannel);
@@ -693,7 +709,6 @@ namespace opdet {
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::CreatePDWaveform
     (sim::SimPhotonsLite const& litePhotons,
-     opdet::OpDetResponseInterface const& odResponse,
      geo::Geometry const& geometry,
      std::vector< std::vector< double > >& pdWaveforms,
      std::vector<FocusList>& fls)
@@ -716,7 +731,7 @@ namespace opdet {
           if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
           {
             // Sample a random subset according to QE
-            if (odResponse.detectedLite(opDet, readoutChannel))
+            if ( Detected(opDet, readoutChannel) )
             {
               unsigned int hardwareChannel =
                 geometry.HardwareChannelFromOpChannel(readoutChannel);
@@ -922,4 +937,29 @@ namespace opdet {
 
   }
 
+  //---------------------------------------------------------------------------
+  bool OpDetDigitizerDUNE::Detected(int OpDet, int &readoutChannel) {
+
+    if (fQEOverride > 0) {
+      // Find the Optical Detector using the geometry service
+      art::ServiceHandle<geo::Geometry> geom;
+      
+      // Here OpDet must be opdet since we are introducing
+      // channel mapping here.
+      float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+      int hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
+      readoutChannel = geom->OpChannel(OpDet, hardwareChannel);
+
+      // Check QE
+      if ( CLHEP::RandFlat::shoot(1.0) > fQEOverride ) return false;
+      return true;
+    }
+    else {
+      art::ServiceHandle< opdet::OpDetResponseInterface > odResponse;
+      // Service for determining optical detector responses
+      return odResponse->detectedLite(OpDet, readoutChannel);
+    }
+  }
+  
+  
 }
