@@ -136,6 +136,7 @@ dunefddphase_photonvisibilityservice_buildlib:
   ParametrisedTimePropagation: false
 }
 
+
 # Copy the library build job so that number of voxels is matched correctly
 
 dune10kt_workspace_photonvisibilityservice: @local::dunefd_photonvisibilityservice_buildlib
@@ -168,7 +169,16 @@ dunefddphase_photonvisibilityservice: @local::dunefddphase_photonvisibilityservi
 dunefddphase_photonvisibilityservice.DoNotLoadLibrary: false
 dunefddphase_photonvisibilityservice.Interpolate: true
 dunefddphase_photonvisibilityservice.LibraryBuildJob: false
-dunefddphase_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_FD_300_000_16_16_81.root"
+#dunefddphase_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_FD_300_000_16_16_81.root"
+
+dunefddphase_photonvisibilityservice.UseCryoBoundary: true
+dunefddphase_photonvisibilityservice.NX: 15
+dunefddphase_photonvisibilityservice.NY: 15
+dunefddphase_photonvisibilityservice.NZ: 62
+dunefddphase_photonvisibilityservice.ParametrisedTimePropagationMaxRange: 800
+dunefddphase_photonvisibilityservice.ParametrisedTimePropagationNParameters: 3
+dunefddphase_photonvisibilityservice.ParametrisedTimePropagation: true
+dunefddphase_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/libext_dunedp_1M_15x15x62_20180913.root"
 
 dune10kt_1x2x6_photonvisibilityservice_buildlib: @local::dunefd_photonvisibilityservice_buildlib
 dune10kt_1x2x6_photonvisibilityservice_buildlib.NZ: 300
