@@ -108,7 +108,7 @@ dune35t_opdetresponse:
 
 dunedphase3x1x1_opdigiproperties:
 {
-  SampleFreq:    64       # ADC sampling frequency in MHz
+  SampleFreq:    250       # ADC sampling frequency in MHz
   TimeBegin:     0        # Where readout frame starts, relative to simulation t0 in micro-seconds
   TimeEnd:       1000     # Where readout frame ends, relative to simulation t0 in micro-seconds
   # Parameter of PMT & shaper

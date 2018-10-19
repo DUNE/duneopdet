@@ -158,18 +158,6 @@ namespace opdet {
       void AddPulse(size_t timeBin, int scale,
                     std::vector< double >& waveform,
                     FocusList& fl, double Gain) const;
-
-      // Functional response to one photoelectron (time in ns)
-      double Pulse1PE(double time) const;
-
-      // Single photoelectron pulse parameters
-      double fPulseLength;   // 1PE pulse length in us
-      double fPeakTime;      // Time when the pulse reaches its maximum in us
-      double fMaxAmplitude;  // Maximum amplitude of the pulse in mV
-      double fFrontTime;     // Constant in the exponential function
-                            // of the leading edge in us
-      double fBackTime;      // Constant in the exponential function
-                            // of the tail in us
       double fQE;
 
       // Make sure the FHiCL parameters make sense
@@ -244,25 +232,18 @@ namespace opdet {
        fInputModule = pset.get<std::vector<std::string>>("InputModule",{"largeant"});
 
 //    fInputModule        = pset.get< std::vector<string> >("InputModule"  );
-    fVoltageToADC       = pset.get< double  >("VoltageToADC"      );
-    fLineNoiseRMS       = pset.get< double  >("LineNoiseRMS"      );
-    fCrossTalk          = pset.get< double  >("CrossTalk"         );
+    fVoltageToADC       = pset.get< double >("VoltageToADC"      );
+    fLineNoiseRMS       = pset.get< double >("LineNoiseRMS"      );
+    fCrossTalk          = pset.get< double >("CrossTalk"         );
     fPedestal           = pset.get< short  >("Pedestal"          );
     fDefaultSimWindow   = pset.get< bool   >("DefaultSimWindow"  );
     fFullWaveformOutput = pset.get< bool   >("FullWaveformOutput");
     fReadoutWindow      = pset.get< size_t >("ReadoutWindow"     );
     fPreTrigger         = pset.get< size_t >("PreTrigger"        );
-
     fPadding            = pset.get< int    >("Padding"           );
-
-    fPulseLength        = pset.get< double >("PulseLength"       );
-    fPeakTime           = pset.get< double >("PeakTime"          );
-    fMaxAmplitude       = pset.get< double >("MaxAmplitude"      );
-    fFrontTime          = pset.get< double >("FrontTime"         );
-    fBackTime           = pset.get< double >("BackTime"          );
-    fGain           = pset.get< double >("Gain"          );
+    fGain               = pset.get< double >("Gain"              );
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
-    fNegativeSignal = pset.get< bool   >("NegativeSignal"  );
+    fNegativeSignal     = pset.get< bool   >("NegativeSignal"    );
     fThreshAlg = std::make_unique< pmtana::AlgoSSPLeadingEdge >
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
 
@@ -314,6 +295,13 @@ namespace opdet {
 
     fSinglePEWaveform = odp->SinglePEWaveform();
 
+    std::cout << "Generating a waveform of " << (fTimeEnd - fTimeBegin)*fSampleFreq <<" Samples"<< std::endl;
+    std::cout << "\tTimeBegin" << fTimeBegin <<" "<< std::endl;
+    std::cout << "\tfTimeEnd" << fTimeEnd <<" "<< std::endl;
+    std::cout << "\tSampleFreq" << fSampleFreq <<" "<< std::endl;
+    std::cout << "\tReadoutWindow" << fReadoutWindow <<" "<< std::endl;
+    std::cout << "\tfPreTrigger" << fPreTrigger <<" "<< std::endl;
+
   }
 
   //---------------------------------------------------------------------------
@@ -334,20 +322,8 @@ namespace opdet {
         << "Sorry, but for now only Lite Photon digitization is implemented!"
         << '\n';
 
-    // Total number of ticks in the full waveform
-    // Including one pretrigger window before the waveform
-    // and one readout window - pretrigger window after the waveform
-//    unsigned int nSamples = (fTimeEnd - fTimeBegin)*fSampleFreq
-//                          + fReadoutWindow;
+    unsigned int nSamples = (fTimeEnd - fTimeBegin)*fSampleFreq;
 
- unsigned int nSamples = fReadoutWindow;
-
-//    std::cout << "Generating a waveform of " << nSamples <<" Samples"<< std::endl;
-//    std::cout << "\tTimeBegin" << fTimeBegin <<" "<< std::endl;
-//    std::cout << "\tfTimeEnd" << fTimeEnd <<" "<< std::endl;
-//    std::cout << "\tSampleFreq" << fSampleFreq <<" "<< std::endl;
-//    std::cout << "\tReadoutWindow" << fReadoutWindow <<" "<< std::endl;
-//    std::cout << "\tfPreTrigger" << fPreTrigger <<" "<< std::endl;
     // Geometry service
     art::ServiceHandle< geo::Geometry > geometry;
 
@@ -474,8 +450,6 @@ namespace opdet {
                                     int scale, std::vector< double >& waveform,
                                     FocusList& fl, double Gain) const
   {
-    double sum=0;
-    for (auto& n : waveform) sum+=n;
 	if(timeBin>waveform.size()) return; //photon out of time
 
     size_t pulseLength = fSinglePEWaveform.size();
@@ -491,20 +465,6 @@ namespace opdet {
       else waveform[timeBin + tick] -= (double)scale*Gain*fSinglePEWaveform[tick];
 
     }
-
-    sum=0;
-    for (auto& n : waveform) sum+=n;
-  }
-
-  //---------------------------------------------------------------------------
-  double OpDetDigitizerDUNEDP::Pulse1PE(double time) const
-  {
-
-    if (time < fPeakTime) return
-      (fVoltageToADC*fMaxAmplitude*std::exp((time - fPeakTime)/fFrontTime));
-    else return
-      (fVoltageToADC*fMaxAmplitude*std::exp(-(time - fPeakTime)/fBackTime));
-
   }
 
   //---------------------------------------------------------------------------
