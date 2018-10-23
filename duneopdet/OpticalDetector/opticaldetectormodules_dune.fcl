@@ -194,7 +194,6 @@ dunedphase3x1x1_opdigi:
    InputModule:          ["largeant"] # Module that created simphotons
    VoltageToADC:         2.048      # Converting mV to ADC counts (counts in 1 mV)
    LineNoiseRMS:           0.8      # Pedestal RMS in ADC counts, likely an underestimate
-   DarkNoiseRate:          2.e3      # In Hz, Ranges 2-50 depending on Vbias
    CrossTalk:              0#0.20     # Probability of producing 2 PE for 1 incident photon
    Pedestal:            100        # in ADC counts
    Gain:            4.1        # in ADC counts
@@ -207,20 +206,17 @@ dunedphase3x1x1_opdigi:
    ReadoutWindow:       25e4        # In ticks
    algo_threshold: @local::standard_algo_sspleadingedge
 
-   Padding:              250000        # In ticks
-
-   PulseLength:		 4.0
-   PeakTime:		 0.260
-   MaxAmplitude:	 0.12
-   FrontTime:		 0.009
-   BackTime:		 0.476
+   Padding:              4000        # In ticks
    SSP_LED_DigiTree:     false	    #To create a SSP LED trigger Ttree
 }
 
 dunedphase3x1x1_opdigiana: @local::dunefd_opdigiana
 
 dunefddphase_opdigi: @local::dunedphase3x1x1_opdigi
-dunefddphase_opdigi.FullWaveformOutput: false
+dunefddphase_opdigi.FullWaveformOutput: true
+dunefddphase_opdigi.Gain:            41        # in ADC counts x ticks
+dunefddphase_opdigi.DefaultSimWindow: true
+dunefddphase_opdigi.PreTrigger: 0
 
 dunefddphase_opdigiana: @local::dunefd_opdigiana
 
