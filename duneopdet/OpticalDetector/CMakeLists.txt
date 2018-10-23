@@ -2,7 +2,7 @@
 
 art_make( BASENAME_ONLY
   LIBRARY_NAME dune_OpticalDetector
-  LIB_LIBRARIES 
+  LIB_LIBRARIES
   lardataobj_RecoBase
   larcorealg_Geometry
   larcore_Geometry_Geometry_service
@@ -18,7 +18,6 @@ art_make( BASENAME_ONLY
   art_Persistency_Common canvas
   art_Utilities canvas
   ${MF_MESSAGELOGGER}
-
   ${FHICLCPP}
   cetlib cetlib_except
   ${ROOT_BASIC_LIB_LIST}
@@ -31,7 +30,7 @@ art_make( BASENAME_ONLY
   larcore_Geometry_Geometry_service
   dune_OpticalDetector
   larsim_MCCheater_ParticleInventoryService_service
-  larsim_MCCheater_PhotonBackTrackerService_service 
+  larsim_MCCheater_PhotonBackTrackerService_service
   nusimdata_SimulationBase
   ${ART_FRAMEWORK_CORE}
   ${ART_FRAMEWORK_PRINCIPAL}
@@ -40,10 +39,10 @@ art_make( BASENAME_ONLY
   ${ART_FRAMEWORK_SERVICES_OPTIONAL}
   ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
   ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
-  art_Persistency_Common canvas
+  ${ART_PERSISTENCY_PROVENANCE}
+  art_Persistency_Common
   art_Utilities canvas
   ${MF_MESSAGELOGGER}
-
   ${FHICLCPP}
   cetlib cetlib_except
   ${CLHEP}
@@ -72,4 +71,3 @@ install_fhicl()
 install_source()
 install_fw( LIST sensl_1.dat
   SUBDIRNAME dune/OpticalDetector )
-
