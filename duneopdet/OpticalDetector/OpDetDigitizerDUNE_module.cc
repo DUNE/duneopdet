@@ -143,6 +143,7 @@ namespace opdet {
       bool   fUseSDPs;//            = pset.get< bool   >("UseSDPs", true);
 
       double  fQEOverride;
+      double  fRefQEOverride;
 
       //-----------------------------------------------------
       // Trigger analysis variables
@@ -269,8 +270,9 @@ namespace opdet {
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
     fUseSDPs            = pset.get< bool   >("UseSDPs", true     );
 
-
+    // Replace QE with effective area. Get area from OpDet geometry
     double tempQE       = pset.get< double >("QEOverride", 0     );
+    double tempRefQE       = pset.get< double >("QERefOverride", 0     );
     fQEOverride         = 0;
     if (tempQE > 0) {
       mf::LogInfo("OpDetDigitizerDUNE") << "Overriding QE. All the functions of OpDetResponseService being ignored.";
