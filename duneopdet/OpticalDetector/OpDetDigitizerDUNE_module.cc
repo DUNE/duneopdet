@@ -185,12 +185,12 @@ namespace opdet {
       void CreateSinglePEWaveform();
     
       // Produce waveform on one of the optical detectors
-      void CreatePDWaveform
-        (art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,
-         geo::Geometry const& geometry,
-         std::vector< std::vector< double > >& pdWaveforms,
-         std::vector<FocusList>& fls,
-         sim::OpDetDivRec& DivRec);
+      void CreatePDWaveform(art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,
+                            geo::Geometry const& geometry,
+                            std::vector< std::vector< double > >& pdWaveforms,
+                            std::vector<FocusList>& fls,
+                            sim::OpDetDivRec& DivRec,
+                            bool Reflected);
 
       // Vary the pedestal
       void AddLineNoise(std::vector< std::vector< double > >&,
@@ -218,7 +218,7 @@ namespace opdet {
       size_t TimeToTick(double  time) const;
     
 
-      bool Detected(int opDet, int &readoutChannel);
+      bool Detected(int opDet, int &readoutChannel, bool Reflected);
   };
 
 }
@@ -267,9 +267,12 @@ namespace opdet {
     }
 
     // Replace QE with effective area. Get area from OpDet geometry
-    double tempQE       = pset.get< double >("QEOverride", 0     );
-    double tempRefQE       = pset.get< double >("QERefOverride", 0     );
+    double tempQE       = pset.get< double >("QEOverride",    0     );
+    double tempRefQE    = pset.get< double >("QERefOverride", 0     );
+
     fQEOverride         = 0;
+    fRefQEOverride      = 0;
+    
     if (tempQE > 0) {
       mf::LogInfo("OpDetDigitizerDUNE") << "Overriding QE. All the functions of OpDetResponseService being ignored.";
         
@@ -278,6 +281,21 @@ namespace opdet {
       fQEOverride = tempQE / LarProp->ScintPreScale();
       
       if (fQEOverride > 1.0001 ) {
+        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set in OpDetResponse_service, " << tempQE
+                                           << " is too large.  It is larger than the prescaling applied during simulation, "
+                                           << LarProp->ScintPreScale()
+                                           << ".  Final QE must be equalt to or smaller than the QE applied at simulation time.";
+        assert(false);
+      }
+    }
+    if (tempRefQE > 0) {
+      mf::LogInfo("OpDetDigitizerDUNE") << "Overriding QE. All the functions of OpDetResponseService being ignored.";
+        
+      // Correct out the prescaling applied during simulation
+      auto const *LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
+      fRefQEOverride = tempRefQE / LarProp->ScintPreScale();
+      
+      if (fRefQEOverride > 1.0001 ) {
         mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set in OpDetResponse_service, " << tempQE
                                            << " is too large.  It is larger than the prescaling applied during simulation, "
                                            << LarProp->ScintPreScale()
@@ -365,17 +383,25 @@ namespace opdet {
 
     // Geometry service
     art::ServiceHandle< geo::Geometry > geometry;
+    
+    
+    std::vector< art::Handle< std::vector< sim::OpDetBacktrackerRecord > > > btr_handles;
+    evt.getManyByType(btr_handles);
 
+    if (btr_handles.size() == 0)
+      throw art::Exception(art::errors::ProductNotFound)<<"No OpDetBacktrackerRecords retrieved.";
 
+    for (auto btr_handle: btr_handles) {
+      // Do some checking before we proceed
+      if (!btr_handle.isValid()) continue;
+      if (btr_handle.provenance()->moduleLabel() != fInputModule) continue;
 
+      bool Reflected = (btr_handle.provenance()->productInstanceName() == "Reflected");
 
-      art::Handle< std::vector< sim::OpDetBacktrackerRecord > > btr_handle;
+      
       std::vector<art::Ptr<sim::OpDetBacktrackerRecord>> btr_vec;
-      if(evt.getByLabel(fInputModule, btr_handle))
-        art::fill_ptr_vector(btr_vec, btr_handle);
-      else
-        throw art::Exception(art::errors::ProductNotFound)<<"No OpDetBacktrackerRecords retrieved.";
-
+      art::fill_ptr_vector(btr_vec, btr_handle);
+    
 
       // For every optical detector:
       for (auto const& btr : btr_vec)
@@ -393,9 +419,9 @@ namespace opdet {
       
         // This vector stores waveforms created for each optical channel
         std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
-            std::vector< double >(nSamples, static_cast< double >(fPedestal)));
-
-        CreatePDWaveform(btr, *geometry, pdWaveforms, fls, DivRec);
+                                                         std::vector< double >(nSamples, static_cast< double >(fPedestal)));
+      
+        CreatePDWaveform(btr, *geometry, pdWaveforms, fls, DivRec, Reflected);
         //DivRec comes out with all of the ticks filled correctly, with each channel filled in it's map.
         //Break here to investigate div recs as they are made and compare them to btrs
       
@@ -520,8 +546,9 @@ namespace opdet {
      geo::Geometry const& geometry,
      std::vector< std::vector< double > >& pdWaveforms,
      std::vector<FocusList>& fls,
-     sim::OpDetDivRec& DivRec)
-    {
+     sim::OpDetDivRec& DivRec,
+     bool Reflected)
+  {
 
       int const opDet = btr_p->OpDetNum();
       //unsigned int const opDet = btr_p->OpDetNum();
@@ -559,7 +586,7 @@ namespace opdet {
             if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
             {
               // Sample a random subset according to QE
-              if ( Detected(opDet, readoutChannel) )
+              if ( Detected(opDet, readoutChannel, Reflected) )
               {
                 unsigned int hardwareChannel =
                   geometry.HardwareChannelFromOpChannel(readoutChannel);
@@ -784,9 +811,12 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  bool OpDetDigitizerDUNE::Detected(int OpDet, int &readoutChannel) {
+  bool OpDetDigitizerDUNE::Detected(int OpDet, int &readoutChannel, bool Reflected) {
 
-    if (fQEOverride > 0) {
+    if (Reflected && !fRefQEOverride) {
+      cet::exception("OpDetDigitizerDUNE") << "Cannot handle reflected light if QERefOverride isn't set";
+    }
+    if ( (!Reflected && fQEOverride > 0) || Reflected ) {
       // Find the Optical Detector using the geometry service
       art::ServiceHandle<geo::Geometry> geom;
       
@@ -797,7 +827,12 @@ namespace opdet {
       readoutChannel = geom->OpChannel(OpDet, hardwareChannel);
 
       // Check QE
-      if ( CLHEP::RandFlat::shoot(1.0) > fQEOverride ) return false;
+      if (!Reflected) {
+        if ( CLHEP::RandFlat::shoot(1.0) > fQEOverride ) return false;
+      }
+      else {
+        if ( CLHEP::RandFlat::shoot(1.0) > fRefQEOverride ) return false;        
+      }
       return true;
     }
     else {
