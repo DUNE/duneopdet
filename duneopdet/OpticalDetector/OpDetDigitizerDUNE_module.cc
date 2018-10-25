@@ -68,7 +68,7 @@ namespace opdet {
 
   class FocusList
   {
-    public:
+  public:
       FocusList(int nSamples, int padding)
         : fNSamples(nSamples), fPadding(padding) {}
 
@@ -98,7 +98,7 @@ namespace opdet {
         // Discontiguous, add
         ranges.emplace_back(from, to);
       }
-
+    
       std::vector<std::pair<int, int>> ranges;
 
     protected:
@@ -108,18 +108,18 @@ namespace opdet {
 
   class OpDetDigitizerDUNE : public art::EDProducer{
 
-    public:
+  public:
 
       OpDetDigitizerDUNE(fhicl::ParameterSet const&);
       // Should the destructor be empty?
       //      virtual ~OpDetDigitizerDUNE();
-
+    
       void produce(art::Event&);
 
     private:
 
       // The parameters read from the FHiCL file
-      std::string fInputModule;   // Input tag for OpDet collection
+      std::string fInputModule;    // Input tag for OpDet collection
       double  fSampleFreq;         // Sampling frequency in MHz
       double  fTimeBegin;          // Beginning of waveform in us
       double  fTimeEnd;            // End of waveform in us
@@ -127,20 +127,20 @@ namespace opdet {
       double  fLineNoiseRMS;       // Pedestal RMS in ADC counts
       double  fDarkNoiseRate;      // In Hz
       double  fCrossTalk;          // Probability of SiPM producing 2 PE signal
-      // in response to 1 photon
-      short  fPedestal;           // In ADC counts
-      bool   fDefaultSimWindow;   // Set the start time to -1 drift window and
-      // the end time to the end time
-      // of the TPC readout
-      bool   fFullWaveformOutput; // Output full waveforms -- produces large
-      // output. Mostly for debug purposes
-      size_t fReadoutWindow;      // In ticks
-      size_t fPreTrigger;         // In ticks
+                                   // in response to 1 photon
+      short  fPedestal;            // In ADC counts
+      bool   fDefaultSimWindow;    // Set the start time to -1 drift window and
+                                   // the end time to the end time
+                                   // of the TPC readout
+      bool   fFullWaveformOutput;  // Output full waveforms -- produces large
+                                   // output. Mostly for debug purposes
+      size_t fReadoutWindow;       // In ticks
+      size_t fPreTrigger;          // In ticks
 
-      int    fPadding;            // In ticks
-
-      bool   fDigiTree_SSP_LED;   // To create a analysis Tree for SSP LED
-      bool   fUseSDPs;//            = pset.get< bool   >("UseSDPs", true);
+      int    fPadding;             // In ticks
+    
+      bool   fDigiTree_SSP_LED;    // To create a analysis Tree for SSP LED
+      bool   fUseSDPs;             // = pset.get< bool   >("UseSDPs", true);
 
       double  fQEOverride;
       double  fRefQEOverride;
@@ -163,20 +163,20 @@ namespace opdet {
 
       // Function that adds n pulses to a waveform
       void AddPulse(size_t timeBin, int scale,
-          std::vector< double >& waveform,
-          FocusList& fl) const;
+                    std::vector< double >& waveform,
+                    FocusList& fl) const;
 
       // Functional response to one photoelectron (time in ns)
       double Pulse1PE(double time) const;
-
+    
       // Single photoelectron pulse parameters
       double fPulseLength;   // 1PE pulse length in us
       double fPeakTime;      // Time when the pulse reaches its maximum in us
       double fMaxAmplitude;  // Maximum amplitude of the pulse in mV
       double fFrontTime;     // Constant in the exponential function
-      // of the leading edge in us
+                             // of the leading edge in us
       double fBackTime;      // Constant in the exponential function
-      // of the tail in us
+                             // of the tail in us
 
       // Make sure the FHiCL parameters make sense
       void CheckFHiCLParameters() const;
@@ -200,26 +200,24 @@ namespace opdet {
 
       // Vary the pedestal
       void AddLineNoise(std::vector< std::vector< double > >&,
-          const std::vector<FocusList>& fls) const;
+                        const std::vector<FocusList>& fls) const;
 
       void AddDarkNoise(std::vector< std::vector< double > >&,
-          std::vector<FocusList>& fls) const;
-
+                        std::vector<FocusList>& fls) const;
+    
       unsigned short CrossTalk() const;
 
       // Create a vector of shorts from a vector of doubles
       // rounding it properly
-      std::vector< short > VectorOfDoublesToVectorOfShorts
-        (std::vector< double > const&) const;
+      std::vector< short > VectorOfDoublesToVectorOfShorts(std::vector< double > const&) const;
 
       // Make several shorter waveforms out of a long one using a hit finder,
       // recording also when they start in the long waveform
-      std::map< size_t, std::vector< short > >
-        SplitWaveform(std::vector< short > const&,
-            const FocusList&);
+      std::map< size_t, std::vector< short > > SplitWaveform(std::vector< short > const&,
+                                                             const FocusList&);
 
       double GetDriftWindow() const;
-
+    
       // Convert time to ticks or the other way around
       // without any checks
       double  TickToTime(size_t tick) const;
@@ -234,7 +232,7 @@ namespace opdet {
 #endif
 
 namespace opdet {
-
+  
   DEFINE_ART_MODULE(OpDetDigitizerDUNE)
 
 }
@@ -259,9 +257,9 @@ namespace opdet {
     fFullWaveformOutput = pset.get< bool   >("FullWaveformOutput");
     fReadoutWindow      = pset.get< size_t >("ReadoutWindow"     );
     fPreTrigger         = pset.get< size_t >("PreTrigger"        );
-
+    
     fPadding            = pset.get< int    >("Padding"           );
-
+    
     fPulseLength        = pset.get< double >("PulseLength"       );
     fPeakTime           = pset.get< double >("PeakTime"          );
     fMaxAmplitude       = pset.get< double >("MaxAmplitude"      );
@@ -326,7 +324,7 @@ namespace opdet {
     }
 
     CheckFHiCLParameters();
-
+    
     // Initializing random number engines
     unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
     createEngine(seed);
@@ -336,7 +334,7 @@ namespace opdet {
     fRandGauss       = std::make_unique< CLHEP::RandGauss       >(engine);
     fRandExponential = std::make_unique< CLHEP::RandExponential >(engine);
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
-
+    
     // Creating a single photoelectron waveform
     // Hardcoded, probably need to read them from the FHiCL file
     //fPulseLength  = 4.0;
@@ -351,7 +349,7 @@ namespace opdet {
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::produce(art::Event& evt)
   {
-
+    
     if(fDigiTree_SSP_LED) art::ServiceHandle< art::TFileService > tfs;
 
     // A pointer that will store produced OpDetWaveforms
@@ -483,15 +481,15 @@ namespace opdet {
       {
         int opDet = btr->OpDetNum();
         //unsigned int opDet = btr->OpDetNum();
-
+      
         // Get number of channels in this optical detector
         unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
-
+      
         std::vector<FocusList> fls(nChannelsPerOpDet, FocusList(nSamples, fPadding));
         //std::vector<sim::OpDetDivRec> DivRec;
         sim::OpDetDivRec DivRec(opDet);
         //DivRec.chans.resize(nChannelsPerOpDet);
-
+      
         // This vector stores waveforms created for each optical channel
         std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
             std::vector< double >(nSamples, static_cast< double >(fPedestal)));
@@ -499,40 +497,39 @@ namespace opdet {
         CreatePDWaveform(btr, *geometry, pdWaveforms, fls, DivRec);
         //DivRec comes out with all of the ticks filled correctly, with each channel filled in it's map.
         //Break here to investigate div recs as they are made and compare them to btrs
-
-
+      
+      
         // Generate dark noise //I will not at this time include dark noise in my split backtracking records.
         if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls);
-
+      
         // Uncomment to undo the effect of FocusLists. Replaces the accumulated
         // lists with ones asserting we need to look at the whole trace.
         // for(FocusList& fl: fls){
         //        fl.ranges.clear();
         //        fl.ranges.emplace_back(0, nSamples-1);
         // }
-
+      
         // Vary the pedestal
         if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls);
 
         // Loop over all the created waveforms, split them into shorter
         // waveforms and use them to initialize OpDetWaveforms
         for (unsigned int hardwareChannel = 0;
-            hardwareChannel < nChannelsPerOpDet; ++hardwareChannel)
+             hardwareChannel < nChannelsPerOpDet; ++hardwareChannel)
         {
           for(const std::pair<int, int>& p: fls[hardwareChannel].ranges){
             // It's a shame we copy here. We could actually avoid by making the
             // functions below take a begin()/end() pair.
             const std::vector<double> sub(pdWaveforms[hardwareChannel].begin()+p.first,
-                pdWaveforms[hardwareChannel].begin()+p.second+1);
-
-            std::vector< short > waveformOfShorts =
-              VectorOfDoublesToVectorOfShorts(sub);
-
+                                          pdWaveforms[hardwareChannel].begin()+p.second+1);
+          
+            std::vector< short > waveformOfShorts = VectorOfDoublesToVectorOfShorts(sub);
+          
             std::map< size_t, std::vector < short > > mapTickWaveform =
               (!fFullWaveformOutput) ?
               SplitWaveform(waveformOfShorts, fls[hardwareChannel]) :
               std::map< size_t, std::vector< short > >{ std::make_pair(0,
-                  waveformOfShorts) };
+                                                                       waveformOfShorts) };
 
             unsigned int opChannel = geometry->OpChannel(opDet, hardwareChannel);
 
@@ -542,8 +539,8 @@ namespace opdet {
                 static_cast< double >(TickToTime(pairTickWaveform.first+p.first));
 
               raw::OpDetWaveform adcVec(timeStamp, opChannel,
-                  pairTickWaveform.second.size());
-
+                                        pairTickWaveform.second.size());
+              
               for (short const& value : pairTickWaveform.second){
                 adcVec.emplace_back(value);
               }
