@@ -13,7 +13,7 @@
 // 1) mobile average
 // 2) denoising code
 //
-// Marina Reggiani-Guzzo, October 2018
+// Marina Reggiani-Guzzo & Dante Totani, October 2018
 //=========================================================
 
 
