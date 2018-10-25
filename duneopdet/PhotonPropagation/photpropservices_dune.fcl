@@ -222,7 +222,7 @@ dune10kt_1x2x6_refl_v1_photonvisibilityservice: {
    DoNotLoadLibrary: false
    LibraryBuildJob: false
 
-   LibraryFile: "dune10kt_v1_1x2x6_withfoils_lib.root"
+   LibraryFile: "PhotonPropagation/LibraryData/lib_dune10kt_v4_1x2x6_withfoils_lib.root"
 }
 
 
