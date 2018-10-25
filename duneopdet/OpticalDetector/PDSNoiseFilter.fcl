@@ -1,0 +1,13 @@
+BEGIN_PROLOG
+
+pds_noise_filter:
+{
+   module_type:          "PDSNoiseFilter"
+   InputModule:          "ssprawdecoder"
+   InputLabels:          ["daq"]
+}
+
+pds_noise_filter_split: @local::pds_noise_filter
+pds_noise_filter_split.InputLabels: ["internal", "external"]
+
+END_PROLOG
