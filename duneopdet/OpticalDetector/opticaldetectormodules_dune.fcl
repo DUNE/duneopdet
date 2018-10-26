@@ -193,17 +193,17 @@ dunedphase3x1x1_opdigi:
 #  InputModule:          ["largeant","photPropS2"] # Module that created simphotons - Use this when simulating S2 light
    InputModule:          ["largeant"] # Module that created simphotons
    VoltageToADC:         2.048      # Converting mV to ADC counts (counts in 1 mV)
-   LineNoiseRMS:           0.8      # Pedestal RMS in ADC counts, likely an underestimate
-   CrossTalk:              0#0.20     # Probability of producing 2 PE for 1 incident photon
-   Pedestal:            100        # in ADC counts
-   Gain:            4.1        # in ADC counts
-   DefaultSimWindow:    false        # Use -1*drift window as the start time and
-                                    # the TPC readout window end time as the end time
-   FullWaveformOutput: true        # Output full waveform. Be careful with this option:
+   LineNoiseRMS:         0.8      # Pedestal RMS in ADC counts, likely an underestimate
+   CrossTalk:            0#0.20     # Probability of producing 2 PE for 1 incident photon
+   Pedestal:             100        # in ADC counts
+   Gain:                 4.1        # in ADC counts
+   DefaultSimWindow:     false        # Use -1*drift window as the start time and
+                                     # the TPC readout window end time as the end time
+   FullWaveformOutput:   true        # Output full waveform. Be careful with this option:
                                     # setting it to "true" can result in large output files
-   NegativeSignal: false
+   NegativeSignal:       false
    PreTrigger:           5e4        # In ticks
-   ReadoutWindow:       25e4        # In ticks
+   ReadoutWindow:        25e4        # In ticks
    algo_threshold: @local::standard_algo_sspleadingedge
 
    Padding:              4000        # In ticks
@@ -213,10 +213,20 @@ dunedphase3x1x1_opdigi:
 dunedphase3x1x1_opdigiana: @local::dunefd_opdigiana
 
 dunefddphase_opdigi: @local::dunedphase3x1x1_opdigi
-dunefddphase_opdigi.FullWaveformOutput: true
+dunefddphase_opdigi.FullWaveformOutput: false
 dunefddphase_opdigi.Gain:            41        # in ADC counts x ticks
 dunefddphase_opdigi.DefaultSimWindow: true
 dunefddphase_opdigi.PreTrigger: 0
+dunefddphase_opdigi.Padding: 1000
+dunefddphase_opdigi.algo_threshold: #algorith used to split the waveforms when FullWaveformOutput: false
+{
+    Name:            "SSP_LED"
+    ADCThreshold:    10
+    Pedestal:        100
+    DWindow:         10
+    ReadoutWd:       4000
+    PreTrg:          300
+}
 
 dunefddphase_opdigiana: @local::dunefd_opdigiana
 
