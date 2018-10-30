@@ -54,17 +54,22 @@ outputs:
 
 
 
-preareas = [ 15, 30] #, 45, 60 ]
-prenoises = [ 10, 50, 500, 5000 ]
+preareas  = [ 15, 30, 45, 60 ]
+prenoises = [ 10, 100, 1000 ]
+presnrs   = [ 4, 5, 7 ]
+signal = 18.18
 
 areas = {}
 noises = {}
+snrs = {}
 
 for area in preareas:
     for noise in prenoises:
-        tag = "{0:02d}cm{1:04d}Hz".format(area, noise)
-        areas[tag] = area
-        noises[tag] = noise
+        for snr in presnrs:
+            tag = "{0:02d}cm{1:04d}Hz{2:1d}snr".format(area, noise, snr)
+            areas[tag] = area
+            noises[tag] = noise
+            snrs[tag] = snr
 
 tags = sorted(areas.keys())
 
@@ -115,6 +120,7 @@ for tag in tags:
     print "## Configs for {0}".format(tag)
     print "physics.producers.opdigi{0}.QEOverride:             {1:.6f}".format(tag, QE)
     print "physics.producers.opdigi{0}.DarkNoiseRate:          {1:d} #Hz".format(tag, noises[tag])
+    print "physics.producers.opdigi{0}.LineNoiseRMS:           {1:.3f}".format(tag, signal/snrs[tag])
     print "physics.producers.ophit{0}.InputModule:             opdigi{0}".format(tag)
     print "physics.producers.opflash{0}.InputModule:           ophit{0}".format(tag)
     print "physics.analyzers.flashmatch{0}.OpHitModuleLabel:   ophit{0}".format(tag)
