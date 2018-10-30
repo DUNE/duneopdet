@@ -84,8 +84,8 @@ dunefd_ophit_single.SPEArea:     1106
 dunefd_ophit_single.SPEShift:    0.304
 
 dunefd_ophit_threegang:          @local::dunefd_ophit_single
-dunefd_ophit_threegang.SPEArea:  410
-dunefd_ophit_threegang.SPEShift: 0.451
+dunefd_ophit_threegang.SPEArea:  264
+dunefd_ophit_threegang.SPEShift: 0.430
 
 dunefd_ophit: @local::dunefd_ophit_threegang
 
@@ -93,8 +93,10 @@ dunefd_opflash:                 @local::standard_opflash
 dunefd_opflash.FlashThreshold:  3.5
 
 
-
+# These aren't right, but leave them unchanged until right values are found.
 protodune_ophit: @local::dunefd_ophit
+protodune_ophit.SPEArea: 410
+protodune_ophit.SPESize: 0.451
 protodune_opflash: @local::dunefd_opflash
 
 protodune_ophit_data_unsplit: @local::protodune_ophit
