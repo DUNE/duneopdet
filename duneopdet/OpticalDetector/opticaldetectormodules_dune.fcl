@@ -124,6 +124,7 @@ dunefd_opdigiana:
    SSP_LED_AnaTree:  false 
 }
 dunefd_opflashana:       @local::standard_opflashana
+dunefd_opflashana.MakePerEventFlashTree: true
 
 
 dunefd_averagewaveform:

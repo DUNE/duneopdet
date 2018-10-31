@@ -118,6 +118,7 @@ print "}"
 for tag in tags:
     QE = areas[tag] * 0.00287 / 4.05 # Convert effective area to QE
     print "## Configs for {0}".format(tag)
+    print "physics.producers.opdigi{0}.SSP_LED_DigiTree:       true".format(tag)
     print "physics.producers.opdigi{0}.QEOverride:             {1:.6f}".format(tag, QE)
     print "physics.producers.opdigi{0}.DarkNoiseRate:          {1:d} #Hz".format(tag, noises[tag])
     print "physics.producers.opdigi{0}.LineNoiseRMS:           {1:.3f}".format(tag, signal/snrs[tag])
