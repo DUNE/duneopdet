@@ -83,6 +83,7 @@ private:
 
 
 phot::PhotonLibraryPropagationS2::PhotonLibraryPropagationS2(fhicl::ParameterSet const & p)
+  : EDProducer{p}
 {
 
   art::ServiceHandle<sim::LArG4Parameters> lgp;
