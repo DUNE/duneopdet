@@ -92,43 +92,43 @@ namespace opdet {
 
     int PosHistYRes, PosHistZRes;
 
-    bool fMakeFlashTimeHist;
-    bool fMakeFlashPosHist;
-    bool fMakePerFlashHists;
-    bool fMakePerOpHitTree;
+//    bool fMakeFlashTimeHist;
+//    bool fMakeFlashPosHist;
+//    bool fMakePerFlashHists;
+//    bool fMakePerOpHitTree;
           
-    TTree * fPerOpHitTree;
+//    TTree * fPerOpHitTree;
    
     Int_t   fEventID;
     Int_t   fFlashID;
     Int_t   fHitID;
     Float_t fFlashTime; 
-    Float_t fAbsTime;
-    bool    fInBeamFrame;
-    int     fOnBeamTime;
-    Float_t fTotalPE;
-    Int_t   fFlashFrame;
+//    Float_t fAbsTime;
+//    bool    fInBeamFrame;
+//    int     fOnBeamTime;
+//    Float_t fTotalPE;
+//    Int_t   fFlashFrame;
     
-    Float_t fNPe;
-    Float_t fYCenter;
-    Float_t fYWidth;
-    Float_t fZCenter;
-    Float_t fZWidth;
+//    Float_t fNPe;
+//    Float_t fYCenter;
+//    Float_t fYWidth;
+//    Float_t fZCenter;
+//    Float_t fZWidth;
 
     Int_t   fOpChannel;
     Float_t fPeakTimeAbs;
     Float_t fPeakTime;
-    Int_t   fFrame;
-    Float_t fWidth;
-    Float_t fArea;
-    Float_t fAmplitude;
+//    Int_t   fFrame;
+//    Float_t fWidth;
+//    Float_t fArea;
+//    Float_t fAmplitude;
     Float_t fPE;
-    Float_t fFastToTotal;
+//    Float_t fFastToTotal;
     Float_t fYOpCenter;
     Float_t fZOpCenter;
     Float_t fXOpCenter;
 
-    int fNFlashes;
+//    int fNFlashes;
     std::vector< int >   fFlashIDVector;
     std::vector< float > fYCenterVector;
     std::vector< float > fZCenterVector;
@@ -140,7 +140,7 @@ namespace opdet {
     std::vector< bool >  fInBeamFrameVector;
     std::vector< int >   fOnBeamTimeVector;
     std::vector< float > fTotalPEVector;
-    int fNChannels;
+//    int fNChannels;
     std::vector< float > fPEsPerFlashPerChannelVector;
   };
 
