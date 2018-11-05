@@ -24,6 +24,7 @@
 #include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "lardataobj/RecoBase/OpHit.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
@@ -75,6 +76,7 @@ namespace opdet {
     TTree * fFlashMatchTree;
     TTree * fLargestFlashTree;
     TTree * fSelectedFlashTree;
+
 
     TEfficiency * fRecoEfficiencyVsE;
     TEfficiency * fRecoEfficiencyVsX;
@@ -140,6 +142,15 @@ namespace opdet {
     Int_t    fNHitOpDets;
     std::vector< Float_t > fPEsPerOpDetVector;
 
+    // For counting waveforms
+    
+    std::string fOpDetWaveformLabel;
+    float fBaseline;
+    float fPE;
+    TTree * fCountTree;
+    Int_t fnwaveforms1pe;
+    Int_t fnwaveforms2pe;
+    Int_t fnwaveforms3pe;
     
   };
 
@@ -167,6 +178,10 @@ namespace opdet {
     fLowX               = pset.get<float>("LowX");
     fHighX              = pset.get<float>("HighX");
     fDistanceCut        = pset.get<float>("DistanceCut");
+
+    fOpDetWaveformLabel = pset.get<std::string>("OpDetWaveformLabel","");
+    fBaseline           = pset.get<float>("Baseline", 1500.);
+    fPE                 = pset.get<float>("PE", 18.);
 
     
 
@@ -246,6 +261,15 @@ namespace opdet {
     fSelectedFlashTree->Branch("PEsPerOpDetVector",           &fPEsPerOpDetVector);
     fSelectedFlashTree->Branch("Purity",                      &fPurity,    "Purity/F");
     fSelectedFlashTree->Branch("Distance",                    &fDistance,    "Distance/F");
+
+    if (!fOpDetWaveformLabel.empty()) {
+      fCountTree = tfs->make<TTree>("CountWaveforms","CountWaveforms");
+      fCountTree->Branch("EventID",       &fEventID,      "EventID/I");
+      fCountTree->Branch("nwaveforms1pe", &fnwaveforms1pe, "nwaveforms1pe/I");
+      fCountTree->Branch("nwaveforms2pe", &fnwaveforms2pe, "nwaveforms2pe/I");
+      fCountTree->Branch("nwaveforms3pe", &fnwaveforms3pe, "nwaveforms3pe/I");
+    }
+
 
 
     fRecoEfficiencyVsE         = tfs->make<TEfficiency>("recoEfficiencyVsE",         ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
@@ -482,6 +506,34 @@ namespace opdet {
     fSelectedEfficiencyVsE->Fill(SelectedRight, fTrueE);
     fSelectedEfficiencyVsX->Fill(SelectedRight, fTrueX);
     fSelectedEfficiencyVsXandE->Fill(SelectedRight, fTrueX, fTrueE);
+
+
+
+    ///////////////////////////////////////////////////
+    // Count waveforms if a waveform label was given //
+    ///////////////////////////////////////////////////
+
+    if (!fOpDetWaveformLabel.empty()) {
+      fnwaveforms1pe = 0;
+      fnwaveforms2pe = 0;
+      fnwaveforms3pe = 0;
+      art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
+      if (evt.getByLabel(fOpDetWaveformLabel, wfHandle)) {
+        fnwaveforms1pe = wfHandle->size();
+
+        for (auto wf: *wfHandle) {
+          auto it = max_element(std::begin(wf), std::end(wf));
+          double peak = *it - fBaseline;
+          if ( peak > (1.5*fPE)) {
+            ++fnwaveforms2pe;
+
+            if ( peak > (2.5*fPE) )
+              ++fnwaveforms3pe;
+          }
+        }
+        fCountTree->Fill();
+      }
+    }
 
 
 
