@@ -10,7 +10,7 @@ print """
 #include "opticaldetectormodules_dune.fcl"
 #include "opticaldetectorservices_dune.fcl"
 #include "FlashMatchAna.fcl"
-
+#include "SNAna.fcl"
 
 process_name: OpticalResim
 
@@ -20,6 +20,7 @@ services:
   TFileService: { fileName: "dune1x2x6_optical_tutorial_resimulate_hist.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} #ART native random number generator
+  #FileCatalogMetadata:   @local::art_file_catalog_mc
   message:      @local::standard_info
   @table::dunefd_simulation_services
 }
@@ -121,6 +122,8 @@ print """
 """
 for tag in tags:
     print "      flashmatch{0}:  @local::marley_flashmatchana".format(tag)
+for tag in tags:
+    print "      snana{0}:       @local::standard_snana".format(tag)
     #print "      flashmatch{0}:  @local::standard_flashmatchana".format(tag)
 
 print """
@@ -133,7 +136,7 @@ for tag in tags:
     simpaths.append("simPath{0}".format(tag))
 endpaths = []
 for tag in tags:
-    print "   anaPath{0}: [ flashmatch{0} ]".format(tag)
+    print "   anaPath{0}: [ flashmatch{0}, snana{0} ]".format(tag)
     endpaths.append("anaPath{0}".format(tag))
 
 print "   stream1:  [ out1 ]"
@@ -163,6 +166,7 @@ for tag in tags:
     print "physics.analyzers.flashmatch{0}.OpDetWaveformLabel: opdigi{0}".format(tag)
     print "physics.analyzers.flashmatch{0}.OpHitModuleLabel:   ophit{0}".format(tag)
     print "physics.analyzers.flashmatch{0}.OpFlashModuleLabel: opflash{0}".format(tag)
+    print "physics.analyzers.snana{0}.OpHitModuleLabel:        ophit{0}".format(tag)
     print
     
     
