@@ -375,7 +375,7 @@ namespace opdet {
     }
 
     // Get assosciations between flashes and hits
-    //art::FindManyP< recob::OpHit > Assns(flashlist, evt, fOpFlashModuleLabel);
+    art::FindManyP< recob::OpHit > Assns(flashlist, evt, fOpFlashModuleLabel);
 
 
     // Set up some flags to fill as we loop
@@ -397,8 +397,8 @@ namespace opdet {
       recob::OpFlash TheFlash = *flashlist[i];
       art::Ptr<recob::OpFlash> FlashP = flashlist[i];
      // std::vector< art::Ptr<recob::OpHit> > hitFromFlash = pbt->OpFlashToOpHits_Ps(FlashP);
-      std::vector< art::Ptr<recob::OpHit> > matchedHits = pbt->OpFlashToOpHits_Ps(FlashP);
-     // std::vector< art::Ptr<recob::OpHit> > matchedHits = Assns.at(i);
+     // std::vector< art::Ptr<recob::OpHit> > matchedHits = pbt->OpFlashToOpHits_Ps(FlashP);
+     std::vector< art::Ptr<recob::OpHit> > matchedHits = Assns.at(i);
 
       // Calculate the flash purity
       double purity = pbt->OpHitCollectionPurity(signal_trackids, matchedHits);
