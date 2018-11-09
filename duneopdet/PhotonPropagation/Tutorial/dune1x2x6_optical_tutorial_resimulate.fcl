@@ -25,7 +25,7 @@ services:
 services.Geometry:                @local::dune10kt_1x2x6_geo
 services.PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice
 services.OpDigiProperties:        @local::dunefd_opdigiproperties
-
+services.LArPropertiesService.ScintPreScale: 0.0287
 
 
 ########################################
