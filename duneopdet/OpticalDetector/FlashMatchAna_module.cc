@@ -395,7 +395,7 @@ namespace opdet {
     {
       // Get OpFlash and associated hits
       recob::OpFlash TheFlash = *flashlist[i];
-//      art::Ptr<recob::OpFlash> FlashP = flashlist[i];
+     // art::Ptr<recob::OpFlash> FlashP = flashlist[i];
      // std::vector< art::Ptr<recob::OpHit> > hitFromFlash = pbt->OpFlashToOpHits_Ps(FlashP);
      // std::vector< art::Ptr<recob::OpHit> > matchedHits = pbt->OpFlashToOpHits_Ps(FlashP);
      std::vector< art::Ptr<recob::OpHit> > matchedHits = Assns.at(i);
