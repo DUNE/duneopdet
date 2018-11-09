@@ -10,7 +10,7 @@ print """
 #include "opticaldetectormodules_dune.fcl"
 #include "opticaldetectorservices_dune.fcl"
 #include "FlashMatchAna.fcl"
-
+#include "SNAna.fcl"
 
 process_name: OpticalResim
 
@@ -20,6 +20,7 @@ services:
   TFileService: { fileName: "dune1x2x6_optical_tutorial_resimulate_hist.root" }
   TimeTracker:       {}
   RandomNumberGenerator: {} #ART native random number generator
+  #FileCatalogMetadata:   @local::art_file_catalog_mc
   message:      @local::standard_info
   @table::dunefd_simulation_services
 }
@@ -54,19 +55,50 @@ outputs:
 
 
 
-preareas = [ 15, 30] #, 45, 60 ]
-prenoises = [ 10, 50, 500, 5000 ]
+preareas  = [ 15, 30, 60 ]
+prenoises = [ 10, 300, 1000 ]
+#prenoises = [ 100 ]
+presnrs   = [ 3, 4, 7 ]
+prerefs  = [ "Opt", "Pes" ]
+signal = 18.18
+
+defareas  = [ 45 ]
+defnoises = [ 100 ]
+defsnrs   = [ 5 ]
+defrefs   = [ "Non" ]
 
 areas = {}
 noises = {}
+snrs = {}
+reflected = {}
 
-for area in preareas:
-    for noise in prenoises:
-        tag = "{0:02d}cm{1:04d}Hz".format(area, noise)
-        areas[tag] = area
-        noises[tag] = noise
+
+sets = [ ("DEF", defareas, defnoises, defsnrs, defrefs),
+         ("EFF", preareas, defnoises, defsnrs, defrefs),
+         ("NSE", defareas, prenoises, defsnrs, defrefs),
+         ("SNR", defareas, defnoises, presnrs, defrefs),
+         ("REF", defareas, defnoises, defsnrs, prerefs) ]
+    
+
+
+for ( name, iareas, inoises, isnrs, irefs ) in sets:
+    for area in iareas:
+        for noise in inoises:
+            for snr in isnrs:
+                for ref in irefs:
+                    tag = "{0}{1:02d}cm{2:04d}Hz{3:1d}snr{4}Refl".format(name, area, noise, snr, ref)
+                    if ref == "Opt":
+                        reflected[tag] = 1.44
+                    elif ref == "Pes":
+                        reflected[tag] = 0.84
+                        area /= 2
+                    areas[tag] = area
+                    noises[tag] = noise
+                    snrs[tag] = snr
 
 tags = sorted(areas.keys())
+
+
 
 print """
 physics:
@@ -78,7 +110,9 @@ physics:
 """
 for tag in tags:
     print "      opdigi{0}:    @local::dunefd_opdigi_threegang".format(tag)
+for tag in tags:
     print "      ophit{0}:     @local::dunefd_ophit".format(tag)
+for tag in tags:
     print "      opflash{0}:   @local::dunefd_opflash".format(tag)
 
 print """
@@ -88,6 +122,9 @@ print """
 """
 for tag in tags:
     print "      flashmatch{0}:  @local::marley_flashmatchana".format(tag)
+for tag in tags:
+    print "      snana{0}:       @local::standard_snana".format(tag)
+    #print "      flashmatch{0}:  @local::standard_flashmatchana".format(tag)
 
 print """
    }
@@ -99,13 +136,13 @@ for tag in tags:
     simpaths.append("simPath{0}".format(tag))
 endpaths = []
 for tag in tags:
-    print "   anaPath{0}: [ flashmatch{0} ]".format(tag)
+    print "   anaPath{0}: [ flashmatch{0}, snana{0} ]".format(tag)
     endpaths.append("anaPath{0}".format(tag))
 
 print "   stream1:  [ out1 ]"
 print ""
 print "   trigger_paths: [" + ", ".join(simpaths) + "]"
-print "   end_paths: [" + ", ".join(endpaths) + "]"
+print "   end_paths: [" + ", ".join(endpaths) + ", stream1 ]"
 print "}"
 
 
@@ -113,12 +150,23 @@ print "}"
 for tag in tags:
     QE = areas[tag] * 0.00287 / 4.05 # Convert effective area to QE
     print "## Configs for {0}".format(tag)
+
+    
+    #print "physics.producers.opdigi{0}.SSP_LED_DigiTree:       true".format(tag)
     print "physics.producers.opdigi{0}.QEOverride:             {1:.6f}".format(tag, QE)
+
+    if tag in reflected:
+        refQE = QE*reflected[tag]
+        print "physics.producers.opdigi{0}.QERefOverride:          {1:.6f}".format(tag, refQE)
+
     print "physics.producers.opdigi{0}.DarkNoiseRate:          {1:d} #Hz".format(tag, noises[tag])
+    print "physics.producers.opdigi{0}.LineNoiseRMS:           {1:.3f}".format(tag, signal/snrs[tag])
     print "physics.producers.ophit{0}.InputModule:             opdigi{0}".format(tag)
     print "physics.producers.opflash{0}.InputModule:           ophit{0}".format(tag)
+    print "physics.analyzers.flashmatch{0}.OpDetWaveformLabel: opdigi{0}".format(tag)
     print "physics.analyzers.flashmatch{0}.OpHitModuleLabel:   ophit{0}".format(tag)
     print "physics.analyzers.flashmatch{0}.OpFlashModuleLabel: opflash{0}".format(tag)
+    print "physics.analyzers.snana{0}.OpHitModuleLabel:        ophit{0}".format(tag)
     print
     
     

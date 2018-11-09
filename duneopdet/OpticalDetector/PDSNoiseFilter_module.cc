@@ -80,7 +80,7 @@ namespace opdet {
       vector<string> fInputLabels;   // Input tag for OpDet collection
       // Additional fhicl parameters here
 
-    std::vector<float> filter( std::vector<short> vec, Int_t nBins);
+    std::vector<float> filter( std::vector<short unsigned int> vec, Int_t nBins);
     void TV1D_denoise(vector<float> input, vector<float>& secondFilter, const int width, const float lambda);
   };
 
@@ -133,6 +133,8 @@ namespace opdet {
 	
 	Int_t nBins = in_wave.size();                     // size of the input vector
 	std::vector<short unsigned int > out_wave(nBins); // vector in which the filtered waveform will be saved
+        std::vector<short unsigned int > out_wave_double(nBins);
+	  for(Int_t i=0; i<nBins; i++) out_wave_double[i]=2*in_wave[i];
 	    // careful, it doesn't work for vector<short>, but it does for vector<short unsigned int>
 
         //####################################################################
@@ -142,7 +144,7 @@ namespace opdet {
         //std:vector<short> out_wave(nBins); // don't worry about the shifted baseline due to the integer of the output
         float convert = 0;  // variable used to convert from float to short
         short convert2 = 0; // sum 0.5 to the final result to try to recover the lost information from the float-short conversion 
-        std::vector<float> filtered = filter(in_wave,nBins); // filtered waveform
+        std::vector<float> filtered = filter(out_wave_double,nBins); // filtered waveform
         
         // loop to convert the filtered output from float to short
         // and save it into the out_wave vector
@@ -171,7 +173,7 @@ namespace opdet {
   //                       Mobile Average Function
   //####################################################################
 
-  std::vector<float> PDSNoiseFilter::filter( std::vector<short> vec, Int_t nBins){
+  std::vector<float> PDSNoiseFilter::filter( std::vector<short unsigned int> vec, Int_t nBins){
       
       Int_t mobileAVG = 5;                    // stablish how big the mobile average will be
       Double_t avg = 0;                       // saves the average value for each bin

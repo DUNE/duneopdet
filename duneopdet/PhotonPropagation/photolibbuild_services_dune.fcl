@@ -37,7 +37,7 @@ dune35t_photolibbuild_services.LArPropertiesService.ScintPreScale: 1
 dunefd_photolibbuild_services:                        @local::dunefd_simulation_services
 
 # Set the photon visiblity service to library building mode
-dunefd_photolibbuild_services.PhotonVisibilityService: @local::dunefd_photonvisibilityservice_buildlib
+dunefd_photolibbuild_services.PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice_buildlib
 
 # enable optical physics in LArG4
 dunefd_photolibbuild_services.LArG4Parameters.EnabledPhysics: [ "Em", 
