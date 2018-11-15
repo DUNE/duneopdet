@@ -280,10 +280,11 @@ dunefddphase_photonvisibilityservice.UseCryoBoundary: true
 dunefddphase_photonvisibilityservice.NX: 15
 dunefddphase_photonvisibilityservice.NY: 15
 dunefddphase_photonvisibilityservice.NZ: 62
-dunefddphase_photonvisibilityservice.ParametrisedTimePropagationMaxRange: 800
+dunefddphase_photonvisibilityservice.ParametrisedTimePropagationMaxRange: 1000
 dunefddphase_photonvisibilityservice.ParametrisedTimePropagationNParameters: 3
 dunefddphase_photonvisibilityservice.ParametrisedTimePropagation: true
-dunefddphase_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/libext_dunedp_1M_15x15x62_20180913.root"
+#dunefddphase_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/libext_dunedp_1M_15x15x62_20180913.root"#not use this old library
+dunefddphase_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/libext_dunedp_1M_15x15x62_20181114.root"
 
 
 
