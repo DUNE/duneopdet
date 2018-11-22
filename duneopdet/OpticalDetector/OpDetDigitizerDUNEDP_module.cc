@@ -296,7 +296,7 @@ namespace opdet {
 
     fSinglePEWaveform = odp->SinglePEWaveform();
 
-    std::cout << "Generating waveforms of " << fTimeEnd - fTimeBegin << "ms = "<< (fTimeEnd - fTimeBegin)*fSampleFreq <<" Samples"<< std::endl;
+    std::cout << "Generating waveforms of " << fTimeEnd - fTimeBegin << "us = "<< (fTimeEnd - fTimeBegin)*fSampleFreq <<" Samples"<< std::endl;
     std::cout << "\tTimeBegin" << fTimeBegin <<" "<< std::endl;
     std::cout << "\tfTimeEnd" << fTimeEnd <<" "<< std::endl;
     std::cout << "\tSampleFreq" << fSampleFreq <<" "<< std::endl;

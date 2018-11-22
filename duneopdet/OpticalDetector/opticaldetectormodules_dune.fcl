@@ -205,7 +205,7 @@ dunedphase3x1x1_opdigi:
    FullWaveformOutput:   true        # Output full waveform. Be careful with this option:
                                     # setting it to "true" can result in large output files
    NegativeSignal:       false
-   PreTrigger:           5e4        # In ticks
+   PreTrigger:           0        # In ticks This must be zero, otherwise we won't find hits in the pretrigger.
    ReadoutWindow:        25e4        # In ticks
    algo_threshold: @local::standard_algo_sspleadingedge
 
@@ -220,7 +220,7 @@ dunefddphase_opdigi.FullWaveformOutput: false
 dunefddphase_opdigi.Gain:            41        # in ADC counts x ticks
 dunefddphase_opdigi.DefaultSimWindow: true
 dunefddphase_opdigi.PreTrigger: 0
-dunefddphase_opdigi.Padding: 1000
+dunefddphase_opdigi.Padding: 4000
 dunefddphase_opdigi.algo_threshold: #algorith used to split the waveforms when FullWaveformOutput: false
 {
     Name:            "SSP_LED"

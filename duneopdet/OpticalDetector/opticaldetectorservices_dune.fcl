@@ -109,8 +109,8 @@ dune35t_opdetresponse:
 dunedphase3x1x1_opdigiproperties:
 {
   SampleFreq:    250       # ADC sampling frequency in MHz
-  TimeBegin:     0        # Where readout frame starts, relative to simulation t0 in micro-seconds
-  TimeEnd:       1000     # Where readout frame ends, relative to simulation t0 in micro-seconds
+  TimeBegin:     -200        # Where readout frame starts, relative to simulation t0 in micro-seconds
+  TimeEnd:       800     # Where readout frame ends, relative to simulation t0 in micro-seconds
   # Parameter of PMT & shaper
   UseEmpiricalGain:        false # boolean control to load empirical gain or not
   QE:                      0.2  # Quantum efficiency
