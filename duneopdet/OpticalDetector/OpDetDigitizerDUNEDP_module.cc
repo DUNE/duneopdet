@@ -125,7 +125,7 @@ namespace opdet {
       double  fDarkNoiseRate;      // In Hz
       double  fCrossTalk;          // Probability of SiPM producing 2 PE signal
                                   // in response to 1 photon
-      short  fPedestal;           // In ADC counts
+      double  fPedestal;           // In ADC counts
       double  fGain;               // Gain of the PMT
       bool   fDefaultSimWindow;   // Set the start time to -1 drift window and
                                   // the end time to the end time
@@ -232,7 +232,7 @@ namespace opdet {
     fVoltageToADC       = pset.get< double >("VoltageToADC"      );
     fLineNoiseRMS       = pset.get< double >("LineNoiseRMS"      );
     fCrossTalk          = pset.get< double >("CrossTalk"         );
-    fPedestal           = pset.get< short  >("Pedestal"          );
+    fPedestal           = pset.get< double  >("Pedestal"          );
     fDefaultSimWindow   = pset.get< bool   >("DefaultSimWindow"  );
     fFullWaveformOutput = pset.get< bool   >("FullWaveformOutput");
     fReadoutWindow      = pset.get< size_t >("ReadoutWindow"     );
@@ -296,7 +296,7 @@ namespace opdet {
 
     fSinglePEWaveform = odp->SinglePEWaveform();
 
-    std::cout << "Generating waveforms of " << fTimeEnd - fTimeBegin << "ms = "<< (fTimeEnd - fTimeBegin)*fSampleFreq <<" Samples"<< std::endl;
+    std::cout << "Generating waveforms of " << fTimeEnd - fTimeBegin << "us = "<< (fTimeEnd - fTimeBegin)*fSampleFreq <<" Samples"<< std::endl;
     std::cout << "\tTimeBegin" << fTimeBegin <<" "<< std::endl;
     std::cout << "\tfTimeEnd" << fTimeEnd <<" "<< std::endl;
     std::cout << "\tSampleFreq" << fSampleFreq <<" "<< std::endl;
