@@ -1,0 +1,28 @@
+#include "opticaldetectormodules.fcl"
+#include "sspmodules.fcl"
+
+BEGIN_PROLOG
+
+
+standard_ProtoDUNEopdeteventdisplay:
+{
+  module_type:            "ProtoDUNEopdeteventdisplay"
+  OpFlashModuleLabel:     "opflash"  
+  OpHitModuleLabel:       "ophit"  
+  YMin:                    -50
+  YMax:                    50
+  ZMin:                    0
+  ZMax:                    1200
+	
+  MakeFlashTimeHist:       false
+  MakeFlashPosHist:        false
+  MakePerFlashHists:       false
+
+  MakePerFlashTree:        true
+  MakePerOpHitTree:        true
+  MakeFlashBreakdownTree:  true
+  MakeFlashHitMatchTree:   true
+  MakePerEventFlashTree:   false
+
+}
+END_PROLOG

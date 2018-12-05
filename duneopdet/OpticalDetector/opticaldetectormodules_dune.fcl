@@ -84,16 +84,36 @@ dunefd_ophit_single.SPEArea:     1106
 dunefd_ophit_single.SPEShift:    0.304
 
 dunefd_ophit_threegang:          @local::dunefd_ophit_single
-dunefd_ophit_threegang.SPEArea:  410
-dunefd_ophit_threegang.SPEShift: 0.451
+dunefd_ophit_threegang.SPEArea:  264
+dunefd_ophit_threegang.SPEShift: 0.430
 
 dunefd_ophit: @local::dunefd_ophit_threegang
 
 dunefd_opflash:                 @local::standard_opflash
 dunefd_opflash.FlashThreshold:  3.5
 
+
+# These aren't right, but leave them unchanged until right values are found.
 protodune_ophit: @local::dunefd_ophit
+protodune_ophit.SPEArea: 410
+protodune_ophit.SPESize: 0.451
 protodune_opflash: @local::dunefd_opflash
+
+protodune_ophit_data_unsplit: @local::protodune_ophit
+protodune_ophit_data_unsplit.InputModule:  ssprawdecoder
+protodune_ophit_data_unsplit.InputLabels: [ "daq" ]
+
+protodune_ophit_data_internal: @local::protodune_ophit_data_unsplit
+protodune_ophit_data_external: @local::protodune_ophit_data_unsplit
+protodune_ophit_data_both:     @local::protodune_ophit_data_unsplit
+protodune_ophit_data_internal.InputLabels: [ "internal" ]
+protodune_ophit_data_external.InputLabels: [ "external" ]
+protodune_ophit_data_both.InputLabels:     [ "internal", "external" ]
+
+protodune_opflash_data_internal: @local::protodune_opflash
+protodune_opflash_data_internal.InputModule: "ophitInternal"
+protodune_opflash_data_external: @local::protodune_opflash
+protodune_opflash_data_external.InputModule: "ophitExternal"
 
 
 dunefd_opdigiana:
@@ -104,6 +124,7 @@ dunefd_opdigiana:
    SSP_LED_AnaTree:  false 
 }
 dunefd_opflashana:       @local::standard_opflashana
+dunefd_opflashana.MakePerEventFlashTree: true
 
 
 dunefd_averagewaveform:
@@ -166,6 +187,51 @@ dune35t_calibrationanalysis_data: @local::dune35t_calibrationanalysis
 dune35t_calibrationanalysis_data.InputModule: ssptooffline
 dune35t_calibrationanalysis_data.OpHitModule: ophit
 dune35t_calibrationanalysis_data.InstanceName: offlinePhoton
+
+
+
+dunedphase3x1x1_opdigi:
+{
+   module_type:          "OpDetDigitizerDUNEDP"
+#  InputModule:          ["largeant","photPropS2"] # Module that created simphotons - Use this when simulating S2 light
+   InputModule:          ["largeant"] # Module that created simphotons
+   VoltageToADC:         2.048      # Converting mV to ADC counts (counts in 1 mV)
+   LineNoiseRMS:         0.8      # Pedestal RMS in ADC counts, likely an underestimate
+   CrossTalk:            0#0.20     # Probability of producing 2 PE for 1 incident photon
+   Pedestal:             100        # in ADC counts
+   Gain:                 4.1        # in ADC counts
+   DefaultSimWindow:     false        # Use -1*drift window as the start time and
+                                     # the TPC readout window end time as the end time
+   FullWaveformOutput:   true        # Output full waveform. Be careful with this option:
+                                    # setting it to "true" can result in large output files
+   NegativeSignal:       false
+   PreTrigger:           0        # In ticks This must be zero, otherwise we won't find hits in the pretrigger.
+   ReadoutWindow:        25e4        # In ticks
+   algo_threshold: @local::standard_algo_sspleadingedge
+
+   Padding:              4000        # In ticks
+   SSP_LED_DigiTree:     false	    #To create a SSP LED trigger Ttree
+}
+
+dunedphase3x1x1_opdigiana: @local::dunefd_opdigiana
+
+dunefddphase_opdigi: @local::dunedphase3x1x1_opdigi
+dunefddphase_opdigi.FullWaveformOutput: false
+dunefddphase_opdigi.Gain:            41        # in ADC counts x ticks
+dunefddphase_opdigi.DefaultSimWindow: true
+dunefddphase_opdigi.PreTrigger: 0
+dunefddphase_opdigi.Padding: 4000
+dunefddphase_opdigi.algo_threshold: #algorith used to split the waveforms when FullWaveformOutput: false
+{
+    Name:            "SSP_LED"
+    ADCThreshold:    10
+    Pedestal:        100
+    DWindow:         10
+    ReadoutWd:       4000
+    PreTrg:          300
+}
+
+dunefddphase_opdigiana: @local::dunefd_opdigiana
 
 
 END_PROLOG
