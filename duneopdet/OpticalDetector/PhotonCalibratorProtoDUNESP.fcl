@@ -1,0 +1,12 @@
+BEGIN_PROLOG
+
+#
+# Applies channel-by-channel PE calibrations
+#
+protodunesp_photoncalibrator:
+{
+   service_provider: PhotonCalibratorServiceProtoDUNESP
+}
+
+
+END_PROLOG

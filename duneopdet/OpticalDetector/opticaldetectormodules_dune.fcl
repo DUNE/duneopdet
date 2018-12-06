@@ -93,16 +93,21 @@ dunefd_opflash:                 @local::standard_opflash
 dunefd_opflash.FlashThreshold:  3.5
 
 
-# These aren't right, but leave them unchanged until right values are found.
+# These calib values would be for MC only
 protodune_ophit: @local::dunefd_ophit
 protodune_ophit.SPEArea: 410
 protodune_ophit.SPESize: 0.451
 protodune_opflash: @local::dunefd_opflash
 
+# For real data set the input module and label
+# Use the PD Calibrator service for calibration 
+# instead of above values.
 protodune_ophit_data_unsplit: @local::protodune_ophit
 protodune_ophit_data_unsplit.InputModule:  ssprawdecoder
 protodune_ophit_data_unsplit.InputLabels: [ "daq" ]
+protodune_ophit_data_unsplit.UseCalibrator: true
 
+# Make variants for internal/external split waveforms
 protodune_ophit_data_internal: @local::protodune_ophit_data_unsplit
 protodune_ophit_data_external: @local::protodune_ophit_data_unsplit
 protodune_ophit_data_both:     @local::protodune_ophit_data_unsplit
