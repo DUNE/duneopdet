@@ -44,6 +44,7 @@ art_make( BASENAME_ONLY
                                 ${ART_FRAMEWORK_SERVICES_OPTIONAL}
                                 ${ART_FRAMEWORK_SERVICES_OPTIONAL_TFILESERVICE_SERVICE}
                                 ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
+                                ${ART_PERSISTENCY_PROVENANCE}
                                 art_Persistency_Common canvas
                                 art_Utilities canvas
                                 cetlib cetlib_except
@@ -79,4 +80,3 @@ install_fhicl()
 install_source()
 install_fw( LIST sensl_1.dat
   SUBDIRNAME dune/OpticalDetector )
-
