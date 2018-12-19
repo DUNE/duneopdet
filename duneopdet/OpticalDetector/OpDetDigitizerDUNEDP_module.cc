@@ -221,7 +221,7 @@ namespace opdet {
   //---------------------------------------------------------------------------
   // Constructor
   OpDetDigitizerDUNEDP::OpDetDigitizerDUNEDP(fhicl::ParameterSet const& pset)
-
+  : EDProducer{pset}
   {
 
     // This module produces (infrastructure piece)
@@ -289,7 +289,8 @@ namespace opdet {
     createEngine(seed);
 
     art::ServiceHandle< art::RandomNumberGenerator > rng;
-    CLHEP::HepRandomEngine &engine = rng->getEngine();
+    CLHEP::HepRandomEngine &engine = rng->getEngine(art::ScheduleID::first(),
+                                                    pset.get<std::string>("module_label"));
     fRandGauss       = std::make_unique< CLHEP::RandGauss       >(engine);
     fRandExponential = std::make_unique< CLHEP::RandExponential >(engine);
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
