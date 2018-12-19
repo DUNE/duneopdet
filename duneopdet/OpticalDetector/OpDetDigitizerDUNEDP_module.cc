@@ -221,7 +221,7 @@ namespace opdet {
   //---------------------------------------------------------------------------
   // Constructor
   OpDetDigitizerDUNEDP::OpDetDigitizerDUNEDP(fhicl::ParameterSet const& pset)
-
+  : EDProducer{pset}
   {
 
     // This module produces (infrastructure piece)
