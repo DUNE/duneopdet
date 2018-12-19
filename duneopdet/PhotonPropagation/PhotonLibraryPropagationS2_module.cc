@@ -83,6 +83,7 @@ private:
 
 
 phot::PhotonLibraryPropagationS2::PhotonLibraryPropagationS2(fhicl::ParameterSet const & p)
+  : EDProducer{p}
 {
 
   art::ServiceHandle<sim::LArG4Parameters> lgp;
@@ -116,9 +117,13 @@ void phot::PhotonLibraryPropagationS2::produce(art::Event & e)
   //  const detinfo::LArProperties* larp = lar::providerFrom<detinfo::LArPropertiesService>();
   
   art::ServiceHandle<art::RandomNumberGenerator> rng;  
-  CLHEP::HepRandomEngine &engine_photon = rng->getEngine("photon");
+  CLHEP::HepRandomEngine &engine_photon = rng->getEngine(art::ScheduleID::first(),
+                                                         moduleDescription().moduleLabel(),
+							 "photon");
   CLHEP::RandPoissonQ randpoisphot(engine_photon);
-  CLHEP::HepRandomEngine &engine_scinttime = rng->getEngine("scinttime");
+  CLHEP::HepRandomEngine &engine_scinttime = rng->getEngine(art::ScheduleID::first(),
+                                                            moduleDescription().moduleLabel(),
+							    "scinttime");
   CLHEP::RandFlat randflatscinttime(engine_scinttime);
 
 
