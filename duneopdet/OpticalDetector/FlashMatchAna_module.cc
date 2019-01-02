@@ -24,6 +24,7 @@
 #include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "lardataobj/RecoBase/OpHit.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 #include "nusimdata/SimulationBase/MCTruth.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
@@ -46,10 +47,10 @@
 #include "canvas/Persistency/Common/FindManyP.h"
 
 namespace opdet {
- 
+
   class FlashMatchAna : public art::EDAnalyzer{
   public:
- 
+
     // Standard constructor and destructor for an ART module.
     FlashMatchAna(const fhicl::ParameterSet&);
     virtual ~FlashMatchAna();
@@ -58,8 +59,8 @@ namespace opdet {
     // example, it will define the histogram we'll write.
     void beginJob();
 
-    // The analyzer routine, called once per event. 
-    void analyze (const art::Event&); 
+    // The analyzer routine, called once per event.
+    void analyze (const art::Event&);
 
   private:
 
@@ -71,17 +72,21 @@ namespace opdet {
     std::string fOpHitModuleLabel;         // Input tag for OpHit collection
     std::string fSignalLabel;              // Input tag for the signal generator label
     std::string fGeantLabel;               // Input tag for GEANT
-    
+
     TTree * fFlashMatchTree;
     TTree * fLargestFlashTree;
     TTree * fSelectedFlashTree;
 
+
     TEfficiency * fRecoEfficiencyVsE;
     TEfficiency * fRecoEfficiencyVsX;
+    TEfficiency * fRecoEfficiencyVsXandE;
     TEfficiency * fLargestEfficiencyVsE;
     TEfficiency * fLargestEfficiencyVsX;
+    TEfficiency * fLargestEfficiencyVsXandE;
     TEfficiency * fSelectedEfficiencyVsE;
     TEfficiency * fSelectedEfficiencyVsX;
+    TEfficiency * fSelectedEfficiencyVsXandE;
 
     // Parameters from the fhicl
     int   fNBinsE;
@@ -101,8 +106,8 @@ namespace opdet {
     Float_t fDetectedT;
     Float_t fTrueE;
     Int_t   fTruePDG;
-    
-    Int_t fNFlashes;    
+
+    Int_t fNFlashes;
     std::vector< Int_t >   fFlashIDVector;
     std::vector< Float_t > fYCenterVector;
     std::vector< Float_t > fZCenterVector;
@@ -137,10 +142,19 @@ namespace opdet {
     Int_t    fNHitOpDets;
     std::vector< Float_t > fPEsPerOpDetVector;
 
-    
+    // For counting waveforms
+
+    std::string fOpDetWaveformLabel;
+    float fBaseline;
+    float fPE;
+    TTree * fCountTree;
+    Int_t fnwaveforms1pe;
+    Int_t fnwaveforms2pe;
+    Int_t fnwaveforms3pe;
+
   };
 
-} 
+}
 
 #endif // FlashMatchAna_H
 
@@ -165,7 +179,9 @@ namespace opdet {
     fHighX              = pset.get<float>("HighX");
     fDistanceCut        = pset.get<float>("DistanceCut");
 
-    
+    fOpDetWaveformLabel = pset.get<std::string>("OpDetWaveformLabel","");
+    fBaseline           = pset.get<float>("Baseline", 1500.);
+    fPE                 = pset.get<float>("PE", 18.);
 
     art::ServiceHandle< art::TFileService > tfs;
 
@@ -244,26 +260,38 @@ namespace opdet {
     fSelectedFlashTree->Branch("Purity",                      &fPurity,    "Purity/F");
     fSelectedFlashTree->Branch("Distance",                    &fDistance,    "Distance/F");
 
+    if (!fOpDetWaveformLabel.empty()) {
+      fCountTree = tfs->make<TTree>("CountWaveforms","CountWaveforms");
+      fCountTree->Branch("EventID",       &fEventID,      "EventID/I");
+      fCountTree->Branch("nwaveforms1pe", &fnwaveforms1pe, "nwaveforms1pe/I");
+      fCountTree->Branch("nwaveforms2pe", &fnwaveforms2pe, "nwaveforms2pe/I");
+      fCountTree->Branch("nwaveforms3pe", &fnwaveforms3pe, "nwaveforms3pe/I");
+    }
 
-    fRecoEfficiencyVsE     = tfs->make<TEfficiency>("recoEfficiencyVsE",     ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
-    fRecoEfficiencyVsX     = tfs->make<TEfficiency>("recoEfficiencyVsX",     ";Position (cm);Efficiency", fNBinsX, fLowX, fHighX);
-    fLargestEfficiencyVsE  = tfs->make<TEfficiency>("largestEfficiencyVsE",  ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
-    fLargestEfficiencyVsX  = tfs->make<TEfficiency>("largestEfficiencyVsX",  ";Position (cm);Efficiency", fNBinsX, fLowX, fHighX);
-    fSelectedEfficiencyVsE = tfs->make<TEfficiency>("selectedEfficiencyVsE", ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
-    fSelectedEfficiencyVsX = tfs->make<TEfficiency>("selectedEfficiencyVsX", ";Position (cm);Efficiency", fNBinsX, fLowX, fHighX);
+
+
+    fRecoEfficiencyVsE         = tfs->make<TEfficiency>("recoEfficiencyVsE",         ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
+    fRecoEfficiencyVsX         = tfs->make<TEfficiency>("recoEfficiencyVsX",         ";Position (cm);Efficiency", fNBinsX, fLowX, fHighX);
+    fRecoEfficiencyVsXandE     = tfs->make<TEfficiency>("recoEfficiencyVsXandE",     ";Position (cm);Energy (GeV);Efficiency", fNBinsX, fLowX, fHighX, fNBinsE, fLowE, fHighE);
+    fLargestEfficiencyVsE      = tfs->make<TEfficiency>("largestEfficiencyVsE",      ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
+    fLargestEfficiencyVsX      = tfs->make<TEfficiency>("largestEfficiencyVsX",      ";Position (cm);Efficiency", fNBinsX, fLowX, fHighX);
+    fLargestEfficiencyVsXandE  = tfs->make<TEfficiency>("largestEfficiencyVsXandE",  ";Position (cm);Energy (GeV);Efficiency", fNBinsX, fLowX, fHighX, fNBinsE, fLowE, fHighE);
+    fSelectedEfficiencyVsE     = tfs->make<TEfficiency>("selectedEfficiencyVsE",     ";Energy (GeV);Efficiency",  fNBinsE, fLowE, fHighE);
+    fSelectedEfficiencyVsX     = tfs->make<TEfficiency>("selectedEfficiencyVsX",     ";Position (cm);Efficiency", fNBinsX, fLowX, fHighX);
+    fSelectedEfficiencyVsXandE = tfs->make<TEfficiency>("selectedEfficiencyVsXandE", ";Position (cm);Energy (GeV);Efficiency", fNBinsX, fLowX, fHighX, fNBinsE, fLowE, fHighE);
   }
 
   //-----------------------------------------------------------------------
   // Destructor
-  FlashMatchAna::~FlashMatchAna() 
+  FlashMatchAna::~FlashMatchAna()
   {}
-   
+
   //-----------------------------------------------------------------------
   void FlashMatchAna::beginJob()
   {}
 
   //-----------------------------------------------------------------------
-  void FlashMatchAna::analyze(const art::Event& evt) 
+  void FlashMatchAna::analyze(const art::Event& evt)
   {
     // Get the required services
     auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
@@ -273,7 +301,7 @@ namespace opdet {
     art::ServiceHandle<cheat::ParticleInventoryService> pinv;
     art::ServiceHandle< art::TFileService > tfs;
     //pbt->Rebuild(evt);
-    
+
 
     // Record the event ID
     fEventID = evt.id().event();
@@ -282,7 +310,7 @@ namespace opdet {
     //////////////////////////////////////
     // Access all the truth information //
     //////////////////////////////////////
-    
+
     auto MClistHandle = evt.getValidHandle<std::vector<simb::MCTruth> >(fSignalLabel);
 
     art::Ptr<simb::MCTruth> mctruth(MClistHandle, 0);
@@ -325,11 +353,11 @@ namespace opdet {
     fDetectedT = fTrueT + deltaT;
 
     // Get the maximum possible time difference by getting number of ticks corresponding to
-    // one full drift distance, and converting to time. 
+    // one full drift distance, and converting to time.
     double maxT = timeService->TPCTick2Time(detprop->NumberTimeSamples());
-    
 
-    
+
+
     //////////////////////////////////////
     // Access all the Flash Information //
     //////////////////////////////////////
@@ -345,9 +373,9 @@ namespace opdet {
       mf::LogError("FlashMatchAna") << "Cannot load any flashes. Failing";
       abort();
     }
-    
+
     // Get assosciations between flashes and hits
-    art::FindManyP< recob::OpHit > Assns(flashlist, evt, fOpFlashModuleLabel);
+    //art::FindManyP< recob::OpHit > Assns(flashlist, evt, fOpFlashModuleLabel);
 
 
     // Set up some flags to fill as we loop
@@ -358,23 +386,26 @@ namespace opdet {
     bool LargestRight     = false;
     bool SelectedFound    = false;
     bool SelectedRight    = false;
-    
-    
-    // For every OpFlash in the vector 
+
+
+    // For every OpFlash in the vector
     fNOpDets   = geom->NOpDets();
     fNFlashes  = flashlist.size();
     for(unsigned int i = 0; i < flashlist.size(); ++i)
     {
       // Get OpFlash and associated hits
       recob::OpFlash TheFlash = *flashlist[i];
-      std::vector< art::Ptr<recob::OpHit> > matchedHits = Assns.at(i);
+      art::Ptr<recob::OpFlash> FlashP = flashlist[i];
+      std::vector< art::Ptr<recob::OpHit> > hitFromFlash = pbt->OpFlashToOpHits_Ps(FlashP);
+      std::vector< art::Ptr<recob::OpHit> > matchedHits = pbt->OpFlashToOpHits_Ps(FlashP);
+      //std::vector< art::Ptr<recob::OpHit> > matchedHits = Assns.at(i);
 
       // Calculate the flash purity
       double purity = pbt->OpHitCollectionPurity(signal_trackids, matchedHits);
-      
+
       // Calcuate relative detection time
       double timeDiff = fDetectedT - TheFlash.Time();
-      
+
       // Check if this is a possible flash (w/in 1 drift window)
       // Otherwise, skip it
       if (timeDiff < -10 || timeDiff > maxT)
@@ -406,7 +437,7 @@ namespace opdet {
         unsigned int iOD = geom->OpDetFromOpChannel(iC);
         fPEsPerOpDetVector[iOD] += TheFlash.PE(iC);
       }
-      
+
       fNHitOpDets = 0;
       for(unsigned int iOD = 0; iOD < geom->NOpDets(); ++iOD){
         if (fPEsPerOpDetVector[iOD] > 0) ++fNHitOpDets;
@@ -431,7 +462,7 @@ namespace opdet {
       // Did we reconstruct any flashes with signal in them?
       if (fPurity > 0) AnyReconstructed = true;
 
-        
+
       // First == Largest, so if this is the first flash it is also the largest.
       // So, fill the LargestFlash tree and the LargestFlash efficiency plots
       if (!LargestFound) {
@@ -466,20 +497,51 @@ namespace opdet {
     // but use the booleans to decide if it was
     // "selected" or not.
     fRecoEfficiencyVsE->Fill(AnyReconstructed, fTrueE);
-    fRecoEfficiencyVsX ->Fill(AnyReconstructed, fTrueX);
+    fRecoEfficiencyVsX->Fill(AnyReconstructed, fTrueX);
+    fRecoEfficiencyVsXandE->Fill(AnyReconstructed, fTrueX, fTrueE);
 
     fLargestEfficiencyVsE->Fill(LargestRight, fTrueE);
     fLargestEfficiencyVsX->Fill(LargestRight, fTrueX);
-    
+    fLargestEfficiencyVsXandE->Fill(LargestRight, fTrueX, fTrueE);
+
     fSelectedEfficiencyVsE->Fill(SelectedRight, fTrueE);
     fSelectedEfficiencyVsX->Fill(SelectedRight, fTrueX);
+    fSelectedEfficiencyVsXandE->Fill(SelectedRight, fTrueX, fTrueE);
+
+
+
+    ///////////////////////////////////////////////////
+    // Count waveforms if a waveform label was given //
+    ///////////////////////////////////////////////////
+
+    if (!fOpDetWaveformLabel.empty()) {
+      fnwaveforms1pe = 0;
+      fnwaveforms2pe = 0;
+      fnwaveforms3pe = 0;
+      art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
+      if (evt.getByLabel(fOpDetWaveformLabel, wfHandle)) {
+        fnwaveforms1pe = wfHandle->size();
+
+        for (auto wf: *wfHandle) {
+          auto it = max_element(std::begin(wf), std::end(wf));
+          double peak = *it - fBaseline;
+          if ( peak > (1.5*fPE)) {
+            ++fnwaveforms2pe;
+
+            if ( peak > (2.5*fPE) )
+              ++fnwaveforms3pe;
+          }
+        }
+        fCountTree->Fill();
+      }
+    }
 
 
 
     ///////////////////////////////////////////////
     // Write out the FlashMatchTree and clean up //
     ///////////////////////////////////////////////
-    
+
     fFlashMatchTree->Fill();
     fFlashIDVector              .clear();
     fYCenterVector              .clear();
