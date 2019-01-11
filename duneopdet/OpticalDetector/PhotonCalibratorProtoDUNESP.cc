@@ -217,7 +217,7 @@ namespace calib {
       //ARAPUCA
       -0.05, -0.05, -0.05, -0.03, //Channels 132-135, MPPC, ARAPUCA
       -0.07, -0.06, -0.09, -0.02, //Channels 136-139, MPPC, ARAPUCA
-      -0.08, 0.00., 0., 0., //Channels 140-143, MPPC, ARAPUCA
+      -0.08, 0.00, 0., 0., //Channels 140-143, MPPC, ARAPUCA
       
       //SSP302
       0.00, 0.00, 0., -0.02, //Channels 108-111, SensL-A, DC
