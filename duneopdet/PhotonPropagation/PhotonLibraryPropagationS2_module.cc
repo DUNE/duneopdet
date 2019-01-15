@@ -330,7 +330,7 @@ void phot::PhotonLibraryPropagationS2::produce(art::Event & e)
      mf::LogError("PhotonLibraryPropagationS2") << "Error creating S2 light, SimPhotons data product is not supported."<<std::endl;
      //std::cout << "SIMPHOTONS NOT SUPPORTED!!! "<< std::endl;
       /*
-    LOG_DEBUG("Optical") << "Storing OpDet Hit Collection in Event";
+    MF_LOG_DEBUG("Optical") << "Storing OpDet Hit Collection in Event";
     std::vector<sim::SimPhotons>& ThePhotons = larg4::OpDetPhotonTable::Instance()->GetPhotons();
     PhotonCol->reserve(ThePhotons.size());
     for(auto& it : ThePhotons)
