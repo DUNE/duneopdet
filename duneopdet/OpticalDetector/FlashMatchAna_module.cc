@@ -106,6 +106,8 @@ namespace opdet {
     Float_t fDetectedT;
     Float_t fTrueE;
     Int_t   fTruePDG;
+    Float_t fRecoX;
+
 
     Int_t fNFlashes;
     std::vector< Int_t >   fFlashIDVector;
@@ -114,6 +116,7 @@ namespace opdet {
     std::vector< Float_t > fYWidthVector;
     std::vector< Float_t > fZWidthVector;
     std::vector< Float_t > fTimeVector;
+    std::vector< Float_t > fRecoXVector;
     std::vector< Float_t > fTimeWidthVector;
     std::vector< Float_t > fTimeDiffVector;
     std::vector< Int_t >   fFlashFrameVector;
@@ -208,6 +211,8 @@ namespace opdet {
     fFlashMatchTree->Branch("NHitOpDetVector",             &fNHitOpDetVector);
     fFlashMatchTree->Branch("Purity",                      &fPurityVector);
     fFlashMatchTree->Branch("Distance",                    &fDistanceVector);
+    fFlashMatchTree->Branch("RecoXVector",                 &fRecoXVector);
+
 
     fLargestFlashTree = tfs->make<TTree>("LargestFlashTree","LargestFlashTree");
     fLargestFlashTree->Branch("EventID",                     &fEventID,   "EventID/I");
@@ -233,7 +238,8 @@ namespace opdet {
     fLargestFlashTree->Branch("PEsPerOpDetVector",           &fPEsPerOpDetVector);
     fLargestFlashTree->Branch("Purity",                      &fPurity,    "Purity/F");
     fLargestFlashTree->Branch("Distance",                    &fDistance,  "Distance/F");
-
+    fLargestFlashTree->Branch("RecoX",                       &fRecoX,     "RecoX/F");
+      
 
     fSelectedFlashTree = tfs->make<TTree>("SelectedFlashTree","SelectedFlashTree");
     fSelectedFlashTree->Branch("EventID",                     &fEventID,   "EventID/I");
@@ -259,6 +265,8 @@ namespace opdet {
     fSelectedFlashTree->Branch("PEsPerOpDetVector",           &fPEsPerOpDetVector);
     fSelectedFlashTree->Branch("Purity",                      &fPurity,    "Purity/F");
     fSelectedFlashTree->Branch("Distance",                    &fDistance,    "Distance/F");
+    fSelectedFlashTree->Branch("RecoX",                       &fRecoX,     "RecoX/F");
+   
 
     if (!fOpDetWaveformLabel.empty()) {
       fCountTree = tfs->make<TTree>("CountWaveforms","CountWaveforms");
@@ -352,6 +360,7 @@ namespace opdet {
     double deltaT = timeService->TPCTick2Time(deltaTicks);
     fDetectedT = fTrueT + deltaT;
 
+
     // Get the maximum possible time difference by getting number of ticks corresponding to
     // one full drift distance, and converting to time.
     double maxT = timeService->TPCTick2Time(detprop->NumberTimeSamples());
@@ -406,6 +415,9 @@ namespace opdet {
       // Calcuate relative detection time
       double timeDiff = fDetectedT - TheFlash.Time();
 
+      double ticks = timeService->Time2Tick(timeDiff);
+      fRecoX = detprop->ConvertTicksToX(ticks, planeid);
+
       // Check if this is a possible flash (w/in 1 drift window)
       // Otherwise, skip it
       if (timeDiff < -10 || timeDiff > maxT)
@@ -427,6 +439,7 @@ namespace opdet {
       fDistance = sqrt( pow(fTrueY-fYCenter,2) +  pow(fTrueZ-fZCenter,2) );
 
 
+
       // Loop through all the opdets with hits in this flash
       fPEsPerOpDetVector.clear();
       for(unsigned int iOD = 0; iOD < geom->NOpDets(); ++iOD){
@@ -443,7 +456,7 @@ namespace opdet {
         if (fPEsPerOpDetVector[iOD] > 0) ++fNHitOpDets;
       }
       fNHitOpDetVector.emplace_back(fNHitOpDets);
-
+     
 
       // Add flash info to the tree of all possible flashes
       fFlashIDVector    .emplace_back(fFlashID);
@@ -457,6 +470,7 @@ namespace opdet {
       fTotalPEVector    .emplace_back(fTotalPE);
       fPurityVector     .emplace_back(fPurity);
       fDistanceVector   .emplace_back(fDistance);
+      fRecoXVector      .emplace_back(fRecoX);
 
 
       // Did we reconstruct any flashes with signal in them?
@@ -555,6 +569,7 @@ namespace opdet {
     fNHitOpDetVector            .clear();
     fPurityVector               .clear();
     fDistanceVector             .clear();
+    fRecoXVector                .clear();
   }
 } // namespace opdet
 
