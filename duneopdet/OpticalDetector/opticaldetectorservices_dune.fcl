@@ -4,20 +4,6 @@
 BEGIN_PROLOG
 
 
-##
-# Opdigi Properties for both detectors
-##
-
-dunefd_opdigiproperties:           @local::standard_opdigiproperties
-dunefd_opdigiproperties.WaveformFile: "dune/OpticalDetector/sensl_1.dat"
-dunefd_opdigiproperties.UseEmpiricalShape: true
-dunefd_opdigiproperties_3windows:  @local::standard_opdigiproperties_3windows
-
-dune35t_opdigiproperties:           @local::standard_opdigiproperties
-dune35t_opdigiproperties.WaveformFile: "dune/OpticalDetector/sensl_1.dat"
-dune35t_opdigiproperties.UseEmpiricalShape: true
-dune35t_opdigiproperties_3windows:  @local::standard_opdigiproperties_3windows
-
 #
 ## dune photon backtracker
 #
