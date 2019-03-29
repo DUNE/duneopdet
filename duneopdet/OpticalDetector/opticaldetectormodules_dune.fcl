@@ -107,6 +107,7 @@ protodune_ophit_data_unsplit: @local::protodune_ophit
 protodune_ophit_data_unsplit.InputModule:  ssprawdecoder
 protodune_ophit_data_unsplit.InputLabels: [ "daq" ]
 protodune_ophit_data_unsplit.UseCalibrator: true
+protodune_ophit_data_unsplit.HitAlgoPset.ADCThreshold: 10
 
 # Make variants for internal/external split waveforms
 protodune_ophit_data_internal: @local::protodune_ophit_data_unsplit
