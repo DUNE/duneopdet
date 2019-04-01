@@ -86,6 +86,7 @@ dunefd_ophit_single.SPEShift:    0.304
 dunefd_ophit_threegang:          @local::dunefd_ophit_single
 dunefd_ophit_threegang.SPEArea:  264
 dunefd_ophit_threegang.SPEShift: 0.430
+dunefd_ophit_threegang.HitAlgoPset.ADCThreshold: 6
 
 dunefd_ophit: @local::dunefd_ophit_threegang
 
@@ -106,6 +107,7 @@ protodune_ophit_data_unsplit: @local::protodune_ophit
 protodune_ophit_data_unsplit.InputModule:  ssprawdecoder
 protodune_ophit_data_unsplit.InputLabels: [ "daq" ]
 protodune_ophit_data_unsplit.UseCalibrator: true
+protodune_ophit_data_unsplit.HitAlgoPset.ADCThreshold: 10
 
 # Make variants for internal/external split waveforms
 protodune_ophit_data_internal: @local::protodune_ophit_data_unsplit
