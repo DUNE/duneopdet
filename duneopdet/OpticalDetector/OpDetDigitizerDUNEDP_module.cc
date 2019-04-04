@@ -21,8 +21,8 @@
 #include "art/Framework/Services/Optional/RandomNumberGenerator.h"
 #include "canvas/Utilities/Exception.h"
 #include "fhiclcpp/ParameterSet.h"
-#include "art/Framework/Services/Optional/TFileService.h" //vitor
-#include "art/Framework/Services/Optional/TFileDirectory.h"//vitor
+#include "art_root_io/TFileService.h"
+#include "art_root_io/TFileDirectory.h"
 #include "CLHEP/Random/RandFlat.h"
 
 
