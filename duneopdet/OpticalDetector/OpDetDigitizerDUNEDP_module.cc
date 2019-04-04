@@ -18,7 +18,6 @@
 #include "art/Framework/Principal/Event.h"
 #include "art/Framework/Principal/Handle.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
-#include "art/Framework/Services/Optional/RandomNumberGenerator.h"
 #include "canvas/Utilities/Exception.h"
 #include "fhiclcpp/ParameterSet.h"
 #include "art_root_io/TFileService.h"
@@ -286,11 +285,7 @@ namespace opdet {
 
     // Initializing random number engines
     unsigned int seed = pset.get< unsigned int >("Seed", sim::GetRandomNumberSeed());
-    createEngine(seed);
-
-    art::ServiceHandle< art::RandomNumberGenerator > rng;
-    CLHEP::HepRandomEngine &engine = rng->getEngine(art::ScheduleID::first(),
-                                                    pset.get<std::string>("module_label"));
+    auto& engine = createEngine(seed);
     fRandGauss       = std::make_unique< CLHEP::RandGauss       >(engine);
     fRandExponential = std::make_unique< CLHEP::RandExponential >(engine);
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
