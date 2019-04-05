@@ -103,7 +103,7 @@ namespace opdet {
 
   //--------------------------------------------------------------------------
   // Constructor
-  OpSlicer::OpSlicer(const fhicl::ParameterSet & pset)
+  OpSlicer::OpSlicer(const fhicl::ParameterSet & pset) : EDProducer{pset}
   {
 
     reconfigure(pset);

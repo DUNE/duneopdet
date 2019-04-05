@@ -92,7 +92,7 @@ namespace opdet {
   //---------------------------------------------------------------------------
   // Constructor
   PDSNoiseFilter::PDSNoiseFilter(Parameters const & config)
-    : art::EDProducer(), 
+    : EDProducer{config},
       fInputModule(config().InputModule()),
       fInputLabels(config().InputLabels())
       // Additional fhicl parameters here
