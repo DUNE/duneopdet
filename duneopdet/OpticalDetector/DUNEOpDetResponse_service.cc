@@ -13,7 +13,7 @@
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "CLHEP/Random/RandFlat.h"
-
+#include <boost/algorithm/string.hpp>
 
 namespace opdet{
 
