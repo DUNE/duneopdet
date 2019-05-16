@@ -38,6 +38,7 @@ namespace calib {
   private:
     std::vector<float>  fSPESizes;
     std::vector<float>  fSPEShifts;
+    std::vector<int>    fBadChannels;
 
     
   }; // class PhotonCalibratorProtoDUNESP
