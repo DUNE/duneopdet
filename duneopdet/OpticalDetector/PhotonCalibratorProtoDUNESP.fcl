@@ -6,6 +6,7 @@ BEGIN_PROLOG
 protodunesp_photoncalibrator:
 {
    service_provider: PhotonCalibratorServiceProtoDUNESP
+   BadChannels:      [ ]
 }
 
 
