@@ -1,8 +1,3 @@
-#include "opticaldetectormodules.fcl"
-#include "sspmodules.fcl"
-
-BEGIN_PROLOG
-
 
 standard_ProtoDUNEopdeteventdisplay:
 {
@@ -25,4 +20,4 @@ standard_ProtoDUNEopdeteventdisplay:
   MakePerEventFlashTree:   false
 
 }
-END_PROLOG
+
