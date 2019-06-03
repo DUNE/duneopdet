@@ -37,6 +37,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <limits>
 
 namespace opdet {
 
@@ -281,13 +282,13 @@ namespace opdet {
         if ( Dist(ohits[i],ohits[j]) < fR0 && !isClust[j] ){
           neigh.push_back(j);
         }
-        if (abs(ohits[i]->PeakTime()-ohits[j]->PeakTime())>2) break;
+        if (abs(ohits[i]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
       for (int j = i+1; j < int(ohits.size()); j++){
         if ( Dist(ohits[i],ohits[j]) < fR0 && !isClust[j] ){
           neigh.push_back(j);
         }
-        if (abs(ohits[i]->PeakTime()-ohits[j]->PeakTime())>2) break;
+        if (abs(ohits[i]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
       if (int(neigh.size())<fMinN) continue;
       neigh.erase(neigh.begin(),neigh.end());
@@ -295,7 +296,7 @@ namespace opdet {
       std::vector<int> cands;
       for (int j = i; j < int(ohits.size()); j++){
         if (isClust[j]) continue;
-        if (ohits[j]->PeakTime()-ohits[i]->PeakTime()>fBreakTime) break;
+        if (ohits[j]->PeakTimeAbs()-ohits[i]->PeakTimeAbs()>fBreakTime) break;
         cands.push_back(j);
       }
       int centroidIdx = YZCentroid(ohits,cands);
@@ -311,14 +312,14 @@ namespace opdet {
           neigh.push_back(j);
           curN.push_back(j);
         }
-        if (abs(ohits[centroidIdx]->PeakTime()-ohits[j]->PeakTime())>2) break;
+        if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
       for (int j = centroidIdx+1; j < int(ohits.size()); j++){
         if ( Dist(ohits[centroidIdx],ohits[j]) < fR0 && !isClust[j] ){
           neigh.push_back(j);
           curN.push_back(j);
         }
-        if (abs(ohits[centroidIdx]->PeakTime()-ohits[j]->PeakTime())>2) break;
+        if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
       double totPE = 0;
       for (int idx : curN) totPE += ohits[idx]->PE();
@@ -333,14 +334,14 @@ namespace opdet {
           if ( Dist(ohits[neigh[0]],ohits[j]) < fR0 && !isClust[j] ){
             curNeigh.push_back(j);
           }
-          if (abs(ohits[centroidIdx]->PeakTime()-ohits[j]->PeakTime())>2)
+          if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2)
             break;
         }
         for (int j = neigh[0]+1; j < int(ohits.size()); j++){
           if ( Dist(ohits[neigh[0]],ohits[j]) < fR0 && !isClust[j] ){
             curNeigh.push_back(j);
           }
-          if (abs(ohits[centroidIdx]->PeakTime()-ohits[j]->PeakTime())>2)
+          if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2)
             break;
         }
         // If this is a core point, add in all reachable hits to neighborhood
@@ -367,7 +368,7 @@ namespace opdet {
       geo->OpDetGeoFromOpChannel(channelcentroid).GetCenter(xyzcentroid);
       double yCenter = xyzcentroid[1];
       double zCenter = xyzcentroid[2];
-      double tCenter = centroid->PeakTime();
+      double tCenter = centroid->PeakTimeAbs();
 
 
       // Now that we have centroid coordinates, include ana delayed light
@@ -377,7 +378,7 @@ namespace opdet {
         if ( r < fRScale*fR0){
           curN.push_back(j);
         }
-        if (abs(ohits[j]->PeakTime()-tCenter)>fBreakTime) break;
+        if (abs(ohits[j]->PeakTimeAbs()-tCenter)>fBreakTime) break;
       }
 
       // Grab the y-z information from the geometry
@@ -385,20 +386,20 @@ namespace opdet {
       std::vector<double> zs;
       GetHitYZ(ohits,curN,ys,zs);
 
-      double minT = 1e6; double maxT = -1e6;
+      double minT = std::numeric_limits<double>::max(); double maxT = -std::numeric_limits<double>::max();
       double minY = 1e6; double maxY = -1e6;
       double minZ = 1e6; double maxZ = -1e6;
 
-      std::vector<double> PEs;
+      std::vector<double> PEs (geo->MaxOpChannel() + 1,0.0);
       double fastToTotal = 0;
       for (int hIdx = 0; hIdx < int(ys.size()); hIdx++){
-        minT = std::min(minT,ohits[hIdx]->PeakTime());
-        maxT = std::max(maxT,ohits[hIdx]->PeakTime());
+        minT = std::min(minT,ohits[hIdx]->PeakTimeAbs());
+        maxT = std::max(maxT,ohits[hIdx]->PeakTimeAbs());
         minY = std::min(minY,ys[hIdx]);
         maxY = std::min(maxY,ys[hIdx]);
         minZ = std::min(minZ,zs[hIdx]);
         maxZ = std::min(maxZ,zs[hIdx]);
-        PEs.push_back(ohits[hIdx]->PE());
+        PEs[ohits[hIdx]->OpChannel()] = ohits[hIdx]->PE();
         fastToTotal += ohits[hIdx]->FastToTotal();
       }
       double yWidth = maxY-minY;
