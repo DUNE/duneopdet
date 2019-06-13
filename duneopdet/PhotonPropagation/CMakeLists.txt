@@ -36,7 +36,7 @@ art_make(
 			${ART_ROOT_IO_TFILE_SUPPORT} ${ROOT_CORE}
 			${ART_ROOT_IO_TFILESERVICE_SERVICE}
                         ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
-			nutools_RandomUtils_NuRandomService_service
+			nurandom_RandomUtils_NuRandomService_service
 			art_Persistency_Common
 			art_Persistency_Provenance
 			art_Utilities

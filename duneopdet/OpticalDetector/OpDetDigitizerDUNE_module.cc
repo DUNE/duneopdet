@@ -28,7 +28,7 @@
 
 
 // ART extensions
-#include "nutools/RandomUtils/NuRandomService.h"
+#include "nurandom/RandomUtils/NuRandomService.h"
 
 // LArSoft includes
 
