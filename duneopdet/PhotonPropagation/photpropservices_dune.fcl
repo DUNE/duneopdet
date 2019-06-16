@@ -221,6 +221,35 @@ protodune_photonvisibilityservice:
 
 
 
+########################################
+# ProtoDUNE Single Phase  with arapucas#
+########################################
+
+protodunev6_photonvisibilityservice:
+{
+
+  NX: 140
+  NY: 120
+  NZ: 140
+   
+  UseCryoBoundary: true
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+#  LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev6.root"
+#  LibraryFile: "/cvmfs/dune.osgstorage.org/pnfs/fnal.gov/usr/dune/persistent/stash/PhotonPropagation/LibraryData/lib_Protodunev6.root"
+
+  #These are not used when usecryoboundary=true
+  XMin: -120
+  XMax: 120
+  YMin: -120
+  YMax: 120
+  ZMin: 0
+  ZMax: 1200
+}
+
+
+
+
 
 ########################
 # ProtoDUNE Dual Phase #
