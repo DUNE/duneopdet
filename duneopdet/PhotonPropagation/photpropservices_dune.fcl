@@ -142,11 +142,6 @@ dunesp_Nhits_vuv_prop_timing_photonvisibilityservice:
    # Semi-analytic VUV Nhits parameters
    GH_PARS: @local::GH_RS60cm_SP
 
-   # Optical Detector information - to be replaced with using geometry service subsequently
-   Optical_Detector_Type: 0     # 0 = rectangular, 1 = disk
-   APERTURE_height: 9.3         # sensitive window heigh (in cm)
-   APERTURE_width: 46.8         # sensitive window width supercell (in cm)
-   PMT_radius: 10.16            # 8 inch diameter PMT (in cm)
 }
 
 #
