@@ -156,12 +156,19 @@ dunesp_Nhits_vuv_vis_prop_timing_photonvisibilityservice:
    # Flag to enable visible light simulation
    StoreReflected: true
  
-   # DUNE-specific VIS parameterization
+   # DUNE-SP VIS parameterization
    @table::dunesp_vis_timing_parameterization
 
-   # Semi-analytic VIS Nhits parameters
+   # DUNE-SP semi-analytic VIS Nhits parameters
    VIS_PARS: @local::VIS_RS60cm_SP
-   @table::dunesp_cathode_info_for_nhits_vis
+
+   # VIS border correction
+   ApplyVISBorderCorrection: true
+   VIS_BORDER_correction_type: @local::VIS_RS60cm_SP_BORDER_correction_type
+   VIS_BORDER_distances_x: @local::VIS_RS60cm_SP_BORDER_distances_x
+   VIS_BORDER_distances_r: @local::VIS_RS60cm_SP_BORDER_distances_r
+   VIS_BORDER_correction: @local::VIS_RS60cm_SP_BORDER_correction
+
 }
 
 ##############
