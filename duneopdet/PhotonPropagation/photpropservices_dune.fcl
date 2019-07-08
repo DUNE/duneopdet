@@ -197,7 +197,7 @@ dune10kt_1x2x6_refl_photonvisibilityservice_buildlib.LibraryFile:      "PhotonPr
 ##########################
 
 
-protodune_photonvisibilityservice:
+protodunev4_photonvisibilityservice:
 {
 
   NX: 100
@@ -245,6 +245,11 @@ protodunev7_photonvisibilityservice:
   ZMin: 0
   ZMax: 1200
 }
+
+
+# Make the v4 visibility service the default
+
+protodune_photonvisibilityservice: @local::protodunev4_photonvisibilityservice
 
 
 
