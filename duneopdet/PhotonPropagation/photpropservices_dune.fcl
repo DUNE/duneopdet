@@ -197,7 +197,7 @@ dune10kt_1x2x6_refl_photonvisibilityservice_buildlib.LibraryFile:      "PhotonPr
 ##########################
 
 
-protodune_photonvisibilityservice:
+protodunev4_photonvisibilityservice:
 {
 
   NX: 100
@@ -217,6 +217,39 @@ protodune_photonvisibilityservice:
   ZMin: 0
   ZMax: 1200
 }
+
+
+
+
+########################################
+# ProtoDUNE Single Phase  with arapucas#
+########################################
+
+protodunev7_photonvisibilityservice:
+{
+
+  NX: 140
+  NY: 120
+  NZ: 140
+   
+  UseCryoBoundary: true
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7.root"
+
+  #These are not used when usecryoboundary=true
+  XMin: -120
+  XMax: 120
+  YMin: -120
+  YMax: 120
+  ZMin: 0
+  ZMax: 1200
+}
+
+
+# Make the v4 visibility service the default
+
+protodune_photonvisibilityservice: @local::protodunev4_photonvisibilityservice
 
 
 
