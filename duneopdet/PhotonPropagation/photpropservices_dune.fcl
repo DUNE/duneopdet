@@ -279,9 +279,9 @@ protodunev7_photonvisibilityservice:
 }
 
 
-# Make the v4 visibility service the default
+# Make the v7 visibility service the default
 
-protodune_photonvisibilityservice: @local::protodunev4_photonvisibilityservice
+protodune_photonvisibilityservice: @local::protodunev7_photonvisibilityservice
 
 
 
