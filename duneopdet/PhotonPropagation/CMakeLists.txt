@@ -1,7 +1,7 @@
 
 art_make(
           SERVICE_LIBRARIES larsim_PhotonPropagation
-                        larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation
+                        larsim_Simulation nug4_ParticleNavigation lardataobj_Simulation
                         larevt_Filters
 	                lardataobj_RawData
 	                larcorealg_Geometry
@@ -27,7 +27,7 @@ art_make(
                         larsim_LArG4
                         lardataobj_Simulation
                         dune_PhotonPropagation_PhotonVisibilityServiceS2_service
-                        larsim_Simulation nutools_ParticleNavigation lardataobj_Simulation
+                        larsim_Simulation nug4_ParticleNavigation lardataobj_Simulation
                         larcorealg_Geometry
       	                larcore_Geometry_Geometry_service
                         ${ART_FRAMEWORK_CORE}
