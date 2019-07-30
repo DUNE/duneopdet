@@ -19,6 +19,7 @@
 // ART Includes
 #include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/types/Atom.h"
+#include "fhiclcpp/types/Sequence.h"
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
@@ -40,7 +41,7 @@ namespace calib {
     {
       //fhicl::Atom<float> SPESize  { fhicl::Name("SPESize")  };
       //fhicl::Atom<float> SPEShift { fhicl::Name("SPEShift") };
-      //fhicl::Atom<float> UseArea  { fhicl::Name("UseArea")  };
+      fhicl::Sequence<int> BadChannels { fhicl::Name("BadChannels"), fhicl::Comment("Channels to remove from reconstruction")  };
     };
     
     using Parameters = art::ServiceTable<ServiceConfiguration_t>;

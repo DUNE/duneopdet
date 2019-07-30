@@ -4,7 +4,7 @@
 // (creating OpDetWaveform)
 // from photon detectors taking SimPhotonsLite as input.
 //
-// Gleb Sinev, Duke, 2015
+// J. Soto, CIEMAT, 2018
 // Based on OpMCDigi_module.cc
 //=========================================================
 
@@ -26,7 +26,7 @@
 
 
 // ART extensions
-#include "nutools/RandomUtils/NuRandomService.h"
+#include "nurandom/RandomUtils/NuRandomService.h"
 
 // LArSoft includes
 
@@ -159,7 +159,9 @@ namespace opdet {
                     std::vector< double >& waveform,
                     FocusList& fl, double Gain) const;
       double fQE;
-
+      bool fCustomQE;
+      std::vector<double> fQEVector;
+      double  getQE(int OpDet);
       // Make sure the FHiCL parameters make sense
       void CheckFHiCLParameters() const;
 
@@ -169,6 +171,13 @@ namespace opdet {
 
       // Produce waveform on one of the optical detectors
       void CreatePDWaveform(sim::SimPhotonsLite const&,
+                            opdet::OpDetResponseInterface const&,
+                            geo::Geometry const&,
+                            std::vector< std::vector< double > >&,
+                            std::vector<FocusList>&);
+
+      // Produce waveform on one of the optical detectors
+      void CreatePDWaveform(sim::SimPhotons const&,
                             opdet::OpDetResponseInterface const&,
                             geo::Geometry const&,
                             std::vector< std::vector< double > >&,
@@ -240,6 +249,8 @@ namespace opdet {
     fGain               = pset.get< double >("Gain"              );
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
     fNegativeSignal     = pset.get< bool   >("NegativeSignal"    );
+    fCustomQE           = pset.get< bool   >("CustomQEperOpDet",false    );
+    if(fCustomQE) fQEVector = pset.get<std::vector<double>>("QEVector");
     fThreshAlg = std::make_unique< pmtana::AlgoSSPLeadingEdge >
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
 
@@ -291,13 +302,35 @@ namespace opdet {
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
 
     fSinglePEWaveform = odp->SinglePEWaveform();
+    if(fSampleFreq!=250)
+    {
+       int rebin=(int)(1.0*250/fSampleFreq);
+       std::vector <double> aux;
 
+       std::cout << "\tbefore: SinglePEWaveform: " << fSinglePEWaveform.size() <<"bins, rebin: "<< rebin<<std::endl;
+        if (rebin<(int)fSinglePEWaveform.size())
+        {
+           for(unsigned int i=0; i<fSinglePEWaveform.size();i++)
+           {
+              if(i%rebin==0) aux.push_back(fSinglePEWaveform[i]);
+              else aux[aux.size()-1]+=fSinglePEWaveform[i];
+           }
+        }
+        else
+        {
+           aux.resize(1);aux[0]=1.0;
+        }
+        fSinglePEWaveform=aux;
+    }
+    double normalization =0;
+    for(unsigned int i=0; i<fSinglePEWaveform.size();i++) normalization+=fSinglePEWaveform[i];
     std::cout << "Generating waveforms of " << fTimeEnd - fTimeBegin << "us = "<< (fTimeEnd - fTimeBegin)*fSampleFreq <<" Samples"<< std::endl;
     std::cout << "\tTimeBegin" << fTimeBegin <<" "<< std::endl;
     std::cout << "\tfTimeEnd" << fTimeEnd <<" "<< std::endl;
     std::cout << "\tSampleFreq" << fSampleFreq <<" "<< std::endl;
     std::cout << "\tReadoutWindow" << fReadoutWindow <<" "<< std::endl;
     std::cout << "\tfPreTrigger" << fPreTrigger <<" "<< std::endl;
+    std::cout << "\fSinglePEWaveform: " << fSinglePEWaveform.size() <<"bins, norm: "<< normalization<<std::endl;
 
   }
 
@@ -352,85 +385,153 @@ namespace opdet {
       modulecounter++;
 
       art::Handle< std::vector< sim::SimPhotonsLite > > litePhotonHandle;
-      evt.getByLabel(mod, litePhotonHandle);
+      if(fUseLitePhotons) evt.getByLabel(mod, litePhotonHandle);
 
+      art::Handle< std::vector< sim::SimPhotons > > PhotonHandle;
+      if(!fUseLitePhotons) evt.getByLabel(mod, PhotonHandle);
 
-     // For every optical detector:
-     for (auto const& litePhotons : (*litePhotonHandle))
-     {
-        // OpChannel in SimPhotonsLite is actually the photon detector number
-        //unsigned int opDet = litePhotons.OpChannel;
-       if(opDet == (unsigned)litePhotons.OpChannel)
+      if(fUseLitePhotons)
+      {
+
+       // For every optical detector:
+       for (auto const& litePhotons : (*litePhotonHandle))
        {
-        // Get number of channels in this optical detector
-        //unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
-	// it is one by default in the dual phase geometry, but let's keep it to have compatible functions with single phase.
+          // OpChannel in SimPhotonsLite is actually the photon detector number
+          //unsigned int opDet = litePhotons.OpChannel;
+         if(opDet == (unsigned)litePhotons.OpChannel)
+         {
+          // Get number of channels in this optical detector
+          //unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
+  	  // it is one by default in the dual phase geometry, but let's keep it to have compatible functions with single phase.
 
-        CreatePDWaveform(litePhotons, *odResponse, *geometry, pdWaveforms, fls[opDet]);
-        if((unsigned)modulecounter<fInputModule.size()) continue;//==fInputModule.size()
+          CreatePDWaveform(litePhotons, *odResponse, *geometry, pdWaveforms, fls[opDet]);
+          if((unsigned)modulecounter<fInputModule.size()) continue;//==fInputModule.size()
 
-        // Generate dark noise
-        if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet]);
+          // Generate dark noise
+          if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet]);
 
-        // Uncomment to undo the effect of FocusLists. Replaces the accumulated
-        // lists with ones asserting we need to look at the whole trace.
-        // for(FocusList& fl: fls){
-        //        fl.ranges.clear();
-        //        fl.ranges.emplace_back(0, nSamples-1);
-        // }
+          // Uncomment to undo the effect of FocusLists. Replaces the accumulated
+          // lists with ones asserting we need to look at the whole trace.
+          // for(FocusList& fl: fls){
+          //        fl.ranges.clear();
+          //        fl.ranges.emplace_back(0, nSamples-1);
+          // }
 
-        // Vary the pedestal
+          // Vary the pedestal
 
-        if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls[opDet]);
+          if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls[opDet]);
 
-        // Loop over all the created waveforms, split them into shorter
-        // waveforms and use them to initialize OpDetWaveforms
+          // Loop over all the created waveforms, split them into shorter
+          // waveforms and use them to initialize OpDetWaveforms
 
-        for (unsigned int hardwareChannel = 0;
-           hardwareChannel < nChannelsPerOpDet; ++hardwareChannel)
-        {
-          for(const std::pair<int, int>& p: fls[opDet][hardwareChannel].ranges){
+          for (unsigned int hardwareChannel = 0;
+             hardwareChannel < nChannelsPerOpDet; ++hardwareChannel)
+          {
+            for(const std::pair<int, int>& p: fls[opDet][hardwareChannel].ranges){
             // It's a shame we copy here. We could actually avoid by making the
             // functions below take a begin()/end() pair.
-            const std::vector<double> sub(pdWaveforms[hardwareChannel].begin()+p.first,
+              const std::vector<double> sub(pdWaveforms[hardwareChannel].begin()+p.first,
                                         pdWaveforms[hardwareChannel].begin()+p.second+1);
 
-            std::vector< short > waveformOfShorts =
-               VectorOfDoublesToVectorOfShorts(sub);
-            //std::cout << "waveformOfShorts " << waveformOfShorts.size()<< std::endl;
+              std::vector< short > waveformOfShorts =
+                 VectorOfDoublesToVectorOfShorts(sub);
+              //std::cout << "waveformOfShorts " << waveformOfShorts.size()<< std::endl;
 
-            std::map< size_t, std::vector < short > > mapTickWaveform =
-              (!fFullWaveformOutput) ?
-              SplitWaveform(waveformOfShorts, fls[opDet][hardwareChannel]) :
-              std::map< size_t, std::vector< short > >{ std::make_pair(0,
-                                                                     waveformOfShorts) };
+              std::map< size_t, std::vector < short > > mapTickWaveform =
+                (!fFullWaveformOutput) ?
+                SplitWaveform(waveformOfShorts, fls[opDet][hardwareChannel]) :
+                std::map< size_t, std::vector< short > >{ std::make_pair(0,
+                                                                       waveformOfShorts) };
 
-            //std::cout << "mapTickWaveform " << mapTickWaveform.size()<< std::endl;
-            unsigned int opChannel = geometry->OpChannel(opDet, hardwareChannel);
-            for (auto const& pairTickWaveform : mapTickWaveform)
-            {
-              double timeStamp =
-              static_cast< double >(TickToTime(pairTickWaveform.first+p.first));
-              //std::cout << "\tp " << p<< std::endl;
-              //std::cout << "\ttimeStamp " << timeStamp<< ", pairTickWaveform.first " << pairTickWaveform.first <<", p.first " << p.first<< std::endl;
-              //std::cout << "\tpairTickWaveform.second.size() " << pairTickWaveform.second.size()<< std::endl;
-
-              raw::OpDetWaveform adcVec(timeStamp, opChannel,
-                                        pairTickWaveform.second.size());
-              int counter=0;
-              for (short const& value : pairTickWaveform.second)
+              //std::cout << "mapTickWaveform " << mapTickWaveform.size()<< std::endl;
+              unsigned int opChannel = geometry->OpChannel(opDet, hardwareChannel);
+              for (auto const& pairTickWaveform : mapTickWaveform)
               {
-                //std::cout <<"\t\tvalue " << value<< std::endl;
-                adcVec.emplace_back(value); counter++;
-	      }
-              //std::cout <<"\t\tcounter " << counter<< std::endl;
-     	   
-              pulseVecPtr->emplace_back(std::move(adcVec));
-	    }//endloop per 
-	  }//endloop per Focus List <fls>
-        }//endloop per Hardware channel
-       }//endif pmt 
-      }//endloop per OpDet
+                double timeStamp =
+                static_cast< double >(TickToTime(pairTickWaveform.first+p.first));
+                //std::cout << "\tp " << p<< std::endl;
+                //std::cout << "\ttimeStamp " << timeStamp<< ", pairTickWaveform.first " << pairTickWaveform.first <<", p.first " << p.first<< std::endl;
+                // std::cout << "\tpairTickWaveform.second.size() " << pairTickWaveform.second.size()<< std::endl;
+
+                raw::OpDetWaveform adcVec(timeStamp, opChannel,
+                                          pairTickWaveform.second.size());
+                int counter=0;
+                for (short const& value : pairTickWaveform.second)
+                {
+                  //std::cout <<"\t\tvalue " << value<< std::endl;
+                  adcVec.emplace_back(value); counter++;
+	        } 
+                //std::cout <<"\t\tcounter " << counter<< std::endl;
+       	   
+                pulseVecPtr->emplace_back(std::move(adcVec));
+	      }//endloop per 
+	    }//endloop per Focus List <fls>
+          }//endloop per Hardware channel
+         }//endif pmt 
+        }//endloop per OpDet
+      }//endif litephotons
+      else //if SimPhotons
+      {  
+       // For every optical detector:
+       for (auto const& Photons : (*PhotonHandle))
+       {
+         if(opDet == (unsigned)Photons.OpChannel())
+         {
+          CreatePDWaveform(Photons, *odResponse, *geometry, pdWaveforms, fls[opDet]);
+          if((unsigned)modulecounter<fInputModule.size()) continue;//==fInputModule.size()
+
+          if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet]);
+
+          if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls[opDet]);
+
+          // Loop over all the created waveforms, split them into shorter
+          // waveforms and use them to initialize OpDetWaveforms
+
+          for (unsigned int hardwareChannel = 0;
+             hardwareChannel < nChannelsPerOpDet; ++hardwareChannel)
+          {
+            for(const std::pair<int, int>& p: fls[opDet][hardwareChannel].ranges){
+            // It's a shame we copy here. We could actually avoid by making the
+            // functions below take a begin()/end() pair.
+              const std::vector<double> sub(pdWaveforms[hardwareChannel].begin()+p.first,
+                                        pdWaveforms[hardwareChannel].begin()+p.second+1);
+
+              std::vector< short > waveformOfShorts =
+                 VectorOfDoublesToVectorOfShorts(sub);
+
+              std::map< size_t, std::vector < short > > mapTickWaveform =
+                (!fFullWaveformOutput) ?
+                SplitWaveform(waveformOfShorts, fls[opDet][hardwareChannel]) :
+                std::map< size_t, std::vector< short > >{ std::make_pair(0,
+                                                                       waveformOfShorts) };
+
+              //std::cout << "mapTickWaveform " << mapTickWaveform.size()<< std::endl;
+              unsigned int opChannel = geometry->OpChannel(opDet, hardwareChannel);
+              for (auto const& pairTickWaveform : mapTickWaveform)
+              {
+                double timeStamp =
+                static_cast< double >(TickToTime(pairTickWaveform.first+p.first));
+                //std::cout << "\tp " << p<< std::endl;
+                //std::cout << "\ttimeStamp " << timeStamp<< ", pairTickWaveform.first " << pairTickWaveform.first <<", p.first " << p.first<< std::endl;
+                // std::cout << "\tpairTickWaveform.second.size() " << pairTickWaveform.second.size()<< std::endl;
+
+                raw::OpDetWaveform adcVec(timeStamp, opChannel,
+                                          pairTickWaveform.second.size());
+                int counter=0;
+                for (short const& value : pairTickWaveform.second)
+                {
+                  //std::cout <<"\t\tvalue " << value<< std::endl;
+                  adcVec.emplace_back(value); counter++;
+	        } 
+                //std::cout <<"\t\tcounter " << counter<< std::endl;
+       	   
+                pulseVecPtr->emplace_back(std::move(adcVec));
+	      }//endloop per 
+	    }//endloop per Focus List <fls>
+          }//endloop per Hardware channel
+         }//endif pmt 
+        }//endloop per OpDet
+      } //endif litePhotons
     }//endloop per Input Module (S1 and S2 light)
    }//endloop per pmt
     if(fDigiTree_SSP_LED)
@@ -498,7 +599,61 @@ namespace opdet {
         if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
         {
           // Sample a random subset according to QE
-          if (CLHEP::RandFlat::shoot(1.0) <fQE)
+          if (CLHEP::RandFlat::shoot(1.0) <getQE(opDet))
+          {
+	    odResponse.detectedLite(opDet, readoutChannel);
+            unsigned int hardwareChannel = geometry.HardwareChannelFromOpChannel(readoutChannel);
+            // Convert the time of the pulse to ticks
+            size_t timeBin = TimeToTick(photonTime);
+            // Add 1 pulse to the waveform
+            AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel], fGain);
+            counter++;
+	    unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
+	    if(fDigiTree_SSP_LED){
+	    	op_photon.emplace_back(opChannel);
+	    	t_photon.emplace_back(photonTime);
+	    }
+	  }
+	  //else std::cout << "photon not detected "<< std::endl;
+        }
+      }
+    }
+//   std::cout << "Created waveform for channel " << opDet << " with " << counter << " photons." << std::endl;
+  
+  }
+
+  //---------------------------------------------------------------------------
+  void OpDetDigitizerDUNEDP::CreatePDWaveform
+                             (sim::SimPhotons const& Photons,
+                              opdet::OpDetResponseInterface const& odResponse,
+                              geo::Geometry const& geometry,
+                              std::vector< std::vector< double > >& pdWaveforms,
+                              std::vector<FocusList>& fls)
+  {
+
+    unsigned int const opDet = Photons.OpChannel();
+    int readoutChannel;
+    // For a group of photons arriving at the same time this is a map
+    // of < arrival time (in ns), number of photons >
+    std::map< int, int > photonsMap;
+    for(unsigned int i=0; i<Photons.size();i++)photonsMap[Photons[i].Time]=0;
+    for(unsigned int i=0; i<Photons.size();i++)photonsMap[Photons[i].Time]++;
+    int counter=0;
+    // For every pair of (arrival time, number of photons) in the map:
+
+    for (auto const& pulse : photonsMap)
+    {
+      // Converting ns to us
+      double photonTime = static_cast< double >(pulse.first)/1000.0;
+
+      int NumberOfPEs = PMTSaturationFunction(pulse.second);
+//      std::cout << "Adding " <<NumberOfPEs << "PEs @ " << photonTime <<  " in ch" << opDet << std::endl;
+      for (int i = 0; i < NumberOfPEs; ++i)
+      {
+        if ((photonTime >= fTimeBegin) && (photonTime < fTimeEnd))
+        {
+          // Sample a random subset according to QE
+          if (CLHEP::RandFlat::shoot(1.0) <getQE(opDet))
           {
 	    odResponse.detectedLite(opDet, readoutChannel);
             unsigned int hardwareChannel = geometry.HardwareChannelFromOpChannel(readoutChannel);
@@ -712,6 +867,11 @@ namespace opdet {
     double sum=0;
     for (auto& n : aa)    sum+=n;
     return sum;
+  }
+  double  OpDetDigitizerDUNEDP::getQE(int OpDet)
+  {
+    if(!fCustomQE) return fQE;
+    else return fQEVector[OpDet];
   }
 
 }

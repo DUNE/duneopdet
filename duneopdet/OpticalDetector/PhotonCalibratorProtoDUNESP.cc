@@ -11,9 +11,10 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-   
-#include <vector>
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
+#include <vector>
+#include <algorithm>
 
 namespace calib {
 
@@ -27,6 +28,11 @@ namespace calib {
     // fSPESizes.push_back(1.);
     // fSPEShifts.push_back(0.);
     //}
+
+
+    fBadChannels = pset.get<std::vector<int> >("BadChannels");
+
+    
     fSPESizes={ 
        
       //SSP101
@@ -287,6 +293,11 @@ namespace calib {
   }
   double PhotonCalibratorProtoDUNESP::PE(double adcs, int opchannel) const
   {
+    if (std::find(fBadChannels.begin(), fBadChannels.end(), opchannel) != fBadChannels.end()) {
+      mf::LogDebug("PhotonCalibratorProtoDUNESP") << "Skipping bad channel " << opchannel;
+      return 0;
+    }
+      
     return adcs/fSPESizes[opchannel] + fSPEShifts[opchannel];
   }
 

@@ -14,5 +14,12 @@ standard_opslicer:
    TrigCoinc:             "2.5" # max time (us) to beam spill for coincidence
 }
 
+protodune_opslicer: @local::standard_opslicer
+
+protodune_opslicer_data_internal: @local::protodune_opslicer
+protodune_opslicer_data_internal.OpHitModuleLabel: "ophitInternal"
+protodune_opslicer_data_external: @local::protodune_opslicer
+protodune_opslicer_data_external.OpHitModuleLabel: "ophitExternal"
+
 
 END_PROLOG
