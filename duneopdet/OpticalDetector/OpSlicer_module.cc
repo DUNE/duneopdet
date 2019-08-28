@@ -274,6 +274,7 @@ namespace opdet {
     std::vector<int> neigh;
 
     for (int i = 0; i < int(ohits.size()); i++){
+
       if (isClust[i]) continue; // Don't base clusts off of clustered hits!
       neigh.erase(neigh.begin(),neigh.end()); // Start from scratch every time
 
@@ -292,6 +293,7 @@ namespace opdet {
       }
       if (int(neigh.size())<fMinN) continue;
       neigh.erase(neigh.begin(),neigh.end());
+
 
       std::vector<int> cands;
       for (int j = i; j < int(ohits.size()); j++){
@@ -325,8 +327,6 @@ namespace opdet {
       for (int idx : curN) totPE += ohits[idx]->PE();
       if (int(curN.size())<fMinN) continue;
 
-
-
       // Loop through neighboring hits, chck if it's a core hit
       while (neigh.size() > 0){
         std::vector<int> curNeigh;  curNeigh.push_back(neigh[0]);
@@ -359,8 +359,6 @@ namespace opdet {
 
       if (int(curN.size())<fMinN) continue;
 
-
-
       // Time to make the OpFlash;
       // Y-Z coordinates come from the centroid
       int channelcentroid = centroid->OpChannel();
@@ -381,6 +379,9 @@ namespace opdet {
         if (abs(ohits[j]->PeakTimeAbs()-tCenter)>fBreakTime) break;
       }
 
+      double finE = 0;
+      for (int idx : curN) finE += ohits[idx]->PE();
+
       // Grab the y-z information from the geometry
       std::vector<double> ys;
       std::vector<double> zs;
@@ -391,20 +392,28 @@ namespace opdet {
       double minZ = 1e6; double maxZ = -1e6;
 
       std::vector<double> PEs (geo->MaxOpChannel() + 1,0.0);
+      std::vector<double> PE2s (geo->MaxOpChannel() + 1,0.0);
       double fastToTotal = 0;
       for (int hIdx = 0; hIdx < int(ys.size()); hIdx++){
-        minT = std::min(minT,ohits[hIdx]->PeakTimeAbs());
-        maxT = std::max(maxT,ohits[hIdx]->PeakTimeAbs());
+        int cIdx = curN[hIdx];
+
+        minT = std::min(minT,ohits[cIdx]->PeakTimeAbs());
+        maxT = std::max(maxT,ohits[cIdx]->PeakTimeAbs());
         minY = std::min(minY,ys[hIdx]);
         maxY = std::min(maxY,ys[hIdx]);
         minZ = std::min(minZ,zs[hIdx]);
         maxZ = std::min(maxZ,zs[hIdx]);
-        PEs[ohits[hIdx]->OpChannel()] = ohits[hIdx]->PE();
+        PEs[ohits[cIdx]->OpChannel()] += ohits[cIdx]->PE();
+        PE2s[ohits[cIdx]->OpChannel()] += ohits[cIdx]->PE();
         fastToTotal += ohits[hIdx]->FastToTotal();
       }
       double yWidth = maxY-minY;
       double zWidth = maxZ-minZ;
 
+      double tot1 = 0;
+      double tot2 = 0;
+      for (double PE : PEs) tot1 += PE;
+      for (double PE : PE2s) tot2 += PE;
 
       // From OpFlashAlg
       int Frame = ts.OpticalClock().Frame(tCenter - 18.1);
