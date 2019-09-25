@@ -267,7 +267,7 @@ protodunev7_photonvisibilityservice:
   UseCryoBoundary: true
   DoNotLoadLibrary: false
   LibraryBuildJob: false
-  LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7.root"
+  LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_200000.root"
 
   #These are not used when usecryoboundary=true
   XMin: -120
