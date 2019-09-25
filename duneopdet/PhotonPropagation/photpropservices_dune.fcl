@@ -286,6 +286,10 @@ protodunev7small_photonvisibilityservice.NZ: 10
 protodunev7small_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_small.root"
 
 
+# Uses library with 90cm Rayleigh scattering
+protodunev7small_photonvisibilityservice: @local::protodunev7_photonvisibilityservice
+protodunev7small_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_90cm.root"
+
 # Make the v7 visibility service the default
 
 protodune_photonvisibilityservice: @local::protodunev7_photonvisibilityservice
