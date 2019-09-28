@@ -267,7 +267,7 @@ protodunev7_photonvisibilityservice:
   UseCryoBoundary: true
   DoNotLoadLibrary: false
   LibraryBuildJob: false
-  LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7.root"
+  LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_200000.root"
 
   #These are not used when usecryoboundary=true
   XMin: -120
@@ -282,9 +282,13 @@ protodunev7_photonvisibilityservice:
 protodunev7small_photonvisibilityservice: @local::protodunev7_photonvisibilityservice
 protodunev7small_photonvisibilityservice.NX: 100
 protodunev7small_photonvisibilityservice.NY: 100
-protodunev7small_photonvisibilityservice.NZ: 10
+protodunev7small_photonvisibilityservice.NZ: 100 
 protodunev7small_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_small.root"
 
+
+# Uses library with 90cm Rayleigh scattering
+protodunev7l90cm_photonvisibilityservice: @local::protodunev7_photonvisibilityservice
+protodunev7l90cm_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_90cm.root"
 
 # Make the v7 visibility service the default
 
