@@ -37,6 +37,7 @@
 #include <vector>
 #include <string>
 #include <memory>
+#include <limits>
 
 namespace opdet {
 
@@ -273,6 +274,7 @@ namespace opdet {
     std::vector<int> neigh;
 
     for (int i = 0; i < int(ohits.size()); i++){
+
       if (isClust[i]) continue; // Don't base clusts off of clustered hits!
       neigh.erase(neigh.begin(),neigh.end()); // Start from scratch every time
 
@@ -281,21 +283,22 @@ namespace opdet {
         if ( Dist(ohits[i],ohits[j]) < fR0 && !isClust[j] ){
           neigh.push_back(j);
         }
-        if (abs(ohits[i]->PeakTime()-ohits[j]->PeakTime())>2) break;
+        if (abs(ohits[i]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
       for (int j = i+1; j < int(ohits.size()); j++){
         if ( Dist(ohits[i],ohits[j]) < fR0 && !isClust[j] ){
           neigh.push_back(j);
         }
-        if (abs(ohits[i]->PeakTime()-ohits[j]->PeakTime())>2) break;
+        if (abs(ohits[i]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
       if (int(neigh.size())<fMinN) continue;
       neigh.erase(neigh.begin(),neigh.end());
 
+
       std::vector<int> cands;
       for (int j = i; j < int(ohits.size()); j++){
         if (isClust[j]) continue;
-        if (ohits[j]->PeakTime()-ohits[i]->PeakTime()>fBreakTime) break;
+        if (ohits[j]->PeakTimeAbs()-ohits[i]->PeakTimeAbs()>fBreakTime) break;
         cands.push_back(j);
       }
       int centroidIdx = YZCentroid(ohits,cands);
@@ -311,20 +314,18 @@ namespace opdet {
           neigh.push_back(j);
           curN.push_back(j);
         }
-        if (abs(ohits[centroidIdx]->PeakTime()-ohits[j]->PeakTime())>2) break;
+        if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
       for (int j = centroidIdx+1; j < int(ohits.size()); j++){
         if ( Dist(ohits[centroidIdx],ohits[j]) < fR0 && !isClust[j] ){
           neigh.push_back(j);
           curN.push_back(j);
         }
-        if (abs(ohits[centroidIdx]->PeakTime()-ohits[j]->PeakTime())>2) break;
+        if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
       double totPE = 0;
       for (int idx : curN) totPE += ohits[idx]->PE();
       if (int(curN.size())<fMinN) continue;
-
-
 
       // Loop through neighboring hits, chck if it's a core hit
       while (neigh.size() > 0){
@@ -333,14 +334,14 @@ namespace opdet {
           if ( Dist(ohits[neigh[0]],ohits[j]) < fR0 && !isClust[j] ){
             curNeigh.push_back(j);
           }
-          if (abs(ohits[centroidIdx]->PeakTime()-ohits[j]->PeakTime())>2)
+          if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2)
             break;
         }
         for (int j = neigh[0]+1; j < int(ohits.size()); j++){
           if ( Dist(ohits[neigh[0]],ohits[j]) < fR0 && !isClust[j] ){
             curNeigh.push_back(j);
           }
-          if (abs(ohits[centroidIdx]->PeakTime()-ohits[j]->PeakTime())>2)
+          if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2)
             break;
         }
         // If this is a core point, add in all reachable hits to neighborhood
@@ -358,8 +359,6 @@ namespace opdet {
 
       if (int(curN.size())<fMinN) continue;
 
-
-
       // Time to make the OpFlash;
       // Y-Z coordinates come from the centroid
       int channelcentroid = centroid->OpChannel();
@@ -367,7 +366,7 @@ namespace opdet {
       geo->OpDetGeoFromOpChannel(channelcentroid).GetCenter(xyzcentroid);
       double yCenter = xyzcentroid[1];
       double zCenter = xyzcentroid[2];
-      double tCenter = centroid->PeakTime();
+      double tCenter = centroid->PeakTimeAbs();
 
 
       // Now that we have centroid coordinates, include ana delayed light
@@ -377,33 +376,44 @@ namespace opdet {
         if ( r < fRScale*fR0){
           curN.push_back(j);
         }
-        if (abs(ohits[j]->PeakTime()-tCenter)>fBreakTime) break;
+        if (abs(ohits[j]->PeakTimeAbs()-tCenter)>fBreakTime) break;
       }
+
+      double finE = 0;
+      for (int idx : curN) finE += ohits[idx]->PE();
 
       // Grab the y-z information from the geometry
       std::vector<double> ys;
       std::vector<double> zs;
       GetHitYZ(ohits,curN,ys,zs);
 
-      double minT = 1e6; double maxT = -1e6;
+      double minT = std::numeric_limits<double>::max(); double maxT = -std::numeric_limits<double>::max();
       double minY = 1e6; double maxY = -1e6;
       double minZ = 1e6; double maxZ = -1e6;
 
-      std::vector<double> PEs;
+      std::vector<double> PEs (geo->MaxOpChannel() + 1,0.0);
+      std::vector<double> PE2s (geo->MaxOpChannel() + 1,0.0);
       double fastToTotal = 0;
       for (int hIdx = 0; hIdx < int(ys.size()); hIdx++){
-        minT = std::min(minT,ohits[hIdx]->PeakTime());
-        maxT = std::max(maxT,ohits[hIdx]->PeakTime());
+        int cIdx = curN[hIdx];
+
+        minT = std::min(minT,ohits[cIdx]->PeakTimeAbs());
+        maxT = std::max(maxT,ohits[cIdx]->PeakTimeAbs());
         minY = std::min(minY,ys[hIdx]);
         maxY = std::min(maxY,ys[hIdx]);
         minZ = std::min(minZ,zs[hIdx]);
         maxZ = std::min(maxZ,zs[hIdx]);
-        PEs.push_back(ohits[hIdx]->PE());
+        PEs[ohits[cIdx]->OpChannel()] += ohits[cIdx]->PE();
+        PE2s[ohits[cIdx]->OpChannel()] += ohits[cIdx]->PE();
         fastToTotal += ohits[hIdx]->FastToTotal();
       }
       double yWidth = maxY-minY;
       double zWidth = maxZ-minZ;
 
+      double tot1 = 0;
+      double tot2 = 0;
+      for (double PE : PEs) tot1 += PE;
+      for (double PE : PE2s) tot2 += PE;
 
       // From OpFlashAlg
       int Frame = ts.OpticalClock().Frame(tCenter - 18.1);

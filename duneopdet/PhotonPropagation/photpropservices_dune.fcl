@@ -74,6 +74,36 @@ dune10kt_v2_1x2x6_photonvisibilityservice:                           @local::dun
 dune10kt_v2_1x2x6_photonvisibilityservice.LibraryFile:               "PhotonPropagation/LibraryData/lib_dune10kt_v2_1x2x6_20171113.root"
 
 
+dune10kt_1x2x6_xe_photonvisibilityservice: {
+   
+  NX: 100
+  NY: 100
+  NZ: 300
+
+  # The boundaries of the cryostat are:
+  # X = [-379.662, 379.662] cm
+  # Y = [-658.099, 699.599] cm
+  # Z = [-302.946, 1443.53] cm
+  UseCryoBoundary: false
+  XMin: 0
+  XMax: 379.662
+  YMin: -658.09
+  YMax: 699.59
+  ZMin: -302.946
+  ZMax: 1443.5
+  ReflectOverZeroX: true
+
+  StoreReflected: false
+  StoreReflT0: false
+  IncludePropTime: false
+
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+
+  LibraryFile: "PhotonPropagation/LibraryData/lib_dune10kt_v3_1x2x6_Xe_photonvisibilityservice.root"
+}
+
+
 
 ### Visibility services with ARAPUCAs and reflector foils
 dune10kt_1x2x6_refl_v1_photonvisibilityservice: {
@@ -142,11 +172,6 @@ dunesp_Nhits_vuv_prop_timing_photonvisibilityservice:
    # Semi-analytic VUV Nhits parameters
    GH_PARS: @local::GH_RS60cm_SP
 
-   # Optical Detector information - to be replaced with using geometry service subsequently
-   Optical_Detector_Type: 0     # 0 = rectangular, 1 = disk
-   APERTURE_height: 9.3         # sensitive window heigh (in cm)
-   APERTURE_width: 46.8         # sensitive window width supercell (in cm)
-   PMT_radius: 10.16            # 8 inch diameter PMT (in cm)
 }
 
 #
@@ -161,12 +186,19 @@ dunesp_Nhits_vuv_vis_prop_timing_photonvisibilityservice:
    # Flag to enable visible light simulation
    StoreReflected: true
  
-   # DUNE-specific VIS parameterization
+   # DUNE-SP VIS parameterization
    @table::dunesp_vis_timing_parameterization
 
-   # Semi-analytic VIS Nhits parameters
+   # DUNE-SP semi-analytic VIS Nhits parameters
    VIS_PARS: @local::VIS_RS60cm_SP
-   @table::dunesp_cathode_info_for_nhits_vis
+
+   # VIS border correction
+   ApplyVISBorderCorrection: true
+   VIS_BORDER_correction_type: @local::VIS_RS60cm_SP_BORDER_correction_type
+   VIS_BORDER_distances_x: @local::VIS_RS60cm_SP_BORDER_distances_x
+   VIS_BORDER_distances_r: @local::VIS_RS60cm_SP_BORDER_distances_r
+   VIS_BORDER_correction: @local::VIS_RS60cm_SP_BORDER_correction
+
 }
 
 ##############
@@ -197,7 +229,7 @@ dune10kt_1x2x6_refl_photonvisibilityservice_buildlib.LibraryFile:      "PhotonPr
 ##########################
 
 
-protodune_photonvisibilityservice:
+protodunev4_photonvisibilityservice:
 {
 
   NX: 100
@@ -217,6 +249,50 @@ protodune_photonvisibilityservice:
   ZMin: 0
   ZMax: 1200
 }
+
+
+
+
+########################################
+# ProtoDUNE Single Phase  with arapucas#
+########################################
+
+protodunev7_photonvisibilityservice:
+{
+
+  NX: 140
+  NY: 120
+  NZ: 140
+   
+  UseCryoBoundary: true
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_200000.root"
+
+  #These are not used when usecryoboundary=true
+  XMin: -120
+  XMax: 120
+  YMin: -120
+  YMax: 120
+  ZMin: 0
+  ZMax: 1200
+}
+
+# Uses a library with fewer voxels for less memory
+protodunev7small_photonvisibilityservice: @local::protodunev7_photonvisibilityservice
+protodunev7small_photonvisibilityservice.NX: 100
+protodunev7small_photonvisibilityservice.NY: 100
+protodunev7small_photonvisibilityservice.NZ: 100 
+protodunev7small_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_small.root"
+
+
+# Uses library with 90cm Rayleigh scattering
+protodunev7l90cm_photonvisibilityservice: @local::protodunev7_photonvisibilityservice
+protodunev7l90cm_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_90cm.root"
+
+# Make the v7 visibility service the default
+
+protodune_photonvisibilityservice: @local::protodunev7_photonvisibilityservice
 
 
 

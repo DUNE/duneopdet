@@ -130,6 +130,12 @@ dunedphase3x1x1_opdigiproperties:
   WaveformChargeNormalized: true
 }
 
+protodunedphase_opdigiproperties:           @local::dunedphase3x1x1_opdigiproperties
+protodunedphase_opdigiproperties.QE: 0.036  #
+protodunedphase_opdigiproperties.SampleFreq: 62.5  #  https://www.caen.it/products/v1740/
+protodunedphase_opdigiproperties.TimeBegin: -4000  #
+protodunedphase_opdigiproperties.TimeEnd: 4000  #
+
 dunefddphase_opdigiproperties:           @local::dunedphase3x1x1_opdigiproperties
 dunefddphase_opdigiproperties.QE: 0.12  # as stablished in arxiv:1807.07123
 END_PROLOG
