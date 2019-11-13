@@ -167,6 +167,8 @@ void make_tdr_sn_calE(TString dummy = "flashmatchDEF45cm0100Hz5snrNonRefl/Select
   hpe   = new TH1F("hpe",    TString::Format(" purity > 0.5; Total PE ; Events"), 100, 0, 1000);
   hpelt = new TH1F("hpelt",  TString::Format(" purity < 0.5; Total PE ; Events"), 100, 0, 1000);
 
+  float recoe_x_pecut;
+
   int ientry = 0;
   Int_t nevent = chain->GetEntries();
 
