@@ -19,6 +19,13 @@
 #include <memory>
 #include <iostream>
 
+// A GEANT4 include to make the macos debug build happy
+// might need to move this include to larsim/LArG4/OpDetSensitiveDetector.h
+// though the real issue is why just the mac build cannot find the
+// symbols in it while other builds an
+
+#include "Geant4/G4VUserTrackInformation.hh"
+
 #include "dune/PhotonPropagation/PhotonVisibilityServiceS2.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larsim/LArG4/OpDetPhotonTable.h"
