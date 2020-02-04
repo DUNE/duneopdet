@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 
+from __future__ import print_function
 def CreateTags():
     preqes  = [ 15, 25, 45 ]
     prethrs = [ 2, 3 ]
@@ -62,106 +63,106 @@ def CreateTags():
 
 def print_seq(tags, form):
     for tag in tags[:-1]:
-        print form.format(tag)+","
+        print(form.format(tag)+",")
     else:
-        print form.format(tags[-1])
+        print(form.format(tags[-1]))
 
 
 tags, params = CreateTags()
 
 
 
-print """
+print("""
 #include "largeantmodules_dune.fcl"
 #include "detsimmodules_dune.fcl"
 #include "opticaldetectormodules_dune.fcl"
 #include "OpSlicer.fcl"
 #include "FlashMatchAna.fcl"
 #include "SNAna.fcl"
-"""
-print "BEGIN_PROLOG"
-print
+""")
+print("BEGIN_PROLOG")
+print()
 
-print 
-print "############################################################################"
-print "pd_detsim_modules: {"
+print() 
+print("############################################################################")
+print("pd_detsim_modules: {")
 for tag in tags:
-    print "      opdigi{0}:    @local::dunefd_opdigi_threegang".format(tag)
-print "}"
-print
+    print("      opdigi{0}:    @local::dunefd_opdigi_threegang".format(tag))
+print("}")
+print()
 
 for tag in tags:
     pm = params[tag]
-    print "pd_detsim_modules.opdigi{0}.QEOverride:                  {1:.6f}".format(tag, pm["qe"])
-    print "pd_detsim_modules.opdigi{0}.QERefOverride:               {1:.6f}".format(tag, pm["refqe"])
-    print "pd_detsim_modules.opdigi{0}.DarkNoiseRate:               {1:d} #Hz".format(tag, pm["darkrate"])
-    print "pd_detsim_modules.opdigi{0}.LineNoiseRMS:                {1:.3f}".format(tag, pm["linerms"])
-    print "pd_detsim_modules.opdigi{0}.algo_threshold.ADCThreshold: {1:.3f}".format(tag, pm["thresh"])
-    print 
+    print("pd_detsim_modules.opdigi{0}.QEOverride:                  {1:.6f}".format(tag, pm["qe"]))
+    print("pd_detsim_modules.opdigi{0}.QERefOverride:               {1:.6f}".format(tag, pm["refqe"]))
+    print("pd_detsim_modules.opdigi{0}.DarkNoiseRate:               {1:d} #Hz".format(tag, pm["darkrate"]))
+    print("pd_detsim_modules.opdigi{0}.LineNoiseRMS:                {1:.3f}".format(tag, pm["linerms"]))
+    print("pd_detsim_modules.opdigi{0}.algo_threshold.ADCThreshold: {1:.3f}".format(tag, pm["thresh"]))
+    print() 
 
-print "pd_detsim_path: ["
+print("pd_detsim_path: [")
 print_seq(tags, "                 opdigi{0}")
-print "                ]"
+print("                ]")
 
 
     
 
-print ""
-print "############################################################################"
-print "pd_reco_modules: {"
+print("")
+print("############################################################################")
+print("pd_reco_modules: {")
 for tag in tags:
-    print "      ophit{0}:     @local::dunefd_ophit".format(tag)
+    print("      ophit{0}:     @local::dunefd_ophit".format(tag))
 for tag in tags:
-    print "      opflash{0}:   @local::dunefd_opflash".format(tag)
+    print("      opflash{0}:   @local::dunefd_opflash".format(tag))
 for tag in tags:
-    print "      opslicer{0}:   @local::standard_opslicer".format(tag)
-print "}"
-print
+    print("      opslicer{0}:   @local::standard_opslicer".format(tag))
+print("}")
+print()
 
 for tag in tags:
     pm = params[tag]
-    print "pd_reco_modules.ophit{0}.InputModule:             opdigi{0}".format(tag)
-    print "pd_reco_modules.opflash{0}.InputModule:           ophit{0}".format(tag)
-    print "pd_reco_modules.opslicer{0}.OpHitModuleLabel:     ophit{0}".format(tag)
-    print 
+    print("pd_reco_modules.ophit{0}.InputModule:             opdigi{0}".format(tag))
+    print("pd_reco_modules.opflash{0}.InputModule:           ophit{0}".format(tag))
+    print("pd_reco_modules.opslicer{0}.OpHitModuleLabel:     ophit{0}".format(tag))
+    print() 
 
 recoparts = []
-print "pd_reco_path: ["
+print("pd_reco_path: [")
 print_seq(tags, "                 ophit{0}, opflash{0}, opslicer{0}")
-print "              ]"
+print("              ]")
 
 
 
 
     
 
-print ""
-print "############################################################################"
-print "pd_ana_modules: {"
+print("")
+print("############################################################################")
+print("pd_ana_modules: {")
 for tag in tags:
-    print "      flashmatch{0}:  @local::marley_flashmatchana".format(tag)
+    print("      flashmatch{0}:  @local::marley_flashmatchana".format(tag))
 for tag in tags:
-    print "      slicematch{0}:  @local::marley_flashmatchana".format(tag)
+    print("      slicematch{0}:  @local::marley_flashmatchana".format(tag))
 for tag in tags:
-    print "      snana{0}:       @local::standard_snana".format(tag)
+    print("      snana{0}:       @local::standard_snana".format(tag))
 
-print "}"
-print
+print("}")
+print()
 
 for tag in tags:
     pm = params[tag]
-    print "pd_ana_modules.flashmatch{0}.OpDetWaveformLabel: opdigi{0}".format(tag)
-    print "pd_ana_modules.flashmatch{0}.OpHitModuleLabel:   ophit{0}".format(tag)
-    print "pd_ana_modules.flashmatch{0}.OpFlashModuleLabel: opflash{0}".format(tag)
-    print "pd_ana_modules.slicematch{0}.OpDetWaveformLabel: opdigi{0}".format(tag)
-    print "pd_ana_modules.slicematch{0}.OpHitModuleLabel:   ophit{0}".format(tag)
-    print "pd_ana_modules.slicematch{0}.OpFlashModuleLabel: opslice{0}".format(tag)
-    print "pd_ana_modules.snana{0}.OpHitModuleLabel:        ophit{0}".format(tag)
-    print
+    print("pd_ana_modules.flashmatch{0}.OpDetWaveformLabel: opdigi{0}".format(tag))
+    print("pd_ana_modules.flashmatch{0}.OpHitModuleLabel:   ophit{0}".format(tag))
+    print("pd_ana_modules.flashmatch{0}.OpFlashModuleLabel: opflash{0}".format(tag))
+    print("pd_ana_modules.slicematch{0}.OpDetWaveformLabel: opdigi{0}".format(tag))
+    print("pd_ana_modules.slicematch{0}.OpHitModuleLabel:   ophit{0}".format(tag))
+    print("pd_ana_modules.slicematch{0}.OpFlashModuleLabel: opslice{0}".format(tag))
+    print("pd_ana_modules.snana{0}.OpHitModuleLabel:        ophit{0}".format(tag))
+    print()
     
-print "pd_ana_path: ["
+print("pd_ana_path: [")
 print_seq(tags, "                 flashmatch{0}, slicematch{0}, snana{0}")
-print "             ]"
+print("             ]")
 
 
-print "END_PROLOG"
+print("END_PROLOG")
