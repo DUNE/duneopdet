@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+from __future__ import print_function
+from builtins import range
 from os.path import join
 from math import sqrt, cos, sin
 import sys
@@ -42,11 +44,11 @@ def MakeEvent(outfile,
     energy = sqrt(momentum**2 + mass**2)
     posx, posy, posz = position
     
-    print >>outfile, eventno, 1
-    print >>outfile, status, pdg,
-    print >>outfile, mother1, mother2, daughter1, daughter2,
-    print >>outfile, momx, momy, momz, energy, mass,
-    print >>outfile, posx, posy, posz, time
+    print(eventno, 1, file=outfile)
+    print(status, pdg, end=' ', file=outfile)
+    print(mother1, mother2, daughter1, daughter2, end=' ', file=outfile)
+    print(momx, momy, momz, energy, mass, end=' ', file=outfile)
+    print(posx, posy, posz, time, file=outfile)
     eventno += 1
 
 
@@ -72,7 +74,7 @@ for eventno in range(N):
         pos = (50., 115., val)
         dir = (0., -1., 0.)
     else:
-        print "Unknown direction", options.direction
+        print("Unknown direction", options.direction)
         sys.exit(1)
     
     MakeEvent(vecfile, position=pos, direction=dir )

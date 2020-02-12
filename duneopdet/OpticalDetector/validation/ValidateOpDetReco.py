@@ -1,4 +1,8 @@
 #!/usr/bin/python
+from __future__ import print_function
+from past.builtins import execfile
+from builtins import range
+from builtins import object
 import sys, os
 
 
@@ -28,11 +32,11 @@ parser.add_option(      "--rootdir", dest="rootdir",     help="TDirectory in roo
 (options, args) = parser.parse_args()
 
 if not (options.nominalfile and options.testfile):
-    print "Both nominal file (-n) and test file (-t) required."
+    print("Both nominal file (-n) and test file (-t) required.")
     sys.exit(1)
 
 if not (options.flash or options.hit or options.assoc or options.plots):
-    print "No plots to make.  Specify at least one of --flash, --hit, --assoc, --plots."
+    print("No plots to make.  Specify at least one of --flash, --hit, --assoc, --plots.")
     sys.exit(1)
 
 # Load libraries after parsing arguments
@@ -61,9 +65,9 @@ def CountFailures(left, right):
     return len(ListFailures(left,right))
 
 def ListFailures(left, right):
-    if type(left) is Flash: return ListFailuresFlash(left, right)
-    if type(left) is Assoc: return ListFailuresAssoc(left, right)
-    if type(left) is Hit:   return ListFailuresHit(left, right)
+    if isinstance(left, Flash): return ListFailuresFlash(left, right)
+    if isinstance(left, Assoc): return ListFailuresAssoc(left, right)
+    if isinstance(left, Hit):   return ListFailuresHit(left, right)
 
 def ListFailuresFlash(left, right):
     failures = []
@@ -339,7 +343,7 @@ if options.flash:
     for EventID in sorted(all.keys()):
         for v in versions:
             all[EventID][v].sort()
-        print EventID, ":", len(all[EventID][S]), len(all[EventID][R])
+        print(EventID, ":", len(all[EventID][S]), len(all[EventID][R]))
 
     onlies = copy.deepcopy(all)
 
@@ -363,24 +367,24 @@ if options.flash:
             if iS >= len(onlies[E][S]):
                 break
 
-        print "Event", E
-        print "  matches", len(matches)
+        print("Event", E)
+        print("  matches", len(matches))
         for v in versions:
-            print "  only", v, len(onlies[E][v])
+            print("  only", v, len(onlies[E][v]))
 
         for v in versions:
             if len(onlies[E][v]):
-                print "  Only in",v
+                print("  Only in",v)
                 for flsh in onlies[E][v]:
                     index = all[E][v].index(flsh)
-                    print "    ",flsh.PrintStr()#, " preceeded by ", all[E][v][index-1].PrintStr()
+                    print("    ",flsh.PrintStr())#, " preceeded by ", all[E][v][index-1].PrintStr()
 
 
-        print "  Matches"
+        print("  Matches")
         for flsh in matches:
             failures_here = ListFailures(flsh[S],flsh[R])
             if failures_here:
-                print "    ", S+":", flsh[S].PrintStr(), "  ", R+":", flsh[R].PrintStr(), " ".join(failures_here)
+                print("    ", S+":", flsh[S].PrintStr(), "  ", R+":", flsh[R].PrintStr(), " ".join(failures_here))
         
 
 
@@ -394,7 +398,7 @@ if options.hit:
 
     onlies = {}
     for v in versions:
-        for e in pbloop(range(hittrees[v].GetEntries())):
+        for e in pbloop(list(range(hittrees[v].GetEntries()))):
             hittrees[v].GetEntry(e)
             if hittrees[v].EventID not in onlies:
                 onlies[hittrees[v].EventID]= defaultdict(list)
@@ -403,7 +407,7 @@ if options.hit:
     for EventID in sorted(onlies.keys()):
         for v in versions:
             onlies[EventID][v].sort()
-        print EventID, ":", len(onlies[EventID][S]), len(onlies[EventID][R])
+        print(EventID, ":", len(onlies[EventID][S]), len(onlies[EventID][R]))
 
 
     for E in sorted(onlies.keys()):
@@ -434,18 +438,18 @@ if options.hit:
             if iS >= len(onlies[E][S]):
                 break
         pbar.finish()
-        print ""
+        print("")
 
-        print "Event", E
-        print "  matches", len(matches)
+        print("Event", E)
+        print("  matches", len(matches))
         for v in versions:
-            print "  only", v, len(onlies[E][v])
+            print("  only", v, len(onlies[E][v]))
 
         for v in versions:
             if len(onlies[E][v]):
-                print "  Only in",v
+                print("  Only in",v)
                 for flsh in onlies[E][v]:
-                    print "    ",flsh.PrintStr()
+                    print("    ",flsh.PrintStr())
 
         #print "  Matches"
         #for flsh in matches:
@@ -464,7 +468,7 @@ if options.assoc:
 
     onlies = {}
     for v in versions:
-        for e in pbloop(range(assoctrees[v].GetEntries())):
+        for e in pbloop(list(range(assoctrees[v].GetEntries()))):
             assoctrees[v].GetEntry(e)
             if assoctrees[v].EventID not in onlies:
                 onlies[assoctrees[v].EventID] = defaultdict(list)
@@ -473,7 +477,7 @@ if options.assoc:
     for EventID in sorted(onlies.keys()):
         for v in versions:
             onlies[EventID][v].sort()
-        print EventID, ":", len(onlies[EventID][S]), len(onlies[EventID][R])
+        print(EventID, ":", len(onlies[EventID][S]), len(onlies[EventID][R]))
 
 
     for E in sorted(onlies.keys()):
@@ -481,8 +485,8 @@ if options.assoc:
 
         matches = []
         failures = [0]*8
-        print "Event", E
-        print "Unmatched lengths", S, len(onlies[E][S]), R, len(onlies[E][R])
+        print("Event", E)
+        print("Unmatched lengths", S, len(onlies[E][S]), R, len(onlies[E][R]))
         maxval = len(onlies[E][S])
         widgets = [ 'Event %i: '%E,pb.Value(), '/', pb.Total(), ' ', pb.Percentage(), ' ',
                     pb.Bar(marker='=',left='[',right=']'),
@@ -502,8 +506,8 @@ if options.assoc:
                 matches.append( { S: onlies[E][S].pop( 0 ) } )
                 matches.append( { R: onlies[E][R].pop( 0 ) } )
         pbar.finish()
-        print ""
-        print "matched lengths  ", S, len(onlies[E][S]), R,  len(onlies[E][R])
+        print("")
+        print("matched lengths  ", S, len(onlies[E][S]), R,  len(onlies[E][R]))
 
         while onlies[E][S]:
             matches.append( { S: onlies[E][S].pop( 0 ) } )
@@ -539,20 +543,20 @@ if options.assoc:
         #        for flsh in onlies[E][v]:
         #            print "    ",flsh.PrintStr()
 
-        print "  Matches"
+        print("  Matches")
         for hit in matches:
-            print "",
-            if S in hit:   print  S+":", hit[S].PrintStr(),
-            else:          print "{0:65}".format(""),
-            print "",
-            if R in hit:   print "    ", R+":", hit[R].PrintStr(),
-            else:          print "{0:65}".format(""),
-            print "  ",
+            print("", end=' ')
+            if S in hit:   print(S+":", hit[S].PrintStr(), end=' ')
+            else:          print("{0:65}".format(""), end=' ')
+            print("", end=' ')
+            if R in hit:   print("    ", R+":", hit[R].PrintStr(), end=' ')
+            else:          print("{0:65}".format(""), end=' ')
+            print("  ", end=' ')
             if S in hit and R in hit:
                 failures_here = ListFailures(hit[S],hit[R])
-                print " ".join(failures_here)
+                print(" ".join(failures_here))
             else:
-                print
+                print()
 
 
 
