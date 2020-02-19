@@ -24,7 +24,7 @@ art_make(
                         ${ROOT_EG}
           MODULE_LIBRARIES
                         ${ROOT_BASIC_LIB_LIST}
-                        larsim_LArG4
+                        larsim_LegacyLArG4
                         lardataobj_Simulation
                         dune_PhotonPropagation_PhotonVisibilityServiceS2_service
                         larsim_Simulation nug4_ParticleNavigation lardataobj_Simulation
