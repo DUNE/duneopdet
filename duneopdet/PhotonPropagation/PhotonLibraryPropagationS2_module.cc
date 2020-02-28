@@ -28,9 +28,9 @@
 
 #include "dune/PhotonPropagation/PhotonVisibilityServiceS2.h"
 #include "larcore/Geometry/Geometry.h"
-#include "larsim/LArG4/OpDetPhotonTable.h"
-#include "larsim/LArG4/OpDetSensitiveDetector.h"
-#include "larsim/LArG4/OpDetReadoutGeometry.h"
+#include "larsim/LegacyLArG4/OpDetPhotonTable.h"
+#include "larsim/LegacyLArG4/OpDetSensitiveDetector.h"
+#include "larsim/LegacyLArG4/OpDetReadoutGeometry.h"
 #include "lardataobj/Simulation/OpDetBacktrackerRecord.h"
 #include "larsim/Simulation/PhotonVoxels.h"
 #include "larsim/Simulation/LArG4Parameters.h"
