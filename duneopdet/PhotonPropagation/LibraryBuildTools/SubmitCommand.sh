@@ -258,7 +258,7 @@ else
 fi
 
 toolsargs="-q -g --opportunistic --OS=SL6 "
-fileargs="-dROOT $outdir/root -dFCL $outdir/fcl -dLOG $outdir/log "
+fileargs="-d ROOT $outdir/root -d FCL $outdir/fcl -d LOG $outdir/log "
 
 #Test job vs real job
 if [ $testVar -ne 0 ]; then #TEST VAR IS SET. Run the test job

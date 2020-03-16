@@ -1,4 +1,8 @@
 #!/usr/bin/python
+from __future__ import print_function
+from past.builtins import execfile
+from builtins import map
+from builtins import range
 import sys, os
 
 startup = False
@@ -21,11 +25,11 @@ parser.add_option(      "--wide",    dest="wide",        help="Make widely binne
 (options, args) = parser.parse_args()
 
 if not (options.nominalfile and options.testfile):
-    print "Both nominal file (-n) and test file (-t) required."
+    print("Both nominal file (-n) and test file (-t) required.")
     sys.exit(1)
 
 if not (options.sim or options.digi or options.event):
-    print "No plots to make.  Specify at least one of --sim, --digi, or --events=M,N,O."
+    print("No plots to make.  Specify at least one of --sim, --digi, or --events=M,N,O.")
     sys.exit(1)
 
 if not os.path.exists(options.dir):
@@ -78,7 +82,7 @@ if options.sim:
             if "same" in dopt: hists[v].SetLineColor(2)
             trees[v].Draw(var+">>h"+v, "", dopt)
             if "same" not in dopt: dopt+="same"
-            print v, var, hists[v].Integral()
+            print(v, var, hists[v].Integral())
 
         VerticalRange(GetHists(c1), ignoreError=True)
         c1.Print(os.path.join(options.dir, "g4_{0}_by_{1}.png".format(treename, var)))
@@ -135,7 +139,7 @@ if options.digi:
             event = int(rootkey.GetName().split("_")[1])
             channel = int(rootkey.GetName().split("_")[3])
             integral = hist.Integral()
-            if v == T: opdet = int(channel/12)
+            if v == T: opdet = int(channel//12)
             else:      opdet = nom_channel_map[channel]
 
             eventintegral[event] += integral
@@ -147,7 +151,7 @@ if options.digi:
             if integral > 0: hists["by_OpDet_cnt"][v].Fill(opdet)
             
         for val in eventintegral.values():
-            if val > 4e4: print "Overflow: ",val
+            if val > 4e4: print("Overflow: ",val)
             hists["per_Event"][v].Fill(val)
         for val in opdetintegral.values():
             hists["per_OpDet"][v].Fill(val)
@@ -172,14 +176,14 @@ if options.digi:
 
 
 if options.events:
-    events = map(int, options.events.split(","))
-    opdets = map(int, options.opdets.split(","))
+    events = list(map(int, options.events.split(",")))
+    opdets = list(map(int, options.opdets.split(",")))
     for event, opdet in [ (e,o) for e in events for o in opdets ]:
         channels = { N:[], T:[] }
-        for c,o in nom_channel_map.items():
+        for (c,o) in nom_channel_map.items():
             if o == opdet:
                 channels[N].append(c)
-        channels[T] = range(o*12,(o+1)*12)
+        channels[T] = list(range(o*12,(o+1)*12))
 
         hists = {}
         trees = {}
@@ -190,7 +194,7 @@ if options.events:
             tdir = files[v].Get("opdigiana")
             for c in channels[v]:
                 htemp = tdir.Get("Event_{0:d}_OpDet_{1:d}_Pulse_0".format(event, c))
-                print v, event, c, htemp.Integral()
+                print(v, event, c, htemp.Integral())
                 if v not in hists:
                     hists[v] = htemp.Clone("h"+v)
                     hists[v].SetLineColor(colors[v])
@@ -207,7 +211,7 @@ if options.events:
         dopt = ""
         for v in versions:
             hists[v].Draw(dopt)
-            print v, hists[v].Integral(), hists[v].Integral()/trees[v].CountAll
+            print(v, hists[v].Integral(), hists[v].Integral()/trees[v].CountAll)
             if "same" not in dopt: dopt += "same"
         c1.Print(os.path.join(options.dir,"waveform_event{0:d}_opdet{1:d}.png".format(event, opdet)))
 

@@ -108,6 +108,11 @@ namespace opdet {
     Int_t   fTruePDG;
     Float_t fRecoX;
 
+    std::vector< Float_t > fTruePxallpart;
+    std::vector< Float_t > fTruePyallpart;
+    std::vector< Float_t > fTruePzallpart;
+    std::vector< Float_t > fTrueEallpart;
+    std::vector< Int_t >   fTrueAllPDG;
 
     Int_t fNFlashes;
     std::vector< Int_t >   fFlashIDVector;
@@ -266,7 +271,11 @@ namespace opdet {
     fSelectedFlashTree->Branch("Purity",                      &fPurity,    "Purity/F");
     fSelectedFlashTree->Branch("Distance",                    &fDistance,    "Distance/F");
     fSelectedFlashTree->Branch("RecoX",                       &fRecoX,     "RecoX/F");
-   
+    fSelectedFlashTree->Branch("TruePxallpart",               &fTruePxallpart);
+    fSelectedFlashTree->Branch("TruePyallpart",               &fTruePyallpart);
+    fSelectedFlashTree->Branch("TruePzallpart",               &fTruePzallpart);
+    fSelectedFlashTree->Branch("TrueEallpart",                &fTrueEallpart);
+    fSelectedFlashTree->Branch("TrueAllPDG",                  &fTrueAllPDG);
 
     if (!fOpDetWaveformLabel.empty()) {
       fCountTree = tfs->make<TTree>("CountWaveforms","CountWaveforms");
@@ -399,6 +408,17 @@ namespace opdet {
       fTrueT     = part.T()*1000; // ns -> us
       fTrueE     = part.E();
       fTruePDG   = part.PdgCode();
+
+      // Get all the paricle including neutrino, and record its properties
+      unsigned int const nParticles = mctruth->NParticles();
+      for (unsigned int i = 0; i < nParticles; ++i) {
+	simb::MCParticle const& particle = mctruth->GetParticle(i);
+        fTruePxallpart    .emplace_back(particle.Px());
+        fTruePyallpart    .emplace_back(particle.Py());
+        fTruePzallpart    .emplace_back(particle.Pz());
+        fTrueEallpart     .emplace_back(particle.E());
+        fTrueAllPDG       .emplace_back(particle.PdgCode());
+      }
 
       // Get the PlaneID which describes the location of the true vertex
       int plane = 0;
@@ -604,6 +624,11 @@ namespace opdet {
     fPurityVector               .clear();
     fDistanceVector             .clear();
     fRecoXVector                .clear();
+    fTruePxallpart              .clear();
+    fTruePyallpart              .clear();
+    fTruePzallpart              .clear();
+    fTrueEallpart               .clear();
+    fTrueAllPDG                 .clear();
   }
 } // namespace opdet
 

@@ -1,3 +1,7 @@
+from __future__ import division
+from __future__ import print_function
+from builtins import map
+from builtins import range
 from ROOT import *
 from array import array
 import os, math
@@ -11,22 +15,22 @@ def PrintError(val, err):
 
 def printlist(mylist):
     rows, columns = os.popen('stty size', 'r').read().split()
-    maxw = max(map(len,mylist))
-    ncols = int(columns)/(maxw+1)
+    maxw = max(list(map(len,mylist)))
+    ncols = int(columns)//(maxw+1)
 
     col = 0
     for word in mylist:
-        print word.ljust(maxw), " ",
+        print(word.ljust(maxw), " ", end=' ')
         col += 1
         if col >= ncols:
-            print ""
+            print("")
             col = 0
-    print ""
+    print("")
 
 
 def GetHists(c1):
     prims = list(c1.GetListOfPrimitives())
-    return filter(lambda x: x.InheritsFrom("TH1"), prims)        
+    return [x for x in prims if x.InheritsFrom("TH1")]        
 
 
 def VerticalRange(hists, xrange=(0,0), ratio=False, forceOne=True, ignoreError=False, maxerr=0.25, absMax=-999, absMin=-999, buffer=0.05):
@@ -182,7 +186,7 @@ def gIntersections(graph, value, xrng, nsteps=1000):
     intersections = []
 
     xmin, xmax = xrng
-    xstp = (xmax - xmin)/(nsteps - 1)
+    xstp = (xmax - xmin)//(nsteps - 1)
 
     for xi in range(nsteps-1):
         x1 = xmin + (xi+0)*xstp
@@ -212,7 +216,7 @@ def pbloop(iterable, name = "Entries"):
         pbar.update(i)
         yield val
     pbar.finish()
-    print ""
+    print("")
 
 
 def BinWidthNormalize(h, width = -1):
@@ -236,7 +240,7 @@ def MakeBins(bmin, bmax, nbins, log=False):
         bmax = log10(bmax)
     bins = [ x*(bmax-bmin)/(nbins - 1.) + bmin for x in range(nbins) ]
     if log:
-        bins = map(lambda x: 10.**x, bins)
+        bins = [10.**x for x in bins]
     return array('d',bins)
         
         
@@ -264,10 +268,10 @@ def mean(lst):
 
 def stdev(lst):
     m = mean(lst)
-    return sqrt( sum(map(lambda x: (x-m)**2, lst)) / (len(lst)-1.) )
+    return sqrt( sum([(x-m)**2 for x in lst]) / (len(lst)-1.) )
 
 def rms(lst):
-    return sqrt( sum(map(lambda x: (x)**2, lst)) / len(lst) )
+    return sqrt( sum([(x)**2 for x in lst]) / len(lst) )
 
 
 def ProfileX(hist):

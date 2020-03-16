@@ -38,7 +38,10 @@ expands to fill the remaining width of the line.
 The progressbar module is very easy to use, yet very powerful. And
 automatically supports features like auto-resizing when available.
 """
+from __future__ import print_function
 
+from builtins import range
+from builtins import object
 __author__ = "Nilton Volpato"
 __author_email__ = "first-name dot last-name @ gmail.com"
 __date__ = "2006-05-07"
@@ -165,14 +168,14 @@ class Bar(ProgressBarWidgetHFill):
         self.left = left
         self.right = right
     def _format_marker(self, pbar):
-        if isinstance(self.marker, (str, unicode)):
+        if isinstance(self.marker, str):
             return self.marker
         else:
             return self.marker.update(pbar)
     def update(self, pbar, width):
         percent = pbar.percentage()
         cwidth = width - len(self.left) - len(self.right)
-        marked_width = int(percent * cwidth / 100)
+        marked_width = int(percent * cwidth // 100)
         m = self._format_marker(pbar)
         bar = (self.left + (m*marked_width).ljust(cwidth) + self.right)
         return bar
@@ -182,7 +185,7 @@ class ReverseBar(Bar):
     def update(self, pbar, width):
         percent = pbar.percentage()
         cwidth = width - len(self.left) - len(self.right)
-        marked_width = int(percent * cwidth / 100)
+        marked_width = int(percent * cwidth // 100)
         m = self._format_marker(pbar)
         bar = (self.left + (m*marked_width).rjust(cwidth) + self.right)
         return bar
@@ -259,7 +262,7 @@ class ProgressBar(object):
                 r.append(w)
                 hfill_inds.append(i)
                 num_hfill += 1
-            elif isinstance(w, (str, unicode)):
+            elif isinstance(w, str):
                 r.append(w)
                 currwidth += len(w)
             else:
@@ -267,7 +270,7 @@ class ProgressBar(object):
                 currwidth += len(weval)
                 r.append(weval)
         for iw in hfill_inds:
-            r[iw] = r[iw].update(self, (self.term_width-currwidth)/num_hfill)
+            r[iw] = r[iw].update(self, (self.term_width-currwidth)//num_hfill)
         return r
 
     def _format_line(self):
@@ -328,7 +331,7 @@ if __name__=='__main__':
             # do something
             pbar.update(10*i+1)
         pbar.finish()
-        print
+        print()
 
     def example2():
         class CrazyFileTransferSpeed(FileTransferSpeed):
@@ -347,7 +350,7 @@ if __name__=='__main__':
             # do something
             pbar.update(5*i+1)
         pbar.finish()
-        print
+        print()
 
     def example3():
         widgets = [Bar('>'), ' ', ETA(), ' ', ReverseBar('<')]
@@ -356,7 +359,7 @@ if __name__=='__main__':
             # do something
             pbar.update(10*i+1)
         pbar.finish()
-        print
+        print()
 
     def example4():
         widgets = ['Test: ', Percentage(), ' ',
@@ -368,7 +371,7 @@ if __name__=='__main__':
             time.sleep(0.2)
             pbar.update(i)
         pbar.finish()
-        print
+        print()
 
 
     example1()
