@@ -532,7 +532,10 @@ namespace opdet {
          }//endif pmt 
         }//endloop per OpDet
       } //endif litePhotons
+      if(fUseLitePhotons) litePhotonHandle.clear();
+      if(!fUseLitePhotons) PhotonHandle.clear();
     }//endloop per Input Module (S1 and S2 light)
+
    }//endloop per pmt
     if(fDigiTree_SSP_LED)
     {
@@ -543,6 +546,8 @@ namespace opdet {
 
     // Push the OpDetWaveforms into the event
     evt.put(std::move(pulseVecPtr));
+
+
 
   }
 
