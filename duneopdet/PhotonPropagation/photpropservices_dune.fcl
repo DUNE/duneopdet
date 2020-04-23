@@ -419,6 +419,39 @@ protodunedp_photonvisibilityservice.Interpolate: true
 protodunedp_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/libext_protodunedp_lightsim_20180420.root"
 
 
+protodunedp_driftY_photonvisibilityservice:
+{
+  NX: 25
+  NY: 25
+  NZ: 25
+  UseCryoBoundary: true
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  LibraryFile: "PhotonPropagation/LibraryData/libext_protodunedphase_driftY_CRYO_RL91CM_v08_41_01_1e8_25x25x25_20200416.root"
+  ParametrisedTimePropagation: true
+  ParametrisedTimePropagationNParameters: 3
+  ParametrisedTimePropagationMaxRange: 2000
+}
+protodunedp_driftY_RL61CM_photonvisibilityservice: @local::protodunedp_driftY_photonvisibilityservice
+protodunedp_driftY_RL61CM_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/libext_protodunedphase_driftY_CRYO_RL61CM_v08_41_01_1e8_25x25x25_20200416.root"
+
+protodunedp_driftY_AV_photonvisibilityservice:
+{
+  NX: 30
+  NY: 30
+  NZ: 30
+  UseCryoBoundary: true
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  XMin:300    XMax: 300    YMin: -407    YMax: 300    ZMin: 0    ZMax: 600
+  LibraryFile: "PhotonPropagation/LibraryData/libext_protodunedphase_driftY_AV_RL91CM_v08_41_01_1e8_30x30x30_20200416.root"
+  ParametrisedTimePropagation: true
+  ParametrisedTimePropagationNParameters: 3
+  ParametrisedTimePropagationMaxRange: 2000
+}
+protodunedp_driftY_AV_RL61CM_photonvisibilityservice: @local::protodunedp_driftY_AV_photonvisibilityservice
+protodunedp_driftY_AV_RL61CM_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/libext_protodunedphase_driftY_AV_RL61CM_v08_41_01_1e8_30x30x30_20200416.root"
+
 
 
 ####################
