@@ -165,10 +165,10 @@ namespace opdet {
 //    fTimeEnd    = odp->TimeEnd();
 //    fSampleFreq = odp->SampleFreq();
 
-    auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
-    fTimeBegin  = timeService->OpticalClock().Time();
-    fTimeEnd    = timeService->OpticalClock().FramePeriod();
-    fSampleFreq = timeService->OpticalClock().Frequency();
+    auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
+    fTimeBegin  = clockData.OpticalClock().Time();
+    fTimeEnd    = clockData.OpticalClock().FramePeriod();
+    fSampleFreq = clockData.OpticalClock().Frequency();
    
     fYMin = pset.get<float>("YMin");
     fYMax = pset.get<float>("YMax");

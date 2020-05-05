@@ -75,7 +75,7 @@ namespace opdet {
     void ClusterHits(std::vector<art::Ptr<recob::OpHit>>,
                      std::vector<recob::OpFlash>&,
                      std::vector< std::vector<int> >&,
-                     detinfo::DetectorClocks const&)const;
+                     detinfo::DetectorClocksData const&)const;
 
 
     // The parameters we'll read from the .fcl file.
@@ -160,8 +160,7 @@ namespace opdet {
     // at the end of processing
     std::vector< std::vector< int > > assocList;
 
-    auto const& detectorClocks
-       (*lar::providerFrom< detinfo::DetectorClocksService >());
+    auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService>()->DataFor(evt);
 
     // Get OpHits from the event
     art::Handle< std::vector< recob::OpHit > > opHitHandle;
@@ -175,7 +174,7 @@ namespace opdet {
 
 
     // Run the clustering
-    ClusterHits(ohits, *flashPtr, assocList, detectorClocks);
+    ClusterHits(ohits, *flashPtr, assocList, clockData);
 
     // Make the associations which we noted we need
     for (size_t i = 0; i != assocList.size(); ++i)
@@ -264,7 +263,7 @@ namespace opdet {
   void OpSlicer::ClusterHits(std::vector< art::Ptr<recob::OpHit> > ohits,
                              std::vector< recob::OpFlash>& oflashes,
                              std::vector< std::vector<int> >& assoc,
-                             detinfo::DetectorClocks const &ts)const
+                             detinfo::DetectorClocksData const &ts)const
   {
     std::sort(ohits.begin(),ohits.end(),sortOpHitByTime);
 

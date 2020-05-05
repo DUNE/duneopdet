@@ -55,7 +55,7 @@ namespace opdet {
                       std::vector< recob::OpFlash >&     FlashVector,
                       std::vector< std::vector< int > >& AssocList,
                       geo::GeometryCore const&           geom,
-                      detinfo::DetectorClocks const&     ts,
+                      detinfo::DetectorClocksData const& ts,
                       float const&                       TrigCoinc);
     void AddHitContribution(recob::OpHit const&    currentHit,
                           double&                MaxTime,
@@ -85,7 +85,7 @@ namespace opdet {
                       std::vector< recob::OpHit > const& HitVector,
                       std::vector< recob::OpFlash >&     FlashVector,
                       geo::GeometryCore const&           geom,
-                      detinfo::DetectorClocks const&     ts,
+                      detinfo::DetectorClocksData const& ts,
                       float const&                       TrigCoinc);
   private:
 
@@ -169,8 +169,7 @@ namespace opdet {
 
     auto const& geometry(*lar::providerFrom< geo::Geometry >());
 
-    auto const& detectorClocks
-       (*lar::providerFrom< detinfo::DetectorClocksService >());
+    auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
 
     // Get OpHits from the event
     art::Handle< std::vector< recob::OpHit > > opHitHandle;
@@ -180,7 +179,7 @@ namespace opdet {
                    *flashPtr,
                    assocList,
                    geometry,
-                   detectorClocks,
+                   clockData,
                    fTrigCoinc);
 
 
@@ -210,7 +209,7 @@ namespace opdet {
                       std::vector< recob::OpFlash >&     FlashVector,
                       std::vector< std::vector< int > >& AssocList,
                       geo::GeometryCore const&           geom,
-                      detinfo::DetectorClocks const&     ts,
+                      detinfo::DetectorClocksData const& ts,
                       float const&                       TrigCoinc) {
 
     // Now start to create flashes.
@@ -243,7 +242,7 @@ namespace opdet {
                       std::vector< recob::OpHit > const& HitVector,
                       std::vector< recob::OpFlash >&     FlashVector,
                       geo::GeometryCore const&           geom,
-                      detinfo::DetectorClocks const&     ts,
+                      detinfo::DetectorClocksData const& ts,
                       float const&                       TrigCoinc) {
 
     double MaxTime = -1e9;

@@ -94,8 +94,8 @@ namespace opdet {
     fInstanceName =   pset.get< std::string >("InstanceName");
     fAnaTree_SSPLED = pset.get< bool        >("SSP_LED_AnaTree"); 
     // Obtain parameters from DetectorClocksService
-    auto const *timeService = lar::providerFrom< detinfo::DetectorClocksService >();
-    fSampleFreq = timeService->OpticalClock().Frequency();
+    auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService>()->DataForJob();
+    fSampleFreq = clockData.OpticalClock().Frequency();
   
     art::ServiceHandle< art::TFileService > tfs;
 
