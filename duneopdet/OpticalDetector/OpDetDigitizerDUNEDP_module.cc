@@ -161,7 +161,12 @@ namespace opdet {
       double fQE;
       bool fCustomQE;
       std::vector<double> fQEVector;
+      bool fCustomGain;
+      std::vector<double> fGainVector;
       double  getQE(int OpDet);
+      double  getGain(int OpDet);
+      double fGainsError;
+      double fSPEWidth;
       // Make sure the FHiCL parameters make sense
       void CheckFHiCLParameters() const;
 
@@ -188,7 +193,7 @@ namespace opdet {
                         const std::vector<FocusList>& fls) const;
 
       void AddDarkNoise(std::vector< std::vector< double > >&,
-                        std::vector<FocusList>& fls) const;
+                        std::vector<FocusList>& fls,  int opDet);
 
       unsigned short CrossTalk() const;
 
@@ -212,6 +217,17 @@ namespace opdet {
 
       int PMTSaturationFunction(int);
       double SumOfElements(std::vector<double>);
+      bool fExportWaveformTree;
+      TTree *fWaveformTree;
+      TTree *fRunInfo;
+
+      int Run;
+      int SubRun;
+      int Event;
+      unsigned int nSamples;
+      double SampleSize;
+      std::vector<short*> adc_value;
+      unsigned int nOpDet;
   };
 
 }
@@ -250,7 +266,14 @@ namespace opdet {
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
     fNegativeSignal     = pset.get< bool   >("NegativeSignal"    );
     fCustomQE           = pset.get< bool   >("CustomQEperOpDet",false    );
+    fCustomGain         = pset.get< bool   >("CustomGainperOpDet",false    );
+    fGainsError         = pset.get< double >("GainsError",0.0    ); //Factor of gain smearing in units of the gain value
+    fSPEWidth           = pset.get< double >("SPEWidth",0.0    ); //Smear the SPE amplitude by the SPE width, in units of the gain value.
+    fExportWaveformTree = pset.get< bool   >("ExportWaveformTree", false);
+
     if(fCustomQE) fQEVector = pset.get<std::vector<double>>("QEVector");
+    if(fCustomGain) fGainVector = pset.get<std::vector<double>>("GainVector");
+
     fThreshAlg = std::make_unique< pmtana::AlgoSSPLeadingEdge >
                    (pset.get< fhicl::ParameterSet >("algo_threshold"));
 
@@ -301,6 +324,20 @@ namespace opdet {
     fRandExponential = std::make_unique< CLHEP::RandExponential >(engine);
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
 
+
+    art::ServiceHandle< geo::Geometry > geometry;
+    nOpDet=geometry->NOpDets();
+
+    if(fGainsError!=0)
+    {
+      std::cout << "Smearing gains vector by " << fGainsError << " percent. " << std::endl;
+      std::vector<double> newGains;
+      for (unsigned int pm=0; pm<nOpDet; pm++) newGains.push_back(fRandGauss->fire(getGain(pm), fGainsError*getGain(pm)));
+      std::cout << "Old gains vector: "; for (unsigned int pm=0; pm<nOpDet; pm++) std::cout << getGain(pm) << " "; std::cout << std::endl;
+      fCustomGain=true; fGainVector=newGains;
+      std::cout << "New gains vector: "; for (unsigned int pm=0; pm<nOpDet; pm++) std::cout << getGain(pm) << " "; std::cout << std::endl;
+    }
+
     fSinglePEWaveform = odp->SinglePEWaveform();
     if(fSampleFreq!=250)
     {
@@ -332,12 +369,46 @@ namespace opdet {
     std::cout << "\tfPreTrigger" << fPreTrigger <<" "<< std::endl;
     std::cout << "\fSinglePEWaveform: " << fSinglePEWaveform.size() <<"bins, norm: "<< normalization<<std::endl;
 
+    nSamples = (fTimeEnd - fTimeBegin)*fSampleFreq;
+    SampleSize = 1000.0/fSampleFreq;
+
+    art::ServiceHandle<art::TFileService> tfs;
+
+    if(fExportWaveformTree)
+    {
+      adc_value.resize(nOpDet);
+      for (unsigned int i=0; i<nOpDet; i++)adc_value[i] = (short*)malloc(sizeof(short)*nSamples);
+
+      double *vaux; vaux = (double*)malloc(sizeof(double)*nOpDet);
+      fRunInfo = tfs->make<TTree>("RunInfo","MonteCarlo Run Info");
+      fRunInfo->Branch("SampleSize"   , &SampleSize   , "SampleSize/D"     );
+      fRunInfo->Branch("nOpDet"        , &nOpDet   , Form("nOpDet/I")    );
+      fRunInfo->Branch("Gains"        , vaux   , Form("Gains[nOpDet]/D")    );
+      for (unsigned int i=0; i<nOpDet; i++) vaux[i]=getGain(i);
+      for (unsigned int i=0; i<nOpDet; i++) std::cout << " Gain [ " << i << " ] = " << vaux[i] << " ADCxticks/PE" << std::endl;
+      fRunInfo->Fill();
+
+
+      fWaveformTree = tfs->make<TTree>("WaveformTree","Waveforms Tree");
+      fWaveformTree->Branch("Run"       , &Run       , "Run/I"       );
+      fWaveformTree->Branch("SubRun"    , &SubRun    , "SubRun/I"    );
+      fWaveformTree->Branch("Event"     , &Event     , "Event/I"     );
+      fWaveformTree->Branch("NSamples"     , &nSamples     , "NSamples/I"     );
+      for (unsigned int i=0; i<nOpDet; i++) fWaveformTree->Branch(Form("adc_channel_%i",i), adc_value[i] , Form("adc_value_%i[NSamples]/S",i)     );
+
+    }
+
   }
 
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNEDP::produce(art::Event& evt)
   {
-
+    if(fExportWaveformTree)
+    {
+      Run    = evt.run();
+      SubRun = evt.subRun();
+      Event  = evt.event();
+    }
     if(fDigiTree_SSP_LED) art::ServiceHandle< art::TFileService > tfs;
 
     // A pointer that will store produced OpDetWaveforms
@@ -352,8 +423,6 @@ namespace opdet {
         << "Sorry, but for now only Lite Photon digitization is implemented!"
         << '\n';
 
-    unsigned int nSamples = (fTimeEnd - fTimeBegin)*fSampleFreq;
-
     // Geometry service
     art::ServiceHandle< geo::Geometry > geometry;
 
@@ -365,13 +434,12 @@ namespace opdet {
     int modulecounter=0;
 
 
-     unsigned int nOpDet=geometry->NOpDets();
 //     unsigned int nChannelsPerOpDet=1;
 
      unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(nOpDet);
 
 
-      // This vector stores waveforms created for each optical channel
+   // This vector stores waveforms created for each optical channel
     
    for(unsigned int opDet=0; opDet<nOpDet; opDet++)
    {
@@ -379,8 +447,8 @@ namespace opdet {
     std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet, std::vector< double >(nSamples, static_cast< double >(fPedestal)));
     std::vector<std::vector<FocusList>> fls(nOpDet,std::vector<FocusList>(nChannelsPerOpDet, FocusList(nSamples, fPadding)));
 
-    for(auto mod : fInputModule){    
-      // For every module collection   
+    for(auto mod : fInputModule){
+      // For every module collection
       //std::cout << "ANALYZING " << mod<<std::endl;                                       
       modulecounter++;
 
@@ -408,7 +476,7 @@ namespace opdet {
           if((unsigned)modulecounter<fInputModule.size()) continue;//==fInputModule.size()
 
           // Generate dark noise
-          if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet]);
+          if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet], opDet);
 
           // Uncomment to undo the effect of FocusLists. Replaces the accumulated
           // lists with ones asserting we need to look at the whole trace.
@@ -464,6 +532,7 @@ namespace opdet {
                 //std::cout <<"\t\tcounter " << counter<< std::endl;
        	   
                 pulseVecPtr->emplace_back(std::move(adcVec));
+
 	      }//endloop per 
 	    }//endloop per Focus List <fls>
           }//endloop per Hardware channel
@@ -480,7 +549,7 @@ namespace opdet {
           CreatePDWaveform(Photons, *odResponse, *geometry, pdWaveforms, fls[opDet]);
           if((unsigned)modulecounter<fInputModule.size()) continue;//==fInputModule.size()
 
-          if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet]);
+          if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet], opDet);
 
           if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls[opDet]);
 
@@ -544,8 +613,19 @@ namespace opdet {
       op_photon.clear();
     }
 
+    if(fExportWaveformTree)
+    {
+       for(unsigned int opDet=0; opDet < nOpDet; opDet++)
+       {
+         for (unsigned int i = 0; i< pulseVecPtr->at(opDet).Waveform().size() ; i++) adc_value[opDet][i] = pulseVecPtr->at(opDet).Waveform()[i];
+         //for (unsigned int i = 0; i< 10 ; i++) std::cout <<" one - pmt - " <<  opDet << "\t" << pulseVecPtr->at(opDet).Waveform()[i] << " " << adc_value[opDet][i] << std::endl;
+       }
+       fWaveformTree->Fill();
+    }
+
     // Push the OpDetWaveforms into the event
     evt.put(std::move(pulseVecPtr));
+
 
 
 
@@ -558,17 +638,24 @@ namespace opdet {
   {
 	if(timeBin>waveform.size()) return; //photon out of time
 
-    size_t pulseLength = fSinglePEWaveform.size();
+    size_t pulseLength = fSinglePEWaveform.size()+1;
     if ((timeBin + fSinglePEWaveform.size()) > waveform.size())
       pulseLength = (waveform.size() - timeBin);
 
     fl.AddRange(timeBin, timeBin+pulseLength-1);
 
+
+    double interbinallignment = fRandFlat->fire(1.0);//shifting the deposited charge among consecutive bins.
+    double customGain = fRandGauss->fire(Gain, fSPEWidth*Gain); //smear the SPE amplitude by the SPEwidth
     // Adding a pulse to the waveform
     for (size_t tick = 0; tick != pulseLength; ++tick)
     {
-      if(!fNegativeSignal) waveform[timeBin + tick] += scale*Gain*fSinglePEWaveform[tick];
-      else waveform[timeBin + tick] -= (double)scale*Gain*fSinglePEWaveform[tick];
+      double bincharge;
+      if (tick==0) bincharge=interbinallignment*scale*customGain*fSinglePEWaveform[tick];
+      else bincharge = interbinallignment*scale*customGain*fSinglePEWaveform[tick] + (1-interbinallignment)*scale*customGain*fSinglePEWaveform[tick-1];
+
+      if(!fNegativeSignal) waveform[timeBin + tick] += bincharge;
+      else waveform[timeBin + tick] -= (double)bincharge;
 
     }
   }
@@ -611,7 +698,7 @@ namespace opdet {
             // Convert the time of the pulse to ticks
             size_t timeBin = TimeToTick(photonTime);
             // Add 1 pulse to the waveform
-            AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel], fGain);
+            AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel], getGain(opDet));
             counter++;
 	    unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
 	    if(fDigiTree_SSP_LED){
@@ -665,7 +752,7 @@ namespace opdet {
             // Convert the time of the pulse to ticks
             size_t timeBin = TimeToTick(photonTime);
             // Add 1 pulse to the waveform
-            AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel], fGain);
+            AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel], getGain(opDet));
             counter++;
 	    unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
 	    if(fDigiTree_SSP_LED){
@@ -702,7 +789,7 @@ namespace opdet {
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNEDP::
   AddDarkNoise(std::vector< std::vector< double > >& waveforms,
-               std::vector<FocusList>& fls) const
+               std::vector<FocusList>& fls, int optDet)
   {
     int i = 0;
     for (auto& waveform : waveforms)
@@ -713,7 +800,7 @@ namespace opdet {
       while (darkNoiseTime < fTimeEnd)
       {
         size_t timeBin = TimeToTick(darkNoiseTime);
-        AddPulse(timeBin, CrossTalk(), waveform, fls[i], fGain);
+        AddPulse(timeBin, CrossTalk(), waveform, fls[i], getGain(optDet) );
         // Find next time to simulate a single PE pulse
         darkNoiseTime += static_cast< double >
                         (fRandExponential->fire(1.0/fDarkNoiseRate)*1000000.0);
@@ -877,6 +964,12 @@ namespace opdet {
   {
     if(!fCustomQE) return fQE;
     else return fQEVector[OpDet];
+  }
+
+  double  OpDetDigitizerDUNEDP::getGain(int OpDet)
+  {
+    if(!fCustomGain) return fGain;
+    else return fGainVector[OpDet];
   }
 
 }
