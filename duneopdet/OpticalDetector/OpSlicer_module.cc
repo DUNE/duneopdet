@@ -301,6 +301,9 @@ namespace opdet {
         cands.push_back(j);
       }
       int centroidIdx = YZCentroid(ohits,cands);
+      if (centroidIdx < 0) // No centroid found
+        continue;
+      
       art::Ptr<recob::OpHit> centroid = ohits[centroidIdx];
       neigh.push_back(centroidIdx);
 
