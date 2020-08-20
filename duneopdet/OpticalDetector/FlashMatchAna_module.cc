@@ -311,8 +311,6 @@ namespace opdet {
   void FlashMatchAna::analyze(const art::Event& evt)
   {
     // Get the required services
-    auto const* detprop = lar::providerFrom<detinfo::DetectorPropertiesService>();
-    auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
     art::ServiceHandle< geo::Geometry > geom;
     art::ServiceHandle< cheat::PhotonBackTrackerService > pbt;
     art::ServiceHandle<cheat::ParticleInventoryService> pinv;
@@ -383,6 +381,9 @@ namespace opdet {
     std::set<int> signal_trackids;
     geo::PlaneID planeid;
 
+    auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
+    auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(evt, clockData);
+
     try {
       auto MClistHandle = evt.getValidHandle<std::vector<simb::MCTruth> >(fSignalLabel);
 
@@ -432,8 +433,8 @@ namespace opdet {
       planeid = tempid;
 
       // Convert true X to would-be charge arrival time, and convert from ticks to us, add to MC time
-      double deltaTicks = detprop->ConvertXToTicks(part.Vx(), planeid);
-      double deltaT = timeService->TPCTick2Time(deltaTicks);
+      double deltaTicks = detProp.ConvertXToTicks(part.Vx(), planeid);
+      double deltaT = clockData.TPCTick2Time(deltaTicks);
       fDetectedT = fTrueT + deltaT;
     }
     catch (art::Exception const& err) 
@@ -453,7 +454,7 @@ namespace opdet {
 
     // Get the maximum possible time difference by getting number of ticks corresponding to
     // one full drift distance, and converting to time.
-    double maxT = timeService->TPCTick2Time(detprop->NumberTimeSamples());
+    double maxT = clockData.TPCTick2Time(detProp.NumberTimeSamples());
 
 
 
@@ -495,8 +496,8 @@ namespace opdet {
         fRecoX = 0;
       }
       else {
-        double ticks = timeService->Time2Tick(timeDiff);
-        fRecoX = detprop->ConvertTicksToX(ticks, planeid);
+        double ticks = clockData.Time2Tick(timeDiff);
+        fRecoX = detProp.ConvertTicksToX(ticks, planeid);
       }
 
       // Check if this is a possible flash (w/in 1 drift window)

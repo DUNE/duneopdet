@@ -209,7 +209,7 @@ namespace opdet {
       std::map< size_t, std::vector< short > > SplitWaveform(std::vector< short > const&,
                                                              const FocusList&);
 
-      double GetDriftWindow() const;
+      double GetDriftWindow(detinfo::DetectorPropertiesData const& detProp) const;
     
       // Convert time to ticks or the other way around
       // without any checks
@@ -319,18 +319,19 @@ namespace opdet {
 
 
     // Obtaining parameters from the DetectorClocksService
-    auto const *timeService = lar::providerFrom< detinfo::DetectorClocksService >();
-    fSampleFreq = timeService->OpticalClock().Frequency();
+    auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
+    fSampleFreq = clockData.OpticalClock().Frequency();
 
     if (fDefaultSimWindow)
     {
+      auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataForJob(clockData);
+
       // Assume the readout starts at -1 drift window
-      fTimeBegin = -1*GetDriftWindow();
+      fTimeBegin = -1*GetDriftWindow(detProp);
 
       // Take the TPC readout window size and convert
       // to us with the electronics clock frequency
-      fTimeEnd   = lar::providerFrom< detinfo::DetectorPropertiesService >()->ReadOutWindowSize()
-        / timeService->TPCClock().Frequency();
+      fTimeEnd   = detProp.ReadOutWindowSize() / clockData.TPCClock().Frequency();
     }
     else
     {
@@ -737,7 +738,7 @@ namespace opdet {
     }
 
   //---------------------------------------------------------------------------
-  double OpDetDigitizerDUNE::GetDriftWindow() const
+  double OpDetDigitizerDUNE::GetDriftWindow(detinfo::DetectorPropertiesData const& detProp) const
   {
 
     double driftWindow;
@@ -747,8 +748,7 @@ namespace opdet {
         art::ServiceHandle< geo::Geometry >()->IterateTPCs())
       if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
 
-    driftWindow =
-      maxDrift/lar::providerFrom< detinfo::DetectorPropertiesService >()->DriftVelocity();
+    driftWindow = maxDrift/detProp.DriftVelocity();
 
     return driftWindow;
 

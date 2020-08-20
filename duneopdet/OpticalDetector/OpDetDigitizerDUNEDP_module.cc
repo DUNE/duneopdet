@@ -208,7 +208,7 @@ namespace opdet {
       SplitWaveform(std::vector< short > const&,
                     const FocusList&);
 
-      double GetDriftWindow() const;
+      double GetDriftWindow(detinfo::DetectorPropertiesData const& detProp) const;
 
       // Convert time to ticks or the other way around
       // without any checks
@@ -287,8 +287,8 @@ namespace opdet {
     art::ServiceHandle<OpDigiProperties> odp;
 
     // Obtaining parameters from the DetectorClocksService
-    auto const *timeService = lar::providerFrom< detinfo::DetectorClocksService >();
-    fSampleFreq    = timeService->OpticalClock().Frequency();
+    auto const clockData = art::ServiceHandle< detinfo::DetectorClocksService const>()->DataForJob();
+    fSampleFreq    = clockData.OpticalClock().Frequency();
     fDarkNoiseRate =  odp->DarkRate();
     fQE = odp->QE();
 
@@ -296,17 +296,17 @@ namespace opdet {
 
     if (fDefaultSimWindow)
     {
+      auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataForJob(clockData);
       // Assume the readout starts at -1 drift window
-      fTimeBegin = -1*GetDriftWindow();
+      fTimeBegin = -1*GetDriftWindow(detProp);
 
       // Take the TPC readout window size and convert
       // to us with the electronics clock frequency
-      fTimeEnd   = lar::providerFrom< detinfo::DetectorPropertiesService >()->ReadOutWindowSize()
-                   / timeService->TPCClock().Frequency();
+      fTimeEnd   = detProp.ReadOutWindowSize() / clockData.TPCClock().Frequency();
 
       fPreTrigger = 0;//Since we are using negative times as the pretrigger, PreTrigger is zero.
-      //fPreTrigger=GetDriftWindow()*timeService->OpticalClock().Frequency();
-      fReadoutWindow = (fTimeEnd- fTimeBegin)*timeService->OpticalClock().Frequency();
+      //fPreTrigger=GetDriftWindow()*clockData.OpticalClock().Frequency();
+      fReadoutWindow = (fTimeEnd- fTimeBegin)*clockData.OpticalClock().Frequency();
     }
     else
     {
@@ -881,7 +881,7 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  double OpDetDigitizerDUNEDP::GetDriftWindow() const
+  double OpDetDigitizerDUNEDP::GetDriftWindow(detinfo::DetectorPropertiesData const& detProp) const
   {
 
     double driftWindow;
@@ -891,8 +891,7 @@ namespace opdet {
            art::ServiceHandle< geo::Geometry >()->IterateTPCs())
       if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
 
-    driftWindow =
-      maxDrift/lar::providerFrom< detinfo::DetectorPropertiesService >()->DriftVelocity();
+    driftWindow = maxDrift / detProp.DriftVelocity();
 
     return driftWindow;
 

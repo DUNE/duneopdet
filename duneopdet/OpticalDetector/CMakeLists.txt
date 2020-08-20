@@ -26,6 +26,7 @@ art_make( BASENAME_ONLY
   
                 MODULE_LIBRARIES
                                 dune_DuneObj
+                                lardataalg_DetectorInfo
                                 lardataobj_RecoBase
                                 larana_OpticalDetector
                                 larana_OpticalDetector_OpHitFinder
