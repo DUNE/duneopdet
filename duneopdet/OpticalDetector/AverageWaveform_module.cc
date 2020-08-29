@@ -24,7 +24,6 @@
 // LArSoft includes
 
 #include "larcore/CoreUtils/ServiceUtil.h"
-#include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardataobj/RawData/OpDetWaveform.h"
 
@@ -91,8 +90,8 @@ namespace opdet {
         fInstanceName = pset.get< std::string >("InstanceName");
 
         // Obtain parameters from TimeService
-        auto const* timeService = lar::providerFrom<detinfo::DetectorClocksService>();
-        fSampleFreq = timeService->OpticalClock().Frequency();
+        auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
+        fSampleFreq = clockData.OpticalClock().Frequency();
 
         // Assume starting at 0
         fTimeBegin  = 0;
