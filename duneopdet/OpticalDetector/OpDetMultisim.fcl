@@ -20,49 +20,56 @@ pd_detsim_modules: {
       opdigiTHR35QENonRefl2PE:    @local::dunefd_opdigi_threegang
       opdigiTHR35QENonRefl3PE:    @local::dunefd_opdigi_threegang
 }
-
+pd_detsim_modules.opdigiDEF35QENonRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.QEOverride:                  0.024500
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiEFF15QENonRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.QEOverride:                  0.010500
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiEFF25QENonRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.QEOverride:                  0.017500
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiEFF45QENonRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.QEOverride:                  0.031500
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiREF35QEOptRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.QEOverride:                  0.024500
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.QERefOverride:               0.035280
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiREF35QEPesRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.QEOverride:                  0.012250
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.QERefOverride:               0.020580
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiTHR35QENonRefl2PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.QEOverride:                  0.024500
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.algo_threshold.ADCThreshold: 15.000
 
+pd_detsim_modules.opdigiTHR35QENonRefl3PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiTHR35QENonRefl3PE.QEOverride:                  0.024500
 pd_detsim_modules.opdigiTHR35QENonRefl3PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiTHR35QENonRefl3PE.DarkNoiseRate:               100 #Hz
