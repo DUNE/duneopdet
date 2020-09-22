@@ -145,13 +145,19 @@ dunesp_library_vuv_vis_prop_timing_photonvisibilityservice:
 {
    # This will need to be repalced in dunetpc with
    # dunesp-specific library settings
-   @table::standard_library_vuv_prop_timing_photonvisibilityservice
+   @table::dune10kt_1x2x6_refl_v1_photonvisibilityservice
+
+   # Flag to enable time parameterizations
+   IncludePropTime: true
+
+   # DUNE-specific VUV timing parameterization
+   @table::dune_vuv_timing_parameterization
 
    # Flag to enable visible light simulation
    StoreReflected: true
    
    # DUNE-specific VIS parameterization
-   @table::dunesp_vis_timing_parameterization
+   @table::dune_vis_timing_parameterization
 
 }
 
@@ -159,36 +165,6 @@ dunesp_library_vuv_vis_prop_timing_photonvisibilityservice:
 # Enable direct timing parameterization and Nhits model estimation.
 # Works only for DUNE SP.
 #
-# default case is 90cm Rayleigh scattering length
-dunesp_Nhits_vuv_prop_timing_RS90cm_photonvisibilityservice:
-{
-   # Flags to enable parameterizations, disable library
-   IncludePropTime: true
-   UseNhitsModel: true
-   DoNotLoadLibrary: true
-
-   # Generic VUV timing parameterization
-   @table::common_vuv_timing_parameterization
-
-   # Semi-analytic VUV Nhits parameters
-   GH_PARS: @local::GH_RS90cm_SP
-   BORDER_correction_SP: @local::BORDER_correction_RS90cm_SP
-}
-# alternate case - original 60cm Rayleigh scattering length
-dunesp_Nhits_vuv_prop_timing_RS60cm_photonvisibilityservice:
-{
-   # Flags to enable parameterizations, disable library
-   IncludePropTime: true
-   UseNhitsModel: true
-   DoNotLoadLibrary: true
-
-   # Generic VUV timing parameterization
-   @table::common_vuv_timing_parameterization
-
-   # Semi-analytic VUV Nhits parameters
-   GH_PARS: @local::GH_RS60cm_SP
-   BORDER_correction_SP: @local::BORDER_correction_RS60cm_SP
-}
 # xenon doped argon case
 dunesp_Nhits_vuv_Xe_photonvisibilityservice:
 {
@@ -198,7 +174,7 @@ dunesp_Nhits_vuv_Xe_photonvisibilityservice:
    DoNotLoadLibrary: true
 
    # Generic VUV timing parameterization
-   @table::common_vuv_timing_parameterization
+   @table::dune_vuv_timing_parameterization
 
    # Semi-analytic VUV Nhits parameters
    GH_PARS: @local::GH_RS700cm_SP
@@ -209,49 +185,29 @@ dunesp_Nhits_vuv_Xe_photonvisibilityservice:
 # Enable direct and reflected timing parameterization and Nhits model estimation.
 # Works only for DUNE SP.
 #
-# default case is 90cm Rayleigh scattering length for the VUV light
-dunesp_Nhits_vuv_vis_prop_timing_RS90cm_photonvisibilityservice:
+# default case is 100cm Rayleigh scattering length for the VUV light
+dunesp_Nhits_vuv_vis_prop_timing_RS100cm_photonvisibilityservice:
 {
-   # DUNE-SP VUV timing and Nhits settings
-   @table::dunesp_Nhits_vuv_prop_timing_RS90cm_photonvisibilityservice
+   # Flags to enable parameterizations, disable library
+   IncludePropTime: true
+   UseNhitsModel: true
+   DoNotLoadLibrary: true
+
+   # DUNE-specific VUV time parameterization
+   @table::dune_vuv_timing_parameterization
+
+   # DUNE-specific VUV semi-analytic Nhits parameters
+   @table::dune_vuv_RS100cm_hits_parameterization
 
    # Flag to enable visible light simulation
    StoreReflected: true
  
-   # DUNE-SP VIS parameterization
-   @table::dunesp_vis_timing_parameterization
+   # DUNE-specific VIS time parameterization
+   @table::dune_vis_timing_parameterization
 
-   # DUNE-SP semi-analytic VIS Nhits parameters
-   VIS_PARS: @local::VIS_RS90cm_SP
+   # DUNE-specific VIS semi-analytic Nhits parameters
+   @table::dune_vis_RS100cm_hits_parameterization
 
-   # VIS border correction
-   ApplyVISBorderCorrection: true
-   VIS_BORDER_correction_type: @local::VIS_RS90cm_SP_BORDER_correction_type
-   VIS_BORDER_distances_x: @local::VIS_RS90cm_SP_BORDER_distances_x
-   VIS_BORDER_distances_r: @local::VIS_RS90cm_SP_BORDER_distances_r
-   VIS_BORDER_correction: @local::VIS_RS90cm_SP_BORDER_correction
-}
-# alternate case - original 60cm Rayleigh scattering length for VUV light
-dunesp_Nhits_vuv_vis_prop_timing_RS60cm_photonvisibilityservice:
-{
-   # DUNE-SP VUV timing and Nhits settings
-   @table::dunesp_Nhits_vuv_prop_timing_RS60cm_photonvisibilityservice
-
-   # Flag to enable visible light simulation
-   StoreReflected: true
- 
-   # DUNE-SP VIS parameterization
-   @table::dunesp_vis_timing_parameterization
-
-   # DUNE-SP semi-analytic VIS Nhits parameters
-   VIS_PARS: @local::VIS_RS60cm_SP
-
-   # VIS border correction
-   ApplyVISBorderCorrection: true
-   VIS_BORDER_correction_type: @local::VIS_RS60cm_SP_BORDER_correction_type
-   VIS_BORDER_distances_x: @local::VIS_RS60cm_SP_BORDER_distances_x
-   VIS_BORDER_distances_r: @local::VIS_RS60cm_SP_BORDER_distances_r
-   VIS_BORDER_correction: @local::VIS_RS60cm_SP_BORDER_correction
 }
 # xenon doped argon case
 dunesp_Nhits_vuv_vis_Xe_photonvisibilityservice:
@@ -263,7 +219,7 @@ dunesp_Nhits_vuv_vis_Xe_photonvisibilityservice:
    StoreReflected: true
  
    # DUNE-SP VIS parameterization
-   @table::dunesp_vis_timing_parameterization
+   @table::dune_vis_timing_parameterization
 
    # DUNE-SP semi-analytic VIS Nhits parameters
    VIS_PARS: @local::VIS_RS700cm_SP
@@ -282,7 +238,7 @@ dunesp_Nhits_vuv_vis_Xe_photonvisibilityservice:
 # Make a choice here among the above for *the* FD 1x2x6 PVS
 # Use the pre-defined DUNE SP configuration for paramterized simulation
 # Default case is with 90cm Rayleigh scattering length @ 128nm
-dune10kt_1x2x6_photonvisibilityservice: @local::dunesp_Nhits_vuv_vis_prop_timing_RS90cm_photonvisibilityservice
+dune10kt_1x2x6_photonvisibilityservice: @local::dunesp_Nhits_vuv_vis_prop_timing_RS100cm_photonvisibilityservice
 
 # Make choice here for Xenon doped FD 1x2x6 PVS
 # Use pre-defined DUNE SP configuration for paramterized simulation
