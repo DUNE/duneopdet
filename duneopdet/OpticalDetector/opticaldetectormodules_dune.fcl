@@ -30,7 +30,7 @@ dunefd_opdigi_unganged:
 
    Padding:              100        # In ticks
 
-   PulseLength:		 4.0
+   PulseLength:		 5.2
    PeakTime:		 0.260
    MaxAmplitude:	 0.12
    FrontTime:		 0.009
@@ -53,7 +53,7 @@ dunefd_opdigi_unganged:
 }
 
 dunefd_opdigi_threegang:	        @local::dunefd_opdigi_unganged
-dunefd_opdigi_threegang.PulseLength:	0.876
+dunefd_opdigi_threegang.PulseLength:	5.2
 dunefd_opdigi_threegang.PeakTime:	0.028
 dunefd_opdigi_threegang.MaxAmplitude:	0.0594
 dunefd_opdigi_threegang.FrontTime:	0.013

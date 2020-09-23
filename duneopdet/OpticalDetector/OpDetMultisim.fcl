@@ -20,49 +20,56 @@ pd_detsim_modules: {
       opdigiTHR35QENonRefl2PE:    @local::dunefd_opdigi_threegang
       opdigiTHR35QENonRefl3PE:    @local::dunefd_opdigi_threegang
 }
-
+pd_detsim_modules.opdigiDEF35QENonRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.QEOverride:                  0.024500
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiDEF35QENonRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiEFF15QENonRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.QEOverride:                  0.010500
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiEFF15QENonRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiEFF25QENonRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.QEOverride:                  0.017500
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiEFF25QENonRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiEFF45QENonRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.QEOverride:                  0.031500
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiEFF45QENonRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiREF35QEOptRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.QEOverride:                  0.024500
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.QERefOverride:               0.035280
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiREF35QEOptRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiREF35QEPesRefl1PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.QEOverride:                  0.012250
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.QERefOverride:               0.020580
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiREF35QEPesRefl1PE.algo_threshold.ADCThreshold: 6.000
 
+pd_detsim_modules.opdigiTHR35QENonRefl2PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.QEOverride:                  0.024500
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiTHR35QENonRefl2PE.algo_threshold.ADCThreshold: 15.000
 
+pd_detsim_modules.opdigiTHR35QENonRefl3PE.InputModule:                 "PDFastSim"
 pd_detsim_modules.opdigiTHR35QENonRefl3PE.QEOverride:                  0.024500
 pd_detsim_modules.opdigiTHR35QENonRefl3PE.QERefOverride:               0.000000
 pd_detsim_modules.opdigiTHR35QENonRefl3PE.DarkNoiseRate:               100 #Hz
@@ -184,7 +191,7 @@ pd_ana_modules.flashmatchDEF35QENonRefl1PE.OpHitModuleLabel:   ophitDEF35QENonRe
 pd_ana_modules.flashmatchDEF35QENonRefl1PE.OpFlashModuleLabel: opflashDEF35QENonRefl1PE
 pd_ana_modules.slicematchDEF35QENonRefl1PE.OpDetWaveformLabel: opdigiDEF35QENonRefl1PE
 pd_ana_modules.slicematchDEF35QENonRefl1PE.OpHitModuleLabel:   ophitDEF35QENonRefl1PE
-pd_ana_modules.slicematchDEF35QENonRefl1PE.OpFlashModuleLabel: opsliceDEF35QENonRefl1PE
+pd_ana_modules.slicematchDEF35QENonRefl1PE.OpFlashModuleLabel: opslicerDEF35QENonRefl1PE
 pd_ana_modules.snanaDEF35QENonRefl1PE.OpHitModuleLabel:        ophitDEF35QENonRefl1PE
 
 pd_ana_modules.flashmatchEFF15QENonRefl1PE.OpDetWaveformLabel: opdigiEFF15QENonRefl1PE
@@ -192,7 +199,7 @@ pd_ana_modules.flashmatchEFF15QENonRefl1PE.OpHitModuleLabel:   ophitEFF15QENonRe
 pd_ana_modules.flashmatchEFF15QENonRefl1PE.OpFlashModuleLabel: opflashEFF15QENonRefl1PE
 pd_ana_modules.slicematchEFF15QENonRefl1PE.OpDetWaveformLabel: opdigiEFF15QENonRefl1PE
 pd_ana_modules.slicematchEFF15QENonRefl1PE.OpHitModuleLabel:   ophitEFF15QENonRefl1PE
-pd_ana_modules.slicematchEFF15QENonRefl1PE.OpFlashModuleLabel: opsliceEFF15QENonRefl1PE
+pd_ana_modules.slicematchEFF15QENonRefl1PE.OpFlashModuleLabel: opslicerEFF15QENonRefl1PE
 pd_ana_modules.snanaEFF15QENonRefl1PE.OpHitModuleLabel:        ophitEFF15QENonRefl1PE
 
 pd_ana_modules.flashmatchEFF25QENonRefl1PE.OpDetWaveformLabel: opdigiEFF25QENonRefl1PE
@@ -200,7 +207,7 @@ pd_ana_modules.flashmatchEFF25QENonRefl1PE.OpHitModuleLabel:   ophitEFF25QENonRe
 pd_ana_modules.flashmatchEFF25QENonRefl1PE.OpFlashModuleLabel: opflashEFF25QENonRefl1PE
 pd_ana_modules.slicematchEFF25QENonRefl1PE.OpDetWaveformLabel: opdigiEFF25QENonRefl1PE
 pd_ana_modules.slicematchEFF25QENonRefl1PE.OpHitModuleLabel:   ophitEFF25QENonRefl1PE
-pd_ana_modules.slicematchEFF25QENonRefl1PE.OpFlashModuleLabel: opsliceEFF25QENonRefl1PE
+pd_ana_modules.slicematchEFF25QENonRefl1PE.OpFlashModuleLabel: opslicerEFF25QENonRefl1PE
 pd_ana_modules.snanaEFF25QENonRefl1PE.OpHitModuleLabel:        ophitEFF25QENonRefl1PE
 
 pd_ana_modules.flashmatchEFF45QENonRefl1PE.OpDetWaveformLabel: opdigiEFF45QENonRefl1PE
@@ -208,7 +215,7 @@ pd_ana_modules.flashmatchEFF45QENonRefl1PE.OpHitModuleLabel:   ophitEFF45QENonRe
 pd_ana_modules.flashmatchEFF45QENonRefl1PE.OpFlashModuleLabel: opflashEFF45QENonRefl1PE
 pd_ana_modules.slicematchEFF45QENonRefl1PE.OpDetWaveformLabel: opdigiEFF45QENonRefl1PE
 pd_ana_modules.slicematchEFF45QENonRefl1PE.OpHitModuleLabel:   ophitEFF45QENonRefl1PE
-pd_ana_modules.slicematchEFF45QENonRefl1PE.OpFlashModuleLabel: opsliceEFF45QENonRefl1PE
+pd_ana_modules.slicematchEFF45QENonRefl1PE.OpFlashModuleLabel: opslicerEFF45QENonRefl1PE
 pd_ana_modules.snanaEFF45QENonRefl1PE.OpHitModuleLabel:        ophitEFF45QENonRefl1PE
 
 pd_ana_modules.flashmatchREF35QEOptRefl1PE.OpDetWaveformLabel: opdigiREF35QEOptRefl1PE
@@ -216,7 +223,7 @@ pd_ana_modules.flashmatchREF35QEOptRefl1PE.OpHitModuleLabel:   ophitREF35QEOptRe
 pd_ana_modules.flashmatchREF35QEOptRefl1PE.OpFlashModuleLabel: opflashREF35QEOptRefl1PE
 pd_ana_modules.slicematchREF35QEOptRefl1PE.OpDetWaveformLabel: opdigiREF35QEOptRefl1PE
 pd_ana_modules.slicematchREF35QEOptRefl1PE.OpHitModuleLabel:   ophitREF35QEOptRefl1PE
-pd_ana_modules.slicematchREF35QEOptRefl1PE.OpFlashModuleLabel: opsliceREF35QEOptRefl1PE
+pd_ana_modules.slicematchREF35QEOptRefl1PE.OpFlashModuleLabel: opslicerREF35QEOptRefl1PE
 pd_ana_modules.snanaREF35QEOptRefl1PE.OpHitModuleLabel:        ophitREF35QEOptRefl1PE
 
 pd_ana_modules.flashmatchREF35QEPesRefl1PE.OpDetWaveformLabel: opdigiREF35QEPesRefl1PE
@@ -224,7 +231,7 @@ pd_ana_modules.flashmatchREF35QEPesRefl1PE.OpHitModuleLabel:   ophitREF35QEPesRe
 pd_ana_modules.flashmatchREF35QEPesRefl1PE.OpFlashModuleLabel: opflashREF35QEPesRefl1PE
 pd_ana_modules.slicematchREF35QEPesRefl1PE.OpDetWaveformLabel: opdigiREF35QEPesRefl1PE
 pd_ana_modules.slicematchREF35QEPesRefl1PE.OpHitModuleLabel:   ophitREF35QEPesRefl1PE
-pd_ana_modules.slicematchREF35QEPesRefl1PE.OpFlashModuleLabel: opsliceREF35QEPesRefl1PE
+pd_ana_modules.slicematchREF35QEPesRefl1PE.OpFlashModuleLabel: opslicerREF35QEPesRefl1PE
 pd_ana_modules.snanaREF35QEPesRefl1PE.OpHitModuleLabel:        ophitREF35QEPesRefl1PE
 
 pd_ana_modules.flashmatchTHR35QENonRefl2PE.OpDetWaveformLabel: opdigiTHR35QENonRefl2PE
@@ -232,7 +239,7 @@ pd_ana_modules.flashmatchTHR35QENonRefl2PE.OpHitModuleLabel:   ophitTHR35QENonRe
 pd_ana_modules.flashmatchTHR35QENonRefl2PE.OpFlashModuleLabel: opflashTHR35QENonRefl2PE
 pd_ana_modules.slicematchTHR35QENonRefl2PE.OpDetWaveformLabel: opdigiTHR35QENonRefl2PE
 pd_ana_modules.slicematchTHR35QENonRefl2PE.OpHitModuleLabel:   ophitTHR35QENonRefl2PE
-pd_ana_modules.slicematchTHR35QENonRefl2PE.OpFlashModuleLabel: opsliceTHR35QENonRefl2PE
+pd_ana_modules.slicematchTHR35QENonRefl2PE.OpFlashModuleLabel: opslicerTHR35QENonRefl2PE
 pd_ana_modules.snanaTHR35QENonRefl2PE.OpHitModuleLabel:        ophitTHR35QENonRefl2PE
 
 pd_ana_modules.flashmatchTHR35QENonRefl3PE.OpDetWaveformLabel: opdigiTHR35QENonRefl3PE
@@ -240,7 +247,7 @@ pd_ana_modules.flashmatchTHR35QENonRefl3PE.OpHitModuleLabel:   ophitTHR35QENonRe
 pd_ana_modules.flashmatchTHR35QENonRefl3PE.OpFlashModuleLabel: opflashTHR35QENonRefl3PE
 pd_ana_modules.slicematchTHR35QENonRefl3PE.OpDetWaveformLabel: opdigiTHR35QENonRefl3PE
 pd_ana_modules.slicematchTHR35QENonRefl3PE.OpHitModuleLabel:   ophitTHR35QENonRefl3PE
-pd_ana_modules.slicematchTHR35QENonRefl3PE.OpFlashModuleLabel: opsliceTHR35QENonRefl3PE
+pd_ana_modules.slicematchTHR35QENonRefl3PE.OpFlashModuleLabel: opslicerTHR35QENonRefl3PE
 pd_ana_modules.snanaTHR35QENonRefl3PE.OpHitModuleLabel:        ophitTHR35QENonRefl3PE
 
 pd_ana_path: [
