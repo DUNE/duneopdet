@@ -173,12 +173,8 @@ dunesp_Nhits_vuv_Xe_photonvisibilityservice:
    UseNhitsModel: true
    DoNotLoadLibrary: true
 
-   # Generic VUV timing parameterization
-   @table::dune_vuv_timing_parameterization
-
    # Semi-analytic VUV Nhits parameters
-   GH_PARS: @local::GH_RS700cm_SP
-   BORDER_correction_SP: @local::BORDER_correction_RS700cm_SP
+   @table::dune_vuv_Xenon_hits_parameterization
 }
 
 #
@@ -218,18 +214,8 @@ dunesp_Nhits_vuv_vis_Xe_photonvisibilityservice:
    # Flag to enable visible light simulation
    StoreReflected: true
  
-   # DUNE-SP VIS parameterization
-   @table::dune_vis_timing_parameterization
-
-   # DUNE-SP semi-analytic VIS Nhits parameters
-   VIS_PARS: @local::VIS_RS700cm_SP
-
-   # VIS border correction
-   ApplyVISBorderCorrection: true
-   VIS_BORDER_correction_type: @local::VIS_RS700cm_SP_BORDER_correction_type
-   VIS_BORDER_distances_x: @local::VIS_RS700cm_SP_BORDER_distances_x
-   VIS_BORDER_distances_r: @local::VIS_RS700cm_SP_BORDER_distances_r
-   VIS_BORDER_correction: @local::VIS_RS700cm_SP_BORDER_correction
+   # DUNE-specific VIS semi-analytic Nhits parameters
+   @table::dune_vis_xenon_hits_parameterization
 }
 
 ##############
