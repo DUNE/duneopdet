@@ -30,12 +30,12 @@ dunefd_opdigi_unganged:
 
    Padding:              100        # In ticks
 
-   PulseLength:		 5.2
-   PeakTime:		 0.260
-   MaxAmplitude:	 0.12
-   FrontTime:		 0.009
-   BackTime:		 0.476
-   SSP_LED_DigiTree:     false	    #To create a SSP LED trigger Ttree
+   PulseLength:		         5.2
+   PeakTime:		           0.260
+   MaxAmplitude:	         0.12
+   FrontTime:		           0.009
+   BackTime:		           0.476
+   SSP_LED_DigiTree:    false	    #To create a SSP LED trigger Ttree
    
    # readout window in optical ticks
    # buffer before waveform
@@ -52,12 +52,13 @@ dunefd_opdigi_unganged:
    # SaturationScale:         16383 # 2^14 - 1, based on SSP Data
 }
 
-dunefd_opdigi_threegang:	        @local::dunefd_opdigi_unganged
-dunefd_opdigi_threegang.PulseLength:	5.2
-dunefd_opdigi_threegang.PeakTime:	0.028
-dunefd_opdigi_threegang.MaxAmplitude:	0.0594
-dunefd_opdigi_threegang.FrontTime:	0.013
-dunefd_opdigi_threegang.BackTime:	0.386
+dunefd_opdigi_threegang:	                            @local::dunefd_opdigi_unganged
+dunefd_opdigi_threegang.PulseLength:	                5.2
+dunefd_opdigi_threegang.PeakTime:	                    0.028
+dunefd_opdigi_threegang.MaxAmplitude:	                0.0594 # * VoltageToADC = 9 ADC/PE
+dunefd_opdigi_threegang.FrontTime:	                  0.013
+dunefd_opdigi_threegang.BackTime:	                    0.386
+dunefd_opdigi_threegang.algo_threshold.ADCThreshold: 15.000 # "2 PE" threshold = 1.7 PE
 
 dunefd_opdigi: @local::dunefd_opdigi_threegang
 
