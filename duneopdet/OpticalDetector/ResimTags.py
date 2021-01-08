@@ -3,12 +3,12 @@
 
 from __future__ import print_function
 def CreateTags():
-    preqes  = [ 15, 25, 45 ]
-    prethrs = [ 2, 3 ]
+    preqes  = [ 25, 30, 40 ]
+    prethrs = [ 1, 3 ]
     prerefs  = [ "Opt", "Pes" ]
 
     defqes  = [ 35 ]
-    defthrs = [ 1 ]
+    defthrs = [ 2 ]
     defrefs   = [ "Non" ]
 
     areas = {}
@@ -38,7 +38,6 @@ def CreateTags():
 
                     # Reduce Eff by 30% for shadowing
                     qeval = float(qe) / 1000.
-                    qeval *= 0.7
 
                     # Produce the parameter tables
                     params[tag] = {}

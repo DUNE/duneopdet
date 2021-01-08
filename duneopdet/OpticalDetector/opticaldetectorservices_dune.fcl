@@ -59,8 +59,30 @@ dunefd_opdetresponse_iuradiator:
 
 }
 
+dunefd_opdetresponse_arapuca:
+{
+   
+   service_provider:        DUNEOpDetResponse
+   
+   QuantumEfficiency:       0.035 # 3.5% efficiency, no corrections
+   
+   WavelengthCutLow:        0 
+   WavelengthCutHigh:       10000
+   
+   # No light guide attenuation
+   LightGuideAttenuation:   false
+   LambdaShort:             0
+   LambdaLong:              0
+   FracShort:               0
+   FracLong:                0
+   LongAxis:                z
+   
+   # No need to convert ARAPUCA channels
+   ChannelConversion:       none
+}
+
 # Use the IU radiator design by default
-dunefd_opdetresponse: @local::dunefd_opdetresponse_iuradiator
+dunefd_opdetresponse: @local::dunefd_opdetresponse_arapuca
 protodune_opdetresponse: @local::dunefd_opdetresponse_iuradiator
 
 
