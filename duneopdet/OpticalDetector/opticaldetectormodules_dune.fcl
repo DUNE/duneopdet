@@ -60,7 +60,12 @@ dunefd_opdigi_threegang.FrontTime:	                  0.013
 dunefd_opdigi_threegang.BackTime:	                    0.386
 dunefd_opdigi_threegang.algo_threshold.ADCThreshold: 15.000 # "2 PE" threshold = 1.7 PE
 
+dunefd_opdigi_threegang_refactor: @local::dunefd_opdigi_threegang
+dunefd_opdigi_threegang_refactor.InputModule: "PDFastSim"
+
 dunefd_opdigi: @local::dunefd_opdigi_threegang
+
+
 
 protodune_opdigi: @local::dunefd_opdigi_threegang
 protodune_opdigi.algo_threshold: @local::standard_algo_sspleadingedge
