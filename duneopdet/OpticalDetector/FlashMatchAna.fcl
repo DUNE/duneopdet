@@ -19,20 +19,7 @@ standard_flashmatchana:
 }
 
 
-marley_flashmatchana:
-{
-   module_type:          "FlashMatchAna"
-   OpFlashModuleLabel:   "opflash"  
-   OpHitModuleLabel:     "ophit"  
-   SignalLabel:          "marley"
-   GeantLabel:           "largeant"
-   DistanceCut:          240 # cm
-   NBinsE:               50
-   LowE:                 0
-   HighE:                0.05
-   NBinsX:               50
-   LowX:                -360
-   HighX:                360
-}
+marley_flashmatchana: @local::standard_flashmatchana
+marley_flashmatchana.SignalLabel: "marley"
 
 END_PROLOG
