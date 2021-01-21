@@ -280,10 +280,12 @@ namespace opdet {
       fQEOverride = tempQE / LarProp->ScintPreScale();
       
       if (fQEOverride > 1.0001 ) {
-        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set in OpDetResponse_service, " << tempQE
+        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set as OpDetDigitizerDUNE.QEOverride, " << tempQE
                                            << " is too large.  It is larger than the prescaling applied during simulation, "
                                            << LarProp->ScintPreScale()
-                                           << ".  Final QE must be equalt to or smaller than the QE applied at simulation time.";
+                                           << " (fQEOverride = "
+                                           << fQEOverride
+                                           << ").  Final QE must be equal to or smaller than the QE applied at simulation time.";
         std::abort();
       }
     }
@@ -295,10 +297,12 @@ namespace opdet {
       fRefQEOverride = tempRefQE / LarProp->ScintPreScale();
       
       if (fRefQEOverride > 1.0001 ) {
-        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set in OpDetResponse_service, " << tempQE
+        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set as OpDetDigitizerDUNE.QERefOverride, " << tempRefQE
                                            << " is too large.  It is larger than the prescaling applied during simulation, "
                                            << LarProp->ScintPreScale()
-                                           << ".  Final QE must be equalt to or smaller than the QE applied at simulation time.";
+                                           << " (fRefQEOverride = "
+                                           << fRefQEOverride
+                                           << ").  Final QE must be equal to or smaller than the QE applied at simulation time.";
         std::abort();
       }
     }

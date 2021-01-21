@@ -70,7 +70,9 @@ namespace opdet{
             mf::LogError("DUNEOpDetResponse_service") << "Quantum efficiency set in OpDetResponse_service, " << tempfQE
                                                       << " is too large.  It is larger than the prescaling applied during simulation, "
                                                       << LarProp->ScintPreScale()
-                                                      << ".  Final QE must be equalt to or smaller than the QE applied at simulation time.";
+                                                      << " (fQE="
+                                                      << fQE
+                                                      << ").  Final QE must be equal to or smaller than the QE applied at simulation time.";
             std::abort();
         }
 
