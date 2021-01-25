@@ -27,7 +27,7 @@ dunefd_pdfastsim_par_xe.IncludePropTime:       false                 # Xe propoa
 dunefd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeLAr  # Xe scintillation time tool needed
 
 # As above, with cathode reflections included
-dunefd_pdfastsim_par_xe_refl:                  @local::dunefd_pdfastsim_par_ar
+dunefd_pdfastsim_par_xe_refl:                  @local::dunefd_pdfastsim_par_xe
 dunefd_pdfastsim_par_xe_refl.DoReflectedLight: true
 dunefd_pdfastsim_par_xe_refl.VISHits:          @local::dune_vis_xenon_hits_parameterization
 #dunefd_pdfastsim_par_xe_refl.VISTiming:                             # Xe propoagation time not yet calculated
