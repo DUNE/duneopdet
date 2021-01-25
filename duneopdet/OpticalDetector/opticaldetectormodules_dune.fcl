@@ -6,7 +6,7 @@ BEGIN_PROLOG
 dunefd_opdigi_unganged:
 {
    module_type:          "OpDetDigitizerDUNE"
-   InputModule:          "largeant" # Module that created simphotons
+   InputModules:         ["largeant"] # Module that created simphotons
 
    # Assume 25 V bias with Sensl C-series SiPMs
    # Gain at this voltage is 4e6 -- that this corresponds to
@@ -61,7 +61,7 @@ dunefd_opdigi_threegang.BackTime:	                    0.386
 dunefd_opdigi_threegang.algo_threshold.ADCThreshold: 15.000 # "2 PE" threshold = 1.7 PE
 
 dunefd_opdigi_threegang_refactor: @local::dunefd_opdigi_threegang
-dunefd_opdigi_threegang_refactor.InputModule: "PDFastSim"
+dunefd_opdigi_threegang_refactor.InputModules: ["PDFastSim"]
 
 dunefd_opdigi: @local::dunefd_opdigi_threegang
 
