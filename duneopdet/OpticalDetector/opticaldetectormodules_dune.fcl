@@ -70,6 +70,9 @@ dunefd_opdigi: @local::dunefd_opdigi_threegang
 protodune_opdigi: @local::dunefd_opdigi_threegang
 protodune_opdigi.algo_threshold: @local::standard_algo_sspleadingedge
 
+protodune_opdigi_refactor: @local::protodune_opdigi
+protodune_opdigi_refactor.InputModules: ["PDFastSim"]
+
 
 dunefd_simphotoncounter:
 {
