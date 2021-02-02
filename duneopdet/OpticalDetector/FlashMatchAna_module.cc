@@ -128,6 +128,7 @@ namespace opdet {
     std::vector< Bool_t >  fInBeamFrameVector;
     std::vector< Int_t >   fOnBeamTimeVector;
     std::vector< Float_t > fTotalPEVector;
+    Float_t                fSumPE;
     std::vector< Float_t > fPurityVector;
     std::vector< Float_t > fDistanceVector;
     Int_t fNOpDets;
@@ -212,6 +213,7 @@ namespace opdet {
     fFlashMatchTree->Branch("TimeWidthVector",             &fTimeWidthVector);
     fFlashMatchTree->Branch("TimeDiffVector",              &fTimeDiffVector);
     fFlashMatchTree->Branch("TotalPEVector",               &fTotalPEVector);
+    fFlashMatchTree->Branch("SumPE",                       &fSumPE,      "SumPE/F");
     fFlashMatchTree->Branch("NOpDets",                     &fNOpDets,    "NOpDets/I");
     fFlashMatchTree->Branch("NHitOpDetVector",             &fNHitOpDetVector);
     fFlashMatchTree->Branch("Purity",                      &fPurityVector);
@@ -368,6 +370,17 @@ namespace opdet {
       mf::LogWarning("FlashMatchAna") << "Cannot load any flashes. Failing";
       return;
     }
+
+    art::Handle< std::vector< recob::OpHit > > HitHandle;
+    std::vector<art::Ptr<recob::OpHit> > hitlist;
+    if (evt.getByLabel(fOpHitModuleLabel, HitHandle)) {
+      art::fill_ptr_vector(hitlist, HitHandle);
+    }
+
+    // Get total PE in all hits
+    fSumPE = 0;
+    for (auto hit: hitlist) 
+        fSumPE += hit->PE();
 
     // Get assosciations between flashes and hits
     //art::FindManyP< recob::OpHit > Assns(flashlist, evt, fOpFlashModuleLabel);

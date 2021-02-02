@@ -1,0 +1,50 @@
+#include "PDFastSimPAR.fcl"
+#include "PDFastSimPVS.fcl"
+#include "opticalsimparameterisations_dune.fcl"
+
+BEGIN_PROLOG
+
+###########
+# DUNE FD #
+###########
+
+# Hits & Timing parameterization for DUNE FD, Ar scintillation
+dunefd_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
+dunefd_pdfastsim_par_ar.VUVTiming:             @local::dune_vuv_timing_parameterization
+dunefd_pdfastsim_par_ar.VUVHits:               @local::dune_vuv_RS100cm_hits_parameterization
+
+# As above, with cathode reflections included
+dunefd_pdfastsim_par_ar_refl:                  @local::dunefd_pdfastsim_par_ar
+dunefd_pdfastsim_par_ar_refl.DoReflectedLight: true
+dunefd_pdfastsim_par_ar_refl.VISTiming:        @local::dune_vis_timing_parameterization
+dunefd_pdfastsim_par_ar_refl.VISHits:          @local::dune_vis_RS100cm_hits_parameterization
+
+# Hits parameterization for DUNE FD, Xe scintillation
+dunefd_pdfastsim_par_xe:                       @local::standard_pdfastsim_par_ar
+dunefd_pdfastsim_par_xe.VUVHits:               @local::dune_vuv_Xenon_hits_parameterization
+dunefd_pdfastsim_par_xe.IncludePropTime:       false                 # Xe propoagation time not yet calculated
+#dunefd_pdfastsim_par_xe.VUVTiming:                                  # Xe propoagation time not yet calculated
+dunefd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeLAr  # Xe scintillation time tool needed
+
+# As above, with cathode reflections included
+dunefd_pdfastsim_par_xe_refl:                  @local::dunefd_pdfastsim_par_xe
+dunefd_pdfastsim_par_xe_refl.DoReflectedLight: true
+dunefd_pdfastsim_par_xe_refl.VISHits:          @local::dune_vis_xenon_hits_parameterization
+#dunefd_pdfastsim_par_xe_refl.VISTiming:                             # Xe propoagation time not yet calculated
+
+# Photon library (or PVS parameterization) is not recommended for the FD
+dunefd_pdfastsim_pvs:                          @local::standard_pdfastsim_pvs
+
+# Choose *the* pdfast sim module for the FD
+dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar_refl
+
+
+#############
+# ProtoDUNE #
+#############
+
+protodune_pdfastsim_pvs:                       @local::standard_pdfastsim_pvs
+protodune_pdfastsim_pvs.SimulationLabel:       "IonAndScint:priorSCE"
+
+
+END_PROLOG

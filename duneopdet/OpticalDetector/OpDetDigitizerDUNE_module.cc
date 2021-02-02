@@ -118,28 +118,29 @@ namespace opdet {
     private:
 
       // The parameters read from the FHiCL file
-      std::string fInputModule;    // Input tag for OpDet collection
-      double  fSampleFreq;         // Sampling frequency in MHz
-      double  fTimeBegin;          // Beginning of waveform in us
-      double  fTimeEnd;            // End of waveform in us
-      double  fVoltageToADC;       // Conversion factor mV to ADC counts
-      double  fLineNoiseRMS;       // Pedestal RMS in ADC counts
-      double  fDarkNoiseRate;      // In Hz
-      double  fCrossTalk;          // Probability of SiPM producing 2 PE signal
-                                   // in response to 1 photon
-      short  fPedestal;            // In ADC counts
-      bool   fDefaultSimWindow;    // Set the start time to -1 drift window and
-                                   // the end time to the end time
-                                   // of the TPC readout
-      bool   fFullWaveformOutput;  // Output full waveforms -- produces large
-                                   // output. Mostly for debug purposes
-      size_t fReadoutWindow;       // In ticks
-      size_t fPreTrigger;          // In ticks
+      std::vector<std::string> vInputModules;
+      std::set<std::string> fInputModules;   // Input tag for OpDet collection
+      double  fSampleFreq;                   // Sampling frequency in MHz
+      double  fTimeBegin;                    // Beginning of waveform in us
+      double  fTimeEnd;                      // End of waveform in us
+      double  fVoltageToADC;                 // Conversion factor mV to ADC counts
+      double  fLineNoiseRMS;                 // Pedestal RMS in ADC counts
+      double  fDarkNoiseRate;                // In Hz
+      double  fCrossTalk;                    // Probability of SiPM producing 2 PE signal
+                                             // in response to 1 photon
+      short  fPedestal;                      // In ADC counts
+      bool   fDefaultSimWindow;              // Set the start time to -1 drift window and
+                                             // the end time to the end time
+                                             // of the TPC readout
+      bool   fFullWaveformOutput;            // Output full waveforms -- produces large
+                                             // output. Mostly for debug purposes
+      size_t fReadoutWindow;                 // In ticks
+      size_t fPreTrigger;                    // In ticks
 
-      int    fPadding;             // In ticks
+      int    fPadding;                       // In ticks
     
-      bool   fDigiTree_SSP_LED;    // To create a analysis Tree for SSP LED
-      bool   fUseSDPs;             // = pset.get< bool   >("UseSDPs", true);
+      bool   fDigiTree_SSP_LED;              // To create a analysis Tree for SSP LED
+      bool   fUseSDPs;                       // = pset.get< bool   >("UseSDPs", true);
 
       double  fQEOverride;
       double  fRefQEOverride;
@@ -236,11 +237,14 @@ namespace opdet {
   // Constructor
   OpDetDigitizerDUNE::OpDetDigitizerDUNE(fhicl::ParameterSet const& pset)
     : EDProducer{pset}
+    , vInputModules(pset.get< std::vector<std::string> >("InputModules"))
+    , fInputModules(vInputModules.begin(), vInputModules.end())
   {
 
 
     // Read the fcl-file
-    fInputModule        = pset.get< std::string >("InputModule"  );
+//    auto tempvec        = 
+//           = 
     fVoltageToADC       = pset.get< double  >("VoltageToADC"      );
     fLineNoiseRMS       = pset.get< double  >("LineNoiseRMS"      );
     fDarkNoiseRate      = pset.get< double  >("DarkNoiseRate"     );
@@ -280,10 +284,12 @@ namespace opdet {
       fQEOverride = tempQE / LarProp->ScintPreScale();
       
       if (fQEOverride > 1.0001 ) {
-        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set in OpDetResponse_service, " << tempQE
+        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set as OpDetDigitizerDUNE.QEOverride, " << tempQE
                                            << " is too large.  It is larger than the prescaling applied during simulation, "
                                            << LarProp->ScintPreScale()
-                                           << ".  Final QE must be equalt to or smaller than the QE applied at simulation time.";
+                                           << " (fQEOverride = "
+                                           << fQEOverride
+                                           << ").  Final QE must be equal to or smaller than the QE applied at simulation time.";
         std::abort();
       }
     }
@@ -295,10 +301,12 @@ namespace opdet {
       fRefQEOverride = tempRefQE / LarProp->ScintPreScale();
       
       if (fRefQEOverride > 1.0001 ) {
-        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set in OpDetResponse_service, " << tempQE
+        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set as OpDetDigitizerDUNE.QERefOverride, " << tempRefQE
                                            << " is too large.  It is larger than the prescaling applied during simulation, "
                                            << LarProp->ScintPreScale()
-                                           << ".  Final QE must be equalt to or smaller than the QE applied at simulation time.";
+                                           << " (fRefQEOverride = "
+                                           << fRefQEOverride
+                                           << ").  Final QE must be equal to or smaller than the QE applied at simulation time.";
         std::abort();
       }
     }
@@ -391,7 +399,7 @@ namespace opdet {
     for (auto btr_handle: btr_handles) {
       // Do some checking before we proceed
       if (!btr_handle.isValid()) continue;
-      if (btr_handle.provenance()->moduleLabel() != fInputModule) continue;
+      if (!fInputModules.count(btr_handle.provenance()->moduleLabel())) continue;
 
       bool Reflected = (btr_handle.provenance()->productInstanceName() == "Reflected");
 
