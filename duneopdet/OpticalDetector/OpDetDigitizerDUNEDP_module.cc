@@ -475,6 +475,10 @@ namespace opdet {
           CreatePDWaveform(litePhotons, *odResponse, *geometry, pdWaveforms, fls[opDet]);
           if((unsigned)modulecounter<fInputModule.size()) continue;//==fInputModule.size()
 
+          if(fExportWaveformTree) for (unsigned int hardwareChannel = 0;
+             hardwareChannel < nChannelsPerOpDet; ++hardwareChannel) fls[opDet][hardwareChannel].AddRange(0,SampleSize);
+
+
           // Generate dark noise
           if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet], opDet);
 
@@ -615,12 +619,14 @@ namespace opdet {
 
     if(fExportWaveformTree)
     {
-       for(unsigned int opDet=0; opDet < nOpDet; opDet++)
+       for(unsigned int j=0; j < pulseVecPtr->size(); j++)
        {
-         for (unsigned int i = 0; i< pulseVecPtr->at(opDet).Waveform().size() ; i++) adc_value[opDet][i] = pulseVecPtr->at(opDet).Waveform()[i];
-         //for (unsigned int i = 0; i< 10 ; i++) std::cout <<" one - pmt - " <<  opDet << "\t" << pulseVecPtr->at(opDet).Waveform()[i] << " " << adc_value[opDet][i] << std::endl;
+         unsigned int opDet= pulseVecPtr->at(j).ChannelNumber();
+//         std::cout <<" one - pmt - " <<  j << "\t" << opDet  << "\t"<< pulseVecPtr->at(j).Waveform().size() << " " << pulseVecPtr->at(j).Waveform()[0] <<  std::endl;
+         for (unsigned int i = 0; i< pulseVecPtr->at(j).Waveform().size() ; i++) adc_value[opDet][i] = pulseVecPtr->at(j).Waveform()[i];
        }
        fWaveformTree->Fill();
+
     }
 
     // Push the OpDetWaveforms into the event
