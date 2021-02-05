@@ -46,7 +46,7 @@ pd_detsim_modules.opdigiEFF40QENonRefl2PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiEFF40QENonRefl2PE.algo_threshold.ADCThreshold: 15.000
 
 pd_detsim_modules.opdigiREF35QEOptRefl2PE.QEOverride:                  0.035000
-pd_detsim_modules.opdigiREF35QEOptRefl2PE.QERefOverride:               0.050400
+pd_detsim_modules.opdigiREF35QEOptRefl2PE.QERefOverride:               0.050000
 pd_detsim_modules.opdigiREF35QEOptRefl2PE.DarkNoiseRate:               100 #Hz
 pd_detsim_modules.opdigiREF35QEOptRefl2PE.LineNoiseRMS:                1.800
 pd_detsim_modules.opdigiREF35QEOptRefl2PE.algo_threshold.ADCThreshold: 15.000

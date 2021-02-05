@@ -8,21 +8,21 @@ BEGIN_PROLOG
 ## dune photon backtracker
 #
 
-dune_providerPBKConf:{
-   G4ModuleLabel:            "largeant" # module that produced the sim::Particle and sim::SimChannel objects
-   MinimumHitEnergyFraction: 0.1        # minimum fraction of energy a G4 trackID contributes to a hit to be
-   Delay:                    260          #This number is the difference between when light arrives at the detector, and the time recorded in OpHits. This number is experiment specific and should be set by each experiment.
-}
-
 dunefd_photonbacktrackerservice:
 {
-  PhotonBackTracker: @local::dune_providerPBKConf
+  PhotonBackTracker: 
+  {
+    G4ModuleLabel:            "largeant" # module that produced the OpDetBTRs
+    MinimumHitEnergyFraction: 0.1        # minimum fraction of energy a G4 trackID contributes to a hit to be
+    Delay:                    260          #This number is the difference between when light arrives at the detector, and the time recorded in OpHits. This number is experiment specific and should be set by each experiment.
+  }
 }
 
-dune35t_photonbacktrackerservice:
-{
-  PhotonBackTracker: @local::dune_providerPBKConf
-}
+dunefd_photonbacktrackerservice_refactor: @local::dunefd_photonbacktrackerservice
+dunefd_photonbacktrackerservice_refactor.PhotonBackTracker.G4ModuleLabel: "PDFastSim"
+
+dune35t_photonbacktrackerservice: @local::dunefd_photonbacktrackerservice
+
 
 ##
 # FD op det response services, nominal and reference
