@@ -1,0 +1,28 @@
+BEGIN_PROLOG
+
+sipm_xarapuca_ar: 
+{
+  module_type:       "SIPMOpSensorSim"
+  InputTag:          "PDFastSim"
+  QuantumEfficiency: 0.035 # 3.5% efficiency
+  DarkNoiseRate:     10.0 # Hz
+  CrossTalk:         0.20
+}
+
+sipm_xarapuca_ar_refl:                       @local::sipm_xarapuca_ar
+sipm_xarapuca_ar_refl.InputTag:              "PDFastSim:reflected"
+sipm_xarapuca_ar_refl.QuantumEfficiency:      0.0175 # 3.5% efficiency * 50% ref. efficinecy
+
+sipm_xarapuca_ar_with_xe:                     @local::sipm_xarapuca_ar
+sipm_xarapuca_ar_with_xe.LateLightCorrection: 0.5 # Assume 50% loss only to late light
+sipm_xarapuca_ar_with_xe.LateLightBoundary:   10  # ns
+
+sipm_xarapuca_xe:                             @local::sipm_xarapuca_ar
+sipm_xarapuca_xe.InputTag:                    "PDFastSimXe"
+sipm_xarapuca_xe.QuantumEfficiency:           0.04 # Total guess. Need an estimate of Xe LY
+
+sipm_xarapuca_xe_refl:                        @local::sipm_xarapuca_ar
+sipm_xarapuca_xe.InputTag:                    "PDFastSimXe:reflected"
+sipm_xarapuca_xe.QuantumEfficiency:           0.01 # Only ~25% of Xe light is reflected
+
+END_PROLOG

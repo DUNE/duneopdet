@@ -1,0 +1,31 @@
+BEGIN_PROLOG
+
+standard_daphne: 
+{
+  module_type:          "WaveformDigitizerSim"
+  InputTags:            ["SiPMSim"] 
+
+  # These paramters are for 3 sensl SiPMs ganged.
+  # Will need to generalize/encapsulate in a tool
+  VoltageToADC:         151.5    # Converting mV to ADC counts (counts in 1 mV)
+  PulseLength:            5.2
+  PeakTime:               0.260  
+  MaxAmplitude:           0.12
+  FrontTime:              0.009
+  BackTime:               0.476  
+
+  Padding:              100      # ticks
+  ReadoutWindow:        320      # ticks
+  PreTrigger:            20      # ticks
+  Threshold:              1.5    # PE
+  Dwindow:               10      # ticks
+
+  Pedestal:             100      # ADC
+  LineNoiseRMS:           2.6    # Pedestal RMS in ADC counts, likely an underestimate
+  DynamicBitRange:       13      # 13-bit dynamic range
+
+}
+
+
+
+END_PROLOG
