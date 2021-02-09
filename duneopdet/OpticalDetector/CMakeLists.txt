@@ -36,6 +36,7 @@ art_make( BASENAME_ONLY
                                 larsim_MCCheater_ParticleInventoryService_service
                                 larsim_MCCheater_PhotonBackTrackerService_service 
                                 nusimdata_SimulationBase
+                                nurandom_RandomUtils_NuRandomService_service
                                 ${FHICLCPP}
                                 ${MF_MESSAGELOGGER}
                                 ${ART_FRAMEWORK_CORE}
