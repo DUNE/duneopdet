@@ -77,6 +77,7 @@ namespace opdet {
       fhicl::Atom<double>         QuantumEfficiency   { Name("QuantumEfficiency"),   Comment("Probabilityof recording a photon") };
       fhicl::Atom<double>         DarkNoiseRate       { Name("DarkNoiseRate"),       Comment("Rate in Hz") };
       fhicl::Atom<double>         CrossTalk           { Name("CrossTalk"),           Comment("Cross talk (1->2 PE) probability") };
+      fhicl::Atom<double>         Correction          { Name("Correction"),          Comment("Adjust the amount of total light. Kept seprate from QE for clarity."), 1};
       fhicl::OptionalAtom<double> LateLightCorrection { Name("LateLightCorrection"), Comment("Adjust the amount of late light")};
       fhicl::OptionalAtom<double> LateLightBoundary   { Name("LateLightBoundary"),   Comment("Boundary that defines late light (ns)") };
 
@@ -98,6 +99,7 @@ namespace opdet {
     double        fTimeBegin;           // Earliest and latest possible times for reading out data
     double        fTimeEnd;             // Used for defining the dark noise range
 
+    double        fCorrection;          // Correct light yield. Kept separate for clarity
     bool          fCorrectLateLight;    // Do we apply a late light correction?
     double        fLateLightCorrection; // How much to correct the late light
     double        fLateLightBoundary;   // What is the boundary which defines late light?
@@ -158,10 +160,12 @@ namespace opdet {
     }
 
 
-    double tempQE = config().QuantumEfficiency();
+    double tempQE = config().QuantumEfficiency() * config().Correction();
     if (tempQE < 0 || tempQE > 1) {
       throw art::Exception(art::errors::Configuration) 
-        << "QuantumEfficiency in SIPMSensorSim set to: " << tempQE << "\n"
+        << "QuantumEfficiency in SIPMSensorSim: " << config().QuantumEfficiency() << "\n"
+        << "                   with correction: " << config().Correction() << "\n"
+        << "       leading to total efficiency: " << tempQE << "\n"
         << "It should be between 0 and 1!\n";
     }
 
@@ -171,7 +175,10 @@ namespace opdet {
 
     if (fQE > 1.0001 ) {
       throw art::Exception(art::errors::Configuration)
-        << "QuantumEfficiency in SIPMSensorSim, " << tempQE << " is too large.\n"
+        << "QuantumEfficiency in SIPMSensorSim: " << config().QuantumEfficiency() << "\n"
+        << "                   with correction: " << config().Correction() << "\n"
+        << "       leading to total efficiency: " << tempQE << "\n"
+        << "is too large.\n"
         << "It is larger than the prescaling applied during simulation, " << LarProp->ScintPreScale() << ".\n"
         << "Final QE must be equal to or smaller than the QE applied at simulation time.\n";
     }
@@ -202,6 +209,18 @@ namespace opdet {
       throw art::Exception(art::errors::Configuration)
         << "Must specify both LateLightCorrection and LateLightBoundary in order to apply correction.\n"
         << "Leave both out to not adjust late light.\n";
+    }
+
+    if (fCorrectLateLight && fLateLightCorrection*tempQE > LarProp->ScintPreScale())
+    {
+      throw art::Exception(art::errors::Configuration)
+        << "QuantumEfficiency in SIPMSensorSim: " << config().QuantumEfficiency() << "\n"
+        << "                   with correction: " << config().Correction() << "\n"
+        << "         and late light correction: " << fLateLightCorrection << "\n"
+        << "       leading to total efficiency: " << tempQE * fLateLightCorrection << "\n"
+        << "is too large.\n"
+        << "It is larger than the prescaling applied during simulation, " << LarProp->ScintPreScale() << ".\n"
+        << "Final QE must be equal to or smaller than the QE applied at simulation time.\n";
     }
   }
 

@@ -3,7 +3,7 @@ BEGIN_PROLOG
 standard_daphne: 
 {
   module_type:          "WaveformDigitizerSim"
-  InputTags:            ["SiPMSim"] 
+  InputTags:            ["sipmSim"] 
 
   # These paramters are for 3 sensl SiPMs ganged.
   # Will need to generalize/encapsulate in a tool
