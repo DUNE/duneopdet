@@ -99,7 +99,7 @@ namespace opdet {
     double        fTimeBegin;           // Earliest and latest possible times for reading out data
     double        fTimeEnd;             // Used for defining the dark noise range
 
-    double        fCorrection;          // Correct light yield. Kept separate for clarity
+    // unused double        fCorrection;          // Correct light yield. Kept separate for clarity
     bool          fCorrectLateLight;    // Do we apply a late light correction?
     double        fLateLightCorrection; // How much to correct the late light
     double        fLateLightBoundary;   // What is the boundary which defines late light?
