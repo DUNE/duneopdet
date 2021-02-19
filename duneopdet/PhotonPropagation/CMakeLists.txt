@@ -52,4 +52,4 @@ install_fhicl()
 install_source()
 
 add_subdirectory(LibraryBuildTools)
-
+add_subdirectory(ScintTimeTools)

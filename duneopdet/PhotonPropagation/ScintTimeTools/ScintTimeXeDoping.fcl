@@ -1,0 +1,18 @@
+BEGIN_PROLOG
+
+# See this link for sources of numbers:
+# https://indico.fnal.gov/event/47958/ 
+
+ScintTimeXeDoping10ppm:
+{
+    tool_type: ScintTimeXeDoping
+    XeConcentration:    10  # ppm
+    ArSingletTime:       6  # ns
+    ArTripletTime:    1600  # ns
+    Xe150nmTime:      5600  # ns
+    TauAX:            7320  # ns  ArXe* formation time
+    TauXX:           13550  # ns  XeXe* formation time
+    TauN2:               0  # ns  0 = no nitrogen
+}
+
+END_PROLOG
