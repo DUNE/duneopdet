@@ -13,24 +13,27 @@ xarapuca_ar_refl:                             @local::xarapuca_ar
 xarapuca_ar_refl.InputTag:                    "PDFastSim:reflected"
 xarapuca_ar_refl.Correction:                  0.5 # 50% ref. efficinecy
 
-# If we assume LY goes from 25k -> 6k and 3/4 of light is late,
-# a 50% late-light scale factor implies an 83% overall scale
-# Scale = 6/25 * 4/(1 + 3*late scale)
-# https://indico.fnal.gov/event/47137/contributions/205417/attachments/138803/173973/VDrift_sim_110121.pdf
+# See this link for sources of numbers:
+# https://indico.fnal.gov/event/47958/
+
+# All Ar light reduced by 50% due to wavelength cut-off
+# Early light reduced by ~3% (neglect for now)
+# Late light reduced by 70%
 xarapuca_ar_xe10ppm:                         @local::xarapuca_ar
-xarapuca_ar_xe10ppm.Correction:              0.83 
-xarapuca_ar_xe10ppm.LateLightCorrection:     0.5  # Assume 50% reduction in late light
+xarapuca_ar_xe10ppm.Correction:              0.5
+xarapuca_ar_xe10ppm.LateLightCorrection:     0.3
 xarapuca_ar_xe10ppm.LateLightBoundary:       10   # ns
 
-# Assume LY for Xe at 10 ppm is 25k -> 19k
+# Early light already disabled at PDFastSim stage
+# Correct down by 0.7 to account for remaining Ar late light
 xarapuca_xe_xe10ppm:                         @local::xarapuca_ar
 xarapuca_xe_xe10ppm.InputTag:                "PDFastSimXe"
-xarapuca_xe_xe10ppm.Correction:              0.76
+xarapuca_xe_xe10ppm.Correction:              0.70
 
 # Assume 25% reflection of Xe light off cathode (in VD)
 xarapuca_xe_xe10ppm_refl:                    @local::xarapuca_xe_xe10ppm
 xarapuca_xe_xe10ppm_refl.InputTag:           "PDFastSimXe:reflected"
-xarapuca_xe_xe10ppm_refl.Correction:         0.19 # .25 * .76
+xarapuca_xe_xe10ppm_refl.Correction:         0.175 # .25 * .70
 
 # Tuned Xe-only X-ARAPUCAs are potentially 86% more efficient
 # https://indico.fnal.gov/event/46058/contributions/200233/attachments/136937/170528/Xe_Arapuca.pdf
@@ -40,6 +43,6 @@ xarapuca_xetuned_xe10ppm.QuantumEfficiency:  0.056
 # Assume 25% reflection of Xe light off cathode (in VD)
 xarapuca_xetuned_xe10ppm_refl:               @local::xarapuca_xetuned_xe10ppm
 xarapuca_xetuned_xe10ppm_refl.InputTag:      "PDFastSimXe:reflected"
-xarapuca_xetuned_xe10ppm_refl.Correction:    0.19 # .25 * .76
+xarapuca_xetuned_xe10ppm_refl.Correction:    0.175 # .25 * .70
 
 END_PROLOG
