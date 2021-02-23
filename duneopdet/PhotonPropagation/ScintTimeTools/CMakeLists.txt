@@ -14,9 +14,10 @@ art_make(NO_PLUGINS
 
 
 simple_plugin(ScintTimeXeDoping "tool"
-              larsim_PhotonPropagation_ScintTimeTools
-              ${MF_MESSAGELOGGER}
-			  ${FHICLCPP}
+                larsim_PhotonPropagation_ScintTimeTools
+                ${MF_MESSAGELOGGER}
+                ${FHICLCPP}
+                ${CLHEP}
               )
 
 
