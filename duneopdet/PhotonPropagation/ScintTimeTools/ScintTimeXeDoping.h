@@ -26,7 +26,7 @@ namespace phot
         void GenScintTime(bool is_fast, CLHEP::HepRandomEngine& engine)  ;
         
     private:
-        int           fLogLevel;
+        //dla int           fLogLevel;
 
         // From fhicl configuration
         double fXeConcentration; // ppm
