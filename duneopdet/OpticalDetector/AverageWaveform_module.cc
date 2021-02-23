@@ -59,10 +59,14 @@ namespace opdet {
         std::string fInstanceName;// Input tag for OpDetWaveforms collection
         double fSampleFreq;        // Sampling frequency in MHz 
         double fTimeBegin;         // Beginning of sample in us
+        int    fBaselineSubtract;  // Baseline to subtract from each waveform
+        int    fNticks;
 
         // Map to store how many waveforms are on one optical channel
         std::map< int, TH1D* > averageWaveforms;
         std::map< int, int   > waveformCount;
+        TH1D* averageWaveformAll;
+        int eventCount;
 
 
     };
@@ -83,11 +87,14 @@ namespace opdet {
     // Constructor
     AverageWaveform::AverageWaveform(fhicl::ParameterSet const& pset)
         : EDAnalyzer(pset)
+        , fInputModule      { pset.get< std::string >("InputModule") }
+        , fInstanceName     { pset.get< std::string >("InstanceName") }
+        , fTimeBegin        { 0 }
+        , fBaselineSubtract { pset.get< int >("BaselineSubtract", 0) }
+        , fNticks           { pset.get< int >("Nticks", 0) }
+        , averageWaveformAll{ NULL }
+        , eventCount        { 0 }
     {
-
-        // Read the fcl-file
-        fInputModule  = pset.get< std::string >("InputModule");
-        fInstanceName = pset.get< std::string >("InstanceName");
 
         // Obtain parameters from TimeService
         auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
@@ -113,18 +120,21 @@ namespace opdet {
     //---------------------------------------------------------------------------
     void AverageWaveform::endJob()
     {
+        double waveformCountAll = 0;
         for (auto iter = averageWaveforms.begin(); iter != averageWaveforms.end(); iter++)
         {
-            mf::LogInfo("Scaling down channel ") << iter->first << " by 1./" << waveformCount[iter->first] << std::endl;
+            waveformCountAll += waveformCount[iter->first];
+            mf::LogInfo("AverageWaveform") << "Scaling down channel " << iter->first << " by 1./" << waveformCount[iter->first] << std::endl;
             iter->second->Scale(1./waveformCount[iter->first]);
         }
+        mf::LogInfo("AverageWaveform") << "Scaling down all channels by 1./" << eventCount << std::endl;
+        averageWaveformAll->Scale(1./eventCount);
     }
 
 
     //---------------------------------------------------------------------------
     void AverageWaveform::analyze(art::Event const& evt)
     {
-
 
         // Get OpDetWaveforms from the event
         art::Handle< std::vector< raw::OpDetWaveform > > waveformHandle;
@@ -137,27 +147,36 @@ namespace opdet {
         for (size_t i = 0; i < waveformHandle->size(); i++)
         {
 
+
             // This was probably required to overcome the "const" problem 
             // with OpDetPulse::Waveform()
             art::Ptr< raw::OpDetWaveform > waveformPtr(waveformHandle, i);
             raw::OpDetWaveform pulse = *waveformPtr;
             int channel = pulse.ChannelNumber();
 
+            if (fNticks == 0) fNticks = pulse.size();
+
+
             // Create the TH1 if it doesn't exist
             auto waveform = averageWaveforms.find( channel );
             if ( waveform == averageWaveforms.end() ) {
                 TString histName = TString::Format("avgwaveform_channel_%03i", channel);
-                averageWaveforms[channel] =  tfs->make< TH1D >(histName, ";t (us);", pulse.size(), 0, double(pulse.size()) / fSampleFreq);
+                averageWaveforms[channel] =  tfs->make< TH1D >(histName, ";t (us);", fNticks, 0, float(fNticks+1) / fSampleFreq);
+            }
+            if (!averageWaveformAll) {
+                averageWaveformAll =  tfs->make< TH1D >("avgwaveform_channel_all", ";t (us);", fNticks, 0, float(fNticks+1) / fSampleFreq);
             }
 
             // Add this waveform to this histogram
             for (size_t tick = 0; tick < pulse.size(); tick++) {
-                averageWaveforms[channel]->Fill(double(tick)/fSampleFreq, pulse[tick]);
+                averageWaveforms[channel]->Fill(double(tick)/fSampleFreq, pulse[tick] - fBaselineSubtract);
+                averageWaveformAll->Fill(double(tick)/fSampleFreq, pulse[tick] - fBaselineSubtract);
             }
 
             // Count number of waveforms on each channel
             waveformCount[channel]++;
         }
+        eventCount++;
 
     }
 
