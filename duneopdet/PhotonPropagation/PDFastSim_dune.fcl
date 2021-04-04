@@ -20,12 +20,22 @@ dunefd_pdfastsim_par_ar_refl.DoReflectedLight: true
 dunefd_pdfastsim_par_ar_refl.VISTiming:        @local::dune_vis_timing_parameterization
 dunefd_pdfastsim_par_ar_refl.VISHits:          @local::dune_vis_RS100cm_hits_parameterization
 
+# As above, but fast-only scintillation for high Xe concentration
+dunefd_pdfastsim_par_ar_fastonly:              @local::dunefd_pdfastsim_par_ar
+dunefd_pdfastsim_par_ar_fastonly.DoSlowComponent: false
+
 # Hits parameterization for DUNE FD, Xe scintillation at 10 ppm
 dunefd_pdfastsim_par_xe:                       @local::standard_pdfastsim_par_ar
+dunefd_pdfastsim_par_xe.DoFastComponent:       false          # Only slow Xe light
 dunefd_pdfastsim_par_xe.VUVHits:               @local::dune_vuv_Xenon_hits_parameterization
 dunefd_pdfastsim_par_xe.IncludePropTime:       false          # Xe propoagation time not yet calculated
 #dunefd_pdfastsim_par_xe.VUVTiming:                           # Xe propoagation time not yet calculated
 dunefd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
+
+# Same as above, but for higher Xe concentration
+dunefd_pdfastsim_par_xe50:                       @local::dunefd_pdfastsim_par_xe
+dunefd_pdfastsim_par_xe50.DoFastComponent:       true
+dunefd_pdfastsim_par_xe50.ScintTimeTool.XeConcentration: 50
 
 # As above, with cathode reflections included
 dunefd_pdfastsim_par_xe_refl:                  @local::dunefd_pdfastsim_par_xe

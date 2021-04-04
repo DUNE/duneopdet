@@ -9,10 +9,10 @@ standard_daphne:
   # Will need to generalize/encapsulate in a tool
   VoltageToADC:         151.5    # Converting mV to ADC counts (counts in 1 mV)
   PulseLength:            5.2
-  PeakTime:               0.260  
-  MaxAmplitude:           0.12
-  FrontTime:              0.009
-  BackTime:               0.476  
+  PeakTime:               0.028  
+  MaxAmplitude:           0.0594 # * VoltageToADC = 9 ADC/PE
+  FrontTime:              0.013
+  BackTime:               0.386  
 
   Padding:              100      # ticks
   ReadoutWindow:        320      # ticks
