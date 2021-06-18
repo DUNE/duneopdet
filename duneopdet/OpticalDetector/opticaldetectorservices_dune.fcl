@@ -83,8 +83,36 @@ dunefd_opdetresponse_arapuca:
 
 # Use the IU radiator design by default
 dunefd_opdetresponse: @local::dunefd_opdetresponse_arapuca
-protodune_opdetresponse: @local::dunefd_opdetresponse_iuradiator
+#protodune_opdetresponse: @local::dunefd_opdetresponse_iuradiator
 
+protodune_opdetresponse:
+{
+   
+   service_provider:        ProtoDUNEOpDetResponse
+   
+   WavelengthCutLow:        0 
+   WavelengthCutHigh:       10000
+   
+   LightGuideAttenuation:   true
+
+   # New IU Radiator Parameters from arXiv:1710.11233
+   # Pending a new library to go along with them
+   # Values need to be checked!!!
+   QuantumEfficiency:       0.00287 # 0.0041 * 70% for mesh transmission
+   LambdaShort:                4.3 # cm
+   LambdaLong:               225.0 # cm
+   FracShort:                 0.29
+   FracLong:                  0.71
+   
+   LongAxis:                z
+   
+   # Convert geometry to readout channels
+   # when reading in fast simulation
+   ChannelConversion:       fast
+
+   QuantumEfficiencyArapucaBeam:  0.0091 # 0.013 * 70% for mesh transmission
+   QuantumEfficiencyArapucaNonBeam:  0.021  # 0.03 * 70% for mesh transmission
+}
 
 
 ##
