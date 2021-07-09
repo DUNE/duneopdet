@@ -63,11 +63,12 @@ namespace opdet
       double fracShort;
       double fracLong;
 
-      bool fWireAttenuation;             // Flag to turn on wire/mesh transmission probability
-      TH1D* hm;                          // histogram to store transmission probability
-      TVector3* Dist;
-      TVector3* VersorX;
-      TVector3* VersorY;
+      //TY: Comment out the 5 unused variables
+      //bool fWireAttenuation;             // Flag to turn on wire/mesh transmission probability
+      //TH1D* hm;                          // histogram to store transmission probability
+      //TVector3* Dist;
+      //TVector3* VersorX;
+      //TVector3* VersorY;
       std::string fWireTransmissionFile;
 
       std::string fChannelConversion;
