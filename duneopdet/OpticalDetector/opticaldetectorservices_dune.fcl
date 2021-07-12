@@ -83,9 +83,9 @@ dunefd_opdetresponse_arapuca:
 
 # Use the IU radiator design by default
 dunefd_opdetresponse: @local::dunefd_opdetresponse_arapuca
-#protodune_opdetresponse: @local::dunefd_opdetresponse_iuradiator
+protodune_opdetresponse: @local::dunefd_opdetresponse_iuradiator
 
-protodune_opdetresponse:
+protodune_opdetresponsev8:
 {
    
    service_provider:        ProtoDUNEOpDetResponse
