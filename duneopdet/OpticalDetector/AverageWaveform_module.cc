@@ -20,6 +20,7 @@
 #include "art_root_io/TFileDirectory.h"
 #include "canvas/Persistency/Common/Ptr.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 // LArSoft includes
 
