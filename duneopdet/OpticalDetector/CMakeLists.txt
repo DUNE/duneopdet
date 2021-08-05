@@ -1,6 +1,6 @@
 #add_subdirectory(BackTrackingTests)
 
-art_make( BASENAME_ONLY
+art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 LIBRARY_NAME dune_OpticalDetector
                 LIB_LIBRARIES 
                                 lardataobj_RecoBase
