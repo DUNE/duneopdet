@@ -13,7 +13,7 @@ art_make(NO_PLUGINS
   )
 
 
-simple_plugin(ScintTimeXeDoping "tool"
+cet_build_plugin(ScintTimeXeDoping art::tool
                 larsim_PhotonPropagation_ScintTimeTools
                 messagefacility::MF_MessageLogger
                 FHICLCPP
