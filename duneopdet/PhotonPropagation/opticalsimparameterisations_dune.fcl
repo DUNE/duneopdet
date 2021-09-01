@@ -860,4 +860,10 @@ dunevd_vuv_Xenon_anode_hits_parameteriszation:
  AnodeReflectivity: 0.25
 }
 
+dunevd_xe_timing_geo:
+{
+  # VUV group velocity in cm/ns
+  vuv_vgroup_mean: 23.99
+}
+
 END_PROLOG

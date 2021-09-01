@@ -69,8 +69,9 @@ dunevd_pdfastsim_par_xe.DoFastComponent:       false          # Only slow Xe lig
 dunevd_pdfastsim_par_xe.VUVHits:               @local::dunevd_vuv_Xenon_hits_parameterization
 dunevd_pdfastsim_par_xe.VISHits:               @local::dunevd_vuv_Xenon_anode_hits_parameteriszation
 dunevd_pdfastsim_par_xe.IncludeAnodeReflections: true		  # include Xenon light reflections from anode
-dunevd_pdfastsim_par_xe.IncludePropTime:       false          # Xe propoagation time not yet calculated
-#dunevd_pdfastsim_par_xe.VUVTiming:                           # Xe propoagation time not yet calculated
+dunevd_pdfastsim_par_xe.IncludePropTime:       true          
+dunevd_pdfastsim_par_xe.GeoPropTimeOnly:       true			  # Xe propoagation time geometric approximation
+dunevd_pdfastsim_par_xe.VUVTiming:			   @local::dunevd_xe_timing_geo
 dunevd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
 
 
