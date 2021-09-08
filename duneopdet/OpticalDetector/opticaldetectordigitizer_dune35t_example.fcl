@@ -14,7 +14,7 @@ services:
   TimeTracker:       {}
   MemoryTracker:         { } # default is one
   RandomNumberGenerator: {} #ART native random number generator
-                @table::dune35t_simulation_services
+                @table::dune35t_simulation_services_legacy
   message:      @local::standard_info
   BackTrackerService:   @local::dune35t_backtrackerservice # defined in backtrackerservice.fcl
   ParticleInventoryService:   @local::dune35t_particleinventoryservice # defined in backtrackerservice.fcl

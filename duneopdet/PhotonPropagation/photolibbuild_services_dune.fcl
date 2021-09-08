@@ -3,7 +3,7 @@
 
 BEGIN_PROLOG
 
-dune35t_photolibbuild_services:           @local::dune35t_g4_services
+dune35t_photolibbuild_services:           @local::dune35t_g4_services_legacy
 
 # Set the photon visiblity service to library building mode
 dune35t_photolibbuild_services.PhotonVisibilityService: @local::dune35t_photonvisibilityservice_buildlib
@@ -34,7 +34,7 @@ dune35t_photolibbuild_services.LArPropertiesService.ScintPreScale: 1
 
 
 # FD G4-specific services do not exist yet
-dunefd_photolibbuild_services:                        @local::dunefd_simulation_services
+dunefd_photolibbuild_services:                        @local::dunefd_simulation_services_legacy
 
 # Set the photon visiblity service to library building mode
 dunefd_photolibbuild_services.PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice_buildlib
