@@ -608,8 +608,15 @@ dunevd_vuv_Argon_hits_parameterization:
 
  delta_angulo_vuv: 10
 
- FieldCageTransparency: 0.8
+ ApplyFieldCageTransparency: true
+ FieldCageTransparencyCathode: 1.0
+ FieldCageTransparencyLateral: 0.8
 }
+
+# external region (outside FC)
+dunevd_vuv_Argon_hits_parameterization_external: @local::dunevd_vuv_Argon_hits_parameterization
+dunevd_vuv_Argon_hits_parameterization_external.FieldCageTransparencyCathode: 0.2   # thick part of FC
+dunevd_vuv_Argon_hits_parameterization_external.FieldCageTransparencyLateral: 1.0
 
 
 # Xenon
@@ -841,7 +848,9 @@ dunevd_vuv_Xenon_hits_parameterization:
 
  DomePDCorr: false 
 
- FieldCageTransparency: 0.8
+ ApplyFieldCageTransparency: true
+ FieldCageTransparencyCathode: 1.0
+ FieldCageTransparencyLateral: 0.8
 
 }
 
@@ -859,6 +868,15 @@ dunevd_vuv_Xenon_anode_hits_parameteriszation:
 
  AnodeReflectivity: 0.25
 }
+
+# external region (outside FC)
+dunevd_vuv_Xenon_hits_parameterization_external: @local::dunevd_vuv_Xenon_hits_parameterization
+dunevd_vuv_Xenon_hits_parameterization_external.FieldCageTransparencyCathode: 0.2   # thick part of FC
+dunevd_vuv_Xenon_hits_parameterization_external.FieldCageTransparencyLateral: 1.0
+
+dunevd_vuv_Xenon_anode_hits_parameteriszation_external: @local::dunevd_vuv_Xenon_anode_hits_parameteriszation   
+
+
 
 dunevd_xe_timing_geo:
 {
