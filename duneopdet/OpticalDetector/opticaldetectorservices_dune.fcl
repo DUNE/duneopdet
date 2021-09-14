@@ -8,7 +8,7 @@ BEGIN_PROLOG
 ## dune photon backtracker
 #
 
-dunefd_photonbacktrackerservice:
+dunefd_photonbacktrackerservice_legacy:
 {
   PhotonBackTracker: 
   {
@@ -18,10 +18,10 @@ dunefd_photonbacktrackerservice:
   }
 }
 
-dunefd_photonbacktrackerservice_refactor: @local::dunefd_photonbacktrackerservice
-dunefd_photonbacktrackerservice_refactor.PhotonBackTracker.G4ModuleLabel: "PDFastSim"
+dunefd_photonbacktrackerservice: @local::dunefd_photonbacktrackerservice_legacy
+dunefd_photonbacktrackerservice.PhotonBackTracker.G4ModuleLabel: "PDFastSim"
 
-dune35t_photonbacktrackerservice: @local::dunefd_photonbacktrackerservice
+dune35t_photonbacktrackerservice: @local::dunefd_photonbacktrackerservice_legacy
 
 
 ##
