@@ -10,7 +10,7 @@ services:
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "opdigiana_hist.root" }
   TimeTracker:       {}
-                @table::dune35t_services
+                @table::dune35t_services_legacy
   message:      @local::standard_info 
 }
 
