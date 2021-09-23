@@ -5,8 +5,8 @@
 //
 ////////////////////////////////////////////////////////////////////////
 
-
 #include "dune/OpticalDetector/DUNEOpDetResponse.h"
+#include "art/Framework/Services/Registry/ServiceDefinitionMacros.h"
 #include "TGeoNode.h"
 #include "TGeoBBox.h"
 #include "larcorealg/Geometry/OpDetGeo.h"
@@ -214,4 +214,3 @@ namespace opdet{
 } // namespace
 
 DEFINE_ART_SERVICE_INTERFACE_IMPL(opdet::DUNEOpDetResponse, opdet::OpDetResponseInterface)
-

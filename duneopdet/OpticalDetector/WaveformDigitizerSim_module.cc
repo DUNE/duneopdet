@@ -23,6 +23,7 @@
 #include "art/Framework/Services/Optional/RandomNumberGenerator.h"
 #include "canvas/Utilities/Exception.h"
 #include "cetlib_except/exception.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 #include "fhiclcpp/ParameterSet.h"
 #include "fhiclcpp/types/DelegatedParameter.h"
