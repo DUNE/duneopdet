@@ -22,6 +22,7 @@
 #include "canvas/Utilities/Exception.h"
 #include "cetlib_except/exception.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 #include "art_root_io/TFileService.h"
 #include "art_root_io/TFileDirectory.h"
 
@@ -389,9 +390,7 @@ namespace opdet {
     // Geometry service
     art::ServiceHandle< geo::Geometry > geometry;
     
-    
-    std::vector< art::Handle< std::vector< sim::OpDetBacktrackerRecord > > > btr_handles;
-    evt.getManyByType(btr_handles);
+    auto const btr_handles = evt.getMany<std::vector<sim::OpDetBacktrackerRecord>>();
 
     if (btr_handles.size() == 0)
       throw art::Exception(art::errors::ProductNotFound)<<"No OpDetBacktrackerRecords retrieved.";

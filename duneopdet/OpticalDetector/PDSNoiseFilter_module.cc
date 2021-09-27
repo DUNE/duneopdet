@@ -30,6 +30,7 @@
 #include "canvas/Utilities/InputTag.h"
 #include "fhiclcpp/types/Atom.h"
 #include "fhiclcpp/types/Sequence.h"
+#include "messagefacility/MessageLogger/MessageLogger.h"
 
 
 // ART extensions
