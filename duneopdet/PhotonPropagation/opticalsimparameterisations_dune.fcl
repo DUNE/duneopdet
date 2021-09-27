@@ -618,6 +618,10 @@ dunevd_vuv_Argon_hits_parameterization_external: @local::dunevd_vuv_Argon_hits_p
 dunevd_vuv_Argon_hits_parameterization_external.FieldCageTransparencyCathode: 0.2   # thick part of FC
 dunevd_vuv_Argon_hits_parameterization_external.FieldCageTransparencyLateral: 1.0
 
+# timing parameterisation
+dunevd_vuv_timing_parameterization: @local::dune_vuv_timing_parameterization
+dunevd_vuv_timing_parameterization.angle_bin_timing_vuv: 90 	# run in single bin mode for speed, gain in precision not warranted without vd specific parameterisation
+
 
 # Xenon
 
