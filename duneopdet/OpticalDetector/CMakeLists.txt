@@ -1,6 +1,6 @@
 #add_subdirectory(BackTrackingTests)
 
-art_make( BASENAME_ONLY
+art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 LIBRARY_NAME dune_OpticalDetector
                 LIB_LIBRARIES 
                                 lardataobj_RecoBase
@@ -8,19 +8,19 @@ art_make( BASENAME_ONLY
                                 larcore_Geometry_Geometry_service
                                 larana_OpticalDetector_OpHitFinder
                                 nusimdata_SimulationBase
-                                ${FHICLCPP}
-                                ${MF_MESSAGELOGGER}
-                                ${ART_FRAMEWORK_CORE}
-                                ${ART_FRAMEWORK_PRINCIPAL}
-                                ${ART_FRAMEWORK_SERVICES_REGISTRY}
-                                ${ART_FRAMEWORK_SERVICES_BASIC}
-                                ${ART_ROOT_IO_TFILE_SUPPORT} ${ROOT_CORE}
-                                ${ART_ROOT_IO_TFILESERVICE_SERVICE}
-                                ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
+                                FHICLCPP
+                                messagefacility::MF_MessageLogger
+                                ART_FRAMEWORK_CORE
+                                ART_FRAMEWORK_PRINCIPAL
+                                ART_FRAMEWORK_SERVICES_REGISTRY
+                                ART_ROOT_IO_TFILE_SUPPORT
+                                ROOT::Core
+                                ART_ROOT_IO_TFILESERVICE_SERVICE
+                                ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE
                                 art_Persistency_Common canvas
                                 art_Utilities canvas
                                 cetlib cetlib_except 
-                                ${ROOT_BASIC_LIB_LIST}
+                                ROOT_BASIC_LIB_LIST
                                 ${Boost_SYSTEM_LIBRARY}
                                 ${Boost_FILESYSTEM_LIBRARY}
   
@@ -37,21 +37,21 @@ art_make( BASENAME_ONLY
                                 larsim_MCCheater_PhotonBackTrackerService_service 
                                 nusimdata_SimulationBase
                                 nurandom_RandomUtils_NuRandomService_service
-                                ${FHICLCPP}
-                                ${MF_MESSAGELOGGER}
-                                ${ART_FRAMEWORK_CORE}
-                                ${ART_FRAMEWORK_PRINCIPAL}
-                                ${ART_FRAMEWORK_SERVICES_REGISTRY}
-                                ${ART_FRAMEWORK_SERVICES_BASIC}
-                                ${ART_ROOT_IO_TFILE_SUPPORT} ${ROOT_CORE}
-                                ${ART_ROOT_IO_TFILESERVICE_SERVICE}
-                                ${ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE}
-                                ${ART_PERSISTENCY_PROVENANCE}
+                                FHICLCPP
+                                messagefacility::MF_MessageLogger
+                                ART_FRAMEWORK_CORE
+                                ART_FRAMEWORK_PRINCIPAL
+                                ART_FRAMEWORK_SERVICES_REGISTRY
+                                ART_ROOT_IO_TFILE_SUPPORT
+                                ROOT::Core
+                                ART_ROOT_IO_TFILESERVICE_SERVICE
+                                ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE
+                                ART_PERSISTENCY_PROVENANCE
                                 art_Persistency_Common canvas
                                 art_Utilities canvas
                                 cetlib cetlib_except
-                                ${CLHEP}
-                                ${ROOT_BASIC_LIB_LIST}
+                                CLHEP
+                                ROOT_BASIC_LIB_LIST
                                 ${Boost_SYSTEM_LIBRARY}
                                 ${Boost_FILESYSTEM_LIBRARY}
 
@@ -59,19 +59,19 @@ art_make( BASENAME_ONLY
                                 larcorealg_Geometry
                                 larcore_Geometry_Geometry_service
                                 dune_OpticalDetector
-                                ${FHICLCPP}
-                                ${MF_MESSAGELOGGER}
-                                ${ART_FRAMEWORK_CORE}
-                                ${ART_FRAMEWORK_PRINCIPAL}
-                                ${ART_FRAMEWORK_SERVICES_REGISTRY}
-                                ${ART_FRAMEWORK_SERVICES_BASIC}
-                                ${ART_ROOT_IO_TFILE_SUPPORT} ${ROOT_CORE}
-                                ${ART_ROOT_IO_TFILESERVICE_SERVICE}
+                                FHICLCPP
+                                messagefacility::MF_MessageLogger
+                                ART_FRAMEWORK_CORE
+                                ART_FRAMEWORK_PRINCIPAL
+                                ART_FRAMEWORK_SERVICES_REGISTRY
+                                ART_ROOT_IO_TFILE_SUPPORT
+                                ROOT::Core
+                                ART_ROOT_IO_TFILESERVICE_SERVICE
                                 art_Persistency_Common canvas
                                 art_Utilities canvas
                                 cetlib cetlib_except
-                                ${CLHEP}
-                                ${ROOT_BASIC_LIB_LIST}
+                                CLHEP
+                                ROOT_BASIC_LIB_LIST
                                 ${Boost_SYSTEM_LIBRARY}
                                 ${Boost_FILESYSTEM_LIBRARY}
 
