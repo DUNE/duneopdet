@@ -50,6 +50,52 @@ dunefd_pdfastsim_pvs:                          @local::standard_pdfastsim_pvs
 dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar_refl
 
 
+###########
+# DUNE VD #
+###########
+
+# Hits & Timing parameterization for DUNE VD, Ar scintillation
+dunevd_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
+dunevd_pdfastsim_par_ar.VUVTiming:             @local::dunevd_vuv_timing_parameterization
+dunevd_pdfastsim_par_ar.VUVHits:               @local::dunevd_vuv_Argon_hits_parameterization
+dunevd_pdfastsim_par_ar.OnlyActiveVolume: 	 true
+
+# As above, but fast-only scintillation for high Xe concentration
+dunevd_pdfastsim_par_ar_fastonly:              @local::dunevd_pdfastsim_par_ar
+dunevd_pdfastsim_par_ar_fastonly.DoSlowComponent: false
+
+# Hits parameterization for DUNE VD, Xe scintillation, 10ppm
+dunevd_pdfastsim_par_xe:                       @local::standard_pdfastsim_par_ar
+dunevd_pdfastsim_par_xe.DoFastComponent:       false          # Only slow Xe light
+dunevd_pdfastsim_par_xe.VUVHits:               @local::dunevd_vuv_Xenon_hits_parameterization
+dunevd_pdfastsim_par_xe.VISHits:               @local::dunevd_vuv_Xenon_anode_hits_parameteriszation
+dunevd_pdfastsim_par_xe.IncludeAnodeReflections: true		  # include Xenon light reflections from anode
+dunevd_pdfastsim_par_xe.IncludePropTime:       true          
+dunevd_pdfastsim_par_xe.GeoPropTimeOnly:       true			  # Xe propoagation time geometric approximation
+dunevd_pdfastsim_par_xe.VUVTiming:			   @local::dunevd_xe_timing_geo
+dunevd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
+dunevd_pdfastsim_par_xe.OnlyActiveVolume: 	 true
+
+#### External region for laterals
+# Argon
+dunevd_pdfastsim_par_ar_external: 		@local::dunevd_pdfastsim_par_ar
+dunevd_pdfastsim_par_ar_external.VUVHits:     @local::dunevd_vuv_Argon_hits_parameterization_external
+dunevd_pdfastsim_par_ar_external.OnlyActiveVolume: false
+dunevd_pdfastsim_par_ar_external.SimulationLabel: IonAndScintExternal
+
+# As above, but fast-only scintillation for high Xe concentration
+dunevd_pdfastsim_par_ar_external_fastonly:    @local::dunevd_pdfastsim_par_ar_external
+dunevd_pdfastsim_par_ar_external_fastonly.DoSlowComponent: false
+
+# Xenon, 10ppm
+dunevd_pdfastsim_par_xe_external: 		 @local::dunevd_pdfastsim_par_xe
+dunevd_pdfastsim_par_xe_external.VUVHits:      @local::dunevd_vuv_Xenon_hits_parameterization_external
+dunevd_pdfastsim_par_xe_external.VISHits:      @local::dunevd_vuv_Xenon_anode_hits_parameteriszation_external
+dunevd_pdfastsim_par_xe_external.SimulationLabel: IonAndScintExternal
+dunevd_pdfastsim_par_xe_external.OnlyActiveVolume: false
+
+
+
 #############
 # ProtoDUNE #
 #############
