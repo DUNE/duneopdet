@@ -609,8 +609,8 @@ dunevd_vuv_Argon_hits_parameterization:
  delta_angulo_vuv: 10
 
  ApplyFieldCageTransparency: true
- FieldCageTransparencyCathode: 1.0
- FieldCageTransparencyLateral: 0.8
+ FieldCageTransparencyCathode: 0.8 #forward transmission of the cathode mesh
+ FieldCageTransparencyLateral: 0.7 #forward transmission of the field cage (narrower profile)
 }
 
 # external region (outside FC)
@@ -853,8 +853,8 @@ dunevd_vuv_Xenon_hits_parameterization:
  DomePDCorr: false 
 
  ApplyFieldCageTransparency: true
- FieldCageTransparencyCathode: 1.0
- FieldCageTransparencyLateral: 0.8
+ FieldCageTransparencyCathode: 0.8 #forward transmission of the cathode mesh
+ FieldCageTransparencyLateral: 0.7 #forward transmission of the field cage (narrower profile)
 
 }
 
