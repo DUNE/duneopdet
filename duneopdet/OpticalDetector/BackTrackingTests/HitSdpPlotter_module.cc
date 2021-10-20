@@ -43,14 +43,14 @@ namespace HitSdpPlotter {
   //-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
   void HitSdpPlotter::analyze(const art::Event& evt) {
 
-    art::Handle<std::vector<recob::OpHit>> ophitHandle;
     std::vector<art::Ptr<recob::OpHit>> ophitList;
-    if(evt.getByLabel(private_OpHitLabel, ophitHandle) )
+    auto ophitHandle = evt.getHandle<std::vector<recob::OpHit> >(private_OpHitLabel);
+    if (ophitHandle)
       art::fill_ptr_vector(ophitList, ophitHandle);
 
-    art::Handle<std::vector<sim::OpDetBacktrackerRecord>> btrHandle;
     std::vector<art::Ptr<sim::OpDetBacktrackerRecord>> btrList;
-    if(evt.getByLabel(private_BtrLabel, btrHandle) )
+    auto btrHandle = evt.getHandle<std::vector<sim::OpDetBacktrackerRecord> >(private_BtrLabel);
+    if (btrHandle)
       art::fill_ptr_vector(btrList, btrHandle);
 
     for( auto& btr : btrList ){

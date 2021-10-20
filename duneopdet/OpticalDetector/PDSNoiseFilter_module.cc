@@ -112,8 +112,8 @@ namespace opdet {
     for (auto label : fInputLabels) {
 
       // Read the waveforms in from the event record
-      art::Handle< vector< raw::OpDetWaveform > > wfHandle;
-      evt.getByLabel(fInputModule, label, wfHandle);
+      art::InputTag itag1(fInputModule, label);
+      auto wfHandle = evt.getHandle< vector< raw::OpDetWaveform > >(itag1);
 
       // Check that they are valid
       if (!wfHandle.isValid()) {

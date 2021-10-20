@@ -231,8 +231,7 @@ namespace opdet {
 
     
     // Get flashes from event
-    art::Handle< std::vector< recob::OpFlash > > FlashHandle;
-    evt.getByLabel(fOpFlashModuleLabel, FlashHandle);
+      auto FlashHandle = evt.getHandle< std::vector< recob::OpFlash > >(fOpFlashModuleLabel);
 
     // Get assosciations between flashes and hits
     art::FindManyP< recob::OpHit > Assns(FlashHandle, evt, fOpFlashModuleLabel);
@@ -275,8 +274,7 @@ namespace opdet {
     
 
       double xyz[3];
-      art::Handle< std::vector< recob::OpHit > > OpHitHandle;
-      evt.getByLabel(fOpHitModuleLabel, OpHitHandle);
+      auto OpHitHandle = evt.getHandle< std::vector< recob::OpHit > >(fOpHitModuleLabel);
       
       for(size_t i=0; i!=OpHitHandle->size(); ++i)
 	{

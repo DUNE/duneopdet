@@ -334,8 +334,8 @@ namespace opdet {
       fnwaveforms1pe = 0;
       fnwaveforms2pe = 0;
       fnwaveforms3pe = 0;
-      art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
-      if (evt.getByLabel(fOpDetWaveformLabel, wfHandle)) {
+      auto wfHandle = evt.getHandle< std::vector< raw::OpDetWaveform > >(fOpDetWaveformLabel);
+      if (wfHandle) {
         fnwaveforms1pe = wfHandle->size();
 
         for (auto wf: *wfHandle) {
@@ -360,9 +360,9 @@ namespace opdet {
     //////////////////////////////////////
 
     // Get flashes from event
-    art::Handle< std::vector< recob::OpFlash > > FlashHandle;
     std::vector<art::Ptr<recob::OpFlash> > flashlist;
-    if (evt.getByLabel(fOpFlashModuleLabel, FlashHandle)) {
+    auto FlashHandle = evt.getHandle< std::vector< recob::OpFlash > >(fOpFlashModuleLabel);
+    if (FlashHandle) {
       art::fill_ptr_vector(flashlist, FlashHandle);
       std::sort(flashlist.begin(), flashlist.end(), recob::OpFlashPtrSortByPE);
     }
@@ -371,9 +371,9 @@ namespace opdet {
       return;
     }
 
-    art::Handle< std::vector< recob::OpHit > > HitHandle;
     std::vector<art::Ptr<recob::OpHit> > hitlist;
-    if (evt.getByLabel(fOpHitModuleLabel, HitHandle)) {
+    auto HitHandle = evt.getHandle< std::vector< recob::OpHit > >(fOpHitModuleLabel);
+    if (HitHandle) {
       art::fill_ptr_vector(hitlist, HitHandle);
     }
 
