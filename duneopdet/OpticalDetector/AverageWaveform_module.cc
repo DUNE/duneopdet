@@ -138,8 +138,8 @@ namespace opdet {
     {
 
         // Get OpDetWaveforms from the event
-        art::Handle< std::vector< raw::OpDetWaveform > > waveformHandle;
-        evt.getByLabel(fInputModule, fInstanceName, waveformHandle);
+        art::InputTag itag1(fInputModule, fInstanceName);
+        auto waveformHandle = evt.getHandle< std::vector< raw::OpDetWaveform > >(itag1);
 
         // Access ART's TFileService, which will handle creating and writing
         // histograms for us
