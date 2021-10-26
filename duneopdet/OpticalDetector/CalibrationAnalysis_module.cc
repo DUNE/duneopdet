@@ -209,8 +209,8 @@ namespace opdet {
 
 
         // Get OpDetWaveforms from the event
-        art::Handle< std::vector< raw::OpDetWaveform > > waveformHandle;
-        evt.getByLabel(fInputModule, fInstanceName, waveformHandle);
+        art::InputTag itag1(fInputModule, fInstanceName);
+        auto waveformHandle = evt.getHandle< std::vector< raw::OpDetWaveform > >(itag1);
 
         // Access ART's TFileService, which will handle creating and writing
         // histograms for us
@@ -275,8 +275,7 @@ namespace opdet {
 	    
         }
 
-	art::Handle< std::vector< recob::OpHit > > OpHitHandle;
-	evt.getByLabel(fOpHitModule, OpHitHandle);
+	auto OpHitHandle = evt.getHandle< std::vector< recob::OpHit > >(fOpHitModule);
 	
         // Map to store how many OpHits are on one optical channel per event
         std::map< int, int   > OpHitCountPerEvent;

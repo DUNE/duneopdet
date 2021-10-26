@@ -201,8 +201,7 @@ namespace opdet {
     Int_t  binnumy = sizeof(binsy)/sizeof(Float_t) - 1;
     
     // Get flashes from event
-    art::Handle< std::vector< recob::OpFlash > > FlashHandle;
-    evt.getByLabel(fOpFlashModuleLabel, FlashHandle);
+    auto FlashHandle = evt.getHandle< std::vector< recob::OpFlash > >(fOpFlashModuleLabel);
 
     // Get assosciations between flashes and hits
     art::FindManyP< recob::OpHit > Assns(FlashHandle, evt, fOpFlashModuleLabel);
@@ -246,8 +245,7 @@ namespace opdet {
 	fFlashID   = i; //++;
     
 	double xyz[3];
-	art::Handle< std::vector< recob::OpHit > > OpHitHandle;
-	evt.getByLabel(fOpHitModuleLabel, OpHitHandle);
+	auto OpHitHandle = evt.getHandle< std::vector< recob::OpHit > >(fOpHitModuleLabel);
 	char INFO[500];      
 	for(size_t i=0; i!=OpHitHandle->size(); ++i)
 	  {

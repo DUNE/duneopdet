@@ -453,10 +453,10 @@ namespace opdet {
       modulecounter++;
 
       art::Handle< std::vector< sim::SimPhotonsLite > > litePhotonHandle;
-      if(fUseLitePhotons) evt.getByLabel(mod, litePhotonHandle);
+      if(fUseLitePhotons) litePhotonHandle = evt.getHandle< std::vector< sim::SimPhotonsLite > >(mod);
 
       art::Handle< std::vector< sim::SimPhotons > > PhotonHandle;
-      if(!fUseLitePhotons) evt.getByLabel(mod, PhotonHandle);
+      if(!fUseLitePhotons) PhotonHandle = evt.getHandle< std::vector< sim::SimPhotons > >(mod);
 
       if(fUseLitePhotons)
       {

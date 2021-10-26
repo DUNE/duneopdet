@@ -172,8 +172,7 @@ namespace opdet {
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
 
     // Get OpHits from the event
-    art::Handle< std::vector< recob::OpHit > > opHitHandle;
-    evt.getByLabel(fInputModule, opHitHandle);
+    auto opHitHandle = evt.getHandle< std::vector< recob::OpHit > >(fInputModule);
 
     RunFlashFinder(*opHitHandle,
                    *flashPtr,
