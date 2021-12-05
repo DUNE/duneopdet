@@ -621,7 +621,8 @@ dunevd_vuv_Argon_hits_parameterization_external.FieldCageTransparencyLateral: 1.
 # timing parameterisation
 dunevd_vuv_timing_parameterization: @local::dune_vuv_timing_parameterization
 dunevd_vuv_timing_parameterization.angle_bin_timing_vuv: 90 	# run in single bin mode for speed, gain in precision not warranted without vd specific parameterisation
-
+dunevd_vuv_timing_parameterization.step_size: 5. 		# larger step size for speed, gain in precision not warranted without vd specific parameterisation
+dunevd_vuv_timing_parameterization.max_d: 4000.  		# cm
 
 # Xenon
 
