@@ -1,7 +1,7 @@
 
 art_make(
           SERVICE_LIBRARIES larsim_PhotonPropagation
-                        larsim_Simulation nug4_ParticleNavigation lardataobj_Simulation
+                        larsim_Simulation nug4::ParticleNavigation lardataobj_Simulation
                         larevt_Filters
 	                lardataobj_RawData
 	                larcorealg_Geometry
@@ -13,14 +13,14 @@ art_make(
 			ROOT::Core
 			ART_ROOT_IO_TFILESERVICE_SERVICE
                         ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE
-			art_Persistency_Common
-			art_Persistency_Provenance
-			art_Utilities
-                        canvas
+			art::Persistency_Common
+			art::Persistency_Provenance
+			art::Utilities
+                        canvas::canvas
 			messagefacility::MF_MessageLogger
-			FHICLCPP
+			fhiclcpp::fhiclcpp
                         CLHEP
-			cetlib cetlib_except
+			cetlib::cetlib cetlib_except
 			ROOT_BASIC_LIB_LIST
                         ROOT_EG
           MODULE_LIBRARIES
@@ -28,7 +28,7 @@ art_make(
                         larsim_LegacyLArG4
                         lardataobj_Simulation
                         dune_PhotonPropagation_PhotonVisibilityServiceS2_service
-                        larsim_Simulation nug4_ParticleNavigation lardataobj_Simulation
+                        larsim_Simulation nug4::ParticleNavigation lardataobj_Simulation
                         larcorealg_Geometry
       	                larcore_Geometry_Geometry_service
                         ART_FRAMEWORK_CORE
@@ -38,14 +38,14 @@ art_make(
 			ROOT::Core
 			ART_ROOT_IO_TFILESERVICE_SERVICE
                         ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE
-			nurandom_RandomUtils_NuRandomService_service
-			art_Persistency_Common
-			art_Persistency_Provenance
-			art_Utilities
-                        canvas
+			nurandom::RandomUtils_NuRandomService_service
+			art::Persistency_Common
+			art::Persistency_Provenance
+			art::Utilities
+                        canvas::canvas
 			messagefacility::MF_MessageLogger
-			FHICLCPP
-			cetlib cetlib_except
+			fhiclcpp::fhiclcpp
+			cetlib::cetlib cetlib_except
                         CLHEP
 	 )
 

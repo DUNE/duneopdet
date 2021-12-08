@@ -5,8 +5,8 @@ art_make(NO_PLUGINS
     ROOT::Core
     ART_FRAMEWORK_SERVICES_REGISTRY
     CANVAS
-    cetlib
-    cetlib_except
+    cetlib::cetlib
+    cetlib_except::cetlib_except
     fhiclcpp
     CLHEP
     ART_UTILITIES
@@ -16,7 +16,7 @@ art_make(NO_PLUGINS
 cet_build_plugin(ScintTimeXeDoping art::tool
                 larsim_PhotonPropagation_ScintTimeTools
                 messagefacility::MF_MessageLogger
-                FHICLCPP
+                fhiclcpp::fhiclcpp
                 CLHEP
               )
 
