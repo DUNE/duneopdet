@@ -30,7 +30,7 @@
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "larsim/MCCheater/PhotonBackTrackerService.h"
 #include "larsim/MCCheater/ParticleInventoryService.h"
-#include "dune/OpticalDetector/OpFlashSort.h"
+#include "duneopdet/OpticalDetector/OpFlashSort.h"
 
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"

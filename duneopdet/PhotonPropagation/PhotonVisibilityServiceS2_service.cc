@@ -5,7 +5,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 // LArSoft includes
-#include "dune/PhotonPropagation/PhotonVisibilityServiceS2.h"
+#include "duneopdet/PhotonPropagation/PhotonVisibilityServiceS2.h"
 #include "art/Framework/Services/Registry/ServiceDefinitionMacros.h"
 #include "larsim/PhotonPropagation/PhotonLibrary.h"
 #include "larsim/Simulation/PhotonVoxels.h"

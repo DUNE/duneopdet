@@ -13,7 +13,7 @@
 // LArSoft includes
 #include "lardataobj/Simulation/SimPhotons.h"
 #include "larana/OpticalDetector/OpDetResponseInterface.h"
-#include "dune/OpticalDetector/DUNEOpDetResponseInterface.h"
+#include "duneopdet/OpticalDetector/DUNEOpDetResponseInterface.h"
 
 
 

@@ -12,7 +12,7 @@
 #define PHOTONCALIBRATORSERVICEPROTODUNESP
 
 // LArSoft Includes
-#include "dune/OpticalDetector/PhotonCalibratorProtoDUNESP.h"
+#include "duneopdet/OpticalDetector/PhotonCalibratorProtoDUNESP.h"
 #include "larreco/Calibrator/IPhotonCalibratorService.h"
 
 

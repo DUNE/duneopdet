@@ -9,7 +9,7 @@
 
 
 
-#include "dune/OpticalDetector/AlgoSSPLeadingEdge.h"
+#include "duneopdet/OpticalDetector/AlgoSSPLeadingEdge.h"
 
 namespace pmtana {
 

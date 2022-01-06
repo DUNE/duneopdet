@@ -27,7 +27,7 @@ art_make(
                         ROOT_BASIC_LIB_LIST
                         larsim_LegacyLArG4
                         lardataobj_Simulation
-                        dune_PhotonPropagation_PhotonVisibilityServiceS2_service
+                        duneopdet_PhotonPropagation_PhotonVisibilityServiceS2_service
                         larsim_Simulation nug4::ParticleNavigation lardataobj_Simulation
                         larcorealg_Geometry
       	                larcore_Geometry_Geometry_service

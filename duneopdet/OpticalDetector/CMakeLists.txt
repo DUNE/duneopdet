@@ -1,7 +1,7 @@
 #add_subdirectory(BackTrackingTests)
 
 art_make( BASENAME_ONLY ALLOW_UNDERSCORES
-                LIBRARY_NAME dune_OpticalDetector
+                LIBRARY_NAME duneopdet_OpticalDetector
                 LIB_LIBRARIES 
                                 lardataobj_RecoBase
                                 larcorealg_Geometry
@@ -25,14 +25,14 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 Boost::filesystem
   
                 MODULE_LIBRARIES
-                                dune_DuneObj
+                                dunecore_DuneObj
                                 lardataalg_DetectorInfo
                                 lardataobj_RecoBase
                                 larana_OpticalDetector
                                 larana_OpticalDetector_OpHitFinder
                                 larcorealg_Geometry
                                 larcore_Geometry_Geometry_service
-                                dune_OpticalDetector
+                                duneopdet_OpticalDetector
                                 larsim_MCCheater_ParticleInventoryService_service
                                 larsim_MCCheater_PhotonBackTrackerService_service 
                                 nusimdata::SimulationBase
@@ -58,7 +58,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 SERVICE_LIBRARIES
                                 larcorealg_Geometry
                                 larcore_Geometry_Geometry_service
-                                dune_OpticalDetector
+                                duneopdet_OpticalDetector
                                 fhiclcpp::fhiclcpp
                                 messagefacility::MF_MessageLogger
                                 ART_FRAMEWORK_CORE

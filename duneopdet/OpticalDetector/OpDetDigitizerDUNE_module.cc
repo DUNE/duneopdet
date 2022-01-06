@@ -42,8 +42,8 @@
 #include "larana/OpticalDetector/OpDetResponseInterface.h"
 #include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
-#include "dune/OpticalDetector/AlgoSSPLeadingEdge.h"
-#include "dune/DuneObj/OpDetDivRec.h"
+#include "duneopdet/OpticalDetector/AlgoSSPLeadingEdge.h"
+#include "dunecore/DuneObj/OpDetDivRec.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
 // CLHEP includes

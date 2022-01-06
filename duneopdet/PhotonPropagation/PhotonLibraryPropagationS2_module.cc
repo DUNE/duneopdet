@@ -26,7 +26,7 @@
 
 #include "Geant4/G4VUserTrackInformation.hh"
 
-#include "dune/PhotonPropagation/PhotonVisibilityServiceS2.h"
+#include "duneopdet/PhotonPropagation/PhotonVisibilityServiceS2.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larsim/LegacyLArG4/OpDetPhotonTable.h"
 #include "larsim/LegacyLArG4/OpDetSensitiveDetector.h"

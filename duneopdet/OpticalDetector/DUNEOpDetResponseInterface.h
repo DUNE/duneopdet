@@ -8,7 +8,7 @@
 #define DUNE_OPDET_RESPONSE_INTERFACE_H
 
 #include "larana/OpticalDetector/OpDetResponseInterface.h"
-#include "dune/OpticalDetector/DUNEOpDetResponse.h"
+#include "duneopdet/OpticalDetector/DUNEOpDetResponse.h"
 
 namespace opdet
 {

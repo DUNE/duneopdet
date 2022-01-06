@@ -6,7 +6,7 @@
 ////////////////////////////////////////////////////////////////////////
 
 
-#include "dune/OpticalDetector/ProtoDUNEOpDetResponse.h"
+#include "duneopdet/OpticalDetector/ProtoDUNEOpDetResponse.h"
 #include "art/Framework/Services/Registry/ServiceDefinitionMacros.h"
 #include "TGeoNode.h"
 #include "TGeoBBox.h"

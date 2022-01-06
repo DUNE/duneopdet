@@ -1,5 +1,5 @@
 // dunetpc includes
-#include "dune/OpticalDetector/PhotonCalibratorProtoDUNESP.h"
+#include "duneopdet/OpticalDetector/PhotonCalibratorProtoDUNESP.h"
 
 // LArSoft Includes
 #include "larreco/Calibrator/IPhotonCalibrator.h"

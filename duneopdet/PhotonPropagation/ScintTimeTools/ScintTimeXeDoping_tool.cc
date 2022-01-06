@@ -6,7 +6,7 @@
 // Generate a random number for timing of LAr scintillation
 // Oct. 8 by Mu Wei
 ////////////////////////////////////////////////////////////////////////
-#include "dune/PhotonPropagation/ScintTimeTools/ScintTimeXeDoping.h"
+#include "duneopdet/PhotonPropagation/ScintTimeTools/ScintTimeXeDoping.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
 namespace phot
