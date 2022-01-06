@@ -328,22 +328,30 @@ namespace opdet {
       consumes< vector< sim::OpDetDivRec > >(tag);
     }
 
+    mf::LogInfo logger("WaveformDigitizerSim");
+
     // Get the optical clock frequency
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
     fSampleFreqMHz = clockData.OpticalClock().Frequency();
-    mf::LogInfo("WaveformDigitizerSim") << "Using a sampling frequency of " << fSampleFreqMHz << " MHz";
+    logger << "Using a sampling frequency of " << fSampleFreqMHz << " MHz" << "\n";
     
 
     // Creating a single photoelectron waveform template
     // based on fhicl configuration
     CreateSinglePEWaveform();
+    logger  << "Requested pulse length of, " << fPulseLength << " us "
+            << "which is " << fPulseLengthTicks << " ticks" << "\n";
+    logger  << "Requested PE threshold, " << std::fixed
+            << std::setprecision(2) << fThresholdPE
+            << ", converted to ADC threshold "
+            << std::setprecision(0) << fThresholdADC << "\n";
 
 
     // Set a dynamic range if given
     short br;
     if ( config().DynamicBitRange(br) ) {
       fMaxSaturationCutOff = pow(2, br) - 1;
-      mf::LogInfo("WaveformDigitizerSim") << "Limiting output to " << br << " bits";
+      logger << "Limiting output to " << br << " bits" << "\n";
     }
 
     
@@ -355,8 +363,7 @@ namespace opdet {
       tsource = "default";
       SetDefaultBeginEndTimes();
     }
-    mf::LogInfo("WaveformDigitizerSim") << "Using " << tsource << " time limits on PD digitizer: "
-                                        << fTimeBegin << " us to " << fTimeEnd << " us";
+    logger << "Using " << tsource << " time limits on PD digitizer: " << fTimeBegin << " us to " << fTimeEnd << " us";
 
     // Check for valid configuration
     CheckFHiCLParameters();
@@ -368,8 +375,6 @@ namespace opdet {
     double maxADC = 0.;
     fPulseLengthTicks = std::round(fPulseLength*fSampleFreqMHz);
     fSinglePEWaveform.resize(fPulseLengthTicks);
-    mf::LogInfo("WaveformDigitizerSim") << "Requested pulse length of, " << fPulseLength << " us "
-                                        << "which is " << fPulseLengthTicks << " ticks";
 
     for (size_t tick = 0; tick < fPulseLengthTicks; ++tick) {
       double val = Pulse1PE(static_cast< double >(tick)/fSampleFreqMHz);
@@ -379,10 +384,6 @@ namespace opdet {
 
     // Set the ADC threshold based on the PE threshold
     fThresholdADC = fThresholdPE * maxADC;
-    mf::LogInfo("WaveformDigitizerSim") << "Requested PE threshold, " << std::fixed
-                                        << std::setprecision(2) << fThresholdPE 
-                                        << ", converted to ADC threshold " 
-                                        << std::setprecision(0) << fThresholdADC;
   }
 
   //---------------------------------------------------------------------------
