@@ -402,19 +402,14 @@ namespace opdet {
     // A little wasteful to get clockData again, but only happens once per job
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
     auto const detProp   = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataForJob(clockData);
-    auto const geometry  = art::ServiceHandle< geo::Geometry >();
 
-    double maxDrift = 0.0;
-    for (geo::TPCGeo const& tpc : geometry->IterateTPCs()) {
-      if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
-    }
+    // Take the TPC readout window size and convert to us with the electronics
+    // clock frequency, adding 5 us of padding
+    fTimeEnd   = detProp.ReadOutWindowSize() / clockData.TPCClock().Frequency() + 5;
 
-    // Assume the readout starts at -1 drift window
-    fTimeBegin = -1.*maxDrift/detProp.DriftVelocity();
+    // Assume the readout is symmetrical around 0
+    fTimeBegin = -1.*fTimeEnd;
 
-    // Take the TPC readout window size and convert
-    // to us with the electronics clock frequency
-    fTimeEnd   = detProp.ReadOutWindowSize() / clockData.TPCClock().Frequency();
   }
 
 
@@ -520,24 +515,26 @@ namespace opdet {
       double photonTime_ns = odtc.time;
       size_t timeBin       = ns2Tick(photonTime_ns);
 
-      fls.AddRange(timeBin, timeBin+fPulseLengthTicks-1);
+      // Check if the photon is inside the digitization range. If not, skip it.
+      if ( timeBin < 0 || timeBin >= pdWaveform.size() ) {
+        mf::LogWarning("WaveformDigitizerSim") << "Skipping a photon at " << photonTime_ns/1000. << " us, outside digitization window of " << fTimeBegin << " to " << fTimeEnd;
+        continue;
+      }
 
       // Loop through records at this time and count photons
       int nPE = 0;
       for (auto const& sdp : odtc.phots)
         nPE += sdp.phot;
 
-      // Adding a pulse to the waveform
-      for (size_t tick = 0; tick < fPulseLengthTicks; ++tick)
-      {
-        try { 
-          pdWaveform[timeBin+tick] += fSinglePEWaveform[tick]*nPE; 
-        }
-        catch (const std::out_of_range& e) {
-          // Hit the end of the waveform -- just end now
-          break; 
-        }
-      }
+      // Add ticks until the end of the single PE waveform or end of the whole pdWaveform
+      size_t stop = std::min(fPulseLengthTicks, pdWaveform.size()-timeBin);
+
+      // Add this range to the focus list
+      fls.AddRange(timeBin, timeBin+stop-1);
+
+      // Add the nPE pulse to the waveform
+      for (size_t tick = 0; tick < stop; ++tick)
+        pdWaveform[timeBin+tick] += fSinglePEWaveform[tick]*nPE;
     }
   }
 
