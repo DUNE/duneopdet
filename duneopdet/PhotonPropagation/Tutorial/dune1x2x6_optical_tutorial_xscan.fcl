@@ -70,7 +70,7 @@ physics:
  producers:
  {
    generator: @local::standard_textfilegen
-   largeant:  @local::dunefd_largeant	  
+   largeant:  @local::dunefd_largeant
    rns:       { module_type: "RandomNumberSaver" }
  }
 
@@ -78,10 +78,10 @@ physics:
  {
    pmtresponse: @local::dunefd_simphotoncounter
 
-      
-   # This name defines a job step below, and will appear as a directory 
-   # in the output histogram file. 
-   AnalysisExample: 
+
+   # This name defines a job step below, and will appear as a directory
+   # in the output histogram file.
+   AnalysisExample:
    {
       # The "module_type" tells us which module to run. The name here
       # matches the name supplied to DEFINE_ART_MODULE near the end of
@@ -117,28 +117,28 @@ physics:
       # PDG code 13 = mu-.
       PDGcode:          13
 
-      # dx used for the dE/dx calculation; units are cm. 
+      # dx used for the dE/dx calculation; units are cm.
       BinSize:          0.3
    }
  }
 
 
- #define the producer and filter modules for this path, order matters, 
+ #define the producer and filter modules for this path, order matters,
  #filters reject all following items.  see lines starting physics.producers below
- # simulate: [ generator, largeant, daq, rns ] 
- simulate: [ generator, largeant, rns ] 
+ # simulate: [ generator, largeant, daq, rns ]
+ simulate: [ generator, largeant, rns ]
  analyzeIt:  [ AnalysisExample, pmtresponse]
- 
- #define the output stream, there could be more than one if using filters 
+
+ #define the output stream, there could be more than one if using filters
  stream1:  [ out1 ]
 
- #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #trigger_paths is a keyword and contains the paths that modify the art::event,
  #ie filters and producers
- trigger_paths: [simulate] 
+ trigger_paths: [simulate]
 
- #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #end_paths is a keyword and contains the paths that do not modify the art::Event,
  #ie analyzers and output streams.  these all run simultaneously
- end_paths:     [analyzeIt, stream1]  
+ end_paths:     [analyzeIt, stream1]
 }
 
 #block to define where the output goes.  if you defined a filter in the physics
@@ -152,3 +152,5 @@ outputs:
    fileName:    "dune1x2x6_optical_example_xscan_gen.root" #default file name, can override from command line with -o or --output
  }
 }
+
+physics.producers.generator.Offset: 0
