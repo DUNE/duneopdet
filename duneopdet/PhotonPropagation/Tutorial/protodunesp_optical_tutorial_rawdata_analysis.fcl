@@ -10,11 +10,9 @@ services:
   # Load the service that manages root files for histograms.
   TFileService: { fileName: "opdigiana_hist.root" }
   TimeTracker:       {}
-                @table::dune35t_services_legacy
+                @table::protodune_simulation_services
   message:      @local::standard_info 
 }
-
-services.OpDigiProperties:        @local::dune35t_opdigiproperties
 
 source:
 {
@@ -27,9 +25,9 @@ physics:
 {
 
  analyzers:
- {
-   opdigiana:   @local::dune35t_opdigiana
-   #ophitana:    @local::dunefd_ophitana
+{
+  opdigiana:   @local::dunefd_opdigiana
+# ophitana:    @local::dunefd_ophitana
 }
  analyzeIt: [opdigiana] #,  ophitana]
 
@@ -45,5 +43,5 @@ physics:
  end_paths:     [analyzeIt]  
 }
 
-physics.analyzers.opdigiana.InputModule: ssptooffline
-physics.analyzers.opdigiana.InstanceName: offlinePhoton
+physics.analyzers.opdigiana.InputModule: ssprawdecoder
+physics.analyzers.opdigiana.InstanceName: internal
