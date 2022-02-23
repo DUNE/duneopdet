@@ -22,7 +22,10 @@ services:
 }
 
 # DUNE FD 1x2x6 workspace geometry
-services.Geometry:                @local::dune10kt_1x2x6_geo
+#services.Geometry:      @local::dune10kt_1x2x6_geo
+services.Geometry.GDML: "dune10kt_v2_1x2x6.gdml"
+services.Geometry.Name: "dune10kt_v2_1x2x6"
+services.Geometry.ROOT: "dune10kt_v2_1x2x6.gdml"
 services.PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice
 services.LArPropertiesService.ScintPreScale: 0.0287
 
