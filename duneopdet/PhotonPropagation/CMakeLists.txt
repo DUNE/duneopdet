@@ -1,18 +1,19 @@
 
 art_make(
           SERVICE_LIBRARIES larsim_PhotonPropagation
-                        larsim_Simulation nug4::ParticleNavigation lardataobj_Simulation
-                        larevt_Filters
-	                lardataobj_RawData
-	                larcorealg_Geometry
-	                larcore_Geometry_Geometry_service
-                        ART_FRAMEWORK_CORE
-			ART_FRAMEWORK_PRINCIPAL
-			ART_FRAMEWORK_SERVICES_REGISTRY
-			ART_ROOT_IO_TFILE_SUPPORT
-			ROOT::Core
-			ART_ROOT_IO_TFILESERVICE_SERVICE
-                        ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE
+                        larsim::Simulation nug4::ParticleNavigation 
+			lardataobj::Simulation
+                        larevt::Filters
+	                lardataobj::RawData
+	                larcorealg::Geometry
+	                larcore::Geometry_Geometry_service
+                        art::Framework_Core
+                        art::Framework_Principal
+                        art::Framework_Services_Registry
+                        art_root_io::tfile_support
+                        ROOT::Core
+                        art_root_io::TFileService_service
+                        art::Framework_Services_Optional_RandomNumberGenerator_service
 			art::Persistency_Common
 			art::Persistency_Provenance
 			art::Utilities
@@ -25,19 +26,20 @@ art_make(
                         ROOT_EG
           MODULE_LIBRARIES
                         ROOT_BASIC_LIB_LIST
-                        larsim_LegacyLArG4
-                        lardataobj_Simulation
-                        duneopdet_PhotonPropagation_PhotonVisibilityServiceS2_service
-                        larsim_Simulation nug4::ParticleNavigation lardataobj_Simulation
-                        larcorealg_Geometry
-      	                larcore_Geometry_Geometry_service
-                        ART_FRAMEWORK_CORE
-			ART_FRAMEWORK_PRINCIPAL
-			ART_FRAMEWORK_SERVICES_REGISTRY
-			ART_ROOT_IO_TFILE_SUPPORT
-			ROOT::Core
-			ART_ROOT_IO_TFILESERVICE_SERVICE
-                        ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE
+                        larsim::LegacyLArG4
+                        lardataobj::Simulation
+                        duneopdet::PhotonPropagation_PhotonVisibilityServiceS2_service
+                        larsim::Simulation 
+                        nug4::ParticleNavigation lardataobj_Simulation
+                        larcorealg::Geometry
+      	                larcore::Geometry_Geometry_service
+                        art::Framework_Core
+                        art::Framework_Principal
+                        art::Framework_Services_Registry
+                        art_root_io::tfile_support
+                        ROOT::Core
+                        art_root_io::TFileService_service
+                        art::Framework_Services_Optional_RandomNumberGenerator_service
 			nurandom::RandomUtils_NuRandomService_service
 			art::Persistency_Common
 			art::Persistency_Provenance

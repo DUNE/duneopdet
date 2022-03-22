@@ -3,18 +3,18 @@ art_make(NO_PLUGINS
     ScintTimeXeDoping_tool.cc
   LIB_LIBRARIES
     ROOT::Core
-    ART_FRAMEWORK_SERVICES_REGISTRY
-    CANVAS
+    art::Framework_Services_Registry
+    canvas::canvas
     cetlib::cetlib
     cetlib_except::cetlib_except
-    fhiclcpp
+    fhiclcpp::fhiclcpp
     CLHEP
-    ART_UTILITIES
+    art::Utilities
   )
 
 
 cet_build_plugin(ScintTimeXeDoping art::tool
-                larsim_PhotonPropagation_ScintTimeTools
+                larsim::PhotonPropagation_ScintTimeTools
                 messagefacility::MF_MessageLogger
                 fhiclcpp::fhiclcpp
                 CLHEP
