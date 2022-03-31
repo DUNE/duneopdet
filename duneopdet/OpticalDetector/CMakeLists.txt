@@ -3,76 +3,78 @@
 art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 LIBRARY_NAME duneopdet_OpticalDetector
                 LIB_LIBRARIES 
-                                lardataobj_RecoBase
-                                larcorealg_Geometry
-                                larcore_Geometry_Geometry_service
-                                larana_OpticalDetector_OpHitFinder
+                                lardataobj::RecoBase
+                                larcorealg::Geometry
+                                larcore::Geometry_Geometry_service
+                                larana::OpticalDetector_OpHitFinder
                                 nusimdata::SimulationBase
                                 fhiclcpp::fhiclcpp
                                 messagefacility::MF_MessageLogger
-                                ART_FRAMEWORK_CORE
-                                ART_FRAMEWORK_PRINCIPAL
-                                ART_FRAMEWORK_SERVICES_REGISTRY
-                                ART_ROOT_IO_TFILE_SUPPORT
+                                art::Framework_Core
+                                art::Framework_Principal
+                                art::Framework_Services_Registry
+                                art_root_io::tfile_support
                                 ROOT::Core
-                                ART_ROOT_IO_TFILESERVICE_SERVICE
-                                ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE
-                                art::Persistency_Common canvas
-                                art::Utilities canvas
-                                cetlib::cetlib cetlib_except 
+                                art_root_io::TFileService_service
+                                art::Framework_Services_Optional_RandomNumberGenerator_service
+                                art::Persistency_Common
+                                art::Utilities 
+				canvas::canvas
+                                cetlib::cetlib 
+				cetlib_except::cetlib_except 
                                 ROOT_BASIC_LIB_LIST
-                                
                                 Boost::filesystem
   
                 MODULE_LIBRARIES
-                                dunecore_DuneObj
-                                lardataalg_DetectorInfo
-                                lardataobj_RecoBase
-                                larana_OpticalDetector
-                                larana_OpticalDetector_OpHitFinder
-                                larcorealg_Geometry
-                                larcore_Geometry_Geometry_service
-                                duneopdet_OpticalDetector
-                                larsim_MCCheater_ParticleInventoryService_service
-                                larsim_MCCheater_PhotonBackTrackerService_service 
+                                dunecore::DuneObj
+                                lardataalg::DetectorInfo
+                                lardataobj::RecoBase
+                                larana::OpticalDetector
+                                larana::OpticalDetector_OpHitFinder
+                                larcorealg::Geometry
+                                larcore::Geometry_Geometry_service
+                                duneopdet::OpticalDetector
+                                larsim::MCCheater_ParticleInventoryService_service
+                                larsim::MCCheater_PhotonBackTrackerService_service 
                                 nusimdata::SimulationBase
                                 nurandom::RandomUtils_NuRandomService_service
                                 fhiclcpp::fhiclcpp
                                 messagefacility::MF_MessageLogger
-                                ART_FRAMEWORK_CORE
-                                ART_FRAMEWORK_PRINCIPAL
-                                ART_FRAMEWORK_SERVICES_REGISTRY
-                                ART_ROOT_IO_TFILE_SUPPORT
+                                art::Framework_Core
+                                art::Framework_Principal
+                                art::Framework_Services_Registry
+                                art_root_io::tfile_support
                                 ROOT::Core
-                                ART_ROOT_IO_TFILESERVICE_SERVICE
-                                ART_FRAMEWORK_SERVICES_OPTIONAL_RANDOMNUMBERGENERATOR_SERVICE
-                                ART_PERSISTENCY_PROVENANCE
-                                art::Persistency_Common canvas
-                                art::Utilities canvas
-                                cetlib::cetlib cetlib_except
+                                art_root_io::TFileService_service
+                                art::Framework_Services_Optional_RandomNumberGenerator_service
+                                art::Persistency_Provenance
+                                art::Persistency_Common
+                                art::Utilities 
+				canvas::canvas
+                                cetlib::cetlib 
+				cetlib_except::cetlib_except
                                 CLHEP
                                 ROOT_BASIC_LIB_LIST
-                                
                                 Boost::filesystem
 
                 SERVICE_LIBRARIES
-                                larcorealg_Geometry
-                                larcore_Geometry_Geometry_service
-                                duneopdet_OpticalDetector
+                                larcorealg::Geometry
+                                larcore::Geometry_Geometry_service
+                                duneopdet::OpticalDetector
                                 fhiclcpp::fhiclcpp
                                 messagefacility::MF_MessageLogger
-                                ART_FRAMEWORK_CORE
-                                ART_FRAMEWORK_PRINCIPAL
-                                ART_FRAMEWORK_SERVICES_REGISTRY
-                                ART_ROOT_IO_TFILE_SUPPORT
+                                art::Framework_Core
+                                art::Framework_Principal
+                                art::Framework_Services_Registry
+                                art_root_io::tfile_support
                                 ROOT::Core
-                                ART_ROOT_IO_TFILESERVICE_SERVICE
-                                art::Persistency_Common canvas
-                                art::Utilities canvas
+                                art_root_io::TFileService_service
+                                art::Persistency_Common
+                                art::Utilities 
+				canvas::canvas
                                 cetlib::cetlib cetlib_except
                                 CLHEP
-                                ROOT_BASIC_LIB_LIST
-                                
+                                ROOT_BASIC_LIB_LIST                                
                                 Boost::filesystem
 
 )
