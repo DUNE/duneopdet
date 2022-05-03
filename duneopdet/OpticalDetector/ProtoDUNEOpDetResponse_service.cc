@@ -11,6 +11,7 @@
 #include "TGeoNode.h"
 #include "TGeoBBox.h"
 #include "larcorealg/Geometry/OpDetGeo.h"
+#include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom()
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "CLHEP/Random/RandFlat.h"
