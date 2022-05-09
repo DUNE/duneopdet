@@ -14,6 +14,7 @@ art_make(NO_PLUGINS
 
 
 cet_build_plugin(ScintTimeXeDoping art::tool
+                larsim::PhotonPropagation_ScintTimeTools
                 messagefacility::MF_MessageLogger
                 fhiclcpp::fhiclcpp
                 CLHEP
