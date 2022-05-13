@@ -38,6 +38,7 @@
 
 // LArSoft includes
 #include "lardataobj/RawData/OpDetWaveform.h"
+#include "lardataobj/RecoBase/OpWaveform.h"
 
 // C++ includes
 #include <vector>
@@ -101,6 +102,7 @@ namespace opdet {
     // Tell ART what we intend to produce
     for (auto label : fInputLabels) {
       produces< vector< raw::OpDetWaveform > >(label);
+      produces< vector< recob::OpWaveform> >(label);
     }
   }
 
@@ -126,6 +128,7 @@ namespace opdet {
 
       // Create a unique_ptr to store the output
       auto out_waveforms = std::make_unique< vector< raw::OpDetWaveform > >();
+      auto out_recowaveforms = std::make_unique< vector< recob::OpWaveform > >();
 
       // Loop through the waveforms applying filtering.
       for (auto const& in_wave : in_waveforms) {
@@ -134,6 +137,7 @@ namespace opdet {
 	
 	Int_t nBins = in_wave.size();                     // size of the input vector
 	std::vector<short unsigned int > out_wave(nBins); // vector in which the filtered waveform will be saved
+	std::vector<float> out_recowave(nBins); // vector in which the filtered waveform will be saved, using float
         std::vector<short unsigned int > out_wave_double(nBins);
 	  for(Int_t i=0; i<nBins; i++) out_wave_double[i]=2*in_wave[i];
 	    // careful, it doesn't work for vector<short>, but it does for vector<short unsigned int>
@@ -153,6 +157,7 @@ namespace opdet {
             convert = filtered[i];
             convert2 = (short) convert + 0.5;
             out_wave[i] = convert2;
+            out_recowave[i] = filtered[i];
         }
 
         //####################################################################
@@ -160,12 +165,15 @@ namespace opdet {
         //####################################################################
 
 	raw::OpDetWaveform out_waveFinal(in_wave.TimeStamp(), in_wave.ChannelNumber(), out_wave);
-
         out_waveforms->emplace_back(std::move(out_waveFinal));
+
+        recob::OpWaveform out_recowaveFinal(out_recowave,in_wave.ChannelNumber());
+        out_recowaveforms->emplace_back(std::move(out_recowaveFinal));
 
       }
 
       evt.put(std::move(out_waveforms),label);
+      evt.put(std::move(out_recowaveforms),label);
     }
 
   }
