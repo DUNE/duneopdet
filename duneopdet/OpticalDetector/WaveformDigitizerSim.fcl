@@ -26,6 +26,12 @@ standard_daphne:
 
 }
 
+stardard_vddaphne: @local::standard_daphne
+stardard_vddaphne.MaxAmplitude:         0.066 # * VoltageToADC = 10 ADC/PE
+stardard_vddaphne.BackTime:             0.200
+stardard_vddaphne.Pedestal:             500      # ADC
+stardard_vddaphne.DynamicBitRange:      14      # 14-bit dynamic range
+
 
 
 END_PROLOG
