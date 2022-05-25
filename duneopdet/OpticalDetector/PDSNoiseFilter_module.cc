@@ -167,7 +167,7 @@ namespace opdet {
 	raw::OpDetWaveform out_waveFinal(in_wave.TimeStamp(), in_wave.ChannelNumber(), out_wave);
         out_waveforms->emplace_back(std::move(out_waveFinal));
 
-        recob::OpWaveform out_recowaveFinal(out_recowave,in_wave.ChannelNumber());
+        recob::OpWaveform out_recowaveFinal(in_wave.TimeStamp(), in_wave.ChannelNumber(), out_recowave);
         out_recowaveforms->emplace_back(std::move(out_recowaveFinal));
 
       }
