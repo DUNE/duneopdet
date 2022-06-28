@@ -29,8 +29,16 @@
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "larsim/MCCheater/PhotonBackTrackerService.h"
+#include "larsim/MCCheater/BackTrackerService.h"
 #include "larsim/MCCheater/ParticleInventoryService.h"
 #include "duneopdet/OpticalDetector/OpFlashSort.h"
+#include "lardataobj/Simulation/SimChannel.h"
+
+#include "larsim/IonizationScintillation/ISCalc.h"
+#include "larsim/IonizationScintillation/ISCalcCorrelated.h"
+#include "larsim/IonizationScintillation/ISCalcNESTLAr.h"
+#include "larsim/IonizationScintillation/ISCalcSeparate.h"
+
 
 // ART includes.
 #include "art/Framework/Core/EDAnalyzer.h"
@@ -60,7 +68,7 @@ namespace opdet {
     void beginJob();
 
     // The analyzer routine, called once per event.
-    void analyze (const art::Event&);
+    void analyze (const art::Event& evt);
 
   private:
 
@@ -105,6 +113,11 @@ namespace opdet {
     Float_t fTrueT;
     Float_t fDetectedT;
     Float_t fTrueE;
+    Float_t fEdep;//Visible energy deposition using SimChannels
+    Float_t Edep;
+    Float_t fEdepSimE;//Energy deposition using SimEnergyDeposits
+    Float_t EdepSimE;
+    std::unique_ptr<larg4::ISCalc> fISAlg;
     Int_t   fTruePDG;
     Float_t fRecoX;
 
@@ -202,6 +215,8 @@ namespace opdet {
     fFlashMatchTree->Branch("TrueT",                       &fTrueT,     "TrueT/F");
     fFlashMatchTree->Branch("DetectedT",                   &fDetectedT, "DetectedT/F");
     fFlashMatchTree->Branch("TrueE",                       &fTrueE,     "TrueE/F");
+    fFlashMatchTree->Branch("Edep",                        &fEdep,       "Edep/F");
+    fFlashMatchTree->Branch("EdepSimE",                    &fEdepSimE,       "EdepSimE/F");
     fFlashMatchTree->Branch("TruePDG",                     &fTruePDG,   "TruePDG/I");
     fFlashMatchTree->Branch("NFlashes",                    &fNFlashes,  "NFlashes/I");
     fFlashMatchTree->Branch("FlashIDVector",               &fFlashIDVector);
@@ -229,6 +244,8 @@ namespace opdet {
     fLargestFlashTree->Branch("TrueT",                       &fTrueT,     "TrueT/F");
     fLargestFlashTree->Branch("DetectedT",                   &fDetectedT, "DetectedT/F");
     fLargestFlashTree->Branch("TrueE",                       &fTrueE,     "TrueE/F");
+    fLargestFlashTree->Branch("Edep",                        &fEdep,     "Edep/F");
+    fLargestFlashTree->Branch("EdepSimE",                    &fEdepSimE,     "EdepSimE/F");
     fLargestFlashTree->Branch("TruePDG",                     &fTruePDG,   "TruePDG/I");
     fLargestFlashTree->Branch("NFlashes",                    &fNFlashes,  "NFlashes/I");
     fLargestFlashTree->Branch("FlashID",                     &fFlashID,   "FlashID/I");
@@ -255,7 +272,8 @@ namespace opdet {
     fSelectedFlashTree->Branch("TrueZ",                       &fTrueZ,     "TrueZ/F");
     fSelectedFlashTree->Branch("TrueT",                       &fTrueT,     "TrueT/F");
     fSelectedFlashTree->Branch("DetectedT",                   &fDetectedT, "DetectedT/F");
-    fSelectedFlashTree->Branch("TrueE",                       &fTrueE,     "TrueE/F");
+    fSelectedFlashTree->Branch("Edep",                        &fEdep,     "Edep/F");
+    fSelectedFlashTree->Branch("EdepSimE",                    &fEdepSimE,     "EdepSimE/F");
     fSelectedFlashTree->Branch("TruePDG",                     &fTruePDG,   "TruePDG/I");
     fSelectedFlashTree->Branch("NFlashes",                    &fNFlashes,  "NFlashes/I");
     fSelectedFlashTree->Branch("FlashID",                     &fFlashID,   "FlashID/I");
@@ -314,11 +332,21 @@ namespace opdet {
   {
     // Get the required services
     art::ServiceHandle< geo::Geometry > geom;
-    art::ServiceHandle< cheat::PhotonBackTrackerService > pbt;
+    art::ServiceHandle<cheat::PhotonBackTrackerService > pbt;
     art::ServiceHandle<cheat::ParticleInventoryService> pinv;
+
+    //BackTrackerService and ParticleInventoryService
+      art::ServiceHandle<cheat::BackTrackerService> bt_serv;
+      //  art::ServiceHandle<cheat::ParticleInventoryService> pi_serv;
     art::ServiceHandle< art::TFileService > tfs;
     //pbt->Rebuild(evt);
 
+    ////Edep handle
+    art::Handle<std::vector<sim::SimEnergyDeposit>> edep_handle;
+    if (!evt.getByLabel("IonAndScint", edep_handle)) {
+      return;
+    }
+   
 
     // Record the event ID
     fEventID = evt.id().event();
@@ -351,7 +379,6 @@ namespace opdet {
         fCountTree->Fill();
       }
     }
-
 
 
 
@@ -396,7 +423,6 @@ namespace opdet {
 
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(evt, clockData);
-
     try {
       auto MClistHandle = evt.getValidHandle<std::vector<simb::MCTruth> >(fSignalLabel);
 
@@ -412,16 +438,53 @@ namespace opdet {
         for (auto part = parts.begin(); part != parts.end(); part++) {
           signal_trackids.emplace((*part)->TrackId());
         }
+      }    
+
+
+      //Get the total visible energy deposited in the LAr AV
+      //TPC SimChannels
+      std::vector<const sim::SimChannel*> fSimChannels;
+      evt.getView("elecDrift",fSimChannels);
+      float totalEdep=0.0;
+      for(auto const &chan : fSimChannels ){
+	for(auto const &tdcide : chan->TDCIDEMap()){
+	  for(const auto& ide :tdcide.second){
+	    //const simb::MCParticle *particle = pinv->TrackIdToParticle_P(ide.trackID);
+	    const art::Ptr<simb::MCTruth> mc=pinv->TrackIdToMCTruth_P(ide.trackID);
+	    // std::cout<<"Origin is "<<mc->Origin()<<std::endl;
+	    if(mc->Origin()!=3) continue;
+	    totalEdep +=ide.energy;
+	  }
+	}
       }
+      double edepsim=0.0;
+      ////Energy deposit using SimEnergyDeposit
+       for (auto const& edepi : *edep_handle) {
+	 //	auto const [energyDeposit, nElectrons, nPhotons, scintYieldRatio] = fISAlg->CalcIonAndScint(detProp, edepi);
+	 edepsim+=edepi.Energy();
+	 //	 std::cout<<edepi.Energy()<<std::endl;
+      }
+      
+      //  fEdepSimE=edepsim;
+      ////////////////////
+
 
       // Get just the neutrino, entry 0 from the list, and record its properties
       const simb::MCParticle& part(mctruth->GetParticle(0));
+     
+          
+      std::cout<<"Edep channel......, simEnergy "<<totalEdep/3.0<<"   "<<edepsim<<" trueE "<<part.E()<<"  EndProcess "<<part.EndProcess()<<std::endl;
+
       fTrueX     = part.Vx();
       fTrueY     = part.Vy();
       fTrueZ     = part.Vz();
       fTrueT     = part.T()*1000; // ns -> us
       fTrueE     = part.E();
+      fEdep=(totalEdep/3.00)/1000.0;
+      fEdepSimE=edepsim/1000.0;
       fTruePDG   = part.PdgCode();
+     
+
 
       // Get all the paricle including neutrino, and record its properties
       unsigned int const nParticles = mctruth->NParticles();
@@ -461,6 +524,8 @@ namespace opdet {
       fTrueZ = 0;
       fTrueT = 0;
       fTrueE = 0;
+      fEdep=0;
+      fEdepSimE=0;
       fTruePDG = 0;
       fDetectedT = 0;
     }
