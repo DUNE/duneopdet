@@ -33,6 +33,7 @@
 #include "larsim/MCCheater/ParticleInventoryService.h"
 #include "duneopdet/OpticalDetector/OpFlashSort.h"
 #include "lardataobj/Simulation/SimChannel.h"
+#include "lardataobj/Simulation/SimEnergyDeposit.h
 
 #include "larsim/IonizationScintillation/ISCalc.h"
 #include "larsim/IonizationScintillation/ISCalcCorrelated.h"
