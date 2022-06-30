@@ -115,9 +115,9 @@ namespace opdet {
     Float_t fDetectedT;
     Float_t fTrueE;
     Float_t fEdep;//Visible energy deposition using SimChannels
-    Float_t Edep;
+    // unused Float_t Edep;
     Float_t fEdepSimE;//Energy deposition using SimEnergyDeposits
-    Float_t EdepSimE;
+    // unused Float_t EdepSimE;
     std::unique_ptr<larg4::ISCalc> fISAlg;
     Int_t   fTruePDG;
     Float_t fRecoX;
