@@ -78,21 +78,21 @@ dunevd_pdfastsim_par_xe.OnlyActiveVolume: 	 true
 
 #### External region for laterals
 # Argon
-dunevd_pdfastsim_par_ar_external: 		@local::dunevd_pdfastsim_par_ar
-dunevd_pdfastsim_par_ar_external.VUVHits:     @local::dunevd_vuv_Argon_hits_parameterization_external
-dunevd_pdfastsim_par_ar_external.OnlyActiveVolume: false
-dunevd_pdfastsim_par_ar_external.SimulationLabel: IonAndScintExternal
+# dunevd_pdfastsim_par_ar_external: 		@local::dunevd_pdfastsim_par_ar
+# dunevd_pdfastsim_par_ar_external.VUVHits:     @local::dunevd_vuv_Argon_hits_parameterization_external
+# dunevd_pdfastsim_par_ar_external.OnlyActiveVolume: false
+# dunevd_pdfastsim_par_ar_external.SimulationLabel: IonAndScintExternal
 
 # As above, but fast-only scintillation for high Xe concentration
-dunevd_pdfastsim_par_ar_external_fastonly:    @local::dunevd_pdfastsim_par_ar_external
-dunevd_pdfastsim_par_ar_external_fastonly.DoSlowComponent: false
+# dunevd_pdfastsim_par_ar_external_fastonly:    @local::dunevd_pdfastsim_par_ar_external
+# dunevd_pdfastsim_par_ar_external_fastonly.DoSlowComponent: false
 
 # Xenon, 10ppm
-dunevd_pdfastsim_par_xe_external: 		 @local::dunevd_pdfastsim_par_xe
-dunevd_pdfastsim_par_xe_external.VUVHits:      @local::dunevd_vuv_Xenon_hits_parameterization_external
-dunevd_pdfastsim_par_xe_external.VISHits:      @local::dunevd_vuv_Xenon_anode_hits_parameteriszation_external
-dunevd_pdfastsim_par_xe_external.SimulationLabel: IonAndScintExternal
-dunevd_pdfastsim_par_xe_external.OnlyActiveVolume: false
+# dunevd_pdfastsim_par_xe_external: 		 @local::dunevd_pdfastsim_par_xe
+# dunevd_pdfastsim_par_xe_external.VUVHits:      @local::dunevd_vuv_Xenon_hits_parameterization_external
+# dunevd_pdfastsim_par_xe_external.VISHits:      @local::dunevd_vuv_Xenon_anode_hits_parameteriszation_external
+# dunevd_pdfastsim_par_xe_external.SimulationLabel: IonAndScintExternal
+# dunevd_pdfastsim_par_xe_external.OnlyActiveVolume: false
 
 
 
