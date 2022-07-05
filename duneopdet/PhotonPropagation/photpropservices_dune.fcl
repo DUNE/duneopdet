@@ -244,6 +244,65 @@ dune10kt_1x2x6_refl_photonvisibilityservice_buildlib.LibraryBuildJob:  true
 dune10kt_1x2x6_refl_photonvisibilityservice_buildlib.LibraryFile:      "PhotonPropagation/LibraryData/Not_A_Library.root"
 
 
+######################
+# DUNE VD #
+######################
+
+dune10kt_vd_1x8x14_photonvisibilityservice_ar:
+{
+
+  # hybrid library
+  NX: 85
+  NY: 174
+  NZ: 220
+  UseCryoBoundary: false
+
+  DoNotLoadLibrary: false
+
+  LibraryBuildJob: false
+
+  LibraryFile: "PhotonPropagation/LibraryData/lib_dune10kt_v1_1x2x6_20170412.root"
+  
+  XMin: -425
+  XMax: 425
+  YMin: -781.26
+  YMax: 781.26
+  ZMin: -104.0305
+  ZMax: 2195.6405
+
+  # timings
+  IncludePropTime: true
+  VUVTiming: @local::dunevd_vuv_timing_parameterization
+}
+
+dune10kt_vd_1x8x14_photonvisibilityservice_xe:
+{
+
+  # hybrid library
+  NX: 85
+  NY: 174
+  NZ: 220
+  UseCryoBoundary: false
+
+  DoNotLoadLibrary: false
+
+  LibraryBuildJob: false
+
+  LibraryFile: "PhotonPropagation/LibraryData/lib_dune10kt_v1_1x2x6_20170412.root"
+  
+  XMin: -425
+  XMax: 425
+  YMin: -781.26
+  YMax: 781.26
+  ZMin: -104.0305
+  ZMax: 2195.6405
+
+  # timings
+  IncludePropTime:       true          
+  GeoPropTimeOnly:       true       # Xe propoagation time geometric approximation
+  VUVTiming:         @local::dunevd_xe_timing_geo
+}
+
 
 
 ##########################
