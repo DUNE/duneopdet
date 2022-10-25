@@ -97,7 +97,7 @@ protodune_hd_pdfastsim_par.SimulationLabel:       "IonAndScint:priorSCE"
 # External region (hybrid model)
 protodune_hd_pdfastsim_pvs_external:                          @local::standard_pdfastsim_pvs
 protodune_hd_pdfastsim_pvs_external.OnlyActiveVolume: 		  false
-protodune_hd_pdfastsim_pvs_external.SimulationLabel:          "IonAndScintExternal"
+protodune_hd_pdfastsim_pvs_external.SimulationLabel:          IonAndScintExternal
 protodune_hd_pdfastsim_pvs_external.VUVTiming:	  			  @local::dune_vuv_timing_parameterization
 
 END_PROLOG
