@@ -365,7 +365,8 @@ namespace opdet {
                           double&                  sumz, 
                           double&                  sumz2) {
 
-    auto const xyz = geom.OpDetGeoFromOpChannel(currentHit.OpChannel()).GetCenter();
+    double xyz[3];
+    geom.OpDetGeoFromOpChannel(currentHit.OpChannel()).GetCenter(xyz);
     double PEThisHit = currentHit.PE();
     
     geo::TPCID tpc = geom.FindTPCAtPosition(xyz);
@@ -374,15 +375,15 @@ namespace opdet {
     if (tpc.isValid) {
       for (size_t p = 0; p != geom.Nplanes(); ++p) {
         geo::PlaneID const planeID(tpc, p);
-        unsigned int w = geom.NearestWireID(xyz, planeID).Wire;
+        unsigned int w = geom.NearestWire(xyz, planeID);
         sumw.at(p)  += PEThisHit*w;
         sumw2.at(p) += PEThisHit*w*w;
       }
     } // if we found the TPC
-    sumy  += PEThisHit*xyz.Y();
-    sumy2 += PEThisHit*xyz.Y()*xyz.Y();
-    sumz  += PEThisHit*xyz.Z();
-    sumz2 += PEThisHit*xyz.Z()*xyz.Z();
+    sumy  += PEThisHit*xyz[1]; 
+    sumy2 += PEThisHit*xyz[1]*xyz[1];
+    sumz  += PEThisHit*xyz[2]; 
+    sumz2 += PEThisHit*xyz[2]*xyz[2];
     
   }
 
