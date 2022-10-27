@@ -156,13 +156,14 @@ namespace phot{
 
     if(fUseCryoBoundary)
       {
-        auto const bounds = geom->Cryostat(0).Boundaries();
-        fXmin = bounds.MinX();
-        fXmax = bounds.MaxX();
-        fYmin = bounds.MinY();
-        fYmax = bounds.MaxY();
-        fZmin = bounds.MinZ();
-        fZmax = bounds.MaxZ();
+	double CryoBounds[6];
+	geom->CryostatBoundaries(CryoBounds);
+	fXmin = CryoBounds[0];
+	fXmax = CryoBounds[1];
+	fYmin = CryoBounds[2];
+	fYmax = CryoBounds[3];
+	fZmin = CryoBounds[4];
+	fZmax = CryoBounds[5];
       }
     else
       {
