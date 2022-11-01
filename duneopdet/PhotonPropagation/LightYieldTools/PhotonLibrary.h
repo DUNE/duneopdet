@@ -26,6 +26,7 @@ Double_t arapucaEfficiency = 0.03;
 const int maxVxDim = 200;           // Reserves memory. Should be greater than 
                                     // the number of voxels in each direction.
 
+// Import a photon library file and put it in a 3D array of light yields.
 class PhotonLibrary {
   public:
     Int_t cryostatBoundsInVx[3][2]; // Include min, but exclude max

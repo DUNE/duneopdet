@@ -1,6 +1,7 @@
 // Tyler LaBree
 // Northern Illinois University
 
+// From a photon library, average voxel slices to get light yield map.
 class LightYieldMap {
   public:
     PhotonLibrary* lib;       // The photon library used to make the map.
