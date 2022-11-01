@@ -10,7 +10,7 @@ void DrawDepthPlot(PhotonLibrary* lib, Int_t minDepth, Int_t maxDepth) {
   Double_t averageLYs[dist];
   Double_t minimumLYs[dist];
   for (int i=0; i<dist; i++) {
-    depths[i] = lib->GetPos(2,Double_t(i+minDepth)+0.5);
+    depths[i] = lib->GetPosInM(2,Double_t(i+minDepth)+0.5);
   }
   for (int i=0; i<dist; i++) {
     Int_t slice[2] = {i+minDepth,i+minDepth+1};
