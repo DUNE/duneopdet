@@ -1,19 +1,22 @@
+// Tyler LaBree
+// Northern Illinois University
+
 class LightYieldMap {
   public:
-    PhotonLibrary* lib;
-    Int_t normDir; // Direction normal to the light yield plot
-    Int_t normBoundsInVx[2];
-    Int_t mapDirs[2];
-    Double_t map[maxVxDim][maxVxDim];
-    Double_t average;
-    Double_t minimum;
+    PhotonLibrary* lib;       // The photon library used to make the map.
+    Int_t normDir;            // Direction normal to the light yield map.
+    Int_t normBoundsInVx[2];  // Bounds on which to average the normal direction
+    Int_t mapDirs[2];         // The two dirs of the light yield map (0, 1, or 2)
+    Double_t map[maxVxDim][maxVxDim]; // Contains light yield map to plot.
+    Double_t average;         // Average light yield for the map.
+    Double_t minimum;         // Minimum light yield for the map.
     TString title;
     TString subtitle;
 
     LightYieldMap(PhotonLibrary* myLib, Int_t myNormDir, Int_t myNormBoundsInVx[2], TString descriptor) {
       lib = myLib;
 
-      // Error handling
+      // Error handling. Are arguments in an acceptable range?
       if (!(0<= myNormDir && myNormDir<=2)) {
         cout << "ERROR: Normal direction not valid." << endl;
       } 
@@ -35,17 +38,22 @@ class LightYieldMap {
       SetAvg();
       SetMin();
       title = Form("Light Yield (%s%c = %.2f - %.2f m);%c [m];%c [m]; Light Yield [PE/MeV]"
-          , descriptor.Data(), dirNames[normDir], lib->GetPos(normDir,Double_t(normBoundsInVx[0]))
-          , lib->GetPos(normDir,Double_t(normBoundsInVx[1])), dirNames[mapDirs[1]], dirNames[mapDirs[0]]);
+          , descriptor.Data(), dirNames[normDir], lib->GetPosInM(normDir,Double_t(normBoundsInVx[0]))
+          , lib->GetPosInM(normDir,Double_t(normBoundsInVx[1])), dirNames[mapDirs[1]], dirNames[mapDirs[0]]);
       subtitle = Form("LY_min = %.2f   <LY> = %.2f", minimum, average);
       return 0;
     }
+
+    // Find and set the two directions of the light yield map.
     void SetMapDirs() {
       int i=0;
       for (int j=0; j<3; j++)
         if (j!=normDir)
           mapDirs[i++] = j;
     }
+
+    // Find and set the light yield map, averaging over bounds in the direction
+    // normal to the map.
     void SetMap() {
       Int_t indices[3] = {0,0,0};
       for (indices[mapDirs[0]]=lib->detectorBoundsInVx[mapDirs[0]][0]; indices[mapDirs[0]]<lib->detectorBoundsInVx[mapDirs[0]][1]; indices[mapDirs[0]]++) {
@@ -58,6 +66,8 @@ class LightYieldMap {
         }
       }
     }
+
+    // Find and set the average value of the light yield map.
     void SetAvg() {
       Double_t numerator = 0;
       Double_t denominator =
@@ -70,6 +80,8 @@ class LightYieldMap {
       }
       average = numerator/denominator;
     }
+
+    // Find and set the minimum value of the light yield map.
     void SetMin() {
       Double_t minVal = 1.79769e+308;
       Int_t minPos[2] = {-1,-1};
@@ -84,18 +96,20 @@ class LightYieldMap {
       }
       minimum = minVal;
     }
+
+    // Draw the light yield map.
     void Draw() {
       TH2D *mapHist = new TH2D("mapHist",title.Data(),
           (lib->detectorBoundsInVx[mapDirs[1]][1] - lib->detectorBoundsInVx[mapDirs[1]][0]),
-          lib->GetPos(mapDirs[1], lib->detectorBoundsInVx[mapDirs[1]][0]),
-          lib->GetPos(mapDirs[1], lib->detectorBoundsInVx[mapDirs[1]][1]),
+          lib->GetPosInM(mapDirs[1], lib->detectorBoundsInVx[mapDirs[1]][0]),
+          lib->GetPosInM(mapDirs[1], lib->detectorBoundsInVx[mapDirs[1]][1]),
           (lib->detectorBoundsInVx[mapDirs[0]][1] - lib->detectorBoundsInVx[mapDirs[0]][0]),
-          lib->GetPos(mapDirs[0], lib->detectorBoundsInVx[mapDirs[0]][0]),
-          lib->GetPos(mapDirs[0], lib->detectorBoundsInVx[mapDirs[0]][1]));
+          lib->GetPosInM(mapDirs[0], lib->detectorBoundsInVx[mapDirs[0]][0]),
+          lib->GetPosInM(mapDirs[0], lib->detectorBoundsInVx[mapDirs[0]][1]));
       for (int i=lib->detectorBoundsInVx[mapDirs[0]][0]; i<lib->detectorBoundsInVx[mapDirs[0]][1]; i++) {
-        Double_t x = lib->GetPos(mapDirs[0],Double_t(i)+0.5);
+        Double_t x = lib->GetPosInM(mapDirs[0],Double_t(i)+0.5);
         for (int j=lib->detectorBoundsInVx[mapDirs[1]][0]; j<lib->detectorBoundsInVx[mapDirs[1]][1]; j++) {
-          Double_t y = lib->GetPos(mapDirs[1],Double_t(j)+0.5);
+          Double_t y = lib->GetPosInM(mapDirs[1],Double_t(j)+0.5);
           Int_t bin = mapHist->Fill(y,x,map[i][j]);
         }
       }

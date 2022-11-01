@@ -1,13 +1,19 @@
-void DrawDepthPlot(PhotonLibrary* lib, Int_t min, Int_t max) {
-  Int_t dist = max-min;
+// Tyler LaBree
+// Northern Illinois University
+
+void DrawDepthPlot(PhotonLibrary* lib, Int_t minDepth, Int_t maxDepth) {
+/* Draw average and minimum light yield vs detector depth on a given photon
+ * library and on the range defined.
+ */
+  Int_t dist = maxDepth-minDepth;
   Double_t depths[dist];
   Double_t averageLYs[dist];
   Double_t minimumLYs[dist];
   for (int i=0; i<dist; i++) {
-    depths[i] = lib->GetPos(2,Double_t(i+min)+0.5);
+    depths[i] = lib->GetPos(2,Double_t(i+minDepth)+0.5);
   }
   for (int i=0; i<dist; i++) {
-    Int_t slice[2] = {i+min,i+min+1};
+    Int_t slice[2] = {i+minDepth,i+minDepth+1};
     LightYieldMap* depthLYMap = new LightYieldMap(lib, 2, slice, "");
     averageLYs[i] = depthLYMap->average;
     minimumLYs[i] = depthLYMap->minimum;

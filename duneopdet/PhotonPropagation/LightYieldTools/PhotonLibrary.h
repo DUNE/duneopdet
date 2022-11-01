@@ -1,3 +1,10 @@
+// Tyler LaBree
+// Northern Illinois University
+
+// Note:
+// "vx" means voxel or voxels, which is short for volume elements.
+// The x, y, and z directions are 0, 1, and 2, respectively.
+
 #include "TH2D.h"
 #include "TH1.h"
 // Detector dimensions
@@ -14,15 +21,16 @@ Double_t detectorBoundsInM[3][2] = {
 
 // Extra constants
 Char_t dirNames[3] = {'x', 'y', 'z'};
-Double_t nPhotPerEDep = 25000.; // photons per MeV
+Double_t nPhotPerEDep = 25000.;     // photons per MeV
 Double_t arapucaEfficiency = 0.03;
-const int maxVxDim = 200; // This reserves memory for the voxel data
+const int maxVxDim = 200;           // Reserves memory. Should be greater than 
+                                    // the number of voxels in each direction.
 
 class PhotonLibrary {
   public:
     Int_t cryostatBoundsInVx[3][2]; // Include min, but exclude max
     Int_t detectorBoundsInVx[3][2]; // Include min, but exclude max
-    Double_t LYPerVx[maxVxDim][maxVxDim][maxVxDim];
+    Double_t LYPerVx[maxVxDim][maxVxDim][maxVxDim]; // Light Yield per voxel. Only valid on detector bounds.
 
     PhotonLibrary(TString myFilename, Int_t myVxDims[3]) {
       SetCryostatVol(myVxDims);
@@ -38,8 +46,8 @@ class PhotonLibrary {
     }
     void SetDetectorVol() {
       for (int i=0; i<3; i++) {
-        detectorBoundsInVx[i][0] = Int_t(GetVox(i, detectorBoundsInM[i][0])+1);
-        detectorBoundsInVx[i][1] = Int_t(GetVox(i, detectorBoundsInM[i][1]));
+        detectorBoundsInVx[i][0] = Int_t(GetPosInVx(i, detectorBoundsInM[i][0])+1);
+        detectorBoundsInVx[i][1] = Int_t(GetPosInVx(i, detectorBoundsInM[i][1]));
       }
     }
     void SetLYPerVx(TString filename) {
@@ -76,15 +84,21 @@ class PhotonLibrary {
         }
       }
     }
-    Double_t GetVox(Int_t dir, Double_t pos) {
-      return (pos - cryostatBoundsInM[dir][0])
-        * Double_t(cryostatBoundsInVx[dir][1] - cryostatBoundsInVx[dir][0])
-        / (cryostatBoundsInM[dir][1] - cryostatBoundsInM[dir][0]);
-    }
-    Double_t GetPos(Int_t dir, Double_t vox) {
-      return vox * (cryostatBoundsInM[dir][1] - cryostatBoundsInM[dir][0])
+
+    /* Converts position in voxels to position in meters along a direction.
+     * An integer voxel number will produce the leading edge position of 
+     * each voxel.
+     */
+    Double_t GetPosInM(Int_t dir, Double_t posInVx) {
+      return posInVx * (cryostatBoundsInM[dir][1] - cryostatBoundsInM[dir][0])
         / Double_t(cryostatBoundsInVx[dir][1] - cryostatBoundsInVx[dir][0]) 
         + cryostatBoundsInM[dir][0];
+    }
+    // Converts position in meters to position in voxels.
+    Double_t GetPosInVx(Int_t dir, Double_t posInM) {
+      return (posInM - cryostatBoundsInM[dir][0])
+        * Double_t(cryostatBoundsInVx[dir][1] - cryostatBoundsInVx[dir][0])
+        / (cryostatBoundsInM[dir][1] - cryostatBoundsInM[dir][0]);
     }
     Double_t GetLightYield(Double_t vis) {
       return vis * arapucaEfficiency * nPhotPerEDep; // PE/MeV
