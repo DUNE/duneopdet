@@ -74,7 +74,7 @@ dunevd_pdfastsim_par_xe.IncludePropTime:       true
 dunevd_pdfastsim_par_xe.GeoPropTimeOnly:       true			  # Xe propoagation time geometric approximation
 dunevd_pdfastsim_par_xe.VUVTiming:			   @local::dunevd_xe_timing_geo
 dunevd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
-dunevd_pdfastsim_par_xe.OnlyActiveVolume: 	 true
+dunevd_pdfastsim_par_xe.OnlyActiveVolume: 	   true
 
 # External region for laterals (Hybrid model)
 dunevd_pdfastsim_pvs_external: @local::standard_pdfastsim_pvs
@@ -84,12 +84,20 @@ dunevd_pdfastsim_pvs_external.ScintTimeTool:  @local::ScintTimeXeDoping10ppm
 dunevd_pdfastsim_pvs_external.VUVTiming:	  @local::dunevd_xe_timing_geo
 
 
-#############
-# ProtoDUNE #
-#############
+################
+# ProtoDUNE-HD #
+################
+# Hits & Timing parameterization for ProtoDUNE-HD
+protodune_hd_pdfastsim_par:                       @local::standard_pdfastsim_par_ar
+protodune_hd_pdfastsim_par.VUVTiming:             @local::dune_vuv_timing_parameterization
+protodune_hd_pdfastsim_par.VUVHits:               @local::protodune_hd_vuv_hits_parameterization
+protodune_hd_pdfastsim_par.OnlyActiveVolume: 	  true
+protodune_hd_pdfastsim_par.SimulationLabel:       "IonAndScint:priorSCE"
 
-protodune_pdfastsim_pvs:                       @local::standard_pdfastsim_pvs
-protodune_pdfastsim_pvs.SimulationLabel:       "IonAndScint:priorSCE"
-
+# External region (hybrid model)
+protodune_hd_pdfastsim_pvs_external:                          @local::standard_pdfastsim_pvs
+protodune_hd_pdfastsim_pvs_external.OnlyActiveVolume: 		  false
+protodune_hd_pdfastsim_pvs_external.SimulationLabel:          IonAndScintExternal
+protodune_hd_pdfastsim_pvs_external.VUVTiming:	  			  @local::dune_vuv_timing_parameterization
 
 END_PROLOG
