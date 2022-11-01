@@ -83,7 +83,14 @@ dunevd_pdfastsim_pvs_external.SimulationLabel: IonAndScintExternal
 dunevd_pdfastsim_pvs_external.ScintTimeTool:  @local::ScintTimeXeDoping10ppm
 dunevd_pdfastsim_pvs_external.VUVTiming:	  @local::dunevd_xe_timing_geo
 
+#############
+# ProtoDUNE #
+#############
 
+protodune_pdfastsim_pvs:                       @local::standard_pdfastsim_pvs
+protodune_pdfastsim_pvs.SimulationLabel:       "IonAndScint:priorSCE"
+
+ 
 ################
 # ProtoDUNE-HD #
 ################
