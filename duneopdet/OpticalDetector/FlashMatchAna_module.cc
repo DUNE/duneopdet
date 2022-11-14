@@ -500,8 +500,7 @@ namespace opdet {
 
       // Get the PlaneID which describes the location of the true vertex
       int plane = 0;
-      double loc[] = {part.Vx(), part.Vy(), part.Vz()};
-      geo::TPCID tpc = geom->FindTPCAtPosition(loc);
+      geo::TPCID tpc = geom->FindTPCAtPosition(geo::Point_t{part.Vx(), part.Vy(), part.Vz()});
       if (! geom->HasTPC(tpc) ) {
         mf::LogInfo("FlashMatchAna") << "No valid TPC for " << tpc;
         return;

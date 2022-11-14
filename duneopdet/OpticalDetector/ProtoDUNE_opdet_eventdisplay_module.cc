@@ -273,16 +273,15 @@ namespace opdet {
 				      binnumy, binsy);
     
 
-      double xyz[3];
       auto OpHitHandle = evt.getHandle< std::vector< recob::OpHit > >(fOpHitModuleLabel);
       
       for(size_t i=0; i!=OpHitHandle->size(); ++i)
 	{
 	  fOpChannel   = OpHitHandle->at(i).OpChannel();
-	  geom->OpDetGeoFromOpChannel(fOpChannel).GetCenter(xyz);
-	  fXOpCenter   = xyz[0];
-	  fYOpCenter   = xyz[1];
-	      fZOpCenter   = xyz[2];
+          auto const xyz = geom->OpDetGeoFromOpChannel(fOpChannel).GetCenter();
+          fXOpCenter   = xyz.X();
+          fYOpCenter   = xyz.Y();
+          fZOpCenter   = xyz.Z();
 	      fPeakTimeAbs = OpHitHandle->at(i).PeakTimeAbs();
 	      fPeakTime    = OpHitHandle->at(i).PeakTime();
 	      fPE          = OpHitHandle->at(i).PE();
