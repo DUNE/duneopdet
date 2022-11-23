@@ -58,7 +58,7 @@ dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar_r
 dunevd_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
 dunevd_pdfastsim_par_ar.VUVTiming:             @local::dunevd_vuv_timing_parameterization
 dunevd_pdfastsim_par_ar.VUVHits:               @local::dunevd_vuv_Argon_hits_parameterization
-dunevd_pdfastsim_par_ar.OnlyActiveVolume: 	 true
+dunevd_pdfastsim_par_ar.OnlyActiveVolume: 	   true
 
 # As above, but fast-only scintillation for high Xe concentration
 dunevd_pdfastsim_par_ar_fastonly:              @local::dunevd_pdfastsim_par_ar
@@ -77,11 +77,15 @@ dunevd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
 dunevd_pdfastsim_par_xe.OnlyActiveVolume: 	   true
 
 # External region for laterals (Hybrid model)
-dunevd_pdfastsim_pvs_external: @local::standard_pdfastsim_pvs
+dunevd_pdfastsim_pvs_external: 					@local::standard_pdfastsim_pvs
 dunevd_pdfastsim_pvs_external.OnlyActiveVolume: false
-dunevd_pdfastsim_pvs_external.SimulationLabel: IonAndScintExternal
-dunevd_pdfastsim_pvs_external.ScintTimeTool:  @local::ScintTimeXeDoping10ppm
-dunevd_pdfastsim_pvs_external.VUVTiming:	  @local::dunevd_xe_timing_geo
+# dunevd_pdfastsim_pvs_external.DoFastComponent:  false # Only slow Xe light
+dunevd_pdfastsim_pvs_external.SimulationLabel:  IonAndScintExternal
+dunevd_pdfastsim_pvs_external.IncludePropTime:  true          
+# dunevd_pdfastsim_pvs_external.GeoPropTimeOnly:  true  # Xe propoagation time geometric approximation
+dunevd_pdfastsim_pvs_external.VUVTiming:	    @local::dunevd_vuv_timing_parameterization 
+# need to modify larsim/PhotonPropagation/PropagationTimeModel.cxx to allow use xenon doping timing @local::dunevd_xe_timing_geo
+# dunevd_pdfastsim_pvs_external.ScintTimeTool:    @local::ScintTimeXeDoping10ppm
 
 #############
 # ProtoDUNE #
@@ -105,6 +109,9 @@ protodune_hd_pdfastsim_par.SimulationLabel:       "IonAndScint:priorSCE"
 protodune_hd_pdfastsim_pvs_external:                          @local::standard_pdfastsim_pvs
 protodune_hd_pdfastsim_pvs_external.OnlyActiveVolume: 		  false
 protodune_hd_pdfastsim_pvs_external.SimulationLabel:          IonAndScintExternal
+protodune_hd_pdfastsim_pvs_external.IncludePropTime:  		  true          
 protodune_hd_pdfastsim_pvs_external.VUVTiming:	  			  @local::dune_vuv_timing_parameterization
+
+
 
 END_PROLOG
