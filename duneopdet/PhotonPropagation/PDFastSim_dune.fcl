@@ -82,7 +82,7 @@ dunevd_pdfastsim_pvs_external.OnlyActiveVolume:   false
 dunevd_pdfastsim_pvs_external.SimulationLabel:    IonAndScintExternal
 dunevd_pdfastsim_pvs_external.IncludePropTime:    true          
 dunevd_pdfastsim_pvs_external.DoFastComponent:    true
-dunevd_pdfastsim_pvs_external.DoSlowComponent:    false
+dunevd_pdfastsim_pvs_external.DoSlowComponent:    true
 dunevd_pdfastsim_pvs_external.DoReflectedLight:   false
 dunevd_pdfastsim_pvs_external.GeoPropTimeOnly:    false  
 dunevd_pdfastsim_pvs_external.VUVTiming:	      @local::dunevd_vuv_timing_parameterization # use argon propogation time model. 
