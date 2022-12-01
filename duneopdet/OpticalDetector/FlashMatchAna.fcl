@@ -2,6 +2,8 @@
 
 BEGIN_PROLOG
 
+### FD1-HD ###
+
 standard_flashmatchana:
 {
    module_type:          "FlashMatchAna"
@@ -9,6 +11,9 @@ standard_flashmatchana:
    OpHitModuleLabel:     "ophit"  
    SignalLabel:          "generator"
    GeantLabel:           "largeant"
+   kgenerator:           1   #For Edep from signal. Use: beam 1; CosmicRay 2; SuperNovaNeutrino 3; SingleParticle 4
+   IsNDK:                false   #NDK generator/Origin is unknown (0) so this is a trick to separate signal and bkg
+   IsVD:                 false   #If a VD sample, we may want flashes recorded between FC and cryostat lateral
    DistanceCut:          240 # cm
    NBinsE:               50
    LowE:                 0
@@ -16,10 +21,30 @@ standard_flashmatchana:
    NBinsX:               50
    LowX:                -360
    HighX:                360
+   PE:                   18.
+   Baseline:             1500.
 }
 
 
 marley_flashmatchana: @local::standard_flashmatchana
 marley_flashmatchana.SignalLabel: "marley"
+marley_flashmatchana.kgenerator: 3
+
+### FD2-VD ###
+
+standard_vdflashmatchana: @local::standard_flashmatchana
+standard_vdflashmatchana.OpFlashModuleLabel:   "opflash10ppm"  
+standard_vdflashmatchana.OpHitModuleLabel:     "ophit10ppm"
+standard_vdflashmatchana.OpDetWaveformLabel: "opdigi10ppm"
+standard_vdflashmatchana.IsVD: true
+standard_vdflashmatchana.DistanceCut: 360.0
+standard_vdflashmatchana.Baseline: 500.0
+
+marley_vdflashmatchana: @local::standard_vdflashmatchana
+marley_vdflashmatchana.SignalLabel: "marley"
+marley_vdflashmatchana.kgenerator: 3
+
+ndk_vdflashmatchana: @local::standard_vdflashmatchana
+ndk_vdflashmatchana.IsNDK: true
 
 END_PROLOG
