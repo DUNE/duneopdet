@@ -58,10 +58,10 @@ dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar_r
 dunevd_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
 dunevd_pdfastsim_par_ar.VUVTiming:             @local::dunevd_vuv_timing_parameterization
 dunevd_pdfastsim_par_ar.VUVHits:               @local::dunevd_vuv_Argon_hits_parameterization
-dunevd_pdfastsim_par_ar.OnlyActiveVolume: 	 true
+dunevd_pdfastsim_par_ar.OnlyActiveVolume:      true
 
 # As above, but fast-only scintillation for high Xe concentration
-dunevd_pdfastsim_par_ar_fastonly:              @local::dunevd_pdfastsim_par_ar
+dunevd_pdfastsim_par_ar_fastonly:                 @local::dunevd_pdfastsim_par_ar
 dunevd_pdfastsim_par_ar_fastonly.DoSlowComponent: false
 
 # Hits parameterization for DUNE VD, Xe scintillation, 10ppm
@@ -72,16 +72,21 @@ dunevd_pdfastsim_par_xe.VISHits:               @local::dunevd_vuv_Xenon_anode_hi
 dunevd_pdfastsim_par_xe.IncludeAnodeReflections: true		  # include Xenon light reflections from anode
 dunevd_pdfastsim_par_xe.IncludePropTime:       true          
 dunevd_pdfastsim_par_xe.GeoPropTimeOnly:       true			  # Xe propoagation time geometric approximation
-dunevd_pdfastsim_par_xe.VUVTiming:			   @local::dunevd_xe_timing_geo
+dunevd_pdfastsim_par_xe.VUVTiming:             @local::dunevd_xe_timing_geo
 dunevd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
 dunevd_pdfastsim_par_xe.OnlyActiveVolume: 	   true
 
 # External region for laterals (Hybrid model)
-dunevd_pdfastsim_pvs_external: @local::standard_pdfastsim_pvs
-dunevd_pdfastsim_pvs_external.OnlyActiveVolume: false
-dunevd_pdfastsim_pvs_external.SimulationLabel: IonAndScintExternal
-dunevd_pdfastsim_pvs_external.ScintTimeTool:  @local::ScintTimeXeDoping10ppm
-dunevd_pdfastsim_pvs_external.VUVTiming:	  @local::dunevd_xe_timing_geo
+dunevd_pdfastsim_pvs_external: 					  @local::standard_pdfastsim_pvs
+dunevd_pdfastsim_pvs_external.OnlyActiveVolume:   false
+dunevd_pdfastsim_pvs_external.SimulationLabel:    IonAndScintExternal
+dunevd_pdfastsim_pvs_external.IncludePropTime:    true          
+dunevd_pdfastsim_pvs_external.DoFastComponent:    true
+dunevd_pdfastsim_pvs_external.DoSlowComponent:    true
+dunevd_pdfastsim_pvs_external.DoReflectedLight:   false
+dunevd_pdfastsim_pvs_external.GeoPropTimeOnly:    false  
+dunevd_pdfastsim_pvs_external.VUVTiming:	      @local::dunevd_vuv_timing_parameterization # use argon propogation time model. 
+# need to modify larsim/PhotonPropagation/PDFastSimPVS_module.cc to allow use xenon doping timing @local::dunevd_xe_timing_geo
 
 #############
 # ProtoDUNE #
@@ -89,7 +94,6 @@ dunevd_pdfastsim_pvs_external.VUVTiming:	  @local::dunevd_xe_timing_geo
 
 protodune_pdfastsim_pvs:                       @local::standard_pdfastsim_pvs
 protodune_pdfastsim_pvs.SimulationLabel:       "IonAndScint:priorSCE"
-
  
 ################
 # ProtoDUNE-HD #
@@ -103,8 +107,13 @@ protodune_hd_pdfastsim_par.SimulationLabel:       "IonAndScint:priorSCE"
 
 # External region (hybrid model)
 protodune_hd_pdfastsim_pvs_external:                          @local::standard_pdfastsim_pvs
-protodune_hd_pdfastsim_pvs_external.OnlyActiveVolume: 		  false
+protodune_hd_pdfastsim_pvs_external.OnlyActiveVolume: 	      false
 protodune_hd_pdfastsim_pvs_external.SimulationLabel:          IonAndScintExternal
-protodune_hd_pdfastsim_pvs_external.VUVTiming:	  			  @local::dune_vuv_timing_parameterization
+protodune_hd_pdfastsim_pvs_external.IncludePropTime:  	      true   
+protodune_hd_pdfastsim_pvs_external.DoFastComponent:    	  true
+protodune_hd_pdfastsim_pvs_external.DoSlowComponent:    	  false
+protodune_hd_pdfastsim_pvs_external.DoReflectedLight:   	  false         
+protodune_hd_pdfastsim_pvs_external.VUVTiming:	  	          @local::dune_vuv_timing_parameterization
+
 
 END_PROLOG

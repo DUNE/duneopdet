@@ -253,7 +253,7 @@ dune10kt_vd_photonvisibilityservice_ArXe: # Generated using 1x8x14 geometry.
   UseCryoBoundary: false
   DoNotLoadLibrary: false
   LibraryBuildJob: false
-  IncludePropTime: true
+  # IncludePropTime: true
 
   LibraryFile: "PhotonPropagation/LibraryData/Photon_library_dunevd10kt_3view_v2_refactored_1x8x14ref_ReflAnode_non_active_merged.root"    
   # This is the merged library between argon and xenon, for the hybrid model. 
@@ -427,7 +427,7 @@ protodune_hd_photonvisibilityservice: # Generated using protoDUNEhd_v2_refactore
   UseCryoBoundary: false
   DoNotLoadLibrary: false
   LibraryBuildJob: false
-  IncludePropTime: true
+  #IncludePropTime: true
 
   LibraryFile: "PhotonPropagation/LibraryData/Photon_library_protoDUNEhd_library_protoDUNEhd_v2_refactored_nonActive.root"    
 
