@@ -253,10 +253,10 @@ dune10kt_vd_photonvisibilityservice_ArXe: # Generated using 1x8x14 geometry.
   UseCryoBoundary: false
   DoNotLoadLibrary: false
   LibraryBuildJob: false
+  # IncludePropTime: true
 
   LibraryFile: "PhotonPropagation/LibraryData/Photon_library_dunevd10kt_3view_v2_refactored_1x8x14ref_ReflAnode_non_active_merged.root"    
   # This is the merged library between argon and xenon, for the hybrid model. 
-
 
   XMin: -425
   XMax: 425
@@ -332,11 +332,7 @@ protodunev7l90cm_photonvisibilityservice: @local::protodunev7_photonvisibilityse
 protodunev7l90cm_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/lib_Protodunev7_90cm.root"
 
 # Make the v7 visibility service the default
-
 protodune_photonvisibilityservice: @local::protodunev7_photonvisibilityservice
-
-
-
 
 
 ########################
@@ -418,6 +414,30 @@ protodunedp_driftY_AV_photonvisibilityservice:
 protodunedp_driftY_AV_RL61CM_photonvisibilityservice: @local::protodunedp_driftY_AV_photonvisibilityservice
 protodunedp_driftY_AV_RL61CM_photonvisibilityservice.LibraryFile: "PhotonPropagation/LibraryData/libext_protodunedphase_driftY_AV_RL61CM_v08_41_01_1e8_30x30x30_20200416.root"
 
+################
+# ProtoDUNE-HD #
+################
+protodune_hd_photonvisibilityservice: # Generated using protoDUNEhd_v2_refactored geometry. 
+{
+  # hybrid library
+  NX: 122
+  NY: 67
+  NZ: 93
+
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  #IncludePropTime: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/Photon_library_protoDUNEhd_library_protoDUNEhd_v2_refactored_nonActive.root"    
+
+  XMin: -393.392
+  XMax: 464.512
+  YMin: -75.664356
+  YMax: 728.635536
+  ZMin: -194.5944
+  ZMax: 667.1808
+}
 
 
 ####################
@@ -555,5 +575,7 @@ protodunedp_photonvisibilityserviceS2:
   ParametrisedTimePropagation: true
   ParametrisedTimePropagationNParameters: 3
 }
+
+
 
 END_PROLOG
