@@ -1,19 +1,9 @@
-#
-# File:    photonlibrary_builder_icarus.fcl
-# Purpose: main configuration file for simulation of scintillation visibility
-# Author:  Gianluca Petrillo (petrillo@slac.stanford.edu)
-# Date:    July 16, 2020
-# Version: 1.0
+# New fhicl file for library generation. It was based on the
+# photonlibrary_builder_icarus.fcl by Gianluca Petrillo
 #
 # This configuration is base for the simulation of a few voxels of the
-# photon visibility lookup table ("photon library") for ICARUS.
+# photon visibility lookup table ("photon library") for ProtoDUNE-HD.
 # 
-# 
-# This is the merge and optimization of `icarus_prodsingle_buildopticallibrary.fcl`
-# from `icaruscode` `v08_57_00` plus `prova_source.fcl`.
-#
-#
-
 
 #include "services_dune.fcl"
 #include "backtrackerservice.fcl"
@@ -27,7 +17,6 @@
 #include "photpropservices_dune.fcl"
 #include "lightsource.fcl"
 #include "LArG4_dune.fcl"
-#include "services_refactored_pdune.fcl"
 
 # services
 #include "services_refactored_pdune.fcl"
