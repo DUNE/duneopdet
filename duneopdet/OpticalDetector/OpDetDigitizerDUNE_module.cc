@@ -5,11 +5,12 @@
 // from photon detectors taking SimPhotonsLite as input.
 //
 // Gleb Sinev, Duke, 2015
+// Maritza Delgado, 2022 SPE testbench option
 // Based on OpMCDigi_module.cc
 //=========================================================
 
-#ifndef OpDetDigitizerDUNE_h
-#define OpDetDigitizerDUNE_h
+#ifndef DigitizerSPE_h
+#define DigitizerSPE_h
 
 // Framework includes
 
@@ -59,10 +60,15 @@
 #include <map>
 #include <cmath>
 #include <memory>
+#include <string>
+#include <sstream>
+#include <fstream>
 
 // ROOT includes
 
 #include "TTree.h"
+#include "TH1.h"
+#include "TFile.h"
 
 
 namespace opdet {
@@ -107,13 +113,13 @@ namespace opdet {
       int fPadding;
   };
 
-  class OpDetDigitizerDUNE : public art::EDProducer{
+  class DigitizerSPE : public art::EDProducer{
 
   public:
 
-      OpDetDigitizerDUNE(fhicl::ParameterSet const&);
+      DigitizerSPE(fhicl::ParameterSet const&);
       // Should the destructor be empty?
-      //      virtual ~OpDetDigitizerDUNE();
+      //      virtual ~DigitizerSPE();
     
       void produce(art::Event&);
 
@@ -143,9 +149,11 @@ namespace opdet {
     
       bool   fDigiTree_SSP_LED;              // To create a analysis Tree for SSP LED
       bool   fUseSDPs;                       // = pset.get< bool   >("UseSDPs", true);
+      bool   SinglePEsignal;                 // File testbench
 
       double  fQEOverride;
       double  fRefQEOverride;
+      std::string fSPEDataFile;
 
       //-----------------------------------------------------
       // Trigger analysis variables
@@ -169,8 +177,8 @@ namespace opdet {
                     FocusList& fl) const;
 
       // Functional response to one photoelectron (time in ns)
-      double Pulse1PE(double time) const;
-    
+      //void Pulse1PE(std::vector<double> & fSinglePEWave);
+    double Pulse1PE(double time) const;
       // Single photoelectron pulse parameters
       double fPulseLength;   // 1PE pulse length in us
       double fPeakTime;      // Time when the pulse reaches its maximum in us
@@ -229,7 +237,7 @@ namespace opdet {
 
 namespace opdet {
   
-  DEFINE_ART_MODULE(OpDetDigitizerDUNE)
+  DEFINE_ART_MODULE(DigitizerSPE)
 
 }
 
@@ -237,7 +245,7 @@ namespace opdet {
 
   //---------------------------------------------------------------------------
   // Constructor
-  OpDetDigitizerDUNE::OpDetDigitizerDUNE(fhicl::ParameterSet const& pset)
+  DigitizerSPE::DigitizerSPE(fhicl::ParameterSet const& pset)
     : EDProducer{pset}
     , vInputModules(pset.get< std::vector<std::string> >("InputModules"))
     , fInputModules(vInputModules.begin(), vInputModules.end())
@@ -266,7 +274,9 @@ namespace opdet {
     fBackTime           = pset.get< double >("BackTime"          );
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
     fUseSDPs            = pset.get< bool   >("UseSDPs", true     );
-    
+    fSPEDataFile        = pset.get< std::string >("SPEDataFile");
+    SinglePEsignal       = pset.get< bool   >("SinglePEsignal"     );
+
     if (!fUseSDPs) {
       throw art::Exception(art::errors::UnimplementedFeature) << "SimPhotonsLite is now deprecated in favor SDPs. If you do not have SDPs because your input file is old, use an older version of dunetpc to run this digitizer";
     }
@@ -279,14 +289,14 @@ namespace opdet {
     fRefQEOverride      = 0;
     
     if (tempQE > 0) {
-      mf::LogInfo("OpDetDigitizerDUNE") << "Overriding QE. All the functions of OpDetResponseService being ignored.";
+      mf::LogInfo("DigitizerSPE") << "Overriding QE. All the functions of OpDetResponseService being ignored.";
         
       // Correct out the prescaling applied during simulation
       auto const *LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
       fQEOverride = tempQE / LarProp->ScintPreScale();
       
       if (fQEOverride > 1.0001 ) {
-        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set as OpDetDigitizerDUNE.QEOverride, " << tempQE
+        mf::LogError("DigitizerSPE") << "Quantum efficiency set as DigitizerSPE.QEOverride, " << tempQE
                                            << " is too large.  It is larger than the prescaling applied during simulation, "
                                            << LarProp->ScintPreScale()
                                            << " (fQEOverride = "
@@ -296,14 +306,14 @@ namespace opdet {
       }
     }
     if (tempRefQE > 0) {
-      mf::LogInfo("OpDetDigitizerDUNE") << "Overriding QE. All the functions of OpDetResponseService being ignored.";
+      mf::LogInfo("DigitizerSPE") << "Overriding QE. All the functions of OpDetResponseService being ignored.";
         
       // Correct out the prescaling applied during simulation
       auto const *LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
       fRefQEOverride = tempRefQE / LarProp->ScintPreScale();
       
       if (fRefQEOverride > 1.0001 ) {
-        mf::LogError("OpDetDigitizerDUNE") << "Quantum efficiency set as OpDetDigitizerDUNE.QERefOverride, " << tempRefQE
+        mf::LogError("DigitizerSPE") << "Quantum efficiency set as DigitizerSPE.QERefOverride, " << tempRefQE
                                            << " is too large.  It is larger than the prescaling applied during simulation, "
                                            << LarProp->ScintPreScale()
                                            << " (fRefQEOverride = "
@@ -359,18 +369,22 @@ namespace opdet {
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
     
     // Creating a single photoelectron waveform
-    // Hardcoded, probably need to read them from the FHiCL file
-    //fPulseLength  = 4.0;
-    //fPeakTime     = 0.260;
-    //fMaxAmplitude = 0.12;
-    //fFrontTime    = 0.009;
-    //fBackTime     = 0.476;
-    CreateSinglePEWaveform();
-
+    
+      // Hardcoded, probably need to read them from the FHiCL file
+      //fPulseLength  = 4.0;
+      //fPeakTime     = 0.260;
+      //fMaxAmplitude = 0.12;
+      //fFrontTime    = 0.009;
+      //fBackTime     = 0.476;
+      CreateSinglePEWaveform();
+    
+   
   }
 
+  
+
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::produce(art::Event& evt)
+  void DigitizerSPE::produce(art::Event& evt)
   {
     
     if(fDigiTree_SSP_LED) art::ServiceHandle< art::TFileService > tfs;
@@ -503,7 +517,7 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::AddPulse(size_t timeBin,
+  void DigitizerSPE::AddPulse(size_t timeBin,
       int scale, std::vector< double >& waveform,
       FocusList& fl) const
   {
@@ -522,9 +536,10 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  double OpDetDigitizerDUNE::Pulse1PE(double time) const
+ double DigitizerSPE::Pulse1PE(double time) const   //(std::vector<double>& fSinglePEWaveform)
   {
-
+  
+    
     if (time < fPeakTime) return
       (fVoltageToADC*fMaxAmplitude*std::exp((time - fPeakTime)/fFrontTime));
     else return
@@ -533,20 +548,66 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::CreateSinglePEWaveform()
+  void DigitizerSPE::CreateSinglePEWaveform()
   {
 
-    size_t length =
-      static_cast< size_t > (std::round(fPulseLength*fSampleFreq));
-    fSinglePEWaveform.resize(length);
-    for (size_t tick = 0; tick != length; ++tick)
-      fSinglePEWaveform[tick] =
-        Pulse1PE(static_cast< double >(tick)/fSampleFreq);
+    art::ServiceHandle< art::TFileService > tfs;
 
+    std::ifstream SPEData;
+    SPEData.open(fSPEDataFile);
+    SPEData.is_open();
+ 
+    if (SinglePEsignal) {
+      mf::LogDebug("DigitizerSPE") << " using testbench pe response";
+      art::ServiceHandle< art::TFileService > tfs;
+      
+      //std::vector< double > SinglePEVec_x; SinglePEVec_y;  //2 column
+      std::vector< double > SinglePEVec_x;   //1 column
+      Double_t  x;                             
+       
+      while (SPEData >> x ) { SinglePEVec_x.push_back(x); } 
+      // while (SPEData >> x >> y) { SinglePEVec_x.push_back(x); SinglePEVec_y.push_back(y);}
+      fSinglePEWaveform = SinglePEVec_x;
+      std:: cout << fSinglePEWaveform.size() << std:: endl;
+       
+      // Create a new histogram
+      TH1D *waveformH = tfs->make< TH1D>("test","test",fSinglePEWaveform.size(),0, 60);  
+       
+      // Copy values from the waveform into the histogram
+      for (size_t tick = 0;tick < fSinglePEWaveform.size(); ++tick){
+            waveformH->SetBinContent(tick + 1, fSinglePEWaveform[tick]);
+         }
+      waveformH->Draw();
+      std::cout << " out "<<" using TESTbench spe "<< std ::endl;
+            
+      fPulseLength = fSinglePEWaveform.size();
+    }
+    else {
+      //shape of single pulse 
+       mf::LogDebug("DigitizerSPE") << " ideal pe response";
+       size_t length = static_cast< size_t > (std::round(fPulseLength*fSampleFreq));
+       fSinglePEWaveform.resize(length);
+      
+       // Create a new histogram
+       TH1D *waveformHist = tfs->make< TH1D >("ideal","ideal",fSinglePEWaveform.size(), fFrontTime,fBackTime);
+    
+       for (size_t tick = 0; tick != length; ++tick){
+       fSinglePEWaveform[tick] =
+       Pulse1PE(static_cast< double >(tick)/fSampleFreq);
+       waveformHist->SetBinContent(tick + 1, fSinglePEWaveform[tick]);
+      }
+      waveformHist->Draw();
+      std::cout << " out "<<" using ideal spe "<< std ::endl;
+       
+     } 
+     
+     SPEData.close(); 
+     return;
+           
   }
 
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::CreatePDWaveform
+  void DigitizerSPE::CreatePDWaveform
     (art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,
      geo::Geometry const& geometry,
      std::vector< std::vector< double > >& pdWaveforms,
@@ -617,7 +678,7 @@ namespace opdet {
             }
             // else
             // remove this as it fills up logfiles for cosmic-ray runs
-            //mf::LogInfo("OpDetDigitizerDUNE")
+            //mf::LogInfo("DigitizerSPE")
             //  << "Throwing away an out-of-time photon at " << photonTime << '\n';
           }
         }//end of this sdp.
@@ -636,7 +697,7 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::
+  void DigitizerSPE::
     AddLineNoise(std::vector< std::vector< double > >& waveforms,
         const std::vector<FocusList>& fls) const
     {
@@ -654,7 +715,7 @@ namespace opdet {
     }
 
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::
+  void DigitizerSPE::
     AddDarkNoise(std::vector< std::vector< double > >& waveforms,
         std::vector<FocusList>& fls) const
     {
@@ -678,7 +739,7 @@ namespace opdet {
     }
 
   //---------------------------------------------------------------------------
-  unsigned short OpDetDigitizerDUNE::CrossTalk() const
+  unsigned short DigitizerSPE::CrossTalk() const
   {
     // Sometimes this should produce 3 or more PEs (not implemented)
     if      (fCrossTalk <= 0.0)                 return 1;
@@ -687,7 +748,7 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  std::vector< short > OpDetDigitizerDUNE::VectorOfDoublesToVectorOfShorts
+  std::vector< short > DigitizerSPE::VectorOfDoublesToVectorOfShorts
     (std::vector< double > const& vectorOfDoubles) const
     {
       // Don't bother to round properly, it's faster this way
@@ -705,7 +766,7 @@ namespace opdet {
     }
 
   //---------------------------------------------------------------------------
-  std::map< size_t, std::vector< short > > OpDetDigitizerDUNE::
+  std::map< size_t, std::vector< short > > DigitizerSPE::
     SplitWaveform(std::vector< short > const& waveform,
         const FocusList& fls)
     {
@@ -746,7 +807,7 @@ namespace opdet {
     }
 
   //---------------------------------------------------------------------------
-  double OpDetDigitizerDUNE::GetDriftWindow(detinfo::DetectorPropertiesData const& detProp) const
+  double DigitizerSPE::GetDriftWindow(detinfo::DetectorPropertiesData const& detProp) const
   {
 
     double driftWindow;
@@ -763,7 +824,7 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  double OpDetDigitizerDUNE::TickToTime(size_t tick) const
+  double DigitizerSPE::TickToTime(size_t tick) const
   {
 
     if (tick > fPreTrigger)
@@ -776,7 +837,7 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  size_t OpDetDigitizerDUNE::TimeToTick(double time) const
+  size_t DigitizerSPE::TimeToTick(double time) const
   {
 
     return static_cast< size_t >(std::round((time - fTimeBegin)*fSampleFreq
@@ -785,7 +846,7 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  void OpDetDigitizerDUNE::CheckFHiCLParameters() const
+  void DigitizerSPE::CheckFHiCLParameters() const
   {
 
     // Are all these logic errors?
@@ -815,10 +876,10 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  bool OpDetDigitizerDUNE::Detected(int OpDet, int &readoutChannel, bool Reflected) {
+  bool DigitizerSPE::Detected(int OpDet, int &readoutChannel, bool Reflected) {
 
     if (Reflected && !fRefQEOverride) {
-      cet::exception("OpDetDigitizerDUNE") << "Cannot handle reflected light if QERefOverride isn't set";
+      cet::exception("DigitizerSPE") << "Cannot handle reflected light if QERefOverride isn't set";
     }
     if ( (!Reflected && fQEOverride > 0) || Reflected ) {
       // Find the Optical Detector using the geometry service
