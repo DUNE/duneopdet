@@ -39,7 +39,7 @@ dunefd_opdigi_unganged:
    
    #Parameters for testbench SPE
 
-   SinglePEsignal:       true      # false for ideal XArapuca response, true for testbench
+   TestbenchSinglePE:    false      # false for ideal XArapuca response, true for testbench 
    SPEDataFile:          "/dune/data2/users/jdelgadg/fbk_CA_digi.txt"
    
    # readout window in optical ticks

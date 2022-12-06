@@ -149,7 +149,7 @@ namespace opdet {
     
       bool   fDigiTree_SSP_LED;              // To create a analysis Tree for SSP LED
       bool   fUseSDPs;                       // = pset.get< bool   >("UseSDPs", true);
-      bool   SinglePEsignal;                 // File testbench
+      bool   TestbenchSinglePE;                 // File testbench
 
       double  fQEOverride;
       double  fRefQEOverride;
@@ -275,7 +275,7 @@ namespace opdet {
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
     fUseSDPs            = pset.get< bool   >("UseSDPs", true     );
     fSPEDataFile        = pset.get< std::string >("SPEDataFile");
-    SinglePEsignal       = pset.get< bool   >("SinglePEsignal"     );
+    TestbenchSinglePE       = pset.get< bool   >("TestbenchSinglePE"     );
 
     if (!fUseSDPs) {
       throw art::Exception(art::errors::UnimplementedFeature) << "SimPhotonsLite is now deprecated in favor SDPs. If you do not have SDPs because your input file is old, use an older version of dunetpc to run this digitizer";
@@ -557,7 +557,7 @@ namespace opdet {
     SPEData.open(fSPEDataFile);
     SPEData.is_open();
  
-    if (SinglePEsignal) {
+    if (TestbenchSinglePE) {
       mf::LogDebug("OpDetDigitizerDUNE") << " using testbench pe response";
       art::ServiceHandle< art::TFileService > tfs;
       
@@ -568,16 +568,15 @@ namespace opdet {
       while (SPEData >> x ) { SinglePEVec_x.push_back(x); } 
       // while (SPEData >> x >> y) { SinglePEVec_x.push_back(x); SinglePEVec_y.push_back(y);}
       fSinglePEWaveform = SinglePEVec_x;
-      std:: cout << fSinglePEWaveform.size() << std:: endl;
-       
-      // Create a new histogram
+             
+     /* // Create a new histogram
       TH1D *waveformH = tfs->make< TH1D>("test","test",fSinglePEWaveform.size(),0, 60);  
        
       // Copy values from the waveform into the histogram
       for (size_t tick = 0;tick < fSinglePEWaveform.size(); ++tick){
             waveformH->SetBinContent(tick + 1, fSinglePEWaveform[tick]);
          }
-      waveformH->Draw();
+      waveformH->Draw();*/
       std::cout << " out "<<" using TESTbench spe "<< std ::endl;
             
       fPulseLength = fSinglePEWaveform.size();
@@ -588,17 +587,16 @@ namespace opdet {
        size_t length = static_cast< size_t > (std::round(fPulseLength*fSampleFreq));
        fSinglePEWaveform.resize(length);
       
-       // Create a new histogram
-       TH1D *waveformHist = tfs->make< TH1D >("ideal","ideal",fSinglePEWaveform.size(), fFrontTime,fBackTime);
+       // Create a histogram
+       // TH1D *waveformHist = tfs->make< TH1D >("ideal","ideal",fSinglePEWaveform.size(), fFrontTime,fBackTime);
     
        for (size_t tick = 0; tick != length; ++tick){
        fSinglePEWaveform[tick] =
        Pulse1PE(static_cast< double >(tick)/fSampleFreq);
-       waveformHist->SetBinContent(tick + 1, fSinglePEWaveform[tick]);
+       //waveformHist->SetBinContent(tick + 1, fSinglePEWaveform[tick]);
       }
-      waveformHist->Draw();
+      //waveformHist->Draw();
       std::cout << " out "<<" using ideal spe "<< std ::endl;
-       
      } 
      
      SPEData.close(); 
