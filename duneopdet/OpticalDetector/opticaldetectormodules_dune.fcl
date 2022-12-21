@@ -39,9 +39,9 @@ dunefd_opdigi_unganged:
    
    #Parameters for testbench SPE
 
-   TestbenchSinglePE:    false      # false for ideal XArapuca response, true for testbench 
-   SPEDataFile:          "./fbk_CA_digi.txt"
-   
+   TestbenchSinglePE:    false     # false for ideal XArapuca response, true for testbench 
+   SPEDataFile:          "./fbk_DAPHNE_Dec22.txt"  #File containing the SPE with one column in the testbench to readout XARAPUCAS: DAPHNE electronics (62.5MHz) 
+                                                  
    # readout window in optical ticks
    # buffer before waveform
    # see SSP manual, dune-doc-9928, p. 58
@@ -51,7 +51,7 @@ dunefd_opdigi_unganged:
    # ReadoutPretrigger:   100
    #
    # SSP Maximum window
-   # ReadoutWindow:      2046
+   # ReadoutWindow:       2046
    # ReadoutPretrigger:   100
    
    # SaturationScale:         16383 # 2^14 - 1, based on SSP Data
@@ -59,11 +59,11 @@ dunefd_opdigi_unganged:
 
 dunefd_opdigi_threegang:	                            @local::dunefd_opdigi_unganged
 dunefd_opdigi_threegang.PulseLength:	                5.2
-dunefd_opdigi_threegang.PeakTime:	                    0.028
+dunefd_opdigi_threegang.PeakTime:	                0.028
 dunefd_opdigi_threegang.MaxAmplitude:	                0.0594 # * VoltageToADC = 9 ADC/PE
-dunefd_opdigi_threegang.FrontTime:	                  0.013
-dunefd_opdigi_threegang.BackTime:	                    0.386
-dunefd_opdigi_threegang.algo_threshold.ADCThreshold: 15.000 # "2 PE" threshold = 1.7 PE
+dunefd_opdigi_threegang.FrontTime:	                0.013
+dunefd_opdigi_threegang.BackTime:	                0.386
+dunefd_opdigi_threegang.algo_threshold.ADCThreshold:  15.000 # "2 PE" threshold = 1.7 PE
 
 dunefd_opdigi_threegang_refactor: @local::dunefd_opdigi_threegang
 dunefd_opdigi_threegang_refactor.InputModules: ["PDFastSim"]

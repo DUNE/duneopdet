@@ -67,7 +67,6 @@
 // ROOT includes
 
 #include "TTree.h"
-#include "TH1.h"
 #include "TFile.h"
 
 
@@ -177,8 +176,7 @@ namespace opdet {
                     FocusList& fl) const;
 
       // Functional response to one photoelectron (time in ns)
-      //void Pulse1PE(std::vector<double> & fSinglePEWave);
-    double Pulse1PE(double time) const;
+      double Pulse1PE(double time) const;
       // Single photoelectron pulse parameters
       double fPulseLength;   // 1PE pulse length in us
       double fPeakTime;      // Time when the pulse reaches its maximum in us
@@ -536,10 +534,9 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
- double OpDetDigitizerDUNE::Pulse1PE(double time) const   //(std::vector<double>& fSinglePEWaveform)
+ double OpDetDigitizerDUNE::Pulse1PE(double time) const   
   {
   
-    
     if (time < fPeakTime) return
       (fVoltageToADC*fMaxAmplitude*std::exp((time - fPeakTime)/fFrontTime));
     else return
@@ -551,58 +548,38 @@ namespace opdet {
   void OpDetDigitizerDUNE::CreateSinglePEWaveform()
   {
 
-    art::ServiceHandle< art::TFileService > tfs;
-
-    std::ifstream SPEData;
-    SPEData.open(fSPEDataFile);
-    SPEData.is_open();
- 
     if (TestbenchSinglePE) {
-      mf::LogDebug("OpDetDigitizerDUNE") << " using testbench pe response";
-      art::ServiceHandle< art::TFileService > tfs;
-      
-      //std::vector< double > SinglePEVec_x; SinglePEVec_y;  //2 column
-      std::vector< double > SinglePEVec_x;   //1 column
-      Double_t  x;                             
-       
-      while (SPEData >> x ) { SinglePEVec_x.push_back(x); } 
-      // while (SPEData >> x >> y) { SinglePEVec_x.push_back(x); SinglePEVec_y.push_back(y);}
-      fSinglePEWaveform = SinglePEVec_x;
+      std::ifstream SPEData;
+      SPEData.open(fSPEDataFile);
+      if (SPEData.is_open()) {
+       mf::LogDebug("OpDetDigitizerDUNE") << " using testbench pe response";
+       std::vector< double > SinglePEVec_x;   //1 column
+       Double_t  x; 
+       while (SPEData >> x ) { SinglePEVec_x.push_back(x); } 
+       fSinglePEWaveform = SinglePEVec_x;
              
-     /* // Create a new histogram
-      TH1D *waveformH = tfs->make< TH1D>("test","test",fSinglePEWaveform.size(),0, 60);  
-       
-      // Copy values from the waveform into the histogram
-      for (size_t tick = 0;tick < fSinglePEWaveform.size(); ++tick){
-            waveformH->SetBinContent(tick + 1, fSinglePEWaveform[tick]);
-         }
-      waveformH->Draw();*/
-      std::cout << " out "<<" using TESTbench spe "<< std ::endl;
-            
-      fPulseLength = fSinglePEWaveform.size();
-    }
+       std::cout << " out "<<" using TESTbench spe "<< std ::endl;
+        
+       fPulseLength = fSinglePEWaveform.size();
+       SPEData.close(); 
+       return;    
+      }
+       else {
+      throw cet::exception("OpDetDigitizerDUNE") << "No Waveform File: Cannot open SPE template file.\n"; 
+      }       
+   }
     else {
       //shape of single pulse 
        mf::LogDebug("OpDetDigitizerDUNE") << " ideal pe response";
        size_t length = static_cast< size_t > (std::round(fPulseLength*fSampleFreq));
        fSinglePEWaveform.resize(length);
-      
-       // Create a histogram
-       // TH1D *waveformHist = tfs->make< TH1D >("ideal","ideal",fSinglePEWaveform.size(), fFrontTime,fBackTime);
-    
        for (size_t tick = 0; tick != length; ++tick){
-       fSinglePEWaveform[tick] =
-       Pulse1PE(static_cast< double >(tick)/fSampleFreq);
-       //waveformHist->SetBinContent(tick + 1, fSinglePEWaveform[tick]);
-      }
-      //waveformHist->Draw();
+        fSinglePEWaveform[tick] =
+        Pulse1PE(static_cast< double >(tick)/fSampleFreq);
+       }
       std::cout << " out "<<" using ideal spe "<< std ::endl;
-     } 
-     
-     SPEData.close(); 
-     return;
-           
-  }
+   } 
+ }
 
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::CreatePDWaveform
