@@ -1,0 +1,150 @@
+# New fhicl file for library generation. It was based on the
+# photonlibrary_builder_icarus.fcl by Gianluca Petrillo
+#
+# This configuration is base for the simulation of a few voxels of the
+# photon visibility lookup table ("photon library") for ProtoDUNE-HD.
+# 
+
+#include "services_dune.fcl"
+#include "backtrackerservice.fcl"
+#include "particleinventoryservice.fcl"
+#include "singles.fcl"
+#include "largeantmodules.fcl"
+#include "detsimmodules.fcl"
+#include "opticaldetectormodules_dune.fcl"
+#include "opticaldetectorservices_dune.fcl"
+#include "photolibbuild_services_dune.fcl"
+#include "photpropservices_dune.fcl"
+#include "lightsource.fcl"
+#include "LArG4_dune.fcl"
+
+# services
+#include "services_refactored_pdune.fcl"
+
+# modules
+#include "opticaldetectormodules.fcl"
+#include "opticaldetectorservices.fcl"
+#include "LArG4_dune.fcl"
+
+
+process_name: LibraryBuild
+
+
+################################################################################
+###  service configuration
+################################################################################
+
+services: {
+  
+  @table::protodune_larg4_services
+  
+  @table::dunefd_photolibbuild_services 
+  # events are generated anew each time: default per-event policy is ineffective
+  #NuRandomService:    @local::random_NuRandomService
+  RandomNumberGenerator: {} #ART native random number generator
+  
+  OpDetResponse:      @local::standard_opdetresponse
+  
+  SpaceChargeService: @erase
+Geometry:		@local::protodune_geo
+  
+} # services
+
+services.Geometry.GDML: "protodunehd_v2_refactored.gdml"
+services.Geometry.ROOT: "protodunehd_v2_refactored.gdml"
+
+services.TFileService.fileName: "Photonlibrary_protodune.root"
+
+services.Geometry.DisableWiresInG4: false # we need to account for wire shadow
+
+services.LArG4Parameters: { # customization
+  
+  @table::services.LArG4Parameters
+  
+  # enable this custom LArG4 physics list
+  # with optical physics instead of fast scintillation
+  UseCustomPhysics: true
+  EnabledPhysics: [
+    "Em",
+    "Optical",            # <== this is the important one!
+    "SynchrotronAndGN",
+    "Ion",
+    "Hadron",
+    "Decay",
+    "HadronElastic",
+    "Stopping",
+    "NeutronTrackingCut"
+    ]
+  
+  # store only the count of photons per channel, not the single photons
+  UseLitePhotons: true 
+  
+  # avoid unnecessary steps
+  DisableWireplanes: true
+  FillSimEnergyDeposits: false
+  NoElectronPropagation: false
+  
+} # services.LArG4Parameters
+
+
+services.PhotonVisibilityService: {
+  LibraryBuildJob:  true
+  DoNotLoadLibrary: true
+  
+  UseCryoBoundary:  true
+  
+  NX:  5  # 5 cm voxels filling 370 cm
+  NY:  5  # 5 cm voxels filling 385 cm
+  NZ:  5  # 5 cm voxels filling 1970 cm
+
+} # services.PhotonVisibilityService
+
+# for photon library generation we do not include prescale
+# (is prescale included at all except in fast optical simulation?)
+services.LArPropertiesService.ScintPreScale: 1.0
+
+
+################################################################################
+###  workflow configuration
+################################################################################
+
+source:
+{
+  module_type: EmptyEvent
+  maxEvents:   125        # Number of events to create
+  firstRun:    1           # Run number to use for this file
+  firstEvent:  1           # number of first event in the file
+}
+physics: {
+
+ producers:
+ {
+   generator: @local::standard_lightsource	  
+   largeant:  @local::standard_largeant	  
+ }
+
+  analyzers: {
+    pmtresponse: {
+      module_type:  SimPhotonCounter
+      GeneratorModule:            "generator"
+      Verbosity:                   0 # quiet!
+      MakeAllPhotonsTree:      false
+      MakeDetectedPhotonsTree: false
+      MakeOpDetsTree:          false
+      MakeOpDetEventsTree:     false
+      MakeLightAnalysisTree:   false
+    }
+  } # analyzers
+
+  simulate:  [ generator, largeant ]
+  analyzeIt: [ pmtresponse ]
+
+} # physics
+
+
+#
+# Optical specific module configuration:
+#
+
+# we do not save, nor create, MCParticle objects
+physics.producers.largeant.MakeMCParticles: false
