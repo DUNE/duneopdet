@@ -507,8 +507,7 @@ namespace opdet {
 
       // Get the PlaneID which describes the location of the true vertex
       int plane = 0;
-      double loc[] = {part.Vx(), part.Vy(), part.Vz()};
-      geo::TPCID tpc = geom->FindTPCAtPosition(loc);
+      geo::TPCID tpc = geom->FindTPCAtPosition(geo::Point_t{part.Vx(), part.Vy(), part.Vz()});
       if (! geom->HasTPC(tpc) ) {
         if(fIsVD){ //allowing Flashes to be recorded outside active volume for VD but with no match
           std::cout << "No valid TPC" << std::endl;
