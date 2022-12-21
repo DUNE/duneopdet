@@ -412,22 +412,17 @@ namespace opdet {
   }
 
    std::vector<int> neighbors;
-   float dx, dy, dz, dt, dtmax;
-   double xyz_hitnumber[3];
-   geom.OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter(xyz_hitnumber);
+   float dt, dtmax;
+   auto const xyz_hitnumber = geom.OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter();
 
    for (int h=itTmin;h<itTmax;h++)
    {
      if(!processed[h])
      {
-       double xyz_h[3];
-       geom.OpDetGeoFromOpChannel(HitVector[sorted[h]].OpChannel()).GetCenter(xyz_h);
-       dx  = xyz_h[0] - xyz_hitnumber[0];
-       dy  = xyz_h[1] - xyz_hitnumber[1];
-       dz  = xyz_h[2] - xyz_hitnumber[2];
        dt  = TMath::Abs(  HitVector[sorted[hitnumber]].PeakTime() - HitVector[sorted[h]].PeakTime() );
        dtmax  = TMath::Abs(initimecluster - HitVector[sorted[h]].PeakTime() );
-       float distance = dx*dx + dy*dy + dz*dz;
+       auto const xyz_h = geom.OpDetGeoFromOpChannel(HitVector[sorted[h]].OpChannel()).GetCenter();
+       float distance = (xyz_h - xyz_hitnumber).R();
 //       std::cout << distance << " " << dt << " " << dtmax << std::endl; lets_pause();
        if(distance<fMaximumDistance*fMaximumDistance && dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow){ neighbors.push_back(h);processed[h]=true;}
      }

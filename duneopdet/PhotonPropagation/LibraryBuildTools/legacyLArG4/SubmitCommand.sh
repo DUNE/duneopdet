@@ -7,7 +7,7 @@
 ## using the FNAL Grid                                                    ##
 ## Author: Alex Himmel (ahimmel@fnal.gov)                                 ##
 ## Updated by Jason Stock (jason.stock@mines.sdsmt.edu) 2017-09-11        ##
-## Script to be run with split dune code (setup of dunesw)                ##
+## Script to be run with dunetpc (not split dune code)                    ##
 ############################################################################
 ############################################################################
 ############################################################################
@@ -134,7 +134,7 @@ while :; do
     --tar|-t)
       if [ "$2" ]; then
         tarfile=$2
-        printf "\nInput tar file specified.\nLArSoft/dunesw will be setup from $tarfile\n"
+        printf "\nInput tar file specified.\nLArSoft/dunetpc will be setup from $tarfile\n"
         shift
       else
         printf 'ERROR: "--tar" requires a path to a tar file of a larsoft installation.\n' >&2
@@ -143,7 +143,7 @@ while :; do
       ;;
     --tar=?*)
       tarfile=${1#*=}
-        printf "\nInput tar file specified.\nLArSoft/dunesw will be setup from $tarfile\n"
+        printf "\nInput tar file specified.\nLArSoft/dunetpc will be setup from $tarfile\n"
       ;;
     --check|-c)
       checkVar=1
@@ -255,7 +255,7 @@ if [ x$tarfile != x ]; then
   larsoft=
   clientargs="${clientargs} --tar_file_name=dropbox://${tarfile} --use-cvmfs-dropbox"
 else
-  larsoft="${environmentVars} -e mrb_top=$MRB_TOP -e mrb_project=dunesw -e mrb_version=$MRB_PROJECT_VERSION -e mrb_quals=$MRB_QUALS "
+  larsoft="${environmentVars} -e mrb_top=$MRB_TOP -e mrb_project=dunetpc -e mrb_version=$MRB_PROJECT_VERSION -e mrb_quals=$MRB_QUALS "
 fi
 
 toolsargs="-q -g --opportunistic -l '+SingularityImage=\"/cvmfs/singularity.opensciencegrid.org/fermilab/fnal-wn-sl7:latest\"' "

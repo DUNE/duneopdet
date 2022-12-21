@@ -199,16 +199,14 @@ namespace opdet {
   {
     // First need to ask the geometry for the y-z location of both OpHits
     int channela = a->OpChannel();
-    double xyza[3];
-    geo->OpDetGeoFromOpChannel(channela).GetCenter(xyza);;
-    double ay = xyza[1];
-    double az = xyza[2];
+    auto const xyza = geo->OpDetGeoFromOpChannel(channela).GetCenter();
+    double ay = xyza.Y();
+    double az = xyza.Z();
 
     int channelb = b->OpChannel();
-    double xyzb[3];
-    geo->OpDetGeoFromOpChannel(channelb).GetCenter(xyzb);;
-    double by = xyzb[1];
-    double bz = xyzb[2];
+    auto const xyzb = geo->OpDetGeoFromOpChannel(channelb).GetCenter();
+    double by = xyzb.Y();
+    double bz = xyzb.Z();
 
     double r2 = pow((ay-by),2) + pow((az-bz),2);
 
@@ -251,10 +249,9 @@ namespace opdet {
     for (int cur : curN){
       art::Ptr<recob::OpHit> oh = ohits[cur];
       int channel = oh->OpChannel();
-      double xyz[3];
-      geo->OpDetGeoFromOpChannel(channel).GetCenter(xyz);;
-      ys.push_back(xyz[1]);
-      zs.push_back(xyz[2]);
+      auto const xyz = geo->OpDetGeoFromOpChannel(channel).GetCenter();
+      ys.push_back(xyz.Y());
+      zs.push_back(xyz.Z());
     }
   }
 
@@ -363,10 +360,9 @@ namespace opdet {
       // Time to make the OpFlash;
       // Y-Z coordinates come from the centroid
       int channelcentroid = centroid->OpChannel();
-      double xyzcentroid[3];
-      geo->OpDetGeoFromOpChannel(channelcentroid).GetCenter(xyzcentroid);
-      double yCenter = xyzcentroid[1];
-      double zCenter = xyzcentroid[2];
+      auto const xyzcentroid = geo->OpDetGeoFromOpChannel(channelcentroid).GetCenter();
+      double yCenter = xyzcentroid.Y();
+      double zCenter = xyzcentroid.Z();
       double tCenter = centroid->PeakTimeAbs();
 
 

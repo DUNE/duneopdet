@@ -81,6 +81,9 @@ namespace opdet {
     std::string fOpHitModuleLabel;         // Input tag for OpHit collection
     std::string fSignalLabel;              // Input tag for the signal generator label
     std::string fGeantLabel;               // Input tag for GEANT
+    int         fkgenerator;               // Input code for getting Edep
+    bool        fIsNDK;                    // Is it a NDK sample?
+    bool        fIsVD;                     // Is it a FD2-VD sample?
 
     TTree * fFlashMatchTree;
     TTree * fLargestFlashTree;
@@ -115,9 +118,7 @@ namespace opdet {
     Float_t fDetectedT;
     Float_t fTrueE;
     Float_t fEdep;//Visible energy deposition using SimChannels
-    // unused Float_t Edep;
     Float_t fEdepSimE;//Energy deposition using SimEnergyDeposits
-    // unused Float_t EdepSimE;
     std::unique_ptr<larg4::ISCalc> fISAlg;
     Int_t   fTruePDG;
     Float_t fRecoX;
@@ -194,6 +195,9 @@ namespace opdet {
     fOpHitModuleLabel   = pset.get<std::string>("OpHitModuleLabel");
     fSignalLabel        = pset.get<std::string>("SignalLabel");
     fGeantLabel         = pset.get<std::string>("GeantLabel");
+    fIsNDK              = pset.get<bool>("IsNDK");
+    fIsVD               = pset.get<bool>("IsVD");
+    fkgenerator         = pset.get<int>("kgenerator");
     fNBinsE             = pset.get<int>("NBinsE");
     fLowE               = pset.get<float>("LowE");
     fHighE              = pset.get<float>("HighE");
@@ -203,8 +207,8 @@ namespace opdet {
     fDistanceCut        = pset.get<float>("DistanceCut");
 
     fOpDetWaveformLabel = pset.get<std::string>("OpDetWaveformLabel","");
-    fBaseline           = pset.get<float>("Baseline", 1500.);
-    fPE                 = pset.get<float>("PE", 18.);
+    fBaseline           = pset.get<float>("Baseline");
+    fPE                 = pset.get<float>("PE");
 
     art::ServiceHandle< art::TFileService > tfs;
 
@@ -337,8 +341,8 @@ namespace opdet {
     art::ServiceHandle<cheat::ParticleInventoryService> pinv;
 
     //BackTrackerService and ParticleInventoryService
-      art::ServiceHandle<cheat::BackTrackerService> bt_serv;
-      //  art::ServiceHandle<cheat::ParticleInventoryService> pi_serv;
+    art::ServiceHandle<cheat::BackTrackerService> bt_serv;
+    //  art::ServiceHandle<cheat::ParticleInventoryService> pi_serv;
     art::ServiceHandle< art::TFileService > tfs;
     //pbt->Rebuild(evt);
 
@@ -453,7 +457,10 @@ namespace opdet {
 	    //const simb::MCParticle *particle = pinv->TrackIdToParticle_P(ide.trackID);
 	    const art::Ptr<simb::MCTruth> mc=pinv->TrackIdToMCTruth_P(ide.trackID);
 	    // std::cout<<"Origin is "<<mc->Origin()<<std::endl;
-	    if(mc->Origin()!=3) continue;
+	    if(fIsNDK){//trick to get correct Edep for NDK events since they are labelled as unknown generator/Origin
+              if(mc->Origin()==4) continue;//all bkg generators are labelled as single particles (Origin =4)
+            }else{
+	      if(mc->Origin()!=fkgenerator) continue;}
 	    totalEdep +=ide.energy;
 	  }
 	}
@@ -500,19 +507,24 @@ namespace opdet {
 
       // Get the PlaneID which describes the location of the true vertex
       int plane = 0;
-      double loc[] = {part.Vx(), part.Vy(), part.Vz()};
-      geo::TPCID tpc = geom->FindTPCAtPosition(loc);
+      geo::TPCID tpc = geom->FindTPCAtPosition(geo::Point_t{part.Vx(), part.Vy(), part.Vz()});
       if (! geom->HasTPC(tpc) ) {
-        mf::LogInfo("FlashMatchAna") << "No valid TPC for " << tpc;
-        return;
-      }
+        if(fIsVD){ //allowing Flashes to be recorded outside active volume for VD but with no match
+          std::cout << "No valid TPC" << std::endl;
+          fDetectedT=-1;
+        }else{ //Flash match only if inside active volume for HD
+          mf::LogInfo("FlashMatchAna") << "No valid TPC for " << tpc;
+          return;
+        }
+      }else{
       geo::PlaneID tempid(tpc, plane);
       planeid = tempid;
-
+      
       // Convert true X to would-be charge arrival time, and convert from ticks to us, add to MC time
       double deltaTicks = detProp.ConvertXToTicks(part.Vx(), planeid);
       double deltaT = clockData.TPCTick2Time(deltaTicks);
       fDetectedT = fTrueT + deltaT;
+      }
     }
     catch (art::Exception const& err) 
     {
@@ -653,7 +665,7 @@ namespace opdet {
 
 
       // The first time we get into here we have the largest flash that is
-      // within the distance cut. So, fill the SelectedFlash tree and the
+      // within the distance cut. So the SelectedFlash tree and the
       // selected flash efficiency plots
       if (!SelectedFound && fDistance < fDistanceCut) {
 
@@ -682,7 +694,6 @@ namespace opdet {
     fSelectedEfficiencyVsE->Fill(SelectedRight, fTrueE);
     fSelectedEfficiencyVsX->Fill(SelectedRight, fTrueX);
     fSelectedEfficiencyVsXandE->Fill(SelectedRight, fTrueX, fTrueE);
-
 
 
 

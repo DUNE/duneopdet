@@ -185,9 +185,8 @@ namespace opdet{
         // Check QE
       	  if ( CLHEP::RandFlat::shoot(1.0) > fQE ) return false;
         }else{ //if it is Arapuca
-          double xyz[3]; 
-          geom->OpDetGeoFromOpChannel(OpDet).GetCenter(xyz);
-          if(xyz[0]<0){ //beam side
+          auto const xyz = geom->OpDetGeoFromOpChannel(OpDet).GetCenter();
+          if(xyz.X()<0){ //beam side
             // Check QE
             if ( CLHEP::RandFlat::shoot(1.0) > fQEArapucaBeam ) return false;
           }else{ //non-beam side
@@ -223,9 +222,8 @@ namespace opdet{
           // Check QE
           if ( CLHEP::RandFlat::shoot(1.0) > fQE ) return false;
         }else{ //if it is Arapuca
-          double xyz[3]; 
-          geom->OpDetGeoFromOpChannel(OpDet).GetCenter(xyz);
-          if(xyz[0]<0){ //beam side
+          auto const xyz = geom->OpDetGeoFromOpChannel(OpDet).GetCenter();
+          if(xyz.X()<0){ //beam side
             // Check QE
             if ( CLHEP::RandFlat::shoot(1.0) > fQEArapucaBeam ) return false;
           }else{ //non-beam side
@@ -241,4 +239,3 @@ namespace opdet{
 } // namespace
 
 DEFINE_ART_SERVICE_INTERFACE_IMPL(opdet::ProtoDUNEOpDetResponse, opdet::OpDetResponseInterface)
-

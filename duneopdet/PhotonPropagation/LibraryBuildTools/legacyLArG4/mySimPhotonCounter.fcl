@@ -1,0 +1,17 @@
+
+BEGIN_PROLOG
+
+mysimphotoncounter:
+{
+   module_type:          "mySimPhotonCounter"
+  Verbosity:               1 
+  InputModule:            "largeant" 
+  MakeAllPhotonsTree:      true
+  MakeDetectedPhotonsTree: true
+  MakeOpDetsTree:          true
+  MakeOpDetEventsTree:     true 
+}
+
+
+
+END_PROLOG
