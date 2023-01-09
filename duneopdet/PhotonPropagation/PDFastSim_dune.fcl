@@ -137,7 +137,7 @@ dunevd_pdfastsim_ann_ar:
        TFLoaderTool:
        {
            tool_type:       TFLoaderMLP
-           ModelName:       "./models/dunevd_128nm_tf2.6/"
+           ModelName:       "PhotonPropagation/ComputableGraph/dunevd_128nm_tf2.6"
            InputsName:      ["serving_default_pos_x:0", "serving_default_pos_y:0", "serving_default_pos_z:0"]
            OutputName:      "StatefulPartitionedCall:0"
        }
@@ -145,7 +145,7 @@ dunevd_pdfastsim_ann_ar:
 
 dunevd_pdfastsim_ann_xe:                          @local::dunevd_pdfastsim_ann_ar
 dunevd_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDoping10ppm
-dunevd_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "./models/dunevd_175nm_tf2.6/"
+dunevd_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/dunevd_175nm_tf2.6"
 
 
 END_PROLOG
