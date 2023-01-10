@@ -6,6 +6,10 @@
 
 BEGIN_PROLOG
 
+############################################
+### SEMI-ANALYTICAL MODEL CONFIGURATIONS ###
+############################################
+
 ###########
 # DUNE FD #
 ###########
@@ -114,6 +118,34 @@ protodune_hd_pdfastsim_pvs_external.DoFastComponent:    	  true
 protodune_hd_pdfastsim_pvs_external.DoSlowComponent:    	  false
 protodune_hd_pdfastsim_pvs_external.DoReflectedLight:   	  false         
 protodune_hd_pdfastsim_pvs_external.VUVTiming:	  	          @local::dune_vuv_timing_parameterization
+
+
+#############################################
+### COMPUTABLE GRAPH MODEL CONFIGURATIONS ###
+#############################################
+
+###########
+# DUNE-VD #
+###########
+
+dunevd_pdfastsim_ann_ar:
+{
+       module_type:         "PDFastSimANN"
+       SimulationLabel:     "IonAndScint"
+       DoSlowComponent:     true
+       ScintTimeTool:       @local::ScintTimeLAr
+       TFLoaderTool:
+       {
+           tool_type:       TFLoaderMLP
+           ModelName:       "PhotonPropagation/ComputableGraph/dunevd_128nm_tf2.6"
+           InputsName:      ["serving_default_pos_x:0", "serving_default_pos_y:0", "serving_default_pos_z:0"]
+           OutputName:      "StatefulPartitionedCall:0"
+       }
+}
+
+dunevd_pdfastsim_ann_xe:                          @local::dunevd_pdfastsim_ann_ar
+dunevd_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDoping10ppm
+dunevd_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/dunevd_175nm_tf2.6"
 
 
 END_PROLOG
