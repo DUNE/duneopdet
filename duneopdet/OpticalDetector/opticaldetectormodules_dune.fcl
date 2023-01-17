@@ -12,31 +12,36 @@ dunefd_opdigi_unganged:
    # Gain at this voltage is 4e6 -- that this corresponds to
    # the MaxAmplitude and VoltageToADC below has not been confirmed.
    
-   VoltageToADC:         151.5      # Converting mV to ADC counts (counts in 1 mV)
-   LineNoiseRMS:           2.6      # Pedestal RMS in ADC counts, likely an underestimate
-   DarkNoiseRate:         10.0      # In Hz, Ranges 2-50 depending on Vbias
-   CrossTalk:              0.20     # Probability of producing 2 PE for 1 incident photon
-   # Afterpulsing:         0.006    # Afterpulsing is not yet simulated
-   Pedestal:            1500        # in ADC counts
-   DefaultSimWindow:    true        # Use -1*drift window as the start time and
-                                    # the TPC readout window end time as the end time
-   FullWaveformOutput: false        # Output full waveform. Be careful with this option:
-                                    # setting it to "true" can result in large output files
-   TimeBegin:              0        # In us (not used if DefaultSimWindow is set to true)
-   TimeEnd:             1600        # In us (not used if DefaultSimWindow is set to true)
-   PreTrigger:           100        # In ticks
-   ReadoutWindow:       1000        # In ticks
+   VoltageToADC:         151.5    # Converting mV to ADC counts (counts in 1 mV)
+   LineNoiseRMS:         2.6      # Pedestal RMS in ADC counts, likely an underestimate
+   DarkNoiseRate:        10.0     # In Hz, Ranges 2-50 depending on Vbias
+   CrossTalk:            0.20     # Probability of producing 2 PE for 1 incident photon
+   # Afterpulsing:       0.006    # Afterpulsing is not yet simulated
+   Pedestal:             1500     # in ADC counts
+   DefaultSimWindow:     true     # Use -1*drift window as the start time and
+                                  # the TPC readout window end time as the end time
+   FullWaveformOutput:   false    # Output full waveform. Be careful with this option:
+                                  # setting it to "true" can result in large output files
+   TimeBegin:            0        # In us (not used if DefaultSimWindow is set to true)
+   TimeEnd:              1600     # In us (not used if DefaultSimWindow is set to true)
+   PreTrigger:           100      # In ticks
+   ReadoutWindow:        1000     # In ticks
    algo_threshold: @local::standard_algo_sspleadingedge
 
-   Padding:              100        # In ticks
+   Padding:              100      # In ticks
 
-   PulseLength:		         5.2
-   PeakTime:		           0.260
-   MaxAmplitude:	         0.12
-   FrontTime:		           0.009
-   BackTime:		           0.476
-   SSP_LED_DigiTree:    false	    #To create a SSP LED trigger Ttree
+   PulseLength:	  5.2
+   PeakTime:		  0.0260
+   MaxAmplitude:	  0.0594
+   FrontTime:		  0.013
+   BackTime:		  0.386
+   SSP_LED_DigiTree:     false     #To create a SSP LED trigger Ttree
    
+   #Parameters for testbench SPE
+
+   TestbenchSinglePE:    false     # false for ideal XArapuca response, true for testbench 
+   SPEDataFile:          "./fbk_DAPHNE_Dec22.txt"  #File containing the SPE with one column in the testbench to readout XARAPUCAS: DAPHNE electronics (62.5MHz) 
+                                                  
    # readout window in optical ticks
    # buffer before waveform
    # see SSP manual, dune-doc-9928, p. 58
@@ -46,7 +51,7 @@ dunefd_opdigi_unganged:
    # ReadoutPretrigger:   100
    #
    # SSP Maximum window
-   # ReadoutWindow:      2046
+   # ReadoutWindow:       2046
    # ReadoutPretrigger:   100
    
    # SaturationScale:         16383 # 2^14 - 1, based on SSP Data
@@ -54,11 +59,11 @@ dunefd_opdigi_unganged:
 
 dunefd_opdigi_threegang:	                            @local::dunefd_opdigi_unganged
 dunefd_opdigi_threegang.PulseLength:	                5.2
-dunefd_opdigi_threegang.PeakTime:	                    0.028
+dunefd_opdigi_threegang.PeakTime:	                0.028
 dunefd_opdigi_threegang.MaxAmplitude:	                0.0594 # * VoltageToADC = 9 ADC/PE
-dunefd_opdigi_threegang.FrontTime:	                  0.013
-dunefd_opdigi_threegang.BackTime:	                    0.386
-dunefd_opdigi_threegang.algo_threshold.ADCThreshold: 15.000 # "2 PE" threshold = 1.7 PE
+dunefd_opdigi_threegang.FrontTime:	                0.013
+dunefd_opdigi_threegang.BackTime:	                0.386
+dunefd_opdigi_threegang.algo_threshold.ADCThreshold:  15.000 # "2 PE" threshold = 1.7 PE
 
 dunefd_opdigi_threegang_refactor: @local::dunefd_opdigi_threegang
 dunefd_opdigi_threegang_refactor.InputModules: ["PDFastSim"]
