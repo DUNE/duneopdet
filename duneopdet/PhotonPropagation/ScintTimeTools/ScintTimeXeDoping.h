@@ -23,11 +23,15 @@ namespace phot
     {
     public:
         explicit ScintTimeXeDoping(fhicl::ParameterSet const& pset);
-        void GenScintTime(bool is_fast, CLHEP::HepRandomEngine& engine)  ;
-        
+        void initRand(CLHEP::HepRandomEngine& engine);
+        void GenScintTime(bool is_fast, CLHEP::HepRandomEngine& engine);
+        double fastScintTime();
+        double slowScintTime();
+
     private:
         //dla int           fLogLevel;
 
+        std::unique_ptr<CLHEP::RandFlat> fUniformGen;
         // From fhicl configuration
         double fXeConcentration; // ppm
         double fArSingletTime;   // ns
@@ -45,7 +49,7 @@ namespace phot
         double fMaxProbt;
         double fMaxTs;
         double fMaxTt;
-        
+
         // utility functions
         double exp_diff(double t, double tau1, double tau2) const;
         double singlet_distro(double t) const { return exp_diff(t, fTauTAs, fTauTX); };
