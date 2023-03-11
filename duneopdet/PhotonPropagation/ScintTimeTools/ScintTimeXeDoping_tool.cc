@@ -12,7 +12,7 @@
 namespace phot
 {
 
-    //......................................................................    
+    //......................................................................
     ScintTimeXeDoping::ScintTimeXeDoping(fhicl::ParameterSet const& pset)
     : ScintTime()
     , fXeConcentration{pset.get<double>("XeConcentration")}
@@ -67,22 +67,27 @@ namespace phot
             << "  MaxTime Singlet: " << fMaxTs  << " ns\n"
             << "  MaxTime Triplet: " << fMaxTt  << " ns\n";
     }
-            
-    //......................................................................    
+
+    void ScintTimeXeDoping::initRand(CLHEP::HepRandomEngine& engine)
+    {
+        fUniformGen = std::make_unique<CLHEP::RandFlat>(engine);
+    }
+
+    //......................................................................
     double ScintTimeXeDoping::exp_diff(double t, double tau1, double tau2) const
     {
         using std::exp;
         return ( exp(-t/tau1) - exp(-t/tau2) ) / (tau1 - tau2);
     }
-    
-    //......................................................................    
+
+    //......................................................................
     // Returns the time within the time distribution of the scintillation process, when the photon was created.
     // Rejection sampling is used to get a random time from the difference-of-exponentials distribution
     void ScintTimeXeDoping::GenScintTime(bool is_fast, CLHEP::HepRandomEngine& engine)
     {
         CLHEP::RandFlat randflatscinttime{engine};
 
-        //ran1, ran2 = random numbers for the algorithm        
+        //ran1, ran2 = random numbers for the algorithm
         while (1)
         {
             double ran1 = randflatscinttime();
@@ -90,7 +95,7 @@ namespace phot
 
             // Use ran1 to pick a proposal time
             // uniformly within the allowed range
-            double t = ran1 * (is_fast ? fMaxTs 
+            double t = ran1 * (is_fast ? fMaxTs
                                        : fMaxTt);
 
             // Rejection prob for this point
@@ -105,6 +110,46 @@ namespace phot
             }
         }
     }
+
+  double ScintTimeXeDoping::fastScintTime()
+  {
+    while (1)
+    {
+      double ran1 = fUniformGen->fire();
+      double ran2 = fUniformGen->fire();
+
+      // Use ran1 to pick a proposal time
+      // uniformly within the allowed range
+      double t = ran1 * fMaxTs;
+
+      // Rejection prob for this point
+      double p = singlet_distro(t) / fMaxProbs;
+
+      // Keep the point if ran2 below p
+      // (larger value of scint_distro -> more likely to sample)
+      if (ran2 < p) return t;
+    }
+  }
+
+  double ScintTimeXeDoping::slowScintTime()
+  {
+    while (1) {
+      double ran1 = fUniformGen->fire();
+      double ran2 = fUniformGen->fire();
+
+      // Use ran1 to pick a proposal time
+      // uniformly within the allowed range
+      double t = ran1 * fMaxTt;
+
+      // Rejection prob for this point
+      double p = triplet_distro(t) / fMaxProbt;
+
+      // Keep the point if ran2 below p
+      // (larger value of scint_distro -> more likely to sample)
+      if (ran2 < p) return t;
+    }
+  }
+
 }
-    
+
 DEFINE_ART_CLASS_TOOL(phot::ScintTimeXeDoping)
