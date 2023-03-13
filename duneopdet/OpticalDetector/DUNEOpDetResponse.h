@@ -22,8 +22,8 @@ namespace opdet
   class DUNEOpDetResponse : public opdet::OpDetResponseInterface {
     public:
 
-      DUNEOpDetResponse(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-      ~DUNEOpDetResponse() throw();
+      DUNEOpDetResponse(fhicl::ParameterSet const& pset);
+      ~DUNEOpDetResponse();
 
       // virtual bool detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const;
       //bool DUNEOpDetResponse::detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const

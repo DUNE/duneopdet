@@ -32,8 +32,7 @@
 
 
 // LArSoft includes
-#include "larcore/Geometry/Geometry.h"
-#include "larcorealg/Geometry/GeometryCore.h"
+#include "larcore/Geometry/WireReadout.h"
 #include "larcorealg/Geometry/OpDetGeo.h"
 #include "lardataobj/RawData/OpDetPulse.h"
 #include "lardataobj/RecoBase/OpFlash.h"
@@ -224,7 +223,7 @@ namespace opdet {
     sprintf(HistName, "Event_%d_Disps", fEventID); 
     sprintf(HistTitle, "PE from OpHits Event %d;z ;DaS                                              RaS (y)", fEventID);
     
-    art::ServiceHandle< geo::Geometry > geom;
+    auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
     //unsigned int NOpChannels = geom->NOpChannels(); 
 
     TH2D * ThisEventDisp = nullptr;    
@@ -252,7 +251,7 @@ namespace opdet {
 
 	    fOpChannel   = OpHitHandle->at(i).OpChannel();
 	    if(fOpChannel == 75 || fOpChannel ==101 ||fOpChannel ==160) continue;
-            auto const xyz = geom->OpDetGeoFromOpChannel(fOpChannel).GetCenter();
+            auto const xyz = wireReadout.OpDetGeoFromOpChannel(fOpChannel).GetCenter();
             fXOpCenter   = xyz.X();
             fYOpCenter   = xyz.Y();
             fZOpCenter   = xyz.Z();

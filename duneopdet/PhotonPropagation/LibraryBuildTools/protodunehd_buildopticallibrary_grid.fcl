@@ -41,6 +41,7 @@ services:
   OpDetResponse:      @local::standard_opdetresponse
   
   SpaceChargeService: @erase
+AuxDetGeometry: @local::protodunehdv1_auxdet_geo
   Geometry:		@local::protodunehdv1_geo
   
 }
@@ -48,7 +49,6 @@ services:
 
 #Use the following lines if you need to change the geometry by hand (e.g. test geometry)
 #services.Geometry.GDML: "dunevdcb1_v2_refactored.gdml"
-#services.Geometry.ROOT: "dunevdcb1_v2_refactored.gdml"
 
 #services.OpDetResponseInterface.LongAxis: z
 
