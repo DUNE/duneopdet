@@ -78,7 +78,8 @@ dunevd_pdfastsim_par_xe.IncludePropTime:       true
 dunevd_pdfastsim_par_xe.GeoPropTimeOnly:       true			  # Xe propoagation time geometric approximation
 dunevd_pdfastsim_par_xe.VUVTiming:             @local::dunevd_xe_timing_geo
 dunevd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
-dunevd_pdfastsim_par_xe.OnlyActiveVolume: 	   true
+dunevd_pdfastsim_par_xe.OnlyActiveVolume:      true
+dunevd_pdfastsim_par_xe.UseXeAbsorption:       true
 
 # External region for laterals (Hybrid model)
 dunevd_pdfastsim_pvs_external: 					  @local::standard_pdfastsim_pvs
