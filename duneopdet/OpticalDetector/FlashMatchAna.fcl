@@ -9,6 +9,7 @@ standard_flashmatchana:
    module_type:          "FlashMatchAna"
    OpFlashModuleLabel:   "opflash"  
    OpHitModuleLabel:     "ophit"  
+   EdepLabel:            "IonAndScint"  
    SignalLabel:          "generator"
    GeantLabel:           "largeant"
    kgenerator:           1   #For Edep from signal. Use: beam 1; CosmicRay 2; SuperNovaNeutrino 3; SingleParticle 4

@@ -77,6 +77,7 @@ namespace opdet {
     // go from this custom example to your own task.
 
     // The parameters we'll read from the .fcl file.
+    std::string fEdepLabel;                // Input tag for Energy deposit collection
     std::string fOpFlashModuleLabel;       // Input tag for OpFlash collection
     std::string fOpHitModuleLabel;         // Input tag for OpHit collection
     std::string fSignalLabel;              // Input tag for the signal generator label
@@ -191,6 +192,7 @@ namespace opdet {
   {
 
     // Indicate that the Input Module comes from .fcl
+    fEdepLabel          = pset.get<std::string>("EdepLabel");
     fOpFlashModuleLabel = pset.get<std::string>("OpFlashModuleLabel");
     fOpHitModuleLabel   = pset.get<std::string>("OpHitModuleLabel");
     fSignalLabel        = pset.get<std::string>("SignalLabel");
@@ -348,7 +350,8 @@ namespace opdet {
 
     ////Edep handle
     art::Handle<std::vector<sim::SimEnergyDeposit>> edep_handle;
-    if (!evt.getByLabel("IonAndScint", edep_handle)) {
+    if (!evt.getByLabel(fEdepLabel, edep_handle)) {
+      mf::LogWarning("FlashMatchAna") << "Cannot load any energy deposits. Failing";
       return;
     }
    
