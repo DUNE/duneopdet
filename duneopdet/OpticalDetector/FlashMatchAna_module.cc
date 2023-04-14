@@ -462,9 +462,7 @@ namespace opdet {
       for(auto const &chan : fSimChannels ){
 	for(auto const &tdcide : chan->TDCIDEMap()){
 	  for(const auto& ide :tdcide.second){
-	    //const simb::MCParticle *particle = pinv->TrackIdToParticle_P(ide.trackID);
 	    const art::Ptr<simb::MCTruth> mc=pinv->TrackIdToMCTruth_P(ide.trackID);
-	    // std::cout<<"Origin is "<<mc->Origin()<<std::endl;
 	    if(fIsNDK){//trick to get correct Edep for NDK events since they are labelled as unknown generator/Origin
               if(mc->Origin()==4) continue;//all bkg generators are labelled as single particles (Origin =4)
             }else{
@@ -476,20 +474,15 @@ namespace opdet {
       double edepsim=0.0;
       ////Energy deposit using SimEnergyDeposit
        for (auto const& edepi : *edep_handle) {
-	 //	auto const [energyDeposit, nElectrons, nPhotons, scintYieldRatio] = fISAlg->CalcIonAndScint(detProp, edepi);
 	 edepsim+=edepi.Energy();
-	 //	 std::cout<<edepi.Energy()<<std::endl;
       }
       
-      //  fEdepSimE=edepsim;
       ////////////////////
 
 
       // Get just the neutrino, entry 0 from the list, and record its properties
       const simb::MCParticle& part(mctruth->GetParticle(0));
      
-          
-      std::cout<<"Edep channel......, simEnergy "<<totalEdep/3.0<<"   "<<edepsim<<" trueE "<<part.E()<<"  EndProcess "<<part.EndProcess()<<std::endl;
 
       fTrueX     = part.Vx();
       fTrueY     = part.Vy();
