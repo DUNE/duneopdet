@@ -140,7 +140,9 @@ namespace opdet {
     , fInputToken{   consumes< std::vector<sim::OpDetBacktrackerRecord> >(fInputTag) }
     , fDarkNoiseRate{config().DarkNoiseRate()}
     , fCrossTalk{    config().CrossTalk()}
-    , fSIPMEngine(   art::ServiceHandle<rndm::NuRandomService>()->createEngine(*this, 
+    , fSIPMEngine(
+        art::ServiceHandle<rndm::NuRandomService>()->registerAndSeedEngine(
+          createEngine(0, "HepJamesRandom", "sipm"),
                                                                                "HepJamesRandom",
                                                                                "sipm", 
                                                                                config.get_PSet(), 
