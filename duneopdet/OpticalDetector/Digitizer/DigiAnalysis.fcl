@@ -1,0 +1,9 @@
+BEGIN_PROLOG
+standard_opdigiana: 
+{
+module_type:     "OpDetDigiAnaDUNE"
+InputModule:     "opdigi" # Module that created OpDetPulses (OpticalRawDigits)
+InstanceName:    ""
+SSP_LED_AnaTree: true
+} 
+END_PROLOG

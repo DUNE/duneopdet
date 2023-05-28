@@ -8,30 +8,27 @@ standard_daphne:
   # These paramters are for 3 sensl SiPMs ganged.
   # Will need to generalize/encapsulate in a tool
   VoltageToADC:         151.5    # Converting mV to ADC counts (counts in 1 mV)
-  PulseLength:            5.2
-  PeakTime:               0.028  
-  MaxAmplitude:           0.0594 # * VoltageToADC = 9 ADC/PE
-  FrontTime:              0.013
-  BackTime:               0.386  
+  PulseLength:          5.2
+  PeakTime:             0.028  
+  MaxAmplitude:         0.0594   # * VoltageToADC = 9 ADC/PE
+  FrontTime:            0.013
+  BackTime:             0.386  
 
   Padding:              100      # ticks
   ReadoutWindow:        320      # ticks
-  PreTrigger:            20      # ticks
-  Threshold:              1.5    # PE
-  Dwindow:               10      # ticks
+  PreTrigger:           20       # ticks
+  Threshold:            1.5      # PE
+  Dwindow:              10       # ticks
 
   Pedestal:             100      # ADC
-  LineNoiseRMS:           2.6    # Pedestal RMS in ADC counts, likely an underestimate
-  DynamicBitRange:       13      # 13-bit dynamic range
-
+  LineNoiseRMS:         2.6      # Pedestal RMS in ADC counts, likely an underestimate
+  DynamicBitRange:      13       # 13-bit dynamic range
 }
 
 standard_vddaphne: @local::standard_daphne
-standard_vddaphne.MaxAmplitude:         0.066 # * VoltageToADC = 10 ADC/PE
-standard_vddaphne.BackTime:             0.200
-standard_vddaphne.Pedestal:             500      # ADC
-standard_vddaphne.DynamicBitRange:      14      # 14-bit dynamic range
-
-
+standard_vddaphne.MaxAmplitude:    0.066 # * VoltageToADC = 10 ADC/PE
+standard_vddaphne.BackTime:        0.200
+standard_vddaphne.Pedestal:        500      # ADC
+standard_vddaphne.DynamicBitRange: 14      # 14-bit dynamic range
 
 END_PROLOG

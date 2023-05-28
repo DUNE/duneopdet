@@ -1,0 +1,65 @@
+BEGIN_PROLOG
+
+##################################################
+# SSP module algorithms
+##################################################
+
+algo_sspleadingedge:
+{
+    Name:             "SSP_LED"
+    ADCThreshold:     1.5
+    MinWidth:         10
+    SecondThreshold:  1
+    Pedestal:         1500
+    DWindow:          10 
+    ReadoutWd:        1001 # Actual wvf max length in [ticks] +1
+    PreTrg:           100 
+}
+
+##################################################
+# Digitizer module algorithms
+##################################################
+
+standard_template_digitizer: 
+{
+  module_type:  "OpDetDigitizerDUNE"
+  InputModules: ["largeant"] # Module that created simphotons
+
+  # These paramters are for 3 sensl SiPMs ganged.
+  # Will need to generalize/encapsulate in a tool
+  LineNoiseRMS:       2.6                           # Pedestal RMS in ADC counts, likely an underestimate 
+  DarkNoiseRate:      0.                            # (10) In Hz, Ranges 2-50 depending on Vbias 0.996
+  CrossTalk:          0.                            # (0.2) Probability of producing 2 PE for 1 incident photon
+
+  Pedestal:           1500                          # in ADC counts
+
+  FullWaveformOutput: false                         # Output full waveform. Be careful with this option, setting it to "true" can result in large output files
+  DefaultSimWindow:   false                         # Use -1*drift window as the start time and                                                 
+  TimeBegin:          0                             # In us (not used if DefaultSimWindow is set to true)0.2
+  TimeEnd:            16                            # In us (not used if DefaultSimWindow is set to true)
+  ReadoutWindow:      1000                          # In ticks
+  
+  PreTrigger:         100                           # [ticks] Does not do anything with padding = 0
+  algo_threshold:     @local::algo_sspleadingedge
+
+  Padding:            100                           # In ticks
+  PeakTime:           0                             # 1.950
+  SSP_LED_DigiTree:   true                          # To create a SSP LED trigger Ttree
+  SinglePEsignal:     true                          # false for ideal XArapuca response, true for testbench
+  SPEDataFile:        "DAPHNE2_FBK_2022.txt"        # Path to SPE template
+  TestbenchSinglePE:  true                          # Bool to select SPE template
+  
+  # Parameters from standard VD digitizer 
+  DynamicBitRange:    14
+  PulseLength:        5.2                           # hpk 7.2  (FBK 0.0095)
+  MaxAmplitude:       6.6e-2                        # 0.04092 (FBK 0.0095)   # * VoltageToADC = 6.2 ADC/PE
+  FrontTime:          1.3e-2                        # 0.013(0.097 FBK)(0.146 )
+  BackTime:           2e-1                          # 0.51  (0.676hpk)
+  Threshold:          1.5
+  VoltageToADC:       1.515e2
+}
+
+standard_ideal_digitizer: @local::standard_template_digitizer
+standard_ideal_digitizer.TestbenchSinglePE: false
+
+END_PROLOG

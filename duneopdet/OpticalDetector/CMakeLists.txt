@@ -1,4 +1,7 @@
 #add_subdirectory(BackTrackingTests)
+add_subdirectory(Digitizer)
+add_subdirectory(Deconvolution)
+add_subdirectory(OpHitFinder)
 
 art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 LIBRARY_NAME duneopdet_OpticalDetector
@@ -84,3 +87,6 @@ install_fhicl()
 install_source()
 install_fw( LIST sensl_1.dat
   SUBDIRNAME dune/OpticalDetector )
+
+FILE(GLOB text_files *.txt)
+install_source( EXTRAS ${text_files} )

@@ -175,9 +175,12 @@ namespace opdet {
 
       // Make a name for the histogram
       std::stringstream histName;
-      histName << "event_"      << evt.id().event() 
-               << "_opchannel_" << channel
-               << "_waveform_"  << mapChannelWF[channel];
+      histName << "event_"          << evt.id().event() 
+               << "_opchannel_"     << channel
+               << "_waveform_"      << mapChannelWF[channel]
+               << "_firstwvftime_"  << firstWaveformTime
+               << "_timestamp_"     << waveform.TimeStamp();
+               
       // Increase counter for number of waveforms on this optical channel
       mapChannelWF[channel]++;
       // Create a new histogram
