@@ -313,12 +313,13 @@ namespace opdet {
 
     , fFullWaveformOutput{  config().FullWaveformOutput() }
 
-    , fOpDigiEngine( art::ServiceHandle<rndm::NuRandomService>()->registerAndSeedEngine(
-        createEngine(0, "HepJamesRandom", "waveformdigi"),
+    , fOpDigiEngine( art::ServiceHandle<rndm::NuRandomService>()->createEngine(*this,
                                                                                "HepJamesRandom",
                                                                                "waveformdigi", 
                                                                                config.get_PSet(), 
                                                                                "SeedWaveformDigi") )
+                                                                                                                                                                                                                           
+                                                                  
     , fRandGauss(fOpDigiEngine)
   {
 

@@ -89,10 +89,9 @@ phot::PhotonLibraryPropagationS2::PhotonLibraryPropagationS2(fhicl::ParameterSet
   : EDProducer{p}
   , fDriftEModuleLabel{p.get< std::string >("DriftEModuleLabel")}
   , fGain{p.get<double>("Gain",500)}
-  , fPhotonEngine(art::ServiceHandle<rndm::NuRandomService>()->registerAndSeedEngine(
-      createEngine(0, "HepJamesRandom", "photon"), "HepJamesRandom", "photon", p, "SeedPhoton"))
-  , fScintTimeEngine(art::ServiceHandle<rndm::NuRandomService>()->registerAndSeedEngine(
-      createEngine(0, "HepJamesRandom", "scinttime"), "HepJamesRandom", "scinttime", p, "SeedScintTime"))
+  , fPhotonEngine(art::ServiceHandle<rndm::NuRandomService>()->
+      createEngine(*this, "HepJamesRandom", "photon", p, "SeedPhoton"))
+  , fScintTimeEngine(art::ServiceHandle<rndm::NuRandomService>()->createEngine(*this, "HepJamesRandom", "scinttime", p, "SeedScintTime"))
 {
   art::ServiceHandle<sim::LArG4Parameters> lgp;
 

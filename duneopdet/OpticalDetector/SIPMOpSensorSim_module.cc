@@ -141,12 +141,11 @@ namespace opdet {
     , fDarkNoiseRate{config().DarkNoiseRate()}
     , fCrossTalk{    config().CrossTalk()}
     , fSIPMEngine(
-        art::ServiceHandle<rndm::NuRandomService>()->registerAndSeedEngine(
-          createEngine(0, "HepJamesRandom", "sipm"),
-                                                                               "HepJamesRandom",
-                                                                               "sipm", 
-                                                                               config.get_PSet(), 
-                                                                               "SeedSiPM"))
+        art::ServiceHandle<rndm::NuRandomService>()->createEngine(*this,
+                                                                  "HepJamesRandom",
+                                                                  "sipm", 
+                                                                  config.get_PSet(), 
+                                                                  "SeedSiPM"))
     , fRandExponential(fSIPMEngine)
     , fRandFlat(fSIPMEngine)
     , fRandPoissPhot(fSIPMEngine)
