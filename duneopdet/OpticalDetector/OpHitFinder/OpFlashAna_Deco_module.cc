@@ -137,7 +137,7 @@ namespace opdet {
     // Indicate that the Input Module comes from .fcl
     fOpFlashModuleLabel = pset.get<std::string>("OpFlashModuleLabel");
     fOpHitModuleLabel = pset.get<std::string>("OpHitModuleLabel");
-    fInputrecobOpflash = pset.get<std::string>("InputrecobOpflash");
+    fInputrecobOpflash = pset.get<std::string>("InputrecobOpflash",true);
     
     auto const clock_data =
       art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
