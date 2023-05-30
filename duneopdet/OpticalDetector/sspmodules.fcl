@@ -1,9 +1,26 @@
+###########################################
+# Last Modified: 28/05/2023               #
+# To include XArapuca temaptes            #
+# by M. Delgado, D. Guffanti & S. Manthey #
+###########################################
+
 BEGIN_PROLOG
 
 ##################################################
-#
 # SSP module algorithms
-#
+##################################################
+
+template_algo_sspleadingedge:
+{
+    Name:             "SSP_LED"
+    ADCThreshold:     1.5
+    MinWidth:         10
+    SecondThreshold:  1
+    Pedestal:         1500
+    DWindow:          10 
+    ReadoutWd:        1001 # Actual wvf max length in [ticks] +1
+    PreTrg:           100 
+}
 
 standard_algo_sspleadingedge:
 {
