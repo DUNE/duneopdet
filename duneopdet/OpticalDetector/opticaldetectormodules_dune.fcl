@@ -1,3 +1,9 @@
+###########################################
+# Last Modified: 28/05/2023               #
+# To include XArapuca temaptes            #
+# by M. Delgado, D. Guffanti & S. Manthey #
+###########################################
+
 #include "opticaldetectormodules.fcl"
 #include "sspmodules.fcl"
 
@@ -56,6 +62,22 @@ dunefd_opdigi_unganged:
    
    # SaturationScale:         16383 # 2^14 - 1, based on SSP Data
 }
+
+standard_fbk_daphnev2_template_digitizer: @local::dunefd_opdigi_threegang
+standard_fbk_daphnev2_template_digitizer.TestbenchSinglePE: true
+standard_fbk_daphnev2_template_digitizer.SPEDataFile: "./fbk_digi_deco_2023.txt" # Path to SPE template
+standard_fbk_daphnev2_template_digitizer.algo_threshold: @local::template_algo_sspleadingedge
+
+standard_hpk_daphnev2_template_digitizer: @local::standard_fbk_daphnev2_template_digitizer
+standard_kpk_daphnev2_template_digitizer.SPEDataFile: "./hpk_digi_deco_2023.txt" # Path to SPE template
+
+standard_fbk_caen_template_digitizer: @local::standard_fbk_daphnev2_template_digitizer
+standard_fbk_caen_template_digitizer.SPEDataFile: "./FBK_SPE_CAEN_45%PDE_2023.txt" # Path to SPE template
+
+standard_hpk_caen_template_digitizer: @local::standard_fbk_daphnev2_template_digitizer
+standard_kpk_caen_template_digitizer.SPEDataFile: "./HPK_SPE_CAEN_45%PDE_2023.txt" # Path to SPE template
+
+standard_template_digitizer: @local::standard_fbk_daphnev2_template_digitizer
 
 dunefd_opdigi_threegang:	                            @local::dunefd_opdigi_unganged
 dunefd_opdigi_threegang.PulseLength:	                5.2
