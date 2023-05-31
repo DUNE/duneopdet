@@ -1,0 +1,30 @@
+BEGIN_PROLOG
+
+dune_opflashana_deco:
+{
+     
+  module_type:           "OpFlashAna_Deco"
+  OpFlashModuleLabel:    "opflash"   #opflashfinder module
+  OpHitModuleLabel:      "ophitspe"  #ophitfinder module
+  InputrecobOpflash:     "false"     # Write "true" if the input includes recob::OpFlash
+   
+  YMin:                    -50
+  YMax:                    50
+  ZMin:                    0
+  ZMax:                    1200
+	
+  MakeFlashTimeHist:       false
+  MakeFlashPosHist:        false
+  MakePerFlashHists:       false
+
+  MakePerFlashTree:        false
+  MakePerOpHitTree:        true
+  MakeFlashBreakdownTree:  false
+  MakeFlashHitMatchTree:   false
+  MakePerEventFlashTree:   false
+     
+}
+
+
+END_PROLOG
+

@@ -143,10 +143,10 @@ namespace opdet {
     , fSIPMEngine(
         art::ServiceHandle<rndm::NuRandomService>()->registerAndSeedEngine(
           createEngine(0, "HepJamesRandom", "sipm"),
-                                                                               "HepJamesRandom",
-                                                                               "sipm", 
-                                                                               config.get_PSet(), 
-                                                                               "SeedSiPM"))
+          "HepJamesRandom",
+          "sipm", 
+          config.get_PSet(), 
+          "SeedSiPM"))
     , fRandExponential(fSIPMEngine)
     , fRandFlat(fSIPMEngine)
     , fRandPoissPhot(fSIPMEngine)
