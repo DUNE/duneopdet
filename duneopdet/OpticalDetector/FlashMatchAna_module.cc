@@ -193,8 +193,8 @@ namespace opdet {
   {
 
     // Indicate that the Input Module comes from .fcl
-    fEdepLabel          = pset.get<std::string>("EdepLabel");
-    felecDriftLabel     = pset.get<std::string>("elecDriftLabel");
+    fEdepLabel          = pset.get<std::string>("EdepLabel","IonAndScint");
+    felecDriftLabel     = pset.get<std::string>("elecDriftLabel","elecDrift");
     fOpFlashModuleLabel = pset.get<std::string>("OpFlashModuleLabel");
     fOpHitModuleLabel   = pset.get<std::string>("OpHitModuleLabel");
     fSignalLabel        = pset.get<std::string>("SignalLabel");
