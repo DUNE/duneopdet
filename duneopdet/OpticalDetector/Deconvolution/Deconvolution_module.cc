@@ -483,7 +483,7 @@ namespace opdet {
       std::vector<double> xvdec(xy, xy+fSamples); 
      
       Double_t scale = 1.0 / fSamples;
-      if (!fAutoScale) {scale = fScale;} 
+      if (!fAutoScale) {scale = fScale / fSamples;} 
       else {
         // Apply filter to the detector response (for normalization)
         xGH = xG * xH; 
