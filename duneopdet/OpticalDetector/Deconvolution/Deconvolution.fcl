@@ -6,7 +6,7 @@ BEGIN_PROLOG
 
 WfmWienerfilter: {
     Name: "Wiener"
-    Cutoff: 1.       # Cutoff is not used in this filter
+    Cutoff: 0.1      # Cutoff is not used in this filter
 }
   
 WfmGaussfilter: {
@@ -29,8 +29,8 @@ dune_deconvolution:
   PreTrigger:        100      # In [ticks] 
   Pedestal:          1500     # In [ADC]
   Samples:           1000     # Timewindow (ReadoutWindow) in [ticks]
-  Scale:             0.001    # Scaling of resulting deconvolution signal.
-  DigiDataColumn:      0      # SPE template source file column.                     
+  Scale:             1        # Scaling of resulting deconvolution signal.
+  DigiDataColumn:     0       # SPE template source file column.                     
   DigiDataFile:      "SPE_DAPHNE2_FBK_2022.dat"    
                      # The SPE template with undershoot and without pretrigger (in ADC*us), 
                      # was obtained from DAPHNE V2 and the cold amplifier (with 48 SiPM FBK/HPK).
