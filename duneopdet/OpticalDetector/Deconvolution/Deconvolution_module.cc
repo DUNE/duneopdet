@@ -670,14 +670,22 @@ namespace opdet {
   /**
    * @brief Source the single p.e. response from file
    *
-   * Source the single p.e. response template from the txt file set by 
+   * Source the single p.e. response template from the dat file set by 
    * `fDigiDataFile` and set the variable `fSinglePEAmplitude` with the 
    * amplitude of the single p.e. response. In case of a multi-column
    * template file, the relevant column can be selected by setting the
-   * varible `fDigiDataColumn`.
+   * variable `fDigiDataColumn`.
    */
   void Deconvolution::SourceSPEDigiDataFile() {
-    size_t n_columns = CountFileColumns(fDigiDataFile.c_str()); 
+    std::string datafile;
+    cet::search_path sp("FW_SEARCH_PATH");
+    // taking the file name as the first argument,
+    // the second argument is the local variable where to store the full path - both are std::string objects
+    sp.find_file(fDigiDataFile, datafile);
+    std::ifstream SPEData;
+    SPEData.open(datafile);
+    size_t n_columns = CountFileColumns(datafile.c_str()); 
+    std::cout << "ncols= " << n_columns << std::endl;
     if (fDigiDataColumn >= n_columns) {
       printf("Deconvolution::SourceSPETemplate ERROR: "); 
       printf("The module is supposed to select column %lu, but only %lu columns are present.\n", 
@@ -685,8 +693,6 @@ namespace opdet {
       throw art::Exception(art::errors::InvalidNumber); 
     }
 
-    std::ifstream SPEData; 
-    SPEData.open(fDigiDataFile); 
     Double_t buff[100] = {0};  
 
     std::string temp_str; 
