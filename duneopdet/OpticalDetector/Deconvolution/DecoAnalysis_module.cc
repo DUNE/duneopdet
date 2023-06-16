@@ -61,8 +61,8 @@ namespace opdet {
       std::string fInputModuleDigi;          // Input tag for OpDet collection
       std::string fInstanceName;             // Input tag for OpDet collection
       double fSampleFreq;                    // in MHz
-      float fTimeBegin;                      // in us
-      float fTimeEnd;                        // in us
+    //float fTimeBegin;                      // in us
+    // float fTimeEnd;                        // in us
   };  
 } 
 
