@@ -46,7 +46,7 @@ dunefd_opdigi_unganged:
    #Parameters for testbench SPE
 
    TestbenchSinglePE:    false     # false for ideal XArapuca response, true for testbench 
-   SPEDataFile:          "./fbk_DAPHNE_Dec22.txt"  #File containing the SPE with one column in the testbench to readout XARAPUCAS: DAPHNE electronics (62.5MHz) 
+ #  SPEDataFile:          "./fbk_DAPHNE_Dec22.txt"  #File containing the SPE with one column in the testbench to readout XARAPUCAS: DAPHNE electronics (62.5MHz) 
                                                   
    # readout window in optical ticks
    # buffer before waveform
@@ -74,7 +74,7 @@ dunefd_opdigi_threegang.algo_threshold.ADCThreshold:  15.000 # "2 PE" threshold 
 dunefd_opdigi_threegang_refactor: @local::dunefd_opdigi_threegang
 dunefd_opdigi_threegang_refactor.InputModules: ["PDFastSim"]
 
-dunefd_opdigi: @local::dunefd_opdigi_threegang
+dunefd_opdigi: @local::dunefd_opdigi_threegang_refactor
 
 protodune_opdigi: @local::dunefd_opdigi_threegang
 protodune_opdigi.algo_threshold: @local::standard_algo_sspleadingedge
@@ -83,19 +83,19 @@ protodune_opdigi_refactor: @local::protodune_opdigi
 protodune_opdigi_refactor.InputModules: ["PDFastSim"]
 
 
-standard_fbk_daphnev2_template_digitizer: @local::dunefd_opdigi_threegang
+standard_fbk_daphnev2_template_digitizer: @local::dunefd_opdigi_threegang_refactor
 standard_fbk_daphnev2_template_digitizer.TestbenchSinglePE: true
-standard_fbk_daphnev2_template_digitizer.SPEDataFile: "./fbk_digi_deco_2023.txt" # Path to SPE template
+standard_fbk_daphnev2_template_digitizer.SPEDataFile: "SPE_DAPHNE2_FBK_2022.dat" # Path to SPE template
 standard_fbk_daphnev2_template_digitizer.algo_threshold: @local::template_algo_sspleadingedge
 
 standard_hpk_daphnev2_template_digitizer: @local::standard_fbk_daphnev2_template_digitizer
-standard_kpk_daphnev2_template_digitizer.SPEDataFile: "./hpk_digi_deco_2023.txt" # Path to SPE template
+standard_kpk_daphnev2_template_digitizer.SPEDataFile: "SPE_DAPHNE2_HPK_2022.dat" # Path to SPE template
 
 standard_fbk_caen_template_digitizer: @local::standard_fbk_daphnev2_template_digitizer
-standard_fbk_caen_template_digitizer.SPEDataFile: "./FBK_SPE_CAEN_45%PDE_2023.txt" # Path to SPE template
+standard_fbk_caen_template_digitizer.SPEDataFile: "SPE_CAEN_FBK_2022.dat" # Path to SPE template
 
 standard_hpk_caen_template_digitizer: @local::standard_fbk_daphnev2_template_digitizer
-standard_kpk_caen_template_digitizer.SPEDataFile: "./HPK_SPE_CAEN_45%PDE_2023.txt" # Path to SPE template
+standard_kpk_caen_template_digitizer.SPEDataFile: "SPE_CAEN_HPK_2022.dat" # Path to SPE template
 
 standard_template_digitizer: @local::standard_fbk_daphnev2_template_digitizer
 

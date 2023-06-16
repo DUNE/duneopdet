@@ -6,7 +6,7 @@ BEGIN_PROLOG
 
 WfmWienerfilter: {
     Name: "Wiener"
-    Cutoff: 1.       # Cutoff is not used in this filter
+    Cutoff: 0.1      # Cutoff is not used in this filter
 }
   
 WfmGaussfilter: {
@@ -29,9 +29,9 @@ dune_deconvolution:
   PreTrigger:        100      # In [ticks] 
   Pedestal:          1500     # In [ADC]
   Samples:           1000     # Timewindow (ReadoutWindow) in [ticks]
-  Scale:             0.001    # Scaling of resulting deconvolution signal.
-  DigiDataColumn:      0      # SPE template source file column.                     
-  DigiDataFile:      "fbk_decon_digi_2023.txt"    
+  Scale:             1        # Scaling of resulting deconvolution signal.
+  DigiDataColumn:     0       # SPE template source file column.                     
+  DigiDataFile:      "SPE_DAPHNE2_FBK_2022.dat"    
                      # The SPE template with undershoot and without pretrigger (in ADC*us), 
                      # was obtained from DAPHNE V2 and the cold amplifier (with 48 SiPM FBK/HPK).
   
@@ -47,14 +47,14 @@ dune_deconvolution:
        
 }
 
- //DataFile hpk
+ #DataFile hpk
  dune_deconvolution_hpk: @local::dune_deconvolution
- dune_deconvolution_hpk.SPEDataFile: "hpk_deco_digi.txt"
+ dune_deconvolution_hpk.SPEDataFile: "SPE_DAPHNE2_HPK_2022.dat"
  
- //Postfilter Cutoff 
+ #Postfilter Cutoff 
  dune_deconvolution.WfmPostfilter.Cutoff: 2.8     # Use this value only for postfilter.
  
- //By debbuging and review the values (SNR,H,S,N,G0,G1,G,V,v) of the Wiener filter:
+ #By debbuging and review the values (SNR,H,S,N,G0,G1,G,V,v) of the Wiener filter:
  deconvolution_snr: @local::dune_deconvolution
  deconvolution_snr.OutputProduct: "SNR"
 

@@ -61,6 +61,7 @@
 #include <cmath>
 #include <memory>
 #include <string>
+#include <iostream>
 #include <sstream>
 #include <fstream>
 
@@ -549,22 +550,26 @@ namespace opdet {
   {
 
     if (TestbenchSinglePE) {
+      std::cout << "Using TESTbench spe!!! "<< std ::endl;
+      std::cout << "With: " << fSPEDataFile << std::endl;
+      std::string datafile;
+      cet::search_path sp("FW_SEARCH_PATH");
+      // taking the file name as the first argument,
+      // the second argument is the local variable where to store the full path - both are std::string objects
+      sp.find_file(fSPEDataFile, datafile);
       std::ifstream SPEData;
-      SPEData.open(fSPEDataFile);
+      SPEData.open(datafile);
       if (SPEData.is_open()) {
        mf::LogDebug("OpDetDigitizerDUNE") << " using testbench pe response";
        std::vector< double > SinglePEVec_x;   //1 column
        Double_t  x; 
        while (SPEData >> x ) { SinglePEVec_x.push_back(x); } 
        fSinglePEWaveform = SinglePEVec_x;
-             
-       std::cout << " out "<<" using TESTbench spe "<< std ::endl;
-        
        fPulseLength = fSinglePEWaveform.size();
        SPEData.close(); 
-       return;    
+       return;       
       }
-       else {
+      else {
       throw cet::exception("OpDetDigitizerDUNE") << "No Waveform File: Cannot open SPE template file.\n"; 
       }       
    }
