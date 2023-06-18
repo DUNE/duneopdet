@@ -46,7 +46,8 @@ dunefd_opdigi_unganged:
    #Parameters for testbench SPE
 
    TestbenchSinglePE:    false     # false for ideal XArapuca response, true for testbench 
- #  SPEDataFile:          "./fbk_DAPHNE_Dec22.txt"  #File containing the SPE with one column in the testbench to readout XARAPUCAS: DAPHNE electronics (62.5MHz) 
+#  SPEDataFile:          "./fbk_DAPHNE_Dec22.txt"  #File containing the SPE with one column in the testbench to readout XARAPUCAS: DAPHNE electronics (62.5MHz) 
+   SPEDataFile: "SPE_DAPHNE2_FBK_2022.dat"
                                                   
    # readout window in optical ticks
    # buffer before waveform
