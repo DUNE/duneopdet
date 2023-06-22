@@ -149,4 +149,26 @@ dunevd_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDoping10ppm
 dunevd_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/dunevd_175nm_tf2.6"
 
 
+
+################
+# protoDUNE-VD #
+################
+
+protodune_vd_pdfastsim_ann_ar:
+{
+       module_type:         "PDFastSimANN"
+       SimulationLabel:     "IonAndScint"
+       DoSlowComponent:     true
+       ScintTimeTool:       @local::ScintTimeLAr
+       TFLoaderTool:
+       {
+           tool_type:       TFLoaderMLP
+           ModelName:       "PhotonPropagation/ComputableGraph/protodune_vd_128nm_tf2.6"
+           InputsName:      ["serving_default_pos_x:0", "serving_default_pos_y:0", "serving_default_pos_z:0"]
+           OutputName:      "StatefulPartitionedCall:0"
+       }
+}
+
+
+
 END_PROLOG
