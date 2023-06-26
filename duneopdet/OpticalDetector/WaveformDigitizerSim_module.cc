@@ -319,6 +319,8 @@ namespace opdet {
                                                                                "waveformdigi", 
                                                                                config.get_PSet(), 
                                                                                "SeedWaveformDigi") )
+                                                                                                                                                                                                                           
+                                                                  
     , fRandGauss(fOpDigiEngine)
   {
 

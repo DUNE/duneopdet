@@ -1,0 +1,11 @@
+BEGIN_PROLOG
+
+dune_deco_analysis:
+   {
+     module_type:              "DecoAnalysis"
+     InputModuleDeco:          "opdec" 
+     InputModuleDigi:          "opdigi" 
+     InstanceName:             "" 
+   }
+
+END_PROLOG

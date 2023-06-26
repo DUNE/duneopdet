@@ -1,0 +1,64 @@
+BEGIN_PROLOG
+
+###################################################################
+# Configuration for the filters:
+###################################################################
+
+WfmWienerfilter: {
+    Name: "Wiener"
+    Cutoff: 0.1      # Cutoff is not used in this filter
+}
+  
+WfmGaussfilter: {
+    Name: "Gauss"
+    Cutoff: 1.       # In MHz.The cutoff frequency is defined by the standard deviation in the frequency domain.
+}                    # The cutoff value should be changed if signal smoothing is not observed.
+ 
+###################################################################
+
+
+dune_deconvolution:
+{
+  module_type:       "Deconvolution"
+  InputModule:       "opdigi"              
+  InstanceName:      ""    
+ 
+  #The LineNoiseRMS,PreTrigger,Pedestal, Samples and DigiDataFile below have the same values as the Digitizer.
+
+  LineNoiseRMS:      3        # Pedestal RMS in [ADC] counts, likely an underestimate
+  PreTrigger:        100      # In [ticks] 
+  Pedestal:          1500     # In [ADC]
+  Samples:           1000     # Timewindow (ReadoutWindow) in [ticks]
+  Scale:             1        # Scaling of resulting deconvolution signal.
+  DigiDataColumn:     0       # SPE template source file column.                     
+  DigiDataFile:      "SPE_DAPHNE2_FBK_2022.dat"    
+                     # The SPE template with undershoot and without pretrigger (in ADC*us), 
+                     # was obtained from DAPHNE V2 and the cold amplifier (with 48 SiPM FBK/HPK).
+  
+  AutoScale:             true   # Scaling based on SPE amplitude from template (Use "true" for Wiener Filter and
+                                # "false" for Gauss Filter). If set to false the value of Scale is used.
+  ApplyPostBLCorrection: true   # Correct baseline after the deconvolution process.
+  PedestalBuffer:         20    # In [ticks], should always be smaller than PreTrigger.
+  
+  ApplyPostfilter:       true   # Filter the waveforms after deconvolution.
+  
+  WfmFilter: @local::WfmWienerfilter     # Write the filter: "WfmWienerfilter" or "WfmGaussfilter"
+  WfmPostfilter: @local::WfmGaussfilter  # Only available "Gauss" postfilter.
+       
+}
+
+ #DataFile hpk
+ dune_deconvolution_hpk: @local::dune_deconvolution
+ dune_deconvolution_hpk.SPEDataFile: "SPE_DAPHNE2_HPK_2022.dat"
+ 
+ #Postfilter Cutoff 
+ dune_deconvolution.WfmPostfilter.Cutoff: 2.8     # Use this value only for postfilter.
+ 
+ #By debbuging and review the values (SNR,H,S,N,G0,G1,G,V,v) of the Wiener filter:
+ deconvolution_snr: @local::dune_deconvolution
+ deconvolution_snr.OutputProduct: "SNR"
+
+
+END_PROLOG
+  
+  

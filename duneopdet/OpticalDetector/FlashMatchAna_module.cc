@@ -77,6 +77,8 @@ namespace opdet {
     // go from this custom example to your own task.
 
     // The parameters we'll read from the .fcl file.
+    std::string fEdepLabel;                // Input tag for Energy deposit collection
+    std::string felecDriftLabel;           // Input tag for electron Drift collection
     std::string fOpFlashModuleLabel;       // Input tag for OpFlash collection
     std::string fOpHitModuleLabel;         // Input tag for OpHit collection
     std::string fSignalLabel;              // Input tag for the signal generator label
@@ -191,6 +193,8 @@ namespace opdet {
   {
 
     // Indicate that the Input Module comes from .fcl
+    fEdepLabel          = pset.get<std::string>("EdepLabel","IonAndScint");
+    felecDriftLabel     = pset.get<std::string>("elecDriftLabel","elecDrift");
     fOpFlashModuleLabel = pset.get<std::string>("OpFlashModuleLabel");
     fOpHitModuleLabel   = pset.get<std::string>("OpHitModuleLabel");
     fSignalLabel        = pset.get<std::string>("SignalLabel");
@@ -348,7 +352,8 @@ namespace opdet {
 
     ////Edep handle
     art::Handle<std::vector<sim::SimEnergyDeposit>> edep_handle;
-    if (!evt.getByLabel("IonAndScint", edep_handle)) {
+    if (!evt.getByLabel(fEdepLabel, edep_handle)) {
+      mf::LogWarning("FlashMatchAna") << "Cannot load any energy deposits. Failing";
       return;
     }
    
@@ -448,15 +453,16 @@ namespace opdet {
 
       //Get the total visible energy deposited in the LAr AV
       //TPC SimChannels
-      std::vector<const sim::SimChannel*> fSimChannels;
-      evt.getView("elecDrift",fSimChannels);
       float totalEdep=0.0;
+      std::vector<const sim::SimChannel*> fSimChannels;
+      if (!evt.getView(felecDriftLabel, fSimChannels)) {
+        mf::LogWarning("FlashMatchAna") << "Cannot load electron drift product. Failing";
+      }
+      evt.getView(felecDriftLabel,fSimChannels);
       for(auto const &chan : fSimChannels ){
 	for(auto const &tdcide : chan->TDCIDEMap()){
 	  for(const auto& ide :tdcide.second){
-	    //const simb::MCParticle *particle = pinv->TrackIdToParticle_P(ide.trackID);
 	    const art::Ptr<simb::MCTruth> mc=pinv->TrackIdToMCTruth_P(ide.trackID);
-	    // std::cout<<"Origin is "<<mc->Origin()<<std::endl;
 	    if(fIsNDK){//trick to get correct Edep for NDK events since they are labelled as unknown generator/Origin
               if(mc->Origin()==4) continue;//all bkg generators are labelled as single particles (Origin =4)
             }else{
@@ -468,20 +474,15 @@ namespace opdet {
       double edepsim=0.0;
       ////Energy deposit using SimEnergyDeposit
        for (auto const& edepi : *edep_handle) {
-	 //	auto const [energyDeposit, nElectrons, nPhotons, scintYieldRatio] = fISAlg->CalcIonAndScint(detProp, edepi);
 	 edepsim+=edepi.Energy();
-	 //	 std::cout<<edepi.Energy()<<std::endl;
       }
       
-      //  fEdepSimE=edepsim;
       ////////////////////
 
 
       // Get just the neutrino, entry 0 from the list, and record its properties
       const simb::MCParticle& part(mctruth->GetParticle(0));
      
-          
-      std::cout<<"Edep channel......, simEnergy "<<totalEdep/3.0<<"   "<<edepsim<<" trueE "<<part.E()<<"  EndProcess "<<part.EndProcess()<<std::endl;
 
       fTrueX     = part.Vx();
       fTrueY     = part.Vy();

@@ -1,4 +1,3 @@
-#add_subdirectory(BackTrackingTests)
 
 art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 LIBRARY_NAME duneopdet_OpticalDetector
@@ -79,11 +78,6 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
 
 )
 
-file(GLOB dat_files *.dat)
-install_fw( LIST ${dat_files} )
-
 install_headers()
 install_fhicl()
 install_source()
-
-add_subdirectory(Deconvolution)
