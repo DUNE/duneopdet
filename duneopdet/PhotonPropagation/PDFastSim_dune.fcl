@@ -156,6 +156,7 @@ dunevd_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableG
 
 protodune_vd_pdfastsim_ann_ar:
 {
+       # Computable graph generated for protodunevd_v2_refactored.gdml
        module_type:         "PDFastSimANN"
        SimulationLabel:     "IonAndScint"
        DoSlowComponent:     true
