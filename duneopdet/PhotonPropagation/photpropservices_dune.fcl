@@ -268,6 +268,54 @@ dune10kt_vd_photonvisibilityservice_ArXe: # Generated using 1x8x14 geometry.
 }
 
 
+dune10kt_vd_photonvisibilityservice_Ar: # Generated using 1x8x14 geometry. 
+{
+  # hybrid library
+  NX: 85
+  NY: 174
+  NZ: 220
+
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  # IncludePropTime: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/PhotonLibrary_dunevd10kt_3view_30deg_v5_refactored_1x8x14ref_argon_active_removed.root"    
+  # This is the merged library between argon and xenon, for the hybrid model. 
+
+  XMin: -425
+  XMax: 425
+  YMin: -781.26
+  YMax: 781.26
+  ZMin: -104.0305
+  ZMax: 2195.6405
+
+}
+
+dune10kt_vd_photonvisibilityservice_Xe: # Generated using 1x8x14 geometry. 
+{
+  # hybrid library
+  NX: 85
+  NY: 174
+  NZ: 220
+
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  # IncludePropTime: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/PhotonLibrary_dunevd10kt_3view_30deg_v5_refactored_1x8x14ref_xenon_active_removed.root"    
+  # This is the merged library between argon and xenon, for the hybrid model. 
+
+  XMin: -425
+  XMax: 425
+  YMin: -781.26
+  YMax: 781.26
+  ZMin: -104.0305
+  ZMax: 2195.6405
+
+}
+
 ##########################
 # ProtoDUNE Single Phase #
 ##########################

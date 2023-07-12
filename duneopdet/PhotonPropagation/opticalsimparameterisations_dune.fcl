@@ -600,7 +600,6 @@ dunevd_vuv_Argon_hits_parameterization:
 
 	delta_angulo_vuv: 10
 
-	ApplyFieldCageTransparency: false
 }
 
 
@@ -658,8 +657,6 @@ dunevd_vuv_Xenon_hits_parameterization:
  GH_border_flat_lateral: @local::GH_border_Xenon_flat_lateral_dunevd
 
  DomePDCorr: false 
-
- ApplyFieldCageTransparency: false
 
 }
 
