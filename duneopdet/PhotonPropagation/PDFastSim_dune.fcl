@@ -116,7 +116,7 @@ protodune_hd_pdfastsim_pvs_external.OnlyActiveVolume: 	      false
 protodune_hd_pdfastsim_pvs_external.SimulationLabel:          IonAndScintExternal
 protodune_hd_pdfastsim_pvs_external.IncludePropTime:  	      true   
 protodune_hd_pdfastsim_pvs_external.DoFastComponent:          true
-protodune_hd_pdfastsim_pvs_external.DoSlowComponent:          false
+protodune_hd_pdfastsim_pvs_external.DoSlowComponent:          true
 protodune_hd_pdfastsim_pvs_external.DoReflectedLight:         false         
 protodune_hd_pdfastsim_pvs_external.VUVTiming:	  	      @local::dune_vuv_timing_parameterization
 
