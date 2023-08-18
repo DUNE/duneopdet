@@ -1,7 +1,7 @@
 # New fhicl file for library generation. It was based on the
 # photonlibrary_builder_icarus.fcl by Gianluca Petrillo
 #
-# This configuration is base for the simulation of a few voxels of the
+# This configuration is base for the full simulation of voxels of the
 # photon visibility lookup table ("photon library") for ProtoDUNE-HD.
 # 
 
@@ -29,12 +29,8 @@
 process_name: LibraryBuild
 
 
-################################################################################
-###  service configuration
-################################################################################
-
-services: {
-  
+services:
+{
   @table::protodune_larg4_services
   
   @table::dunefd_photolibbuild_services 
@@ -47,11 +43,14 @@ services: {
   SpaceChargeService: @erase
   Geometry:		@local::protodunehdv1_geo
   
-} # services
+}
+
 
 #Use the following lines if you need to change the geometry by hand (e.g. test geometry)
-#services.Geometry.GDML: "protodunehd_v2_refactored.gdml"
-#services.Geometry.ROOT: "protodunehd_v2_refactored.gdml"
+#services.Geometry.GDML: "dunevdcb1_v2_refactored.gdml"
+#services.Geometry.ROOT: "dunevdcb1_v2_refactored.gdml"
+
+#services.OpDetResponseInterface.LongAxis: z
 
 services.TFileService.fileName: "Photonlibrary_protodunehd.root"
 
@@ -93,9 +92,9 @@ services.PhotonVisibilityService: {
   
   UseCryoBoundary:  true
   
-  NX:  5  # 5 voxels along X direction
-  NY:  5  # 5 voxels along Y direction
-  NZ:  5  # 5 voxels along Z direction
+  NX:  100  # 100 voxels along X direction
+  NY:  100  # 100 voxels along Y direction
+  NZ:  100  # 100 voxels along Z direction
 
 } # services.PhotonVisibilityService
 
@@ -107,14 +106,20 @@ services.LArPropertiesService.ScintPreScale: 1.0
 ###  workflow configuration
 ################################################################################
 
+#Start each new event with an empty event.
 source:
 {
   module_type: EmptyEvent
-  maxEvents:   125        # Number of events to create
+  maxEvents:   2           # Number of events to create
   firstRun:    1           # Run number to use for this file
   firstEvent:  1           # number of first event in the file
 }
-physics: {
+
+# Define and configure some modules to do work on each event.
+# First modules are defined; they are scheduled later.
+# Modules are grouped by type.
+physics:
+{
 
  producers:
  {
@@ -122,28 +127,54 @@ physics: {
    largeant:  @local::standard_largeant	  
  }
 
-  analyzers: {
-    pmtresponse: {
-      module_type:  SimPhotonCounter
-      GeneratorModule:            "generator"
-      Verbosity:                   0 # quiet!
-      MakeAllPhotonsTree:      false
-      MakeDetectedPhotonsTree: false
-      MakeOpDetsTree:          false
-      MakeOpDetEventsTree:     false
-      MakeLightAnalysisTree:   false
-    }
-  } # analyzers
+ analyzers:
+ {
+   pmtresponse: @local::dunefd_simphotoncounter    # defined in opticaldetectormodules.fcl
+ }
 
-  simulate:  [ generator, largeant ]
-  analyzeIt: [ pmtresponse ]
+ #define the producer and filter modules for this path, order matters, 
+ #filters reject all following items.  see lines starting physics.producers below
+ simulate: [ generator, largeant ] 
+ analyzeIt:  [ pmtresponse ]
+ #define the output stream, there could be more than one if using filters  stream1:  [ ]
+ stream1:  [ ]
 
-} # physics
+ #trigger_paths is a keyword and contains the paths that modify the art::event, 
+ #ie filters and producers
+ trigger_paths: [simulate] 
+
+ #end_paths is a keyword and contains the paths that do not modify the art::Event, 
+ #ie analyzers and output streams.  these all run simultaneously
+ end_paths:     [analyzeIt, stream1]  
+}
+
+#block to define where the output goes.  if you defined a filter in the physics
+#block and put it in the trigger_paths then you need to put a SelectEvents: {SelectEvents: [XXX]}
+#entry in the output stream you want those to go to, where XXX is the label of the filter module(s)
+outputs:
+{
+ out1:
+ {
+   module_type: RootOutput
+   fileName:    "notused.root" #default file name, can override from command line with -o or --output
+ }
+}
 
 
-#
-# Optical specific module configuration:
-#
+##### Parameter changes for the generator (lightsource) #####
 
-# we do not save, nor create, MCParticle objects
-physics.producers.largeant.MakeMCParticles: false
+# do not allow lightsource to write output into root file
+physics.producers.generator.FillTree: false
+
+##### Parameter changes for the pmt response analyzer (simphotoncounter) #####
+
+physics.analyzers.pmtresponse.MakeAllPhotonsTree: false
+physics.analyzers.pmtresponse.MakeDetectedPhotonsTree: false
+physics.analyzers.pmtresponse.MakeOpDetsTree: false
+physics.analyzers.pmtresponse.MakeOpDetEventsTree: false
+
+#How many photons to generate per voxel
+physics.producers.generator.N: 100000
+
+# To disable wireplane absorption, uncomment this line
+#services.LArG4Parameters.OpticalParamModels: ["TransparentPlaneAction"]
