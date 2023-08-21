@@ -166,6 +166,7 @@ dunefd_ophit_threegang.HitAlgoPset.ADCThreshold: 6
 dunefd_ophit: @local::dunefd_ophit_threegang
 
 dunefdvd_ophit: @local::dunefd_ophit
+dunefdvd_ophit.InputModule: opdigi10ppm
 dunefdvd_ophit.HitAlgoPset.ADCThreshold: 15
 dunefdvd_ophit.SPEArea: 130
 dunefdvd_ophit.HitAlgoPset.Pedestal: 500
@@ -210,9 +211,9 @@ dunefd_opdigiana:
    InstanceName:     ""    
    SSP_LED_AnaTree:  false 
 }
+
 dunefd_opflashana:       @local::standard_opflashana
 dunefd_opflashana.MakePerEventFlashTree: true
-
 
 dunefd_averagewaveform:
 {

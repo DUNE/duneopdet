@@ -53,6 +53,7 @@
 // CLHEP includes
 
 #include "CLHEP/Random/RandGauss.h"
+#include "CLHEP/Random/RandFlat.h"
 
 // C++ includes
 
@@ -221,6 +222,7 @@ namespace opdet {
     // Random number engines
     CLHEP::HepRandomEngine& fOpDigiEngine;
     CLHEP::RandGauss        fRandGauss;
+    CLHEP::RandFlat         fRandFlat;
 
     double fSampleFreqMHz; 
     size_t fPulseLengthTicks;
@@ -247,8 +249,9 @@ namespace opdet {
     // Add photons to an existing waveform
 
     void AddPEsToWaveform(const sim::OpDetDivRec* dr_p,
-                          vector<double> &        pdWaveform,
-                          FocusList &             fls) const;
+                          unsigned int nChannelsPerOpDet,
+                          vector<vector<double>> & hardwareWaveform,
+                          std::vector<FocusList> & fls); // const;
 
     // Vary the pedestal
     void AddLineNoise(vector< double > & waveform, 
@@ -322,6 +325,7 @@ namespace opdet {
                                                                                                                                                                                                                            
                                                                   
     , fRandGauss(fOpDigiEngine)
+    , fRandFlat(fOpDigiEngine)
   {
 
     // This module produces (infrastructure piece)
@@ -450,6 +454,9 @@ namespace opdet {
   //---------------------------------------------------------------------------
   void WaveformDigitizerSim::produce(art::Event& event)
   {
+    // Geometry service
+    art::ServiceHandle< geo::Geometry > geometry;
+
     // A pointer that will store produced OpDetWaveforms
     auto wave_forms_p = std::make_unique< vector< raw::OpDetWaveform > >();
 
@@ -465,41 +472,50 @@ namespace opdet {
         mf::LogWarning("WaveformDigitizerSim") << "Could not load OpDetDivRecs " << tag << ". Skipping.";
         continue;
       }
+
       for (auto const& dr : *dr_handle) {
         DivRecsByChannel[dr.OpDetNum()].push_back( &dr );
       }
     }
 
-    // Now, loop through channels, treating all photons on a cha
+    // Now, loop through channels, treating all photons on a channel
     for (auto const& [opDet, vDivRecs]: DivRecsByChannel)
     {
-      // Create the empty waveform vector and focus list
-      vector< double > pdWaveform(nSamples, fPedestal);
-      FocusList fls(nSamples, fPadding);
+      // Get number of readout channels in this optical detector
+      unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
+
+      // Create the vector (to address multiple readout channels per OpDet) of empty waveform vector and focus list
+      std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
+                                                       std::vector< double >(nSamples, static_cast< double >(fPedestal)));
+      std::vector<FocusList> fls(nChannelsPerOpDet, FocusList(nSamples, fPadding));
 
       // Add a PE template to the waveform for each true photon
-      for (auto dr_p: vDivRecs) AddPEsToWaveform(dr_p, pdWaveform, fls);
+      for (auto dr_p: vDivRecs) AddPEsToWaveform(dr_p, nChannelsPerOpDet, pdWaveforms, fls);
 
-      // So that line noise is added to all ticks in full output mode
-      if (fFullWaveformOutput)  fls.everything(); 
+      //Loop to correctly assign the waveforms to readout channels, if more than 1 per OpDet
+      for(unsigned int rdCh=0; rdCh<nChannelsPerOpDet; rdCh++){
+        int readoutChannel = geometry->OpChannel(opDet, rdCh);
+        // So that line noise is added to all ticks in full output mode
+        if (fFullWaveformOutput)  fls[rdCh].everything(); 
 
-      // Add line noise
-      AddLineNoise(pdWaveform, fls);
+        // Add line noise
+        AddLineNoise(pdWaveforms[rdCh], fls[rdCh]);
 
-      if (fFullWaveformOutput) {
-        wave_forms_p->emplace_back(Tick2us(0), opDet, Digitize(pdWaveform.begin(), pdWaveform.end()));
-      }
-      else {
+        if (fFullWaveformOutput) {
+        wave_forms_p->emplace_back(Tick2us(0), readoutChannel, Digitize(pdWaveforms[rdCh].begin(), pdWaveforms[rdCh].end()));
+        }
+        else {
         // Checking for tiggers on floats, rather than shorts.
         // This is an approximation, but it saves making an extra copy
         // of the waveform and makes the code easier to follow.
-        for ( auto t: CFDTrigger(pdWaveform, fls) ) {
+          for ( auto t: CFDTrigger(pdWaveforms[rdCh], fls[rdCh]) ) {
 
-          // Digitize and store
-          auto shortWF = Digitize(pdWaveform.begin()+t.first, pdWaveform.begin()+t.second+1);
-          wave_forms_p->emplace_back(Tick2us(t.first), opDet,  shortWF);
+            // Digitize and store
+            auto shortWF = Digitize(pdWaveforms[rdCh].begin()+t.first, pdWaveforms[rdCh].begin()+t.second+1);
+            wave_forms_p->emplace_back(Tick2us(t.first), readoutChannel,  shortWF);
+          }
         }
-      }
+     }
     }
 
     // Push the OpDetWaveforms into the event
@@ -509,8 +525,9 @@ namespace opdet {
 
   //---------------------------------------------------------------------------
   void WaveformDigitizerSim::AddPEsToWaveform(sim::OpDetDivRec const* dr_p,
-                                              vector<double>&         pdWaveform,
-                                              FocusList&              fls) const
+                                              unsigned int nChannelsPerOpDet,
+                                              vector<vector<double>>& pdWaveform,
+                                              std::vector<FocusList>&        fls) //const
   {
     // Vector of DivRec time bins (struct OpDet_Time_Chans)
     for (auto odtc: dr_p->GetTimeChans()) {
@@ -520,7 +537,7 @@ namespace opdet {
       size_t timeBin       = ns2Tick(photonTime_ns);
 
       // Check if the photon is inside the digitization range. If not, skip it.
-      if ( timeBin < 0 || timeBin >= pdWaveform.size() ) {
+      if ( timeBin < 0 || timeBin >= pdWaveform[0].size() ) { //fine to compare with a single waveform since they are all the same size
         mf::LogWarning("WaveformDigitizerSim") << "Skipping a photon at " << photonTime_ns/1000. << " us, outside digitization window of " << fTimeBegin << " to " << fTimeEnd;
         continue;
       }
@@ -530,15 +547,19 @@ namespace opdet {
       for (auto const& sdp : odtc.phots)
         nPE += sdp.phot;
 
-      // Add ticks until the end of the single PE waveform or end of the whole pdWaveform
-      size_t stop = std::min(fPulseLengthTicks, pdWaveform.size()-timeBin);
+      for(int n=0; n<nPE; n++){
+        // Randomly distribute detected photons into the different readout channels in this optical detector
+        int hardwareChannel = (int) ( fRandFlat.fire(1.0) * nChannelsPerOpDet ) ;
+        // Add ticks until the end of the single PE waveform or end of the whole pdWaveform
+        size_t stop = std::min(fPulseLengthTicks, pdWaveform[hardwareChannel].size()-timeBin);
 
-      // Add this range to the focus list
-      fls.AddRange(timeBin, timeBin+stop-1);
+        // Add this range to the focus list
+        fls[hardwareChannel].AddRange(timeBin, timeBin+stop-1);
 
-      // Add the nPE pulse to the waveform
-      for (size_t tick = 0; tick < stop; ++tick)
-        pdWaveform[timeBin+tick] += fSinglePEWaveform[tick]*nPE;
+        // Add the PE pulse to the waveform
+        for (size_t tick = 0; tick < stop; ++tick)
+          pdWaveform[hardwareChannel][timeBin+tick] += fSinglePEWaveform[tick];
+      }
     }
   }
 

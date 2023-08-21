@@ -20,6 +20,7 @@ xarapuca_ar_refl.Correction:                  0.5 # 50% ref. efficinecy
 # Early light reduced by ~3% (neglect for now)
 # Late light reduced to 24%
 xarapuca_ar_xe10ppm:                         @local::xarapuca_ar
+xarapuca_ar_xe10ppm.InputTag:                "PDFastSimAr"
 xarapuca_ar_xe10ppm.Correction:              0.65
 xarapuca_ar_xe10ppm.LateLightCorrection:     0.31
 xarapuca_ar_xe10ppm.LateLightBoundary:       10   # ns
@@ -44,5 +45,12 @@ xarapuca_xetuned_xe10ppm.QuantumEfficiency:  0.056
 xarapuca_xetuned_xe10ppm_refl:               @local::xarapuca_xetuned_xe10ppm
 xarapuca_xetuned_xe10ppm_refl.InputTag:      "PDFastSimXe:reflected"
 xarapuca_xetuned_xe10ppm_refl.Correction:    0.175 # .25 * .70
+
+#External volume config for VD
+xarapuca_ar_xe10ppm_ext:                    @local::xarapuca_ar_xe10ppm
+xarapuca_ar_xe10ppm_ext.InputTag:           "PDFastSimArExternal"
+
+xarapuca_xe_xe10ppm_ext:                    @local::xarapuca_xe_xe10ppm
+xarapuca_xe_xe10ppm_ext.InputTag:           "PDFastSimXeExternal"
 
 END_PROLOG

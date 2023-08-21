@@ -186,9 +186,9 @@ namespace opdet {
         << "Final QE must be equal to or smaller than the QE applied at simulation time.\n";
     }
 
-
+    //This will be handled on the WaveformDigitizerSim_module.cc 
     // Check for non-trivial channel mapping which is not supported
-    art::ServiceHandle< geo::Geometry > geometry;
+/*    art::ServiceHandle< geo::Geometry > geometry;
     for (unsigned int opDet = 0; opDet < geometry->NOpDets() ; ++opDet) {
       if (geometry->NOpHardwareChannels(opDet) > 1)
         throw art::Exception(art::errors::Configuration)
@@ -196,7 +196,7 @@ namespace opdet {
           << " channels associated with it. \n"
           << "This kind of channel mapping is not supported by SIPMOpSensorSim.\n"
           << "You need to use the legacy OpDetDigitizerDUNE instead.\n";
-    }
+    }*/
 
     // Set time ranges if needed for dark noise
     if (fDarkNoiseRate > 0) SetBeginEndTimes();
