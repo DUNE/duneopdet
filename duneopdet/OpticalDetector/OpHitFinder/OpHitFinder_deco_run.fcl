@@ -2,7 +2,7 @@
 #include "opticaldetectorservices_dune.fcl"
 #include "services_dune.fcl"
 #include "OpHitFinderDeco.fcl"
-#include "OpFlashAna_Deco.fcl"
+#include "OpFlashAnaDeco.fcl"
 #include "tools_dune.fcl"
 
 process_name: Reco
