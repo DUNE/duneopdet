@@ -3,7 +3,7 @@ BEGIN_PROLOG
 dune_opflashana_deco:
 {
      
-  module_type:           "OpFlashAna_Deco"
+  module_type:           "OpFlashAnaDeco"
   OpFlashModuleLabel:    "opflash"   #opflashfinder module
   OpHitModuleLabel:      "ophitspe"  #ophitfinder module
   InputrecobOpflash:     "false"     # Write "true" if the input includes recob::OpFlash
