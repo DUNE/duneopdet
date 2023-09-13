@@ -10,7 +10,7 @@ dune_ophit_finder_deco:
     
     InputDigiType:   "recob" # Write recob for OpWaveform object raw OpDetWaveform object
     ChannelMasks:    []      # Will ignore channels in this list
-    HitThreshold:    3.0     # Amplitude threshold for hits "5.0 for Gauss" and "2.0 for Wiener" 
+    HitThreshold:    3.0     # Amplitude threshold for hits "5.0 for Gauss" and "3.0 for Wiener" 
     UseCalibrator:   false   # If set to false, SPE parameters below
                              # are used. If set to true, is it unusable? 
     AreaToPE:        true    # Use area to calculate number of PEs
