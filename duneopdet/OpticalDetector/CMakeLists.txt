@@ -87,3 +87,4 @@ install_fhicl()
 install_source()
 
 add_subdirectory(Deconvolution)
+add_subdirectory(OpHitFinder)
