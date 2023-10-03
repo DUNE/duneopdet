@@ -321,8 +321,10 @@ namespace opdet {
         }
         if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
+      /* totPE is set but not used
       double totPE = 0;
       for (int idx : curN) totPE += ohits[idx]->PE();
+      */
       if (int(curN.size())<fMinN) continue;
 
       // Loop through neighboring hits, chck if it's a core hit
@@ -376,8 +378,10 @@ namespace opdet {
         if (abs(ohits[j]->PeakTimeAbs()-tCenter)>fBreakTime) break;
       }
 
+      /* finE is set but not used
       double finE = 0;
       for (int idx : curN) finE += ohits[idx]->PE();
+      */
 
       // Grab the y-z information from the geometry
       std::vector<double> ys;
@@ -407,10 +411,12 @@ namespace opdet {
       double yWidth = maxY-minY;
       double zWidth = maxZ-minZ;
 
+      /* tot1 and tot2 are set but not used
       double tot1 = 0;
       double tot2 = 0;
       for (double PE : PEs) tot1 += PE;
       for (double PE : PE2s) tot2 += PE;
+      */
 
       // From OpFlashAlg
       int Frame = ts.OpticalClock().Frame(tCenter - 18.1);

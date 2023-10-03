@@ -121,10 +121,10 @@ namespace opdet {
     //---------------------------------------------------------------------------
     void AverageWaveform::endJob()
     {
-        double waveformCountAll = 0;
+        // double waveformCountAll = 0; // unused
         for (auto iter = averageWaveforms.begin(); iter != averageWaveforms.end(); iter++)
         {
-            waveformCountAll += waveformCount[iter->first];
+            // waveformCountAll += waveformCount[iter->first]; // unused
             mf::LogInfo("AverageWaveform") << "Scaling down channel " << iter->first << " by 1./" << waveformCount[iter->first] << std::endl;
             iter->second->Scale(1./waveformCount[iter->first]);
         }

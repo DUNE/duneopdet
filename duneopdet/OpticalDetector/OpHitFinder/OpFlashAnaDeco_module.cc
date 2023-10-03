@@ -1,5 +1,5 @@
 // ===============================================================
-// OpFlashAna_Deco_module.cc
+// OpFlashAnaDeco_module.cc
 // This module is based on the larana/OpFlashAna_module.cc.  
 // This analyzer writes out a TTree containing the properties of
 // each reconstructed ophit and opflash
@@ -10,8 +10,8 @@
 // each reconstructed flash
 //
 
-#ifndef OpFlashAna_Deco_h
-#define OpFlashAna_Deco_h
+#ifndef OpFlashAnaDeco_h
+#define OpFlashAnaDeco_h
 
 // ROOT includes
 #include "TH1.h"
@@ -41,10 +41,10 @@
 
 namespace opdet {
 
-  class OpFlashAna_Deco : public art::EDAnalyzer {
+  class OpFlashAnaDeco : public art::EDAnalyzer {
   public:
     // Standard constructor and destructor for an ART module.
-    OpFlashAna_Deco(const fhicl::ParameterSet&);
+    OpFlashAnaDeco(const fhicl::ParameterSet&);
 
     // The analyzer routine, called once per event.
     void analyze(const art::Event&);
@@ -131,13 +131,13 @@ namespace opdet {
 
   //-----------------------------------------------------------------------
   // Constructor
-  OpFlashAna_Deco::OpFlashAna_Deco(fhicl::ParameterSet const& pset) : EDAnalyzer(pset)
+  OpFlashAnaDeco::OpFlashAnaDeco(fhicl::ParameterSet const& pset) : EDAnalyzer(pset)
   {
 
     // Indicate that the Input Module comes from .fcl
     fOpFlashModuleLabel = pset.get<std::string>("OpFlashModuleLabel");
     fOpHitModuleLabel = pset.get<std::string>("OpHitModuleLabel");
-    fInputrecobOpflash = pset.get<std::string>("InputrecobOpflash",true);
+    fInputrecobOpflash = pset.get<std::string>("InputrecobOpflash");
     
     auto const clock_data =
       art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
@@ -258,7 +258,7 @@ namespace opdet {
   }
 
   //-----------------------------------------------------------------------
- void OpFlashAna_Deco::analyze(const art::Event& evt)
+ void OpFlashAnaDeco::analyze(const art::Event& evt)
   {
   
   // Access ART's TFileService, which will handle creating and writing
@@ -443,5 +443,5 @@ namespace opdet {
 } // namespace opdet
 
 namespace opdet {
-  DEFINE_ART_MODULE(OpFlashAna_Deco)
+  DEFINE_ART_MODULE(OpFlashAnaDeco)
 }
