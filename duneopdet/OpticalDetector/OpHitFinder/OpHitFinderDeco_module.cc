@@ -197,7 +197,9 @@ namespace opdet {
     auto const clock_data = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     auto const& calibrator(*fCalib);
 
-    if (fInputDigiType == "recob"){
+    if (fInputDigiType == "recob")
+    {
+      std::cout << "\nRunning Ophitfinder with InputDigiType = 'recob'\n";
       // Load pulses into WaveformVector
       art::Handle<std::vector<recob::OpWaveform>> decoHandle;
       art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
@@ -222,68 +224,63 @@ namespace opdet {
       }
 
     if (fInputDigiType == "raw"){
+      std::cout << "\nRunning Ophitfinder with InputDigiType = 'raw'\n";
       // Load pulses into WaveformVector
       art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
       evt.getByLabel(fInputModuledigi,rawHandle);
       assert(rawHandle.isValid());
-       if (fChannelMasks.empty() && fInputLabels.size() < 2) {
-      art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
-      if (fInputLabels.empty())
-        evt.getByLabel(fInputModuledigi, rawHandle);
-      else
-        evt.getByLabel(fInputModuledigi, fInputLabels.front(), rawHandle);
-      assert(rawHandle.isValid());
-      RunHitFinder(*rawHandle,
-                   *HitPtr,
-                   fPulseRecoMgr,
-                   *fThreshAlg,
-                   geometry,
-                   fHitThreshold,
-                   clock_data,
-                   calibrator,
-                   fUseStartTime); 
-    }
-    else {
-
-      // Reserve a large enough array
-      int totalsize = 0;
-      for (auto label : fInputLabels) {
+      
+      if (fChannelMasks.empty() && fInputLabels.size() < 2){
         art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
-        evt.getByLabel(fInputModuledigi, label, rawHandle);
-        if (!rawHandle.isValid()) continue; // Skip non-existent collections
-        totalsize += rawHandle->size();
+        if (fInputLabels.empty()) {evt.getByLabel(fInputModuledigi, rawHandle);}
+        else {evt.getByLabel(fInputModuledigi, fInputLabels.front(), rawHandle);}
+        assert(rawHandle.isValid());
+        RunHitFinder(*rawHandle,
+                    *HitPtr,
+                    fPulseRecoMgr,
+                    *fThreshAlg,
+                    geometry,
+                    fHitThreshold,
+                    clock_data,
+                    calibrator,
+                    fUseStartTime); 
       }
 
-      std::vector<raw::OpDetWaveform> WaveformVector;
-      WaveformVector.reserve(totalsize);
-
-      for (auto label : fInputLabels) {
-        art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
-        evt.getByLabel(fInputModuledigi, label, rawHandle);
-        if (!rawHandle.isValid()) continue; // Skip non-existent collections
-
-        for (auto const& wf : *rawHandle) {
-          if (fChannelMasks.find(wf.ChannelNumber()) != fChannelMasks.end()) continue;
-          WaveformVector.push_back(wf);
+      else{
+        int totalsize = 0;
+        for (auto label : fInputLabels) {
+          art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
+          evt.getByLabel(fInputModuledigi, label, rawHandle);
+          if (!rawHandle.isValid()) {continue;} // Skip non-existent collections
+          totalsize += rawHandle->size();
         }
-      }
 
-      RunHitFinder(WaveformVector,
-                   *HitPtr,
-                   fPulseRecoMgr,
-                   *fThreshAlg,
-                   geometry,
-                   fHitThreshold,
-                   clock_data,
-                   calibrator,
-                   fUseStartTime);
+        std::vector<raw::OpDetWaveform> WaveformVector;
+        WaveformVector.reserve(totalsize);
+
+        for (auto label : fInputLabels){
+          art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
+          evt.getByLabel(fInputModuledigi, label, rawHandle);
+          if (!rawHandle.isValid()) {continue;} // Skip non-existent collections
+          for (auto const& wf : *rawHandle) {
+            if (fChannelMasks.find(wf.ChannelNumber()) != fChannelMasks.end()) {continue;}
+            WaveformVector.push_back(wf);
+          }
+        }
+
+        RunHitFinder(WaveformVector,
+                    *HitPtr,
+                    fPulseRecoMgr,
+                    *fThreshAlg,
+                    geometry,
+                    fHitThreshold,
+                    clock_data,
+                    calibrator,
+                    fUseStartTime);
       }
     }
-
-    else{std::cout<<"InputDigiType not recognized"<<std::endl;}
-    
     // Store results into the event
-    std:: cout << "hit: " << HitPtr->size() << std::endl;
+    std:: cout << "Found hits: " << HitPtr->size() << "!\n";
     evt.put(std::move(HitPtr));
   }   
 } // namespace opdet
