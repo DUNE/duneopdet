@@ -1,0 +1,17 @@
+
+#BEGIN_PROLOG
+
+dunefdvd_opflash:
+{
+   module_type:          "OpFlashFinderVerticalDrift"
+   InputModule:          "ophit10ppm" 
+   MaximumTimeDistance:  2.0
+   MaximumTimeWindow:    2.0
+   Cdyz:                 1500.0
+   CMdz:                 1500.0
+   MMdz:                 1500.0   
+}
+
+
+
+#END_PROLOG
