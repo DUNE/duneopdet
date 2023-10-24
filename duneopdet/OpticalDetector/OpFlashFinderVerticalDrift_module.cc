@@ -436,7 +436,7 @@ namespace opdet {
    //geom.OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter(xyz_hitnumber);
    auto const xyz_hitnumber = geom.OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter();
 
-   std::cout <<"Earliest: "<< HitVector[sorted[hitnumber]].PeakTime() <<" " << xyz_hitnumber.X() << " " << xyz_hitnumber.Y() << " " << xyz_hitnumber.Z() << std::endl;
+   //std::cout <<"Earliest: "<< HitVector[sorted[hitnumber]].PeakTime() <<" " << xyz_hitnumber.X() << " " << xyz_hitnumber.Y() << " " << xyz_hitnumber.Z() << std::endl;
 
    for (int h=itTmin;h<itTmax;h++)
    {
@@ -455,36 +455,36 @@ namespace opdet {
        
        if(xyz_h.X() < fCx && xyz_hitnumber.X() < fCx){
          if(dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow && dist < fCdyz){ neighbors.push_back(h);processed[h]=true;}  	
-         std::cout <<" C C "<< fCdyz <<" "<< dist << std::endl; 
+         //std::cout <<" C C "<< fCdyz <<" "<< dist << std::endl; 
 
        }
        if(xyz_h.Y() > fRMy && xyz_hitnumber.Y() > fRMy){
          if(dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow && dist < fMMdz){ neighbors.push_back(h);processed[h]=true;}  
-         std::cout <<" R R "<< fMMdz <<" "<< dist << std::endl;
+         //std::cout <<" R R "<< fMMdz <<" "<< dist << std::endl;
        }
        if(xyz_h.Y() < fLMy && xyz_hitnumber.Y() < fLMy){
          if(dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow && dist < fMMdz){ neighbors.push_back(h);processed[h]=true;}
-         std::cout <<" L L "<< fMMdz <<" "<< dist << std::endl;
+         //std::cout <<" L L "<< fMMdz <<" "<< dist << std::endl;
        }
        if(TMath::Abs(xyz_h.Y()) > fRMy && xyz_hitnumber.X() < fCx){
          dist = TMath::Abs(dz);
          if(dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow && dist < fCMdz){ neighbors.push_back(h);processed[h]=true;} 
-         std::cout <<" C RL "<< fCMdz <<" "<< dist << std::endl;
+         //std::cout <<" C RL "<< fCMdz <<" "<< dist << std::endl;
        }
        if(xyz_h.X() < fCx && TMath::Abs(xyz_hitnumber.Y()) > fRMy){
          dist = TMath::Abs(dz);
          if(dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow && dist < fCMdz){ neighbors.push_back(h);processed[h]=true;}
-         std::cout <<" RL C "<< fCMdz <<" "<< dist << std::endl;
+         //std::cout <<" RL C "<< fCMdz <<" "<< dist << std::endl;
        }
        if(xyz_h.Y() < fLMy && xyz_hitnumber.Y() > fRMy){
          dist = TMath::Abs(dz);
          if(dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow && dist < fMMdz){ neighbors.push_back(h);processed[h]=true;}
-         std::cout <<" R L "<< fMMdz <<" "<< dist << std::endl;
+         //std::cout <<" R L "<< fMMdz <<" "<< dist << std::endl;
        }
        if(xyz_h.Y() > fRMy && xyz_hitnumber.Y() < fLMy){
          dist = TMath::Abs(dz);
          if(dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow && dist < fMMdz){ neighbors.push_back(h);processed[h]=true;}
-         std::cout <<" L R "<< fMMdz <<" "<< dist << std::endl;
+         //std::cout <<" L R "<< fMMdz <<" "<< dist << std::endl;
        }       
        //float distance = dx*dx + dy*dy + dz*dz;
 
@@ -517,20 +517,20 @@ namespace opdet {
    { 
      if(!processed[h])
      {
-       std::cout << "Start h :" << h << std::endl;  
+       //std::cout << "Start h :" << h << std::endl;  
        processed[h]=true;
        std::vector<int> N; N.clear();
        std::vector<int> nb =getNeighbors(HitVector,h, processed, HitVector[sorted[h]].PeakTime(),sorted,geom); 
        N.insert( N.end(), nb.begin(), nb.end() );
-       std::cout << "Main go: " << nb.size() << std::endl;
+       //std::cout << "Main go: " << nb.size() << std::endl;
        for (unsigned int i=0;i<N.size();i++)
        {
            std::vector<int> nb2 =getNeighbors(HitVector,N[i], processed, HitVector[sorted[h]].PeakTime(),sorted,geom); 
-           std::cout << "Go: " << i << nb2.size() << std::endl;
+           //std::cout << "Go: " << i << nb2.size() << std::endl;
            N.insert( N.end(), nb2.begin(), nb2.end() );
        }
            N.push_back(sorted[h]);
-           std::cout << "N size:  " << N.size() << std::endl;         
+           //std::cout << "N size:  " << N.size() << std::endl;         
            HitsPerFlash.push_back(N);
      } 
    }
