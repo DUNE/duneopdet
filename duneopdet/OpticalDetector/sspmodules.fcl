@@ -1,9 +1,14 @@
+###########################################
+# Last Modified: 28/05/2023               #
+# To include XArapuca temaptes            #
+# by M. Delgado, D. Guffanti & S. Manthey #
+###########################################
+
 BEGIN_PROLOG
 
 ##################################################
-#
 # SSP module algorithms
-#
+##################################################
 
 standard_algo_sspleadingedge:
 {
@@ -16,6 +21,10 @@ standard_algo_sspleadingedge:
     ReadoutWd:        700
     PreTrg:            20
 }
+
+template_algo_sspleadingedge: @local::standard_algo_sspleadingedge
+template_algo_sspleadingedge.ReadoutWd: 1001
+template_algo_sspleadingedge.PreTrg: 100
 
 ####################################################
 

@@ -5,6 +5,7 @@
 // from photon detectors taking SimPhotonsLite as input.
 //
 // Gleb Sinev, Duke, 2015
+// Maritza Delgado, 2022 SPE testbench option
 // Based on OpMCDigi_module.cc
 //=========================================================
 
@@ -59,10 +60,15 @@
 #include <map>
 #include <cmath>
 #include <memory>
+#include <string>
+#include <iostream>
+#include <sstream>
+#include <fstream>
 
 // ROOT includes
 
 #include "TTree.h"
+#include "TFile.h"
 
 
 namespace opdet {
@@ -143,9 +149,11 @@ namespace opdet {
     
       bool   fDigiTree_SSP_LED;              // To create a analysis Tree for SSP LED
       bool   fUseSDPs;                       // = pset.get< bool   >("UseSDPs", true);
+      bool   TestbenchSinglePE;                 // File testbench
 
       double  fQEOverride;
       double  fRefQEOverride;
+      std::string fSPEDataFile;
 
       //-----------------------------------------------------
       // Trigger analysis variables
@@ -170,7 +178,6 @@ namespace opdet {
 
       // Functional response to one photoelectron (time in ns)
       double Pulse1PE(double time) const;
-    
       // Single photoelectron pulse parameters
       double fPulseLength;   // 1PE pulse length in us
       double fPeakTime;      // Time when the pulse reaches its maximum in us
@@ -266,7 +273,9 @@ namespace opdet {
     fBackTime           = pset.get< double >("BackTime"          );
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
     fUseSDPs            = pset.get< bool   >("UseSDPs", true     );
-    
+    fSPEDataFile        = pset.get< std::string >("SPEDataFile");
+    TestbenchSinglePE       = pset.get< bool   >("TestbenchSinglePE"     );
+
     if (!fUseSDPs) {
       throw art::Exception(art::errors::UnimplementedFeature) << "SimPhotonsLite is now deprecated in favor SDPs. If you do not have SDPs because your input file is old, use an older version of dunetpc to run this digitizer";
     }
@@ -359,15 +368,19 @@ namespace opdet {
     fRandFlat        = std::make_unique< CLHEP::RandFlat        >(engine);
     
     // Creating a single photoelectron waveform
-    // Hardcoded, probably need to read them from the FHiCL file
-    //fPulseLength  = 4.0;
-    //fPeakTime     = 0.260;
-    //fMaxAmplitude = 0.12;
-    //fFrontTime    = 0.009;
-    //fBackTime     = 0.476;
-    CreateSinglePEWaveform();
-
+    
+      // Hardcoded, probably need to read them from the FHiCL file
+      //fPulseLength  = 4.0;
+      //fPeakTime     = 0.260;
+      //fMaxAmplitude = 0.12;
+      //fFrontTime    = 0.009;
+      //fBackTime     = 0.476;
+      CreateSinglePEWaveform();
+    
+   
   }
+
+  
 
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::produce(art::Event& evt)
@@ -522,9 +535,9 @@ namespace opdet {
   }
 
   //---------------------------------------------------------------------------
-  double OpDetDigitizerDUNE::Pulse1PE(double time) const
+ double OpDetDigitizerDUNE::Pulse1PE(double time) const   
   {
-
+  
     if (time < fPeakTime) return
       (fVoltageToADC*fMaxAmplitude*std::exp((time - fPeakTime)/fFrontTime));
     else return
@@ -536,14 +549,42 @@ namespace opdet {
   void OpDetDigitizerDUNE::CreateSinglePEWaveform()
   {
 
-    size_t length =
-      static_cast< size_t > (std::round(fPulseLength*fSampleFreq));
-    fSinglePEWaveform.resize(length);
-    for (size_t tick = 0; tick != length; ++tick)
-      fSinglePEWaveform[tick] =
+    if (TestbenchSinglePE) {
+      std::cout << "Using TESTbench spe!!! "<< std ::endl;
+      std::cout << "With: " << fSPEDataFile << std::endl;
+      std::string datafile;
+      cet::search_path sp("FW_SEARCH_PATH");
+      // taking the file name as the first argument,
+      // the second argument is the local variable where to store the full path - both are std::string objects
+      sp.find_file(fSPEDataFile, datafile);
+      std::ifstream SPEData;
+      SPEData.open(datafile);
+      if (SPEData.is_open()) {
+       mf::LogDebug("OpDetDigitizerDUNE") << " using testbench pe response";
+       std::vector< double > SinglePEVec_x;   //1 column
+       Double_t  x; 
+       while (SPEData >> x ) { SinglePEVec_x.push_back(x); } 
+       fSinglePEWaveform = SinglePEVec_x;
+       fPulseLength = fSinglePEWaveform.size();
+       SPEData.close(); 
+       return;       
+      }
+      else {
+      throw cet::exception("OpDetDigitizerDUNE") << "No Waveform File: Cannot open SPE template file.\n"; 
+      }       
+   }
+    else {
+      //shape of single pulse 
+       mf::LogDebug("OpDetDigitizerDUNE") << " ideal pe response";
+       size_t length = static_cast< size_t > (std::round(fPulseLength*fSampleFreq));
+       fSinglePEWaveform.resize(length);
+       for (size_t tick = 0; tick != length; ++tick){
+        fSinglePEWaveform[tick] =
         Pulse1PE(static_cast< double >(tick)/fSampleFreq);
-
-  }
+       }
+      std::cout << " out "<<" using ideal spe "<< std ::endl;
+   } 
+ }
 
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::CreatePDWaveform
@@ -753,7 +794,7 @@ namespace opdet {
 
     double maxDrift = 0.0;
     for (geo::TPCGeo const& tpc :
-        art::ServiceHandle< geo::Geometry >()->IterateTPCs())
+           art::ServiceHandle< geo::Geometry >()->Iterate<geo::TPCGeo>())
       if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
 
     driftWindow = maxDrift/detProp.DriftVelocity();

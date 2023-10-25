@@ -199,16 +199,14 @@ namespace opdet {
   {
     // First need to ask the geometry for the y-z location of both OpHits
     int channela = a->OpChannel();
-    double xyza[3];
-    geo->OpDetGeoFromOpChannel(channela).GetCenter(xyza);;
-    double ay = xyza[1];
-    double az = xyza[2];
+    auto const xyza = geo->OpDetGeoFromOpChannel(channela).GetCenter();
+    double ay = xyza.Y();
+    double az = xyza.Z();
 
     int channelb = b->OpChannel();
-    double xyzb[3];
-    geo->OpDetGeoFromOpChannel(channelb).GetCenter(xyzb);;
-    double by = xyzb[1];
-    double bz = xyzb[2];
+    auto const xyzb = geo->OpDetGeoFromOpChannel(channelb).GetCenter();
+    double by = xyzb.Y();
+    double bz = xyzb.Z();
 
     double r2 = pow((ay-by),2) + pow((az-bz),2);
 
@@ -251,10 +249,9 @@ namespace opdet {
     for (int cur : curN){
       art::Ptr<recob::OpHit> oh = ohits[cur];
       int channel = oh->OpChannel();
-      double xyz[3];
-      geo->OpDetGeoFromOpChannel(channel).GetCenter(xyz);;
-      ys.push_back(xyz[1]);
-      zs.push_back(xyz[2]);
+      auto const xyz = geo->OpDetGeoFromOpChannel(channel).GetCenter();
+      ys.push_back(xyz.Y());
+      zs.push_back(xyz.Z());
     }
   }
 
@@ -324,8 +321,10 @@ namespace opdet {
         }
         if (abs(ohits[centroidIdx]->PeakTimeAbs()-ohits[j]->PeakTimeAbs())>2) break;
       }
+      /* totPE is set but not used
       double totPE = 0;
       for (int idx : curN) totPE += ohits[idx]->PE();
+      */
       if (int(curN.size())<fMinN) continue;
 
       // Loop through neighboring hits, chck if it's a core hit
@@ -363,10 +362,9 @@ namespace opdet {
       // Time to make the OpFlash;
       // Y-Z coordinates come from the centroid
       int channelcentroid = centroid->OpChannel();
-      double xyzcentroid[3];
-      geo->OpDetGeoFromOpChannel(channelcentroid).GetCenter(xyzcentroid);
-      double yCenter = xyzcentroid[1];
-      double zCenter = xyzcentroid[2];
+      auto const xyzcentroid = geo->OpDetGeoFromOpChannel(channelcentroid).GetCenter();
+      double yCenter = xyzcentroid.Y();
+      double zCenter = xyzcentroid.Z();
       double tCenter = centroid->PeakTimeAbs();
 
 
@@ -380,8 +378,10 @@ namespace opdet {
         if (abs(ohits[j]->PeakTimeAbs()-tCenter)>fBreakTime) break;
       }
 
+      /* finE is set but not used
       double finE = 0;
       for (int idx : curN) finE += ohits[idx]->PE();
+      */
 
       // Grab the y-z information from the geometry
       std::vector<double> ys;
@@ -411,10 +411,12 @@ namespace opdet {
       double yWidth = maxY-minY;
       double zWidth = maxZ-minZ;
 
+      /* tot1 and tot2 are set but not used
       double tot1 = 0;
       double tot2 = 0;
       for (double PE : PEs) tot1 += PE;
       for (double PE : PE2s) tot2 += PE;
+      */
 
       // From OpFlashAlg
       int Frame = ts.OpticalClock().Frame(tCenter - 18.1);

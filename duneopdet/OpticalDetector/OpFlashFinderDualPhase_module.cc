@@ -365,8 +365,7 @@ namespace opdet {
                           double&                  sumz, 
                           double&                  sumz2) {
 
-    double xyz[3];
-    geom.OpDetGeoFromOpChannel(currentHit.OpChannel()).GetCenter(xyz);
+    auto const xyz = geom.OpDetGeoFromOpChannel(currentHit.OpChannel()).GetCenter();
     double PEThisHit = currentHit.PE();
     
     geo::TPCID tpc = geom.FindTPCAtPosition(xyz);
@@ -375,15 +374,15 @@ namespace opdet {
     if (tpc.isValid) {
       for (size_t p = 0; p != geom.Nplanes(); ++p) {
         geo::PlaneID const planeID(tpc, p);
-        unsigned int w = geom.NearestWire(xyz, planeID);
+        unsigned int w = geom.NearestWireID(xyz, planeID).Wire;
         sumw.at(p)  += PEThisHit*w;
         sumw2.at(p) += PEThisHit*w*w;
       }
     } // if we found the TPC
-    sumy  += PEThisHit*xyz[1]; 
-    sumy2 += PEThisHit*xyz[1]*xyz[1];
-    sumz  += PEThisHit*xyz[2]; 
-    sumz2 += PEThisHit*xyz[2]*xyz[2];
+    sumy  += PEThisHit*xyz.Y();
+    sumy2 += PEThisHit*xyz.Y()*xyz.Y();
+    sumz  += PEThisHit*xyz.Z();
+    sumz2 += PEThisHit*xyz.Z()*xyz.Z();
     
   }
 
@@ -413,22 +412,17 @@ namespace opdet {
   }
 
    std::vector<int> neighbors;
-   float dx, dy, dz, dt, dtmax;
-   double xyz_hitnumber[3];
-   geom.OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter(xyz_hitnumber);
+   float dt, dtmax;
+   auto const xyz_hitnumber = geom.OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter();
 
    for (int h=itTmin;h<itTmax;h++)
    {
      if(!processed[h])
      {
-       double xyz_h[3];
-       geom.OpDetGeoFromOpChannel(HitVector[sorted[h]].OpChannel()).GetCenter(xyz_h);
-       dx  = xyz_h[0] - xyz_hitnumber[0];
-       dy  = xyz_h[1] - xyz_hitnumber[1];
-       dz  = xyz_h[2] - xyz_hitnumber[2];
        dt  = TMath::Abs(  HitVector[sorted[hitnumber]].PeakTime() - HitVector[sorted[h]].PeakTime() );
        dtmax  = TMath::Abs(initimecluster - HitVector[sorted[h]].PeakTime() );
-       float distance = dx*dx + dy*dy + dz*dz;
+       auto const xyz_h = geom.OpDetGeoFromOpChannel(HitVector[sorted[h]].OpChannel()).GetCenter();
+       float distance = (xyz_h - xyz_hitnumber).R();
 //       std::cout << distance << " " << dt << " " << dtmax << std::endl; lets_pause();
        if(distance<fMaximumDistance*fMaximumDistance && dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow){ neighbors.push_back(h);processed[h]=true;}
      }

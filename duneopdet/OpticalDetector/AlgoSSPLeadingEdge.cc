@@ -62,10 +62,10 @@ namespace pmtana {
 
     bool   fire          = false;
     int    counter       = 0;
-    double pedestal      = _pedestal;
-    double threshold     = _adc_thres;
+    // double pedestal      = _pedestal; // unused if threshold is unused
+    // double threshold     = _adc_thres; // unused
     double threshold2    = _adc_thres;
-    threshold           += pedestal;
+    // threshold           += pedestal; // unused
  //   double pre_threshold = _2nd_thres;
  //   pre_threshold       += pedestal;
 

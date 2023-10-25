@@ -156,14 +156,13 @@ namespace phot{
 
     if(fUseCryoBoundary)
       {
-	double CryoBounds[6];
-	geom->CryostatBoundaries(CryoBounds);
-	fXmin = CryoBounds[0];
-	fXmax = CryoBounds[1];
-	fYmin = CryoBounds[2];
-	fYmax = CryoBounds[3];
-	fZmin = CryoBounds[4];
-	fZmax = CryoBounds[5];
+        auto const bounds = geom->Cryostat(geo::CryostatID{0}).Boundaries();
+        fXmin = bounds.MinX();
+        fXmax = bounds.MaxX();
+        fYmin = bounds.MinY();
+        fYmax = bounds.MaxY();
+        fZmin = bounds.MinZ();
+        fZmax = bounds.MaxZ();
       }
     else
       {
@@ -309,7 +308,7 @@ namespace phot{
   double PhotonVisibilityServiceS2::DistanceToOpDet( double const* xyz, unsigned int OpDet )
   {
     art::ServiceHandle<geo::Geometry> geom;
-    return geom->OpDetGeoFromOpDet(OpDet).DistanceToPoint(xyz);
+    return geom->OpDetGeoFromOpDet(OpDet).DistanceToPoint(geo::vect::toPoint(xyz));
       
   }
 
@@ -321,7 +320,7 @@ namespace phot{
   double PhotonVisibilityServiceS2::SolidAngleFactor( double const* xyz, unsigned int OpDet )
   {
     art::ServiceHandle<geo::Geometry> geom;
-    return geom->OpDetGeoFromOpDet(OpDet).CosThetaFromNormal(xyz);
+    return geom->OpDetGeoFromOpDet(OpDet).CosThetaFromNormal(geo::vect::toPoint(xyz));
   }
 
   //------------------------------------------------------

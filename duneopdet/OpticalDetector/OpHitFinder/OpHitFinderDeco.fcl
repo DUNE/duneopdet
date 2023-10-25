@@ -1,0 +1,43 @@
+BEGIN_PROLOG
+
+dune_ophit_finder_deco:
+{
+    module_type:     "OpHitFinderDeco"
+    GenModule:       "generator"
+    InputModule:     "opdec"       # Module with the recob::OpWaveform object         
+    InputModuledigi: "opdigi"      # Module with the raw::OpDetWaveform object
+    InputLabels:     [ "" ]
+    
+    InputDigiType:   "recob" # Write recob for OpWaveform object raw OpDetWaveform object
+    ChannelMasks:    []      # Will ignore channels in this list
+    HitThreshold:    3.0     # Amplitude threshold for hits "5.0 for Gauss" and "3.0 for Wiener" 
+    UseCalibrator:   false   # If set to false, SPE parameters below
+                             # are used. If set to true, is it unusable? 
+    AreaToPE:        true    # Use area to calculate number of PEs
+    ScalingFactor:   100.0   # If AreaToPE is true, this number is "300" for Gauss, "100" for Wiener and "1" for raw.
+    SPEArea:         100.0   # For deco waveforms, should be equal to ScalingFactor 
+                             # used as single PE area (for raw (ADC*ns)/(sampling rate)16ns = ADC counts)
+    SPEShift:        0.0     # Baseline offset in ADC->SPE conversion.
+    reco_man:        @local::standard_preco_manager
+    PedAlgoPset:     @local::standard_algo_pedestal_edges      
+    HitAlgoPset:{
+        Name: "SlidingWindow"     #This setting changes according to the filter used.
+        ADCThreshold:        3.0     
+        NSigmaThreshold:     1     
+        EndADCThreshold:     1     
+        EndNSigmaThreshold:  1     
+        MinPulseWidth:       1
+        NumPreSample:        2
+        NumPostSample:       2
+        PositivePolarity:    true
+        TailADCThreshold:    1
+        TailNSigmaThreshold: 1
+        Verbosity:           false
+    }   
+}
+
+dune_ophit_finder_gauss_deco: @local::dune_ophit_finder_deco
+dune_ophit_finder_gauss_deco.HitThreshold: 5.0
+dune_ophit_finder_gauss_deco.HitAlgoPset.ADCThreshold: 5.0
+
+END_PROLOG

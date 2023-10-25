@@ -894,7 +894,7 @@ namespace opdet {
 
     double maxDrift = 0.0;
     for (geo::TPCGeo const& tpc :
-           art::ServiceHandle< geo::Geometry >()->IterateTPCs())
+           art::ServiceHandle< geo::Geometry >()->Iterate<geo::TPCGeo>())
       if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
 
     driftWindow = maxDrift / detProp.DriftVelocity();

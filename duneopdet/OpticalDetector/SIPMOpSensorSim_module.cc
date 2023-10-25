@@ -140,11 +140,13 @@ namespace opdet {
     , fInputToken{   consumes< std::vector<sim::OpDetBacktrackerRecord> >(fInputTag) }
     , fDarkNoiseRate{config().DarkNoiseRate()}
     , fCrossTalk{    config().CrossTalk()}
-    , fSIPMEngine(   art::ServiceHandle<rndm::NuRandomService>()->createEngine(*this, 
-                                                                               "HepJamesRandom",
-                                                                               "sipm", 
-                                                                               config.get_PSet(), 
-                                                                               "SeedSiPM"))
+    , fSIPMEngine(
+        art::ServiceHandle<rndm::NuRandomService>()->registerAndSeedEngine(
+          createEngine(0, "HepJamesRandom", "sipm"),
+          "HepJamesRandom",
+          "sipm", 
+          config.get_PSet(), 
+          "SeedSiPM"))
     , fRandExponential(fSIPMEngine)
     , fRandFlat(fSIPMEngine)
     , fRandPoissPhot(fSIPMEngine)
@@ -184,9 +186,9 @@ namespace opdet {
         << "Final QE must be equal to or smaller than the QE applied at simulation time.\n";
     }
 
-
+    //This will be handled on the WaveformDigitizerSim_module.cc 
     // Check for non-trivial channel mapping which is not supported
-    art::ServiceHandle< geo::Geometry > geometry;
+/*    art::ServiceHandle< geo::Geometry > geometry;
     for (unsigned int opDet = 0; opDet < geometry->NOpDets() ; ++opDet) {
       if (geometry->NOpHardwareChannels(opDet) > 1)
         throw art::Exception(art::errors::Configuration)
@@ -194,7 +196,7 @@ namespace opdet {
           << " channels associated with it. \n"
           << "This kind of channel mapping is not supported by SIPMOpSensorSim.\n"
           << "You need to use the legacy OpDetDigitizerDUNE instead.\n";
-    }
+    }*/
 
     // Set time ranges if needed for dark noise
     if (fDarkNoiseRate > 0) SetBeginEndTimes();
@@ -341,7 +343,7 @@ namespace opdet {
     auto const geometry  = art::ServiceHandle< geo::Geometry >();
 
     double maxDrift = 0.0;
-    for (geo::TPCGeo const& tpc : geometry->IterateTPCs())
+    for (geo::TPCGeo const& tpc : geometry->Iterate<geo::TPCGeo>())
       if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
 
     // Start at -1 drift window

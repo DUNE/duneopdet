@@ -1,12 +1,11 @@
-#add_subdirectory(BackTrackingTests)
-
 art_make( BASENAME_ONLY ALLOW_UNDERSCORES
-                LIBRARY_NAME duneopdet_OpticalDetector
+                LIBRARY_NAME duneopdet_OpticalDetector_OpHitFinder
                 LIB_LIBRARIES 
                                 lardataobj::RecoBase
                                 larcorealg::Geometry
                                 larcore::Geometry_Geometry_service
                                 larana::OpticalDetector_OpHitFinder
+                                #duneopdet::OpticalDetector_OpHitFinder
                                 nusimdata::SimulationBase
                                 fhiclcpp::fhiclcpp
                                 messagefacility::MF_MessageLogger
@@ -34,6 +33,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 larcorealg::Geometry
                                 larcore::Geometry_Geometry_service
                                 duneopdet::OpticalDetector
+                                duneopdet::OpticalDetector_OpHitFinder
                                 larsim::MCCheater_ParticleInventoryService_service
                                 larsim::MCCheater_PhotonBackTrackerService_service 
                                 nusimdata::SimulationBase
@@ -56,12 +56,12 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 CLHEP
                                 ROOT_BASIC_LIB_LIST
                                 Boost::filesystem
-                                FFTW3::FFTW3
 
                 SERVICE_LIBRARIES
                                 larcorealg::Geometry
                                 larcore::Geometry_Geometry_service
                                 duneopdet::OpticalDetector
+                                duneopdet::OpticalDetector_OpHitFinder
                                 fhiclcpp::fhiclcpp
                                 messagefacility::MF_MessageLogger
                                 art::Framework_Core
@@ -80,12 +80,6 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
 
 )
 
-file(GLOB dat_files *.dat)
-install_fw( LIST ${dat_files} )
-
 install_headers()
 install_fhicl()
 install_source()
-
-add_subdirectory(Deconvolution)
-add_subdirectory(OpHitFinder)
