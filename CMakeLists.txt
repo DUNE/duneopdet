@@ -40,6 +40,7 @@ find_ups_product( larcorealg )
 find_ups_product( nurandom )
 find_ups_product( dunecore )
 find_ups_product( clhep )
+find_ups_product( fftw )
 find_ups_geant4( )
 
 # macros for artdaq_dictionary and simple_plugin
