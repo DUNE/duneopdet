@@ -5,11 +5,11 @@ dunefdvd_opflash:
 {
    module_type:          "OpFlashFinderVerticalDrift"
    InputModule:          "ophit10ppm" 
-   MaximumTimeDistance:  2.0
-   MaximumTimeWindow:    2.0
-   Cdyz:                 1500.0
-   CMdz:                 1500.0
-   MMdz:                 1500.0   
+   MaximumTimeDistance:  2.0 # time parameter for selecting time neighbouring hits (us)
+   MaximumTimeWindow:    2.0 # time parameter for flash composition (us)
+   Cdyz:                 1500.0 # dist. criteria for neighbouring hits on cathode plane (cm)
+   CMdz:                 1500.0 # dist. criteria for neighbouring hits on cathode and membrane planes (cm)
+   MMdz:                 1500.0 # dist. criteria for neighbouring hits on membrane planes (cm) 
 }
 
 

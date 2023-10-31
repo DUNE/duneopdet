@@ -1,8 +1,10 @@
-// Vertical drift flash finder based on 
-// time and tiles location of the OpHits. 
-// F. Marinho (2022)
-// Modification on José Soto's code for DP
-//
+// Vertical drift flash finder based on the relative 
+// time and tiles location distances between the OpHits used
+// to compose flashes considering the particular 3 detecting 
+// XArapuca planes geometry of the Vertical Drift
+// Author: F. Marinho (2022)
+// Based on modification on José Soto's code for DP 
+// 
 
 
 #ifndef OpFlashFinderVerticalDrift_H
@@ -93,14 +95,13 @@ namespace opdet {
     std::string fInputModule; // Input tag for OpHit collection
     
 
-    Double_t fMaximumDistance;
-    Double_t fMaximumTimeDistance;
-    Double_t fMaximumTimeWindow;
-    Double_t fTrigCoinc;
-    Double_t fLMy;
+    Double_t fMaximumTimeDistance;        // time parameter for selecting time neighbouring hits
+    Double_t fMaximumTimeWindow;          // time parameter for flash composition wrt attributed initial flash time
+    Double_t fTrigCoinc;                  // Beam frame coincidence criteria
+    Double_t fLMy;                        // position variables for identifying in which detecting plan a sensor is located 
     Double_t fRMy;
     Double_t fCx;
-    Double_t fCdyz;
+    Double_t fCdyz;                       // distance criteria for position neighbouring hits according to the different combinations of sensor planes with hits
     Double_t fCMdz;
     Double_t fMMdz;
 
@@ -138,7 +139,6 @@ namespace opdet {
     fInputModule = pset.get< std::string >("InputModule");
     //These values need to be stablished   
     fTrigCoinc      = pset.get< double >("TrigCoinc",1.0);
-    fMaximumDistance     = pset.get< double >("MaximumDistance",1000.0);
     fMaximumTimeDistance = pset.get< double >("MaximumTimeDistance",1.0);
     fMaximumTimeWindow   = pset.get< double >("MaximumTimeWindow",1.0);
     fLMy  = pset.get< double >("LMy",-700.0);
@@ -312,7 +312,7 @@ namespace opdet {
       WireWidths.at(p)  = CalculateWidth(sumw.at(p), sumw2.at(p), TotalPE);
     }
 
-    // Emperical corrections to get the Frame right.
+    // Empirical corrections to get the Frame right.
     // Eventual solution - remove frames
     int Frame = ts.OpticalClock().Frame(AveAbsTime - 18.1);
     if (Frame == 0) Frame = 1;
@@ -378,9 +378,6 @@ namespace opdet {
                           double&                  sumz, 
                           double&                  sumz2) {
 
-    //double xyz[3];
-    //geom.OpDetGeoFromOpChannel(currentHit.OpChannel()).GetCenter(xyz);
-
     auto const xyz = geom.OpDetGeoFromOpChannel(currentHit.OpChannel()).GetCenter();
 
     double PEThisHit = currentHit.PE();
@@ -391,7 +388,6 @@ namespace opdet {
     if (tpc.isValid) {
       for (size_t p = 0; p != geom.Nplanes(); ++p) {
         geo::PlaneID const planeID(tpc, p);
-        //unsigned int w = geom.NearestWire(xyz, planeID);
         unsigned int w = geom.NearestWireID(xyz, planeID).Wire;
         sumw.at(p)  += PEThisHit*w;
         sumw2.at(p) += PEThisHit*w*w;
@@ -432,18 +428,16 @@ namespace opdet {
    std::vector<int> neighbors;
    float dx, dy, dz;
    float dt, dtmax;
-   //double xyz_hitnumber[3];
-   //geom.OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter(xyz_hitnumber);
    auto const xyz_hitnumber = geom.OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter();
 
    //std::cout <<"Earliest: "<< HitVector[sorted[hitnumber]].PeakTime() <<" " << xyz_hitnumber.X() << " " << xyz_hitnumber.Y() << " " << xyz_hitnumber.Z() << std::endl;
+
+   //Hits clustering for flash formation considering selection requirements according to which planes hits belong to (cathode & membrane) 
 
    for (int h=itTmin;h<itTmax;h++)
    {
      if(!processed[h])
      {
-       //double xyz_h[3];
-       //geom.OpDetGeoFromOpChannel(HitVector[sorted[h]].OpChannel()).GetCenter(xyz_h);
        auto const xyz_h = geom.OpDetGeoFromOpChannel(HitVector[sorted[h]].OpChannel()).GetCenter();
        std::cout << "Next:    " << HitVector[sorted[h]].PeakTime() << " "<< xyz_h.X() << " " << xyz_h.Y() << " " << xyz_h.Z() << std::endl; 
        dx  = (xyz_h - xyz_hitnumber).X();
@@ -486,11 +480,7 @@ namespace opdet {
          if(dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow && dist < fMMdz){ neighbors.push_back(h);processed[h]=true;}
          //std::cout <<" L R "<< fMMdz <<" "<< dist << std::endl;
        }       
-       //float distance = dx*dx + dy*dy + dz*dz;
 
-       //std::cout << TMath::Sqrt(dist) << " " << dt << " " << dtmax <<" " << fMaximumDistance  << std::endl; //lets_pause();
-       //if(distance<fMaximumDistance*fMaximumDistance && dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow){ neighbors.push_back(h);processed[h]=true;}
-       //if(dt<fMaximumTimeDistance && dtmax<fMaximumTimeWindow){ neighbors.push_back(h);processed[h]=true;}
      }
    }
    return neighbors;
