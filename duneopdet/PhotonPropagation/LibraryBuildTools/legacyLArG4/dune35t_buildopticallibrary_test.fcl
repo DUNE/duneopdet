@@ -31,9 +31,8 @@ services:
 
 
 services.Geometry.GDML: "dune35t4apa_v5.gdml"
-services.Geometry.ROOT: "dune35t4apa_v5.gdml"
 services.Geometry.SortingParameters.DetectorVersion: "dune35t4apa_v5"
-
+services.AuxDetGeometry.GDML: @local::services.Geometry.GDML
 
 #Start each new event with an empty event.
 source:

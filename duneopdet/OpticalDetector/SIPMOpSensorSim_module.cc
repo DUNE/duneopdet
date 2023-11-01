@@ -37,6 +37,7 @@
 #include "lardataobj/Simulation/SimPhotons.h"
 #include "lardataobj/Simulation/OpDetBacktrackerRecord.h"
 #include "larsim/Simulation/LArG4Parameters.h"
+#include "larcore/Geometry/Geometry.h"
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom()
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardata/DetectorInfoServices/DetectorPropertiesService.h"
