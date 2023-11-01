@@ -7,6 +7,9 @@ dunefdvd_opflash:
    InputModule:          "ophit10ppm" 
    MaximumTimeDistance:  2.0 # time parameter for selecting time neighbouring hits (us)
    MaximumTimeWindow:    2.0 # time parameter for flash composition (us)
+   LMy:                  -700.0 # position inputs for identifying in which detecting plan a sensor is located
+   RMy:                  700.0 
+   Cx:                   -320.0
    Cdyz:                 1500.0 # dist. criteria for neighbouring hits on cathode plane (cm)
    CMdz:                 1500.0 # dist. criteria for neighbouring hits on cathode and membrane planes (cm)
    MMdz:                 1500.0 # dist. criteria for neighbouring hits on membrane planes (cm) 

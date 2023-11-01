@@ -1,10 +1,12 @@
 // Vertical drift flash finder based on the relative 
 // time and tiles location distances between the OpHits used
 // to compose flashes considering the particular 3 detecting 
-// XArapuca planes geometry of the Vertical Drift
+// XArapuca planes geometry of the Vertical Drift.
+//
 // Author: F. Marinho (2022)
-// Based on modification on José Soto's code for DP 
 // 
+// Based on modification on José Soto's code for DP 
+// *Upper volume only/adapt if lower volume is implemented
 
 
 #ifndef OpFlashFinderVerticalDrift_H
