@@ -50,8 +50,8 @@ services: {
 } # services
 
 #Use the following lines if you need to change the geometry by hand (e.g. test geometry)
-#services.Geometry.GDML: "protodunehd_v2_refactored.gdml"
-#services.Geometry.ROOT: "protodunehd_v2_refactored.gdml"
+services.Geometry.GDML: "protodunehd_v6_refactored.gdml"
+services.Geometry.ROOT: "protodunehd_v6_refactored.gdml"
 
 services.TFileService.fileName: "Photonlibrary_protodunehd.root"
 
