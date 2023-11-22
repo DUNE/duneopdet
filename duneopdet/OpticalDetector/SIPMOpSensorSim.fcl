@@ -4,7 +4,7 @@ xarapuca_ar:
 {
   module_type:       "SIPMOpSensorSim"
   InputTag:          "PDFastSim"
-  QuantumEfficiency: 0.030 # 3% X-ARAPUCA efficiency for Ar
+  QuantumEfficiency: 0.027 # 3% X-ARAPUCA efficiency for Ar * 90% transmission through meshes in VD
   DarkNoiseRate:     10.0 # Hz
   CrossTalk:         0.20
 }
