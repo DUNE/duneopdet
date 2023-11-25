@@ -4,7 +4,7 @@ xarapuca_ar:
 {
   module_type:       "SIPMOpSensorSim"
   InputTag:          "PDFastSim"
-  QuantumEfficiency: 0.027 # 3% X-ARAPUCA efficiency for Ar * 90% transmission through meshes in VD
+  QuantumEfficiency: 0.030 # 3% X-ARAPUCA efficiency
   DarkNoiseRate:     10.0 # Hz
   CrossTalk:         0.20
 }
@@ -52,5 +52,17 @@ xarapuca_ar_xe10ppm_ext.InputTag:           "PDFastSimArExternal"
 
 xarapuca_xe_xe10ppm_ext:                    @local::xarapuca_xe_xe10ppm
 xarapuca_xe_xe10ppm_ext.InputTag:           "PDFastSimXeExternal"
+
+xarapuca_ar_xe10ppm_dunefdvd: @local::xarapuca_ar_xe10ppm
+xarapuca_ar_xe10ppm_dunefdvd.QuantumEfficiency: 0.027  # 3% X-ARAPUCA efficiency for Ar * 90% transmission through meshes in VD
+
+xarapuca_xe_xe10ppm_dunefdvd: @local::xarapuca_xe_xe10ppm
+xarapuca_xe_xe10ppm_dunefdvd.QuantumEfficiency: 0.027  # 3% X-ARAPUCA efficiency for Ar * 90% transmission through meshes in VD
+
+xarapuca_ar_xe10ppm_ext_dunefdvd: @local::xarapuca_ar_xe10ppm_ext
+xarapuca_ar_xe10ppm_ext_dunefdvd.QuantumEfficiency: 0.027  # 3% X-ARAPUCA efficiency for Ar * 90% transmission through meshes in VD
+
+xarapuca_xe_xe10ppm_ext_dunefdvd: @local::xarapuca_xe_xe10ppm_ext
+xarapuca_xe_xe10ppm_ext_dunefdvd.QuantumEfficiency: 0.027  # 3% X-ARAPUCA efficiency for Ar * 90% transmission through meshes in VD
 
 END_PROLOG
