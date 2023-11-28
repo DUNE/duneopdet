@@ -25,7 +25,7 @@ fwdir  product_dir config_data
 
 product          version
 cetbuildtools	 v8_20_00	-	only_for_build
-dunecore         v09_81_00d01
+dunecore         v09_81_00d02
 end_product_list
 
 
