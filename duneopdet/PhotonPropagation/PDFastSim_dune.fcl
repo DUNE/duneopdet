@@ -94,7 +94,9 @@ dunevd_pdfastsim_pvs_ar_external.VUVTiming:	     @local::dunevd_vuv_timing_param
 
 dunevd_pdfastsim_pvs_xe_external:          	     @local::dunevd_pdfastsim_pvs_ar_external
 dunevd_pdfastsim_pvs_xe_external.DoFastComponent:    false 
-dunevd_pdfastsim_pvs_xe_external.VUVTiming:          @local::ScintTimeXeDoping10ppm
+dunevd_pdfastsim_pvs_xe_external.ScintTimeTool:      @local::ScintTimeXeDoping10ppm
+dunevd_pdfastsim_pvs_xe_external.VUVTiming:          @local::dunevd_xe_timing_geo
+dunevd_pdfastsim_pvs_xe_external.GeoPropTimeOnly:    true  
 # need to modify larsim/PhotonPropagation/PDFastSimPVS_module.cc to allow use xenon doping timing @local::dunevd_xe_timing_geo
 
 #############
