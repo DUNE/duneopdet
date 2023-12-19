@@ -7,7 +7,7 @@
 cmake_minimum_required (VERSION 3.19 FATAL_ERROR)
 
 project(duneopdet LANGUAGES CXX)
-set(${PROJECT_NAME}_CMAKE_PROJECT_VERSION_STRING 09.81.00d02)
+set(${PROJECT_NAME}_CMAKE_PROJECT_VERSION_STRING 09.82.00d00)
 
 # cetbuildtools contains our cmake modules
 find_package(cetbuildtools REQUIRED)
@@ -40,6 +40,7 @@ find_ups_product( larcorealg )
 find_ups_product( nurandom )
 find_ups_product( dunecore )
 find_ups_product( clhep )
+find_ups_product( fftw )
 find_ups_geant4( )
 
 # macros for artdaq_dictionary and simple_plugin
