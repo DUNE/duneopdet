@@ -82,6 +82,17 @@ dunevd_pdfastsim_par_xe.OnlyActiveVolume:      true
 dunevd_pdfastsim_par_xe.UseXeAbsorption:       true
 
 # External region for laterals (Hybrid model)
+# Temporarily keeping this service for VD coldbox
+dunevd_pdfastsim_pvs_external: 			  @local::standard_pdfastsim_pvs
+dunevd_pdfastsim_pvs_external.OnlyActiveVolume:   false
+dunevd_pdfastsim_pvs_external.SimulationLabel:    IonAndScintExternal
+dunevd_pdfastsim_pvs_external.IncludePropTime:    true          
+dunevd_pdfastsim_pvs_external.DoFastComponent:    true
+dunevd_pdfastsim_pvs_external.DoSlowComponent:    true
+dunevd_pdfastsim_pvs_external.DoReflectedLight:   false
+dunevd_pdfastsim_pvs_external.GeoPropTimeOnly:    false  
+dunevd_pdfastsim_pvs_external.VUVTiming:	  @local::dunevd_vuv_timing_parameterization # use argon propogation time model. 
+
 dunevd_pdfastsim_pvs_ar_external: 	             @local::standard_pdfastsim_pvs
 dunevd_pdfastsim_pvs_ar_external.OnlyActiveVolume:   false
 dunevd_pdfastsim_pvs_ar_external.SimulationLabel:    IonAndScintExternal
