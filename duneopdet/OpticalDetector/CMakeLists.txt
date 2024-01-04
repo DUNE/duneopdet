@@ -56,6 +56,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 CLHEP
                                 ROOT_BASIC_LIB_LIST
                                 Boost::filesystem
+                                FFTW3::FFTW3
 
                 SERVICE_LIBRARIES
                                 larcorealg::Geometry
