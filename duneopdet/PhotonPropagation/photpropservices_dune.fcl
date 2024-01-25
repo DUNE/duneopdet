@@ -522,7 +522,7 @@ protodunevd_v4_Xe_photonvisibilityservice:  #generated using v4 geometry Xenon l
   DoNotLoadLibrary: false
   LibraryBuildJob: false
   Interpolate: true
-  LibraryFile: "PhotonPropagation/LibraryData/libext_protodunevd_v4_Ar_Baseline_v09_69_00d00_5e7_25x25x25_landau_20231216.root"    
+  LibraryFile: "PhotonPropagation/LibraryData/libext_protodunevd_v4_Xe_Baseline_v09_69_00d00_5e7_25x25x25_landau_20231216.root"    
 }
 
 ####################
