@@ -137,6 +137,8 @@ protodune_hd_pdfastsim_pvs_external.DoSlowComponent:          true
 protodune_hd_pdfastsim_pvs_external.DoReflectedLight:         false         
 protodune_hd_pdfastsim_pvs_external.VUVTiming:	  	      @local::dune_vuv_timing_parameterization
 
+protodune_hd_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs_external
+protodune_hd_pdfastsim_pvs.SimulationLabel:          IonAndScint
 
 #############################################
 ### COMPUTABLE GRAPH MODEL CONFIGURATIONS ###
