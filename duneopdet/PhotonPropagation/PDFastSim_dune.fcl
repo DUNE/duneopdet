@@ -189,6 +189,7 @@ protodune_vd_pdfastsim_ann_ar:
        }
 }
 
+protodune_vd_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs
 
 
 END_PROLOG
