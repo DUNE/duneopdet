@@ -487,6 +487,43 @@ protodune_hd_photonvisibilityservice: # Generated using protoDUNEhd_v2_refactore
   ZMax: 667.1808
 }
 
+protodune_hd_v6_photonvisibilityservice:  #generated using v6 geometry, 1m RSL, 20m AbsL, Reflectivities ON.
+{
+  NX: 25
+  NY: 25
+  NZ: 25
+  UseCryoBoundary: true
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  Interpolate: true
+  LibraryFile: "PhotonPropagation/LibraryData/libext_protodunehd_v6_Ar_Baseline_v09_69_00d00_5e7_25x25x25_landau_20231216.root"    
+}
+
+################
+# ProtoDUNE-VD #
+################
+protodunevd_v4_Ar_photonvisibilityservice:  #generated using v4 geometry, Argon light, 1m RSL, 20m AbsL, Reflectivities ON.
+{
+  NX: 25
+  NY: 25
+  NZ: 25
+  UseCryoBoundary: true
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  Interpolate: true
+  LibraryFile: "PhotonPropagation/LibraryData/libext_protodunevd_v4_Ar_Baseline_v09_69_00d00_5e7_25x25x25_landau_20231216.root"    
+}
+protodunevd_v4_Xe_photonvisibilityservice:  #generated using v4 geometry Xenon light, ~8m RSL, 80m AbsL, Reflectivities ON.
+{
+  NX: 25
+  NY: 25
+  NZ: 25
+  UseCryoBoundary: true
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  Interpolate: true
+  LibraryFile: "PhotonPropagation/LibraryData/libext_protodunevd_v4_Xe_Baseline_v09_69_00d00_5e7_25x25x25_landau_20231216.root"    
+}
 
 ####################
 # Dual Phase 3x1x1 #
