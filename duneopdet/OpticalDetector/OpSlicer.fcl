@@ -5,14 +5,22 @@ standard_opslicer:
    module_type:          "OpSlicer"
    OpHitModuleLabel:     "ophit"
 
-   TScale:                "0.15" # distance scale in cm
-   RScale:                "600" # time scale in ns
+   TScale:                "0.15" # time scale in (ns)
+   RScale:                "600" # distance scale in (cm)
    R0:                    "1" # distance cut around centroid for delayed light
    BreakTime:             "5" # max time delay for integrating up delayed light
    MinN:                  "3" # min # of ophits to make a cluster
 
    TrigCoinc:             "2.5" # max time (us) to beam spill for coincidence
 }
+
+dune10kt_1x2x6_opslicer: @local::standard_opslicer
+dune10kt_1x2x6_opslicer.OpHitModuleLabel: "ophitspe"
+dune10kt_1x2x6_opslicer.TScale: "1.6"
+dune10kt_1x2x6_opslicer.RScale: "600"
+dune10kt_1x2x6_opslicer.R0: "6"
+dune10kt_1x2x6_opslicer.BreakTime: "10"
+dune10kt_1x2x6_opslicer.MinN: "10"
 
 protodune_opslicer: @local::standard_opslicer
 
