@@ -10,7 +10,7 @@ art_make(NO_PLUGINS
     fhiclcpp::fhiclcpp
     CLHEP
     art::Utilities
-  )
+  ) ### MIGRATE-ACTION-RECOMMENDED (migrate-3.22.02) - deprecated: use art_make_library(), art_dictonary(), and cet_build_plugin() with explicit source lists and plugin base types
 
 
 cet_build_plugin(ScintTimeXeDoping art::tool

@@ -21,7 +21,6 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
 				canvas::canvas
                                 cetlib::cetlib 
 				cetlib_except::cetlib_except 
-                                ROOT_BASIC_LIB_LIST
                                 Boost::filesystem
   
                 MODULE_LIBRARIES
@@ -52,8 +51,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
 				canvas::canvas
                                 cetlib::cetlib 
 				cetlib_except::cetlib_except
-                                CLHEP
-                                ROOT_BASIC_LIB_LIST
+				CLHEP::CLHEP
                                 Boost::filesystem
 
                 SERVICE_LIBRARIES
@@ -72,11 +70,10 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 art::Utilities 
 				canvas::canvas
                                 cetlib::cetlib cetlib_except
-                                CLHEP
-                                ROOT_BASIC_LIB_LIST                                
+				CLHEP::CLHEP
                                 Boost::filesystem
 
-)
+) ### MIGRATE-ACTION-RECOMMENDED (migrate-3.22.02) - deprecated: use art_make_library(), art_dictonary(), and cet_build_plugin() with explicit source lists and plugin base types
 
 install_headers()
 install_fhicl()

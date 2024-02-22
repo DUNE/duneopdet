@@ -22,10 +22,8 @@ art_make(
 			fhiclcpp::fhiclcpp
                         CLHEP
 			cetlib::cetlib cetlib_except
-			ROOT_BASIC_LIB_LIST
-                        ROOT_EG
+                        ROOT::EG
           MODULE_LIBRARIES
-                        ROOT_BASIC_LIB_LIST
                         larsim::LegacyLArG4
                         lardataobj::Simulation
                         duneopdet::PhotonPropagation_PhotonVisibilityServiceS2_service
@@ -49,7 +47,7 @@ art_make(
 			fhiclcpp::fhiclcpp
 			cetlib::cetlib cetlib_except
                         CLHEP
-	 )
+	 ) ### MIGRATE-ACTION-RECOMMENDED (migrate-3.22.02) - deprecated: use art_make_library(), art_dictonary(), and cet_build_plugin() with explicit source lists and plugin base types
 
 install_headers()
 install_fhicl()
