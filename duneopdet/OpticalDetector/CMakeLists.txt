@@ -7,6 +7,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 larcorealg::Geometry
                                 larcore::Geometry_Geometry_service
                                 larana::OpticalDetector_OpHitFinder
+                                larreco::PhotonCalibrator
                                 nusimdata::SimulationBase
                                 fhiclcpp::fhiclcpp
                                 messagefacility::MF_MessageLogger
@@ -28,6 +29,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 dunecore::DuneObj
                                 lardataalg::DetectorInfo
                                 lardataobj::RecoBase
+                                lardata::headers
                                 larana::OpticalDetector
                                 larana::OpticalDetector_OpHitFinder
                                 larcorealg::Geometry
@@ -61,6 +63,8 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 SERVICE_LIBRARIES
                                 larcorealg::Geometry
                                 larcore::Geometry_Geometry_service
+                                lardata::headers
+                                lardataalg::DetectorInfo
                                 duneopdet::OpticalDetector
                                 fhiclcpp::fhiclcpp
                                 messagefacility::MF_MessageLogger
@@ -73,7 +77,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 art::Persistency_Common
                                 art::Utilities 
 				canvas::canvas
-                                cetlib::cetlib cetlib_except
+                                cetlib::cetlib cetlib_except::cetlib_except
 				CLHEP::CLHEP
                                 Boost::filesystem
 

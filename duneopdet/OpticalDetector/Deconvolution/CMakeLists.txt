@@ -2,6 +2,7 @@
 art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 LIBRARY_NAME duneopdet_OpticalDetector
                 LIB_LIBRARIES 
+                                lardataalg::DetectorInfo
                                 lardataobj::RecoBase
                                 larcorealg::Geometry
                                 larcore::Geometry_Geometry_service
@@ -27,6 +28,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 dunecore::DuneObj
                                 lardataalg::DetectorInfo
                                 lardataobj::RecoBase
+                                lardata::headers
                                 larana::OpticalDetector
                                 larana::OpticalDetector_OpHitFinder
                                 larcorealg::Geometry
@@ -69,7 +71,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 art::Persistency_Common
                                 art::Utilities 
 				canvas::canvas
-                                cetlib::cetlib cetlib_except
+                                cetlib::cetlib cetlib_except::cetlib_except
 				CLHEP::CLHEP
                                 Boost::filesystem
 

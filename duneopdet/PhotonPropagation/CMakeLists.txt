@@ -1,8 +1,9 @@
 
 art_make(
-          SERVICE_LIBRARIES larsim_PhotonPropagation
+          SERVICE_LIBRARIES larsim::PhotonPropagation
                         larsim::Simulation nug4::ParticleNavigation 
 			lardataobj::Simulation
+                        lardata::headers
                         larevt::Filters
 	                lardataobj::RawData
 	                larcorealg::Geometry
@@ -20,15 +21,16 @@ art_make(
                         canvas::canvas
 			messagefacility::MF_MessageLogger
 			fhiclcpp::fhiclcpp
-                        CLHEP
-			cetlib::cetlib cetlib_except
+                        CLHEP::CLHEP
+			cetlib::cetlib cetlib_except::cetlib_except
                         ROOT::EG
           MODULE_LIBRARIES
                         larsim::LegacyLArG4
                         lardataobj::Simulation
+                        lardata::headers
                         duneopdet::PhotonPropagation_PhotonVisibilityServiceS2_service
                         larsim::Simulation 
-                        nug4::ParticleNavigation lardataobj_Simulation
+                        nug4::ParticleNavigation
                         larcorealg::Geometry
       	                larcore::Geometry_Geometry_service
                         art::Framework_Core
@@ -45,8 +47,8 @@ art_make(
                         canvas::canvas
 			messagefacility::MF_MessageLogger
 			fhiclcpp::fhiclcpp
-			cetlib::cetlib cetlib_except
-                        CLHEP
+			cetlib::cetlib cetlib_except::cetlib_except
+                        CLHEP::CLHEP
 	 ) ### MIGRATE-ACTION-RECOMMENDED (migrate-3.22.02) - deprecated: use art_make_library(), art_dictonary(), and cet_build_plugin() with explicit source lists and plugin base types
 
 install_headers()

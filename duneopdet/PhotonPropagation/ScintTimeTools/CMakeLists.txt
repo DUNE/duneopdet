@@ -8,15 +8,16 @@ art_make(NO_PLUGINS
     cetlib::cetlib
     cetlib_except::cetlib_except
     fhiclcpp::fhiclcpp
-    CLHEP
-    art::Utilities
+    CLHEP::CLHEP
+    art::Utilitiesa
   ) ### MIGRATE-ACTION-RECOMMENDED (migrate-3.22.02) - deprecated: use art_make_library(), art_dictonary(), and cet_build_plugin() with explicit source lists and plugin base types
 
 
 cet_build_plugin(ScintTimeXeDoping art::tool
                 messagefacility::MF_MessageLogger
                 fhiclcpp::fhiclcpp
-                CLHEP
+                CLHEP::CLHEP
+                larsim::PhotonPropagation
               )
 
 
