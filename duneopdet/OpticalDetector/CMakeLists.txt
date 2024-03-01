@@ -81,7 +81,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
 				CLHEP::CLHEP
                                 Boost::filesystem
 
-) ### MIGRATE-ACTION-RECOMMENDED (migrate-3.22.02) - deprecated: use art_make_library(), art_dictonary(), and cet_build_plugin() with explicit source lists and plugin base types
+)
 
 file(GLOB dat_files *.dat)
 install_fw( LIST ${dat_files} )
