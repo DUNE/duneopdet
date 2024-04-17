@@ -1,8 +1,9 @@
 
 art_make(
-          SERVICE_LIBRARIES larsim_PhotonPropagation
+          SERVICE_LIBRARIES larsim::PhotonPropagation
                         larsim::Simulation nug4::ParticleNavigation 
 			lardataobj::Simulation
+                        lardata::headers
                         larevt::Filters
 	                lardataobj::RawData
 	                larcorealg::Geometry
@@ -20,17 +21,16 @@ art_make(
                         canvas::canvas
 			messagefacility::MF_MessageLogger
 			fhiclcpp::fhiclcpp
-                        CLHEP
-			cetlib::cetlib cetlib_except
-			ROOT_BASIC_LIB_LIST
-                        ROOT_EG
+                        CLHEP::CLHEP
+			cetlib::cetlib cetlib_except::cetlib_except
+                        ROOT::EG
           MODULE_LIBRARIES
-                        ROOT_BASIC_LIB_LIST
                         larsim::LegacyLArG4
                         lardataobj::Simulation
+                        lardata::headers
                         duneopdet::PhotonPropagation_PhotonVisibilityServiceS2_service
                         larsim::Simulation 
-                        nug4::ParticleNavigation lardataobj_Simulation
+                        nug4::ParticleNavigation
                         larcorealg::Geometry
       	                larcore::Geometry_Geometry_service
                         art::Framework_Core
@@ -47,8 +47,8 @@ art_make(
                         canvas::canvas
 			messagefacility::MF_MessageLogger
 			fhiclcpp::fhiclcpp
-			cetlib::cetlib cetlib_except
-                        CLHEP
+			cetlib::cetlib cetlib_except::cetlib_except
+                        CLHEP::CLHEP
 	 )
 
 install_headers()
