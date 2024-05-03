@@ -499,6 +499,28 @@ protodune_hd_v6_photonvisibilityservice:  #generated using v6 geometry, 1m RSL, 
   LibraryFile: "PhotonPropagation/LibraryData/libext_protodunehd_v6_Ar_Baseline_v09_69_00d00_5e7_25x25x25_landau_20231216.root"    
 }
 
+protodune_hd_TBC_photonvisibilityservice: # Generated using protoDUNEhd_v6_refactored geometry.
+{
+  # hybrid library
+  NX: 94
+  NY: 87
+  NZ: 78
+
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  #IncludePropTime: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/TBC"
+
+  XMin: -391.564606
+  XMax: 464.195190
+  YMin: -65.479393
+  YMax: 725.724670
+  ZMin: -199.330917
+  ZMax: 661.863403
+}
+
 ################
 # ProtoDUNE-VD #
 ################
