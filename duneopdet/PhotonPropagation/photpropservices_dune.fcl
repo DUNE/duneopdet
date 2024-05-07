@@ -499,7 +499,7 @@ protodune_hd_v6_photonvisibilityservice:  #generated using v6 geometry, 1m RSL, 
   LibraryFile: "PhotonPropagation/LibraryData/libext_protodunehd_v6_Ar_Baseline_v09_69_00d00_5e7_25x25x25_landau_20231216.root"    
 }
 
-protodune_hd_v6_optimised_photonvisibilityservice: # Generated using protoDUNEhd_v6_refactored geometry.
+protodune_hd_v6_hybridModel_photonvisibilityservice: # Generated using protoDUNEhd_v6_refactored geometry.
 {
   # Generated with
   # Rayleigh scattering length, 99.9cm @ 128nm
