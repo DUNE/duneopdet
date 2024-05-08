@@ -499,6 +499,35 @@ protodune_hd_v6_photonvisibilityservice:  #generated using v6 geometry, 1m RSL, 
   LibraryFile: "PhotonPropagation/LibraryData/libext_protodunehd_v6_Ar_Baseline_v09_69_00d00_5e7_25x25x25_landau_20231216.root"    
 }
 
+protodune_hd_v6_hybridModel_photonvisibilityservice: # Generated using protoDUNEhd_v6_refactored geometry.
+{
+  # Generated with
+  # Rayleigh scattering length, 99.9cm @ 128nm
+  # services.LArPropertiesService.AbsLengthSpectrum: [2000,2000,2000,8000,8000,8000,2000,2000,2000,2000]
+  # Reflectivities ON.
+
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  #IncludePropTime: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/lib_protodunehd_v6_refactored_Ar_v09_76_00d00_5e5_94x87x78_ExternalVolume_20240416.root"
+
+  # Voxelisation is the result of automatic optimisation, can re-run with option below
+  #UseAutomaticVoxels: true
+
+  NX: 94
+  NY: 87
+  NZ: 78
+
+  XMin: -391.564606
+  XMax: 464.195190
+  YMin: -65.479393
+  YMax: 725.724670
+  ZMin: -199.330917
+  ZMax: 661.863403
+}
+
 ################
 # ProtoDUNE-VD #
 ################
