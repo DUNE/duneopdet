@@ -31,8 +31,8 @@ services:
 
 
 services.Geometry.GDML: "dune10kt_v1_workspace.gdml"
-services.Geometry.ROOT: "dune10kt_v1_workspace.gdml"
 services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1_workspace"
+services.AuxDetGeometry.GDML: @local::services.Geometry.GDML
 
 services.OpDetResponseInterface.LongAxis: z
 

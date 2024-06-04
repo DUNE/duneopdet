@@ -47,6 +47,7 @@ services:
    
 }
 
+services.AuxDetGeometry: @local::protodunedphase_auxdet_geo
 services.Geometry:                @local::protodunedphase_geo
 PhotonVisibilityService: @local::protodunedp_photonvisibilityservice
 services.PhotonVisibilityService.ParametrisedTimePropagation: false

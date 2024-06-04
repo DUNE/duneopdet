@@ -44,12 +44,10 @@ physics:
 }
 
 services.Geometry.GDML: "protodune_v3.gdml"
-services.Geometry.ROOT: "protodune_v3.gdml"
 services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
+services.AuxDetGeometry.GDML: @local::services.Geometry.GDML
 
 #services.Geometry.GDML: "protodune_v2.gdml"
-#services.Geometry.ROOT: "protodune_v2.gdml"
 #services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
 
 services.PhotonVisibilityService.LibraryFile: "lib_protodune_0ppmn2.root"
-

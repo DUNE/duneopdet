@@ -23,7 +23,7 @@
 #include <cstring>
 
 // LArSoft includes
-#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "lardataobj/RecoBase/OpHit.h"
@@ -300,8 +300,7 @@ namespace opdet {
         tfs->make<TH2D>(HistName, ";y ;z ", PosHistYRes, fYMin, fYMax, PosHistZRes, fZMin, fZMax);
     }
 
-    art::ServiceHandle<geo::Geometry const> geom;
-    unsigned int NOpChannels = geom->NOpChannels();
+    unsigned int NOpChannels = art::ServiceHandle<geo::WireReadout const>()->Get().NOpChannels();
 
     if (fMakePerEventFlashTree) {
       fNFlashes = FlashHandle->size();
