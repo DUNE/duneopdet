@@ -21,8 +21,7 @@ namespace opdet
     class DUNE35tonOpDetResponse : public opdet::OpDetResponseInterface {
     public:
 
-        DUNE35tonOpDetResponse(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-        ~DUNE35tonOpDetResponse() throw();
+        DUNE35tonOpDetResponse(fhicl::ParameterSet const& pset);
 
 
 

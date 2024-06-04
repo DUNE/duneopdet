@@ -27,8 +27,8 @@ namespace opdet
   class ProtoDUNEOpDetResponse : public opdet::OpDetResponseInterface {
     public:
 
-      ProtoDUNEOpDetResponse(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
-      ~ProtoDUNEOpDetResponse() throw();
+      ProtoDUNEOpDetResponse(fhicl::ParameterSet const& pset);
+      ~ProtoDUNEOpDetResponse();
 
       // virtual bool detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const;
       //bool ProtoDUNEOpDetResponse::detectedLite(int OpDet, int &newOpChannel, int& hardwareChannel) const

@@ -31,8 +31,8 @@ services:
 
 
 services.Geometry.GDML: "protodune_v4.gdml"
-services.Geometry.ROOT: "protodune_v4.gdml"
 services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
+services.AuxDetGeometry.GDML: @local::services.Geometry.GDML
 
 services.OpDetResponseInterface.LongAxis: z
 
@@ -121,4 +121,3 @@ services.OpDetResponseInterface.LambdaShort:                4.3 # cm
 services.OpDetResponseInterface.LambdaLong:               225.0 # cm
 services.OpDetResponseInterface.FracShort:                 0.29
 services.OpDetResponseInterface.FracLong:                  0.71
-
