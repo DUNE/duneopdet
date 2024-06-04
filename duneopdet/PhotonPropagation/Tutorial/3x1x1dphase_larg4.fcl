@@ -47,6 +47,7 @@ services:
    #PhotonVisibilityServiceS2: @local::dunedphase3x1x1_photonvisibilityserviceS2
 }
 
+services.AuxDetGeometry: @local::dphase3x1x1_auxdet_geo
 services.Geometry:                @local::dphase3x1x1_geo
 services.PhotonVisibilityService: @local::dunedphase3x1x1_photonvisibilityservice
 services.PhotonVisibilityService.ParametrisedTimePropagation: false

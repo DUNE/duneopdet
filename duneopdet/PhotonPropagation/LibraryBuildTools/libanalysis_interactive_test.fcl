@@ -49,9 +49,8 @@ physics:
 
 
 services.Geometry.GDML: "protoDune_v1.gdml"
-services.Geometry.ROOT: "protoDune_v1.gdml"
 services.Geometry.SortingParameters.DetectorVersion: "dune10kt_v1"
-
+services.AuxDetGeometry.GDML: @local::services.Geometry.GDML
 
 
 # Begin optical specific parts:
@@ -76,4 +75,3 @@ services.PhotonVisibilityService.UseCryoBoundary: false
 #services.PhotonVisibilityService.YMax:  0
 #services.PhotonVisibilityService.ZMin:  60.
 #services.PhotonVisibilityService.ZMax:  90.
-

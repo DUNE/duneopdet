@@ -34,6 +34,8 @@
 
 // LArSoft includes
 
+#include "larcore/Geometry/WireReadout.h"
+#include "larcore/Geometry/Geometry.h"
 #include "lardataobj/Simulation/sim.h"
 #include "lardataobj/Simulation/SimPhotons.h"
 #include "lardataobj/Simulation/OpDetBacktrackerRecord.h"
@@ -195,7 +197,7 @@ namespace opdet {
     
       // Produce waveform on one of the optical detectors
       void CreatePDWaveform(art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,
-                            geo::Geometry const& geometry,
+                            geo::WireReadoutGeom const& wireReadout,
                             std::vector< std::vector< double > >& pdWaveforms,
                             std::vector<FocusList>& fls,
                             sim::OpDetDivRec& DivRec,
@@ -402,7 +404,7 @@ namespace opdet {
       + fReadoutWindow;
 
     // Geometry service
-    art::ServiceHandle< geo::Geometry > geometry;
+    auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
     
     auto const btr_handles = evt.getMany<std::vector<sim::OpDetBacktrackerRecord>>();
 
@@ -428,7 +430,7 @@ namespace opdet {
         //unsigned int opDet = btr->OpDetNum();
       
         // Get number of channels in this optical detector
-        unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
+        unsigned int nChannelsPerOpDet = wireReadout.NOpHardwareChannels(opDet);
       
         std::vector<FocusList> fls(nChannelsPerOpDet, FocusList(nSamples, fPadding));
         //std::vector<sim::OpDetDivRec> DivRec;
@@ -439,7 +441,7 @@ namespace opdet {
         std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
                                                          std::vector< double >(nSamples, static_cast< double >(fPedestal)));
       
-        CreatePDWaveform(btr, *geometry, pdWaveforms, fls, DivRec, Reflected);
+        CreatePDWaveform(btr, wireReadout, pdWaveforms, fls, DivRec, Reflected);
         //DivRec comes out with all of the ticks filled correctly, with each channel filled in it's map.
         //Break here to investigate div recs as they are made and compare them to btrs
       
@@ -476,7 +478,7 @@ namespace opdet {
               std::map< size_t, std::vector< short > >{ std::make_pair(0,
                                                                        waveformOfShorts) };
 
-            unsigned int opChannel = geometry->OpChannel(opDet, hardwareChannel);
+            unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);
 
             for (auto const& pairTickWaveform : mapTickWaveform)
             {
@@ -589,7 +591,7 @@ namespace opdet {
   //---------------------------------------------------------------------------
   void OpDetDigitizerDUNE::CreatePDWaveform
     (art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,
-     geo::Geometry const& geometry,
+     geo::WireReadoutGeom const& wireReadout,
      std::vector< std::vector< double > >& pdWaveforms,
      std::vector<FocusList>& fls,
      sim::OpDetDivRec& DivRec,
@@ -635,13 +637,13 @@ namespace opdet {
               if ( Detected(opDet, readoutChannel, Reflected) )
               {
                 unsigned int hardwareChannel =
-                  geometry.HardwareChannelFromOpChannel(readoutChannel);
+                  wireReadout.HardwareChannelFromOpChannel(readoutChannel);
                 // Convert the time of the pulse to ticks
                 size_t timeBin = TimeToTick(photonTime);
                 // Add 1 pulse to the waveform
                 AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel]);
 
-                unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
+                unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);
                 //Set/find tick. Set/find Channel
                 sim::OpDet_Time_Chans::stored_time_t tmp_time=time_sdps.first;
                 DivRec.AddPhoton(opChannel, tid, tmp_time);
@@ -651,8 +653,8 @@ namespace opdet {
                 }
               }//else{
               /*  unsigned int hardwareChannel =
-                  geometry.HardwareChannelFromOpChannel(readoutChannel);
-                  unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
+                  wireReadout.HardwareChannelFromOpChannel(readoutChannel);
+                  unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);
                   DivRec.tick_chans[i].DivChans.IfNotInit(opChannel);
                   }*/
             }
@@ -794,8 +796,10 @@ namespace opdet {
 
     double maxDrift = 0.0;
     for (geo::TPCGeo const& tpc :
-           art::ServiceHandle< geo::Geometry >()->Iterate<geo::TPCGeo>())
-      if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
+           art::ServiceHandle< geo::Geometry >()->Iterate<geo::TPCGeo>()) {
+      auto const driftDistance = tpc.DriftDistance();
+      if (maxDrift < driftDistance) maxDrift = driftDistance;
+    }
 
     driftWindow = maxDrift/detProp.DriftVelocity();
 
@@ -863,13 +867,13 @@ namespace opdet {
     }
     if ( (!Reflected && fQEOverride > 0) || Reflected ) {
       // Find the Optical Detector using the geometry service
-      art::ServiceHandle<geo::Geometry> geom;
+      auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
       
       // Here OpDet must be opdet since we are introducing
       // channel mapping here.
-      float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+      float NOpHardwareChannels = wireReadout.NOpHardwareChannels(OpDet);
       int hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
-      readoutChannel = geom->OpChannel(OpDet, hardwareChannel);
+      readoutChannel = wireReadout.OpChannel(OpDet, hardwareChannel);
 
       // Check QE
       if (!Reflected) {

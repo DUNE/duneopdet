@@ -11,6 +11,8 @@
 #include "TGeoNode.h"
 #include "TGeoBBox.h"
 #include "larcorealg/Geometry/OpDetGeo.h"
+#include "larcore/Geometry/WireReadout.h"
+#include "larcore/Geometry/Geometry.h"
 #include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -22,17 +24,11 @@ namespace opdet{
 
 
     //--------------------------------------------------------------------
-    DUNE35tonOpDetResponse::DUNE35tonOpDetResponse(fhicl::ParameterSet const& pset, 
-                                         art::ActivityRegistry &/*reg*/)
+    DUNE35tonOpDetResponse::DUNE35tonOpDetResponse(fhicl::ParameterSet const& pset)
     {
         this->doReconfigure(pset);
     }
     
-    //--------------------------------------------------------------------
-    DUNE35tonOpDetResponse::~DUNE35tonOpDetResponse() throw()
-    { }
-
-
     //--------------------------------------------------------------------
     void DUNE35tonOpDetResponse::doReconfigure(fhicl::ParameterSet const& pset)
     {
@@ -79,11 +75,10 @@ namespace opdet{
     //--------------------------------------------------------------------
     int  DUNE35tonOpDetResponse::doNOpChannels() const
     {
-        art::ServiceHandle<geo::Geometry> geom;
         if (fFastSimChannelConvert || fFullSimChannelConvert)
-            return geom->NOpChannels();
+            return art::ServiceHandle<geo::WireReadout>()->Get().NOpChannels();
         else
-            return geom->NOpDets();
+            return art::ServiceHandle<geo::Geometry>()->NOpDets();
 
     }
 
@@ -107,13 +102,14 @@ namespace opdet{
 
 
         if (fFullSimChannelConvert){
+            auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
             // Override default number of channels for Fiber and Plank
-            float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+            float NOpHardwareChannels = wireReadout.NOpHardwareChannels(OpDet);
             if (pdtype == 1) NOpHardwareChannels = 3;
             if (pdtype == 2) NOpHardwareChannels = 2;
             
             int hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
-            newOpChannel = geom->OpChannel(OpDet, hardwareChannel);
+            newOpChannel = wireReadout.OpChannel(OpDet, hardwareChannel);
         }
         else{
             newOpChannel = OpDet;
@@ -234,11 +230,9 @@ namespace opdet{
         if (fFastSimChannelConvert){
 
             // Find the Optical Detector using the geometry service
-            art::ServiceHandle<geo::Geometry> geom;
             // Here OpDet must be opdet since we are introducing
             // channel mapping here.
-            const TGeoNode* node = geom->OpDetGeoFromOpDet(OpDet).Node();
-
+            const TGeoNode* node = art::ServiceHandle<geo::Geometry>()->OpDetGeoFromOpDet(OpDet).Node();
             
             // Identify the photon detector type
             int pdtype;
@@ -250,12 +244,14 @@ namespace opdet{
             else                                                  pdtype = -1;
 
             // Override default number of channels for Fiber and Plank
-            float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+            auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
+
+            float NOpHardwareChannels = wireReadout.NOpHardwareChannels(OpDet);
             if (pdtype == 1) NOpHardwareChannels = 8;
             if (pdtype == 2) NOpHardwareChannels = 2;
 
             int hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
-            newOpChannel = geom->OpChannel(OpDet, hardwareChannel);
+            newOpChannel = wireReadout.OpChannel(OpDet, hardwareChannel);
         }
         else{
             newOpChannel = OpDet;
@@ -271,4 +267,3 @@ namespace opdet{
 } // namespace
 
 DEFINE_ART_SERVICE_INTERFACE_IMPL(opdet::DUNE35tonOpDetResponse, opdet::OpDetResponseInterface)
-

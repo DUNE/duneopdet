@@ -21,6 +21,7 @@
 #include <climits>
 
 // LArSoft includes
+#include "larcore/Geometry/WireReadout.h"
 #include "larcore/Geometry/Geometry.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "lardataobj/RecoBase/OpHit.h"
@@ -341,6 +342,7 @@ namespace opdet {
   {
     // Get the required services
     art::ServiceHandle< geo::Geometry > geom;
+    auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
     art::ServiceHandle<cheat::PhotonBackTrackerService > pbt;
     art::ServiceHandle<cheat::ParticleInventoryService> pinv;
 
@@ -619,9 +621,9 @@ namespace opdet {
       for(unsigned int iOD = 0; iOD < geom->NOpDets(); ++iOD){
         fPEsPerOpDetVector.emplace_back(0);
       }
-      for(unsigned int iC=0; iC < geom->NOpChannels(); ++iC)
+      for(unsigned int iC=0; iC < wireReadout.NOpChannels(); ++iC)
       {
-        unsigned int iOD = geom->OpDetFromOpChannel(iC);
+        unsigned int iOD = wireReadout.OpDetFromOpChannel(iC);
         fPEsPerOpDetVector[iOD] += TheFlash.PE(iC);
       }
 
