@@ -10,7 +10,7 @@ standard_flashmatchana:
    OpFlashModuleLabel:   "opflash"  
    OpHitModuleLabel:     "ophit"  
    EdepLabel:            "IonAndScint"  
-   elecDriftLabel:       "elecDrift" #Change to tpcrawdecoder:SimpleSC for wirecell 
+   elecDriftLabel:       "tpcrawdecoder:SimpleSC" #from wirecell
    SignalLabel:          "generator"
    GeantLabel:           "largeant"
    kgenerator:           1   #For Edep from signal. Use: beam 1; CosmicRay 2; SuperNovaNeutrino 3; SingleParticle 4
@@ -42,6 +42,8 @@ standard_vdflashmatchana.IsVD: true
 standard_vdflashmatchana.DistanceCut: 360.0
 standard_vdflashmatchana.Baseline: 500.0
 standard_vdflashmatchana.PE: 10.0
+#standard_vdflashmatchana.elecDriftLabel: "elecDrift" #This may be needed for a while in VD because of the CRP gaps 
+
 
 marley_vdflashmatchana: @local::standard_vdflashmatchana
 marley_vdflashmatchana.SignalLabel: "marley"
