@@ -214,5 +214,10 @@ protodune_vd_pdfastsim_ann_ar:
 
 protodune_vd_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs
 
+protodune_vd_pdfastsim_ann_xe:                          @local::protodune_vd_pdfastsim_ann_ar
+protodune_vd_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDoping10ppm
+protodune_vd_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/protodune_vd_175nm_tf2.6"
+
+
 
 END_PROLOG
