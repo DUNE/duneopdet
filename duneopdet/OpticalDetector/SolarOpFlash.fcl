@@ -1,0 +1,8 @@
+#include "SolarNuAna.fcl"
+
+BEGIN_PROLOG
+
+solar_opflash_dune10kt_1x2x6: @local::solar_nu_ana_hd
+solar_opflash_dune10kt_1x2x6.module_type: "SolarOpFlash"
+
+END_PROLOG
