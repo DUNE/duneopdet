@@ -71,7 +71,7 @@ namespace solar
     float fOpFlashAlgoRad;
     float fOpFlashAlgoPE;
     float fOpFlashAlgoTriggerPE;
-    bool fOpFlashAlgoCentroid;
+    // bool fOpFlashAlgoCentroid;
     std::unique_ptr<solar::SolarAuxUtils> solaraux;
     std::unique_ptr<solar::AdjOpHitsUtils> adjophits;
   };
@@ -100,7 +100,7 @@ namespace solar
         fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad")),
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE")),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE")),
-        fOpFlashAlgoCentroid(p.get<bool>("OpFlashAlgoCentroid")),
+        // fOpFlashAlgoCentroid(p.get<bool>("OpFlashAlgoCentroid")),
         solaraux(new solar::SolarAuxUtils(p)),
         adjophits(new solar::AdjOpHitsUtils(p))
   {
