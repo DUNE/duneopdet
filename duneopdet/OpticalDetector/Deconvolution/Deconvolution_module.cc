@@ -358,8 +358,8 @@ namespace opdet {
 
 
     // prepare channel to template map
-    auto &channels = pars().TemplateMapChannel();
-    auto &templates = pars().TemplateMapTemplate();
+    auto channels = pars().TemplateMap_channel();
+    auto templates = pars().TemplateMap_template();
     auto chann = channels.begin();
     auto templ = templates.begin();
     for (;chann != channels.end(); ++chann, ++templ) {
@@ -408,8 +408,9 @@ namespace opdet {
     for (auto const& wf: digi_wave) {
       auto channel = wf.ChannelNumber();
 
-      auto &xh = fSinglePEWaveforms[fChannelToTemplateMap[channel]];
+      //auto &xh = fSinglePEWaveforms[fChannelToTemplateMap[channel]];
       auto &xH = fSinglePEWaveforms_fft[fChannelToTemplateMap[channel]];
+      auto &speapmlitude = fSinglePEAmplitudes[fChannelToTemplateMap[channel]];
 
       CmplxWaveform_t xV(fSamples);
       CmplxWaveform_t xS(fSamples);
@@ -440,7 +441,7 @@ namespace opdet {
       Double_t SPE_Max = 0;
       double maxADC=*max_element(xv.begin(),xv.end());
       double maxAmplit= maxADC; // Pedestal already subtracted
-      SPE_Max = maxAmplit/fSinglePEAmplitude;
+      SPE_Max = maxAmplit/speapmlitude;
 
       std::vector<double>xs(fSamples,0.);
       // Compute expected input (using a delta or the scint tile profile as a model)
