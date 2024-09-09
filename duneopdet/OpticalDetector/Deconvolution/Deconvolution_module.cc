@@ -417,7 +417,7 @@ namespace opdet {
       auto channel = wf.ChannelNumber();
 
       // check if this channel is to be ignored
-      if ( fIgnoreChannels.contains(channel) )
+      if ( fIgnoreChannels.count(channel) )
 	  continue;
 
       //auto &xh = fSinglePEWaveforms[fChannelToTemplateMap[channel]];
