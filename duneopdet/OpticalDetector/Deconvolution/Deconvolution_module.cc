@@ -100,6 +100,8 @@ namespace opdet {
           fhicl::Sequence<unsigned int> TemplateMap_channel{ fhicl::Name("TemplateMapChannel") };
           fhicl::Sequence<unsigned int> TemplateMap_template{ fhicl::Name("TemplateMapTemplate") };
 
+          fhicl::Sequence<unsigned int> IgnoreChannels{ fhicl::Name("IgnoreChannels") };
+
 
           struct Filter {
             fhicl::Atom<std::string> Name{fhicl::Name("Name"), "Gauss"};
@@ -265,6 +267,8 @@ namespace opdet {
       bool fAutoScale;
 
       std::map<unsigned int, unsigned int> fChannelToTemplateMap;
+      std::set<unsigned int> fIgnoreChannels;
+
 
       // Additional parameters here
 
@@ -366,6 +370,10 @@ namespace opdet {
       fChannelToTemplateMap[*chann] = *templ;
     }
 
+    for ( auto chan : pars().IgnoreChannels() ) {
+	fIgnoreChannels.insert(chan);
+    }
+
 
     // build post filter (if required)
     if (fApplyPostfilter) BuildExtraFilter(fxG1, fPostfilterConfig);
@@ -407,6 +415,10 @@ namespace opdet {
     //******************************
     for (auto const& wf: digi_wave) {
       auto channel = wf.ChannelNumber();
+
+      // check if this channel is to be ignored
+      if ( fIgnoreChannels.contains(channel) )
+	  continue;
 
       //auto &xh = fSinglePEWaveforms[fChannelToTemplateMap[channel]];
       auto &xH = fSinglePEWaveforms_fft[fChannelToTemplateMap[channel]];
