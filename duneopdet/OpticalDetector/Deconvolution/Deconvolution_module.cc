@@ -89,6 +89,8 @@ namespace opdet {
           fhicl::Atom<short>       Pedestal{ fhicl::Name("Pedestal"), 1500};
           fhicl::Sequence<std::string> DigiDataFiles{ fhicl::Name("DigiDataFiles") };
           fhicl::Atom<size_t>      DigiDataColumn{ fhicl::Name("DigiDataColumn"), 1 };
+          fhicl::Sequence<std::string> NoiseTemplateFiles{ fhicl::Name("NoiseTemplateFiles") };
+
           fhicl::Atom<Int_t>       Samples{ fhicl::Name("Samples"), 1000 };
           fhicl::Atom<Int_t>       PedestalBuffer{ fhicl::Name("PedestalBuffer"), 10 };
           fhicl::Atom<Double_t>    Scale{ fhicl::Name("Scale"), 1 };
@@ -99,6 +101,8 @@ namespace opdet {
 
           fhicl::Sequence<unsigned int> TemplateMap_channel{ fhicl::Name("TemplateMapChannel") };
           fhicl::Sequence<unsigned int> TemplateMap_template{ fhicl::Name("TemplateMapTemplate") };
+          fhicl::Sequence<unsigned int> NoiseTemplateMap_channel{ fhicl::Name("NoiseTemplateMapChannel") };
+          fhicl::Sequence<unsigned int> NoiseTemplateMap_template{ fhicl::Name("NoiseTemplateMapTemplate") };
 
           fhicl::Sequence<unsigned int> IgnoreChannels{ fhicl::Name("IgnoreChannels") };
 
@@ -266,8 +270,6 @@ namespace opdet {
       bool fApplyPostBLCorr;
       bool fAutoScale;
 
-      std::map<unsigned int, unsigned int> fChannelToTemplateMap;
-      std::set<unsigned int> fIgnoreChannels;
 
 
       // Additional parameters here
@@ -277,6 +279,13 @@ namespace opdet {
       std::vector<CmplxWaveform_t> fSinglePEWaveforms_fft;    //!< Fourier transform of the tamplates
       std::vector<double> fSinglePEAmplitudes;                //!< single PE amplitude for found maximum peak in the template.
       unsigned int WfDeco;                      //!< Number of waveform processed
+      std::map<unsigned int, unsigned int> fChannelToTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSinglePEWaveforms)
+      std::set<unsigned int> fIgnoreChannels; //!< List of channels to ignore in deconvolution
+
+      // Noise templates -- input in frequency domain
+      std::vector<std::vector<double> > fNoiseTemplates;    //!< Vector that stores noise template in frequency domain
+      std::map<unsigned int, unsigned int> fChannelToNoiseTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSingle
+
 
       //--------Filter Variables
       std::string fOutputProduct;
@@ -362,12 +371,26 @@ namespace opdet {
 
 
     // prepare channel to template map
-    auto channels = pars().TemplateMap_channel();
-    auto templates = pars().TemplateMap_template();
-    auto chann = channels.begin();
-    auto templ = templates.begin();
-    for (;chann != channels.end(); ++chann, ++templ) {
-      fChannelToTemplateMap[*chann] = *templ;
+    {
+	auto channels = pars().TemplateMap_channel();
+	auto templates = pars().TemplateMap_template();
+	auto chann = channels.begin();
+	auto templ = templates.begin();
+	for (;chann != channels.end(); ++chann, ++templ) {
+	    fChannelToTemplateMap[*chann] = *templ;
+	}
+    }
+
+    // Prepare the noise templates
+    SourceNoiseTemplateFiles();
+    {
+	auto channels = pars().NoiseTemplateMap_channel();
+	auto templates = pars().NoiseTemplateMap_template();
+	auto chann = channels.begin();
+	auto templ = templates.begin();
+	for (;chann != channels.end(); ++chann, ++templ) {
+	    fChannelToNoiseTemplateMap[*chann] = *templ;
+	}
     }
 
     for ( auto chan : pars().IgnoreChannels() ) {
