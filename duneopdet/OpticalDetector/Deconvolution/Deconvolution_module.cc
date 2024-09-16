@@ -262,6 +262,7 @@ namespace opdet {
       size_t fPreTrigger;                       //!< In ticks
       std::vector<std::string> fDigiDataFiles;                //!< single p.e. template source file
       size_t fDigiDataColumn;                   //!< single p.e. template source file column
+      std::vector<std::string> fNoiseTemplateFiles;                //!< noise template source file
       double fScale;                            //!< Scaling of resulting wvfs
       int fSamples;                             //!< Same value as ReadoutWindow in digitizer
       int fPedestalBuffer;                      //!< Used to calculate pedestal which is definded as PreTrigger - PedestalBuffer in [ticks]
@@ -299,6 +300,7 @@ namespace opdet {
     private:
       int  CountFileColumns(const char* file_path);
       void SourceSPEDigiDataFiles();
+      void SourceNoiseTemplateFiles();
       void BuildExtraFilter(CmplxWaveform_t& xF0, const WfmExtraFilter_t config);
       void ComputeExpectedInput(std::vector<double>& s, double nmax);
       void CopyToOutput(const std::vector<float>& v, std::vector<float>& target);
@@ -330,6 +332,7 @@ namespace opdet {
 
     fDigiDataFiles{ pars().DigiDataFiles()},
     fDigiDataColumn{ pars().DigiDataColumn()},
+    fNoiseTemplateFiles{ pars().NoiseTemplateFiles()},
     fScale{ pars().Scale()},
     fSamples{ pars().Samples()},
     fPedestalBuffer{ pars().PedestalBuffer()},
@@ -784,6 +787,48 @@ namespace opdet {
     }
     return;
   }
+
+  /**
+   * @brief Source template noise from files
+   *
+   * Source the noise templates from the dat files set by
+   * `fNoiseTemplateFiles`.
+   */
+  void Deconvolution::SourceNoiseTemplateFiles() {
+    cet::search_path sp("FW_SEARCH_PATH");
+    for (auto fname: fNoiseTemplateFiles) {
+      fNoiseTemplates.push_back(std::vector<double>()); // add a new empty waform
+      auto &noisewfrm = fNoiseTemplates.back(); // get the reference to the waveform vector
+      std::string datafile;
+      // taking the file name as the first argument,
+      // the second argument is the local variable where to store the full path - both are std::string objects
+      sp.find_file(fname, datafile);
+      std::ifstream noiseData;
+      noiseData.open(datafile);
+
+      std::string temp_str;
+      double temp = 0.;
+      if (noiseData.is_open()) {
+	while (std::getline(noiseData, temp_str)) {
+	  std::stringstream ss; ss << temp_str;
+	  ss >> temp;
+	  noisewfrm.push_back(temp);
+	}
+      } else {
+	printf("Deconvolution::SourceNoiseTemplateFiles ERROR ");
+	printf("Cannot open noise template file.\n");
+
+	throw art::Exception(art::errors::FileOpenError);
+      }
+
+      noisewfrm.resize(fSamples, 0);
+
+      noiseData.close();
+
+    }
+    return;
+  }
+
 
   /**
    * @brief Count the nr of column in a txt file
