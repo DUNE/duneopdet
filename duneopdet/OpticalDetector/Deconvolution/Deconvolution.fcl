@@ -38,6 +38,10 @@ dune_deconvolution:
   TemplateMapTemplate: @local::protodunehd_deconvolution_spetemplates.SingleFileSPETemplateMapTemplate
   IgnoreChannels:    @local::protodunehd_pds_channels.IgnoreChannels
 
+  NoiseTemplateFiles: []
+  NoiseTemplateMapChannel: []
+  NoiseTemplateMapTemplate: []
+
   AutoScale:             true    # Scaling based on SPE amplitude from template (Use "true" for Wiener Filter and
                                  # "false" for Gauss Filter). If set to false the value of Scale is used.
   ApplyPostBLCorrection: false   # Correct baseline after the deconvolution process(Use "false" for Wiener).
