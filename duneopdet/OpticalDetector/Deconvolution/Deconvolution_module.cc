@@ -30,6 +30,8 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+#include "lardata/Utilities/AssociationUtil.h"
+
 // ART extensions
 #include "nurandom/RandomUtils/NuRandomService.h"
 
@@ -318,6 +320,10 @@ namespace opdet{
   DEFINE_ART_MODULE(Deconvolution)
 }
 
+namespace {
+    using AssnsRawDeconv = art::Assns< raw::OpDetWaveform, recob::OpWaveform >;
+}
+
 namespace opdet {
   //---------------------------------------------------------------------------
   // Constructor
@@ -350,6 +356,7 @@ namespace opdet {
 
     // This module produces
     produces< std::vector< recob::OpWaveform> > ();
+    produces< AssnsRawDeconv > ();
 
 
     // Obtain parameters from TimeService
@@ -430,6 +437,8 @@ namespace opdet {
 
     //Pointer that will store produced DecoWaveform
     auto out_recob = std::make_unique< std::vector< recob::OpWaveform > >();
+    // associations to the raw waveform
+    std::unique_ptr< AssnsRawDeconv > assnPtr(new AssnsRawDeconv);
 
     std::vector<short unsigned int > out_digiwave(fSamples); //vector in which the waveform will be saved
     std::vector<float> out_recob_float(fSamples);        //vector in which the decowaveform will be saved, using float
@@ -439,7 +448,9 @@ namespace opdet {
     //******************************
     //--- Process waveforms
     //******************************
+    int iDigi = -1; // index in digital waveform vector
     for (auto const& wf: digi_wave) {
+      ++iDigi;
       auto channel = wf.ChannelNumber();
 
       // check if this channel is to be ignored
@@ -620,7 +631,12 @@ namespace opdet {
       }
 
       recob::OpWaveform decwav(wf.TimeStamp(), wf.ChannelNumber(), out_recob_float );
+
       out_recob->emplace_back(std::move(decwav));
+
+      // create association
+      art::Ptr<raw::OpDetWaveform> opwfm_ptr(wfHandle, iDigi);
+      util::CreateAssn( *this, evt, *out_recob, opwfm_ptr, *(assnPtr.get()), out_recob->size()-1);
     }//waveforms loop
 
     //-------------------------------------Print fType Filter
@@ -633,6 +649,7 @@ namespace opdet {
 
     // Push the OpDetWaveforms and OpWaveform into the event
     evt.put(std::move(out_recob));
+    evt.put(std::move(assnPtr));
     WfDeco++;
   }
 
