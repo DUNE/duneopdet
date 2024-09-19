@@ -10,7 +10,7 @@ protodunehd_pds_channels: {
 
    APA1_full_stream_channels: [120,121,122,123,124,125,126,127,128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,148,149,150,151,152,153,154,155,156,157,158,159]
 
-   SPETemplateFiles: [ "SPE_DAPHNE2_FBK_2024.dat", "SPE_DAPHNE2_HPK_2024.dat"]
+   SPETemplateFiles: [ "SPE_NP04_FBK_2024_without_pretrigger.dat", "SPE_NP04_HPK_2024_without_pretrigger.dat"]
 
    SPETemplateMapChannelToFile_FBK: [ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
       0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
