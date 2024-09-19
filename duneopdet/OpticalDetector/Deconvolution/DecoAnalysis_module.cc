@@ -164,7 +164,7 @@ namespace opdet {
       // Copy values from the waveform into the histogram
       for(size_t tick = 0; tick < decowaveform.NSignal(); tick++){
         // Fill histogram with waveform
-        decowaveformHist->SetBinContent(tick, decowaveform.Signal()[tick]);
+        decowaveformHist->SetBinContent(tick+1, decowaveform.Signal()[tick]);
       }
 
       // Create a new histogram with raw waveform
@@ -172,7 +172,7 @@ namespace opdet {
       // Copy values from the waveform into the histogram
       for(size_t tick = 0; tick < waveform.Waveform().size(); tick++){
         // Fill histogram with waveform
-        rawwaveformHist->SetBinContent(tick, waveform.Waveform()[tick]);
+        rawwaveformHist->SetBinContent(tick+1, waveform.Waveform()[tick]);
       }
     }
   }
