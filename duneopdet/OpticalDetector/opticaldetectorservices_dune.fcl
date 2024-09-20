@@ -44,7 +44,7 @@ dunefd_opdetresponse_arapuca:
    
    service_provider:        DUNEOpDetResponse
    
-   QuantumEfficiency:       0.035 # 3.5% efficiency, no corrections
+   QuantumEfficiency:       0.03 # 3.0% efficiency, no corrections
    
    WavelengthCutLow:        0 
    WavelengthCutHigh:       10000
