@@ -288,6 +288,7 @@ namespace opdet {
       // Noise templates -- input in frequency domain
       std::vector<std::vector<double> > fNoiseTemplates;    //!< Vector that stores noise template in frequency domain
       std::map<unsigned int, unsigned int> fChannelToNoiseTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSingle
+      std::vector<double> fNoiseDefault;
 
 
       //--------Filter Variables
@@ -306,6 +307,7 @@ namespace opdet {
       void BuildExtraFilter(CmplxWaveform_t& xF0, const WfmExtraFilter_t config);
       void ComputeExpectedInput(std::vector<double>& s, double nmax);
       void CopyToOutput(const std::vector<float>& v, std::vector<float>& target);
+      void CopyToOutput(const std::vector<double>& v, std::vector<float>& target);
       void CopyToOutput(const CmplxWaveform_t& v, std::vector<float>& target);
       Double_t ComputeAutoNormalization(CmplxWaveform_t& xGH, const float thrs=0);
       TVirtualFFT* fft_r2c;
@@ -329,27 +331,26 @@ namespace opdet {
   // Constructor
   Deconvolution::Deconvolution(const Parameters& pars)
     : EDProducer{pars},
-    fInputModule{ pars().InputModule()},
-    fInstanceName{ pars().InstanceName()},
-
-    fPedestal{ pars().Pedestal()},
-    fLineNoiseRMS{ pars().LineNoiseRMS() },
-    fPreTrigger{ pars().PreTrigger()},
-
-    fDigiDataFiles{ pars().DigiDataFiles()},
-    fDigiDataColumn{ pars().DigiDataColumn()},
-    fNoiseTemplateFiles{ pars().NoiseTemplateFiles()},
-    fScale{ pars().Scale()},
-    fSamples{ pars().Samples()},
-    fPedestalBuffer{ pars().PedestalBuffer()},
-    fApplyPostfilter{ pars().ApplyPostfilter()},
-    fApplyPostBLCorr{ pars().ApplyPostBLCorrection()},
-    fAutoScale{ pars().AutoScale()},
-    fOutputProduct{ pars().OutputProduct() },
-    fPostfilterConfig{ WfmExtraFilter_t( pars().Postfilter()) },
-    fFilterConfig{ WfmFilter_t( pars().Filter() ) },
-    fxG0(fSamples),
-    fxG1(fSamples)
+      fInputModule{ pars().InputModule()},
+      fInstanceName{ pars().InstanceName()},
+      fPedestal{ pars().Pedestal()},
+      fLineNoiseRMS{ pars().LineNoiseRMS() },
+      fPreTrigger{ pars().PreTrigger()},
+      fDigiDataFiles{ pars().DigiDataFiles()},
+      fDigiDataColumn{ pars().DigiDataColumn()},
+      fNoiseTemplateFiles{ pars().NoiseTemplateFiles()},
+      fScale{ pars().Scale()},
+      fSamples{ pars().Samples()},
+      fPedestalBuffer{ pars().PedestalBuffer()},
+      fApplyPostfilter{ pars().ApplyPostfilter()},
+      fApplyPostBLCorr{ pars().ApplyPostBLCorrection()},
+      fAutoScale{ pars().AutoScale()},
+      fNoiseDefault(fSamples, fLineNoiseRMS*fLineNoiseRMS*fSamples),
+      fOutputProduct{ pars().OutputProduct() },
+      fPostfilterConfig{ WfmExtraFilter_t( pars().Postfilter()) },
+      fFilterConfig{ WfmFilter_t( pars().Filter() ) },
+      fxG0(fSamples),
+      fxG1(fSamples)
   {
     // Declare that we'll produce a vector of OpDetWaveforms
     WfDeco=0;
@@ -407,6 +408,49 @@ namespace opdet {
 	fIgnoreChannels.insert(chan);
     }
 
+    //=== info print out ===
+    auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
+    // info on channel to SPE template map
+    mfi<<"Channels mapped to SPE template files:\n";
+    {
+      std::map< std::string, std::vector<int> > templ_to_channel_map;
+      for (auto itm: fChannelToTemplateMap)
+	templ_to_channel_map[fDigiDataFiles[itm.second]].push_back(itm.first);
+      for (auto itm: templ_to_channel_map) {
+	mfi<<"    "<<itm.first<<": ";
+	for (auto ch: itm.second)
+	  mfi<<ch<<", ";
+	mfi<<"\n";
+      }
+    }
+    mfi<<"\n";
+
+    // info on channel to noise template map
+    mfi<<"Default white noise RMS: " << fLineNoiseRMS << "\n";
+
+    mfi<<"Channels mapped to noise template files:\n";
+    {
+      std::map< std::string, std::vector<int> > templ_to_channel_map;
+      for (auto itm: fChannelToNoiseTemplateMap)
+	templ_to_channel_map[fNoiseTemplateFiles[itm.second]].push_back(itm.first);
+      for (auto itm: templ_to_channel_map) {
+	mfi<<"    "<<itm.first<<": ";
+	for (auto ch: itm.second)
+	  mfi<<ch<<", ";
+	mfi<<"\n";
+      }
+    }
+    if (!fChannelToNoiseTemplateMap.size())
+      mfi<<"Only using default white noise.\n";
+    mfi<<"\n";
+
+
+    // info on ignored channels
+    mfi<<"Ignoring channels:\n    ";
+    for (auto ch: fIgnoreChannels)
+      mfi<<ch<<", ";
+    mfi<<"\n";
+    //=== === ===
 
     // build post filter (if required)
     if (fApplyPostfilter) BuildExtraFilter(fxG1, fPostfilterConfig);
@@ -458,17 +502,22 @@ namespace opdet {
 	  continue;
 
       //auto &xh = fSinglePEWaveforms[fChannelToTemplateMap[channel]];
-      auto &xH = fSinglePEWaveforms_fft[fChannelToTemplateMap[channel]];
+      auto &xH = fSinglePEWaveforms_fft[fChannelToTemplateMap[channel]]; // get the SPE template relevant for this channel
       auto &speapmlitude = fSinglePEAmplitudes[fChannelToTemplateMap[channel]];
 
       CmplxWaveform_t xV(fSamples);
       CmplxWaveform_t xS(fSamples);
-      CmplxWaveform_t xN(fSamples);
       CmplxWaveform_t xG(fSamples);
       CmplxWaveform_t xY(fSamples);
       CmplxWaveform_t xGH(fSamples);
       std::vector<float> xSNR(fSamples, 0.);
       int OriginalWaveformSize = wf.Waveform().size();
+
+      // noise
+      auto iTemplate = fChannelToNoiseTemplateMap.find(channel);
+      auto &xN = (iTemplate != fChannelToNoiseTemplateMap.end()) ? fNoiseTemplates[iTemplate->second] : fNoiseDefault; // get the noise template relevant for this channel
+
+
       //----------------------Resize deconvoluted signals (using floats) to original waveform size
       if (static_cast<int>(OriginalWaveformSize) <= fSamples) {
         out_recob_float.resize(fSamples,0);
@@ -494,7 +543,7 @@ namespace opdet {
 
       std::vector<double>xs(fSamples,0.);
       // Compute expected input (using a delta or the scint tile profile as a model)
-         ComputeExpectedInput(xs, SPE_Max);
+      ComputeExpectedInput(xs, SPE_Max);
 
       //-------------------------------------------------- Compute waveform FFT
       fft_r2c->SetPoints(&xv[0]);
@@ -519,9 +568,7 @@ namespace opdet {
         // Compute spectral density
         double H2 = xH.fCmplx.at(i).Rho2();
         double S2 = xS.fCmplx.at(i).Rho2();
-        double N2 = fLineNoiseRMS * fLineNoiseRMS * fSamples ;
-
-        xN.fCmplx.at(i) = TComplex(sqrt(N2), 0.);
+	double N2 = xN.at(i);
 
         if (fFilterConfig.fType == Deconvolution::kWiener){
           // Compute Wiener filter
@@ -838,7 +885,7 @@ namespace opdet {
 	throw art::Exception(art::errors::FileOpenError);
       }
 
-      noisewfrm.resize(fSamples, 0);
+      noisewfrm.resize(fSamples, 0.);
 
       noiseData.close();
 
@@ -949,6 +996,10 @@ namespace opdet {
 
   void Deconvolution::CopyToOutput(const std::vector<float>& v, std::vector<float>& target) {
     target.assign(v.begin(), v.end());
+    return;
+  }
+  void Deconvolution::CopyToOutput(const std::vector<double>& v, std::vector<float>& target) {
+    target = std::vector<float>(v.begin(), v.end());
     return;
   }
   void Deconvolution::CopyToOutput(const CmplxWaveform_t& v, std::vector<float>& target) {
