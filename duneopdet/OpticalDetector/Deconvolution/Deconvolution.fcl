@@ -29,7 +29,7 @@ dune_deconvolution:
   LineNoiseRMS:      2.6      # Pedestal RMS in [ADC] counts, likely an underestimate
   PreTrigger:        100      # In [ticks]
   Pedestal:          1500     # In [ADC]
-  Samples:           1000     # Timewindow (ReadoutWindow) in [ticks]
+  Samples:           1024     # Timewindow (ReadoutWindow) in [ticks]
   Scale:             1        # Scaling of resulting deconvolution signal.
   DigiDataColumn:    0        # SPE template source file column.
   DigiDataFiles:      @local::protodunehd_deconvolution_spetemplates.DigiDataFiles
