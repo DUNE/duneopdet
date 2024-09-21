@@ -102,6 +102,7 @@ namespace opdet
       fhicl::Atom<bool> ApplyPostBLCorrection{fhicl::Name("ApplyPostBLCorrection")};
       fhicl::Atom<bool> AutoScale{fhicl::Name("AutoScale"), false};
       fhicl::Atom<std::string> OutputProduct{fhicl::Name("OutputProduct"), "decowave"};
+<<<<<<< HEAD
       fhicl::Atom<short> InputPolarity{fhicl::Name("InputPolarity")};
 
       fhicl::Sequence<unsigned int> TemplateMap_channels{fhicl::Name("TemplateMapChannels")};
@@ -110,6 +111,15 @@ namespace opdet
       fhicl::Sequence<unsigned int> NoiseTemplateMap_templates{fhicl::Name("NoiseTemplateMapTemplates")};
 
       fhicl::Sequence<int> IgnoreChannels{fhicl::Name("IgnoreChannels")}; // integer to allow for channel -1 = unrecognized channel
+=======
+
+      fhicl::Sequence<unsigned int> TemplateMap_channel{fhicl::Name("TemplateMapChannel")};
+      fhicl::Sequence<unsigned int> TemplateMap_template{fhicl::Name("TemplateMapTemplate")};
+      fhicl::Sequence<unsigned int> NoiseTemplateMap_channel{fhicl::Name("NoiseTemplateMapChannel")};
+      fhicl::Sequence<unsigned int> NoiseTemplateMap_template{fhicl::Name("NoiseTemplateMapTemplate")};
+
+      fhicl::Sequence<unsigned int> IgnoreChannels{fhicl::Name("IgnoreChannels")};
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
 
       struct Filter
       {
@@ -314,6 +324,7 @@ namespace opdet
     bool fApplyPostBLCorr;
     bool fAutoScale;
 
+<<<<<<< HEAD
     short int fInputPolarity; //!< whether the input raw waveform is positive or negative
 
     // Additional parameters here
@@ -340,6 +351,32 @@ namespace opdet
     EInputShape fInputShape = kDelta;
     // EInputShape fInputShape = kScint; //uncomment if set to kScint
 
+=======
+    // Additional parameters here
+
+    //--- Single photoelectron variables
+    std::vector<std::vector<double>> fSinglePEWaveforms;        //!< Vector that stores the single PE template in ADC*us
+    std::vector<CmplxWaveform_t> fSinglePEWaveforms_fft;        //!< Fourier transform of the tamplates
+    std::vector<double> fSinglePEAmplitudes;                    //!< single PE amplitude for found maximum peak in the template.
+    unsigned int WfDeco;                                        //!< Number of waveform processed
+    std::map<unsigned int, unsigned int> fChannelToTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSinglePEWaveforms)
+    std::set<unsigned int> fIgnoreChannels;                     //!< List of channels to ignore in deconvolution
+
+    // Noise templates -- input in frequency domain
+    std::vector<std::vector<double>> fNoiseTemplates;                //!< Vector that stores noise template in frequency domain
+    std::map<unsigned int, unsigned int> fChannelToNoiseTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSingle
+    std::vector<double> fNoiseDefault;
+
+    //--------Filter Variables
+    std::string fOutputProduct;
+    WfmExtraFilter_t fPostfilterConfig;
+    WfmFilter_t fFilterConfig;
+
+    // Input signal shape model for Wiener filter could use delta "kDelta" or scintillation light signals "kScint"
+    EInputShape fInputShape = kDelta;
+    // EInputShape fInputShape = kScint; //uncomment if set to kScint
+
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
   private:
     int CountFileColumns(const char *file_path);
     void SourceSPEDigiDataFiles();
@@ -388,7 +425,10 @@ namespace opdet
         fApplyPostfilter{pars().ApplyPostfilter()},
         fApplyPostBLCorr{pars().ApplyPostBLCorrection()},
         fAutoScale{pars().AutoScale()},
+<<<<<<< HEAD
         fInputPolarity{pars().InputPolarity()},
+=======
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
         fNoiseDefault(fSamples, fLineNoiseRMS * fLineNoiseRMS * fSamples),
         fOutputProduct{pars().OutputProduct()},
         fPostfilterConfig{WfmExtraFilter_t(pars().Postfilter())},
@@ -426,8 +466,13 @@ namespace opdet
 
     // prepare channel to template map
     {
+<<<<<<< HEAD
       auto channels = pars().TemplateMap_channels();
       auto templates = pars().TemplateMap_templates();
+=======
+      auto channels = pars().TemplateMap_channel();
+      auto templates = pars().TemplateMap_template();
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
       auto chann = channels.begin();
       auto templ = templates.begin();
       for (; chann != channels.end(); ++chann, ++templ)
@@ -439,8 +484,13 @@ namespace opdet
     // Prepare the noise templates
     SourceNoiseTemplateFiles();
     {
+<<<<<<< HEAD
       auto channels = pars().NoiseTemplateMap_channels();
       auto templates = pars().NoiseTemplateMap_templates();
+=======
+      auto channels = pars().NoiseTemplateMap_channel();
+      auto templates = pars().NoiseTemplateMap_template();
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
       auto chann = channels.begin();
       auto templ = templates.begin();
       for (; chann != channels.end(); ++chann, ++templ)
@@ -577,17 +627,24 @@ namespace opdet
         out_recob_float.resize(fSamples);
       }
 
+<<<<<<< HEAD
       // Calculate pedestal
       double pedestal = 0.;
       for (int i = 0; i < int(fPreTrigger - fPedestalBuffer); ++i)
         pedestal += wf[i];
       pedestal /= (fPreTrigger - fPedestalBuffer);
 
+=======
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
       for (Int_t i = 0; i < fSamples; i++)
       {
         // Remove baseline
         if (i < static_cast<int>(wf.Waveform().size()))
+<<<<<<< HEAD
           xv[i] = fInputPolarity * (wf[i] - pedestal);
+=======
+          xv[i] = (wf[i] - fPedestal);
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
         // if waveform is shorter than fSamples fill the rest with noise
         else
           xv[i] = CLHEP::RandGauss::shoot(0, fLineNoiseRMS);
@@ -626,6 +683,7 @@ namespace opdet
 
       for (int i = 0; i < fSamples * 0.5 + 1; i++)
       {
+<<<<<<< HEAD
 
         if (fFilterConfig.fType == Deconvolution::kWiener)
         {
@@ -633,6 +691,15 @@ namespace opdet
           double H2 = xH.fCmplx.at(i).Rho2();
           double S2 = xS.fCmplx.at(i).Rho2();
           double N2 = xN.at(i);
+=======
+        // Compute spectral density
+        double H2 = xH.fCmplx.at(i).Rho2();
+        double S2 = xS.fCmplx.at(i).Rho2();
+        double N2 = xN.at(i);
+
+        if (fFilterConfig.fType == Deconvolution::kWiener)
+        {
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
           // Compute Wiener filter
           xSNR.at(i) = S2 / N2;
           xG.fCmplx.at(i) = TComplex::Conjugate(xH.fCmplx.at(i)) * S2 / (H2 * S2 + N2);
@@ -640,7 +707,10 @@ namespace opdet
 
         else if (fFilterConfig.fType == Deconvolution::kGauss)
         {
+<<<<<<< HEAD
           // vpec: FIXME: don't repeat this calculation every time? Can this be precalculated?
+=======
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
           // Compute gauss filter
           xG.fCmplx[0] = TComplex(0, 0);
           xG.fCmplx.at(i) = TComplex::Exp(
@@ -681,6 +751,7 @@ namespace opdet
         scale = filter_norm / (Double_t)fSamples;
       }
 
+<<<<<<< HEAD
       // calculate pedestal before prefilter - assuming filter has no effect on baseline
       double decPedestal = 0;
       if (fApplyPostBLCorr)
@@ -692,6 +763,8 @@ namespace opdet
         decPedestal = decPedestal / int(fPreTrigger - fPedestalBuffer);
       }
 
+=======
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
       if (fApplyPostfilter)
       {
         CmplxWaveform_t xxY(fSamples);
@@ -712,8 +785,22 @@ namespace opdet
         }
       }
       //
+<<<<<<< HEAD
 
       // Apply pedestal after post-filter
+=======
+      // Correct baseline after deconvolution
+      double decPedestal = 0;
+      if (fApplyPostBLCorr)
+      {
+        for (size_t i = 0; i < fPreTrigger - fPedestalBuffer; i++)
+        {
+          decPedestal = decPedestal + xvdec[i];
+        }
+        decPedestal = decPedestal / int(fPreTrigger - fPedestalBuffer);
+      }
+
+>>>>>>> d31a8cf (PULL FROM vpec/deconv_template_per_channel)
       for (int i = 0; i < fSamples; i++)
       {
         out_recob_float[i] = (xvdec[i] - decPedestal) * scale;
