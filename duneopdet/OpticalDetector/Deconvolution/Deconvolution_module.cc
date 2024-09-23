@@ -565,12 +565,12 @@ namespace opdet {
       Double_t fTickCutOff = fSamples*fFrequencyCutOff/fSampleFreq;
 
       for (int i=0; i<fSamples*0.5+1; i++) {
-        // Compute spectral density
-        double H2 = xH.fCmplx.at(i).Rho2();
-        double S2 = xS.fCmplx.at(i).Rho2();
-	double N2 = xN.at(i);
 
         if (fFilterConfig.fType == Deconvolution::kWiener){
+	  // Compute spectral density
+	  double H2 = xH.fCmplx.at(i).Rho2();
+	  double S2 = xS.fCmplx.at(i).Rho2();
+	  double N2 = xN.at(i);
           // Compute Wiener filter
           xSNR.at(i) = S2 / N2;
           xG.fCmplx.at(i) = TComplex::Conjugate(xH.fCmplx.at(i))*S2 / (H2*S2 + N2);
