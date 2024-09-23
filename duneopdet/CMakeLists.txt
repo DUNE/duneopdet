@@ -1,2 +1,3 @@
 add_subdirectory(OpticalDetector)
 add_subdirectory(PhotonPropagation)
+add_subdirectory(SolarNuUtils)
