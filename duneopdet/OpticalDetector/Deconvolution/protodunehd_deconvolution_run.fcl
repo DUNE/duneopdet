@@ -20,6 +20,10 @@ physics.producers.opdec.PedestalBuffer: 20
 physics.producers.opdec.InputModule: "pdhddaphne"
 physics.producers.opdec.InstanceName: "daq"
 
+# PD HD raw waveforms have negative polarity
+physics.producers.opdec.InputPolarity: -1
+
+
 physics.analyzers.opdecoana.InputModuleDeco: "opdec"
 physics.analyzers.opdecoana.InputModuleDigi: "pdhddaphne"
 physics.analyzers.opdecoana.InstanceNameDeco: ""
