@@ -99,7 +99,11 @@ namespace opdet {
           fhicl::Atom<bool>        ApplyPostfilter{ fhicl::Name("ApplyPostfilter"), false };
           fhicl::Atom<bool>        ApplyPostBLCorrection{ fhicl::Name("ApplyPostBLCorrection") };
           fhicl::Atom<bool>        AutoScale{ fhicl::Name("AutoScale"), false };
-          fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
+
+	fhicl::Atom<short>        InputPolarity{ fhicl::Name("InputPolarity") };
+
+
+	fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
 
           fhicl::Sequence<unsigned int> TemplateMap_channel{ fhicl::Name("TemplateMapChannel") };
           fhicl::Sequence<unsigned int> TemplateMap_template{ fhicl::Name("TemplateMapTemplate") };
@@ -273,6 +277,8 @@ namespace opdet {
       bool fApplyPostBLCorr;
       bool fAutoScale;
 
+    short int fInputPolarity; //!< whether the input raw waveform is positive or negative
+
 
 
       // Additional parameters here
@@ -345,6 +351,7 @@ namespace opdet {
       fApplyPostfilter{ pars().ApplyPostfilter()},
       fApplyPostBLCorr{ pars().ApplyPostBLCorrection()},
       fAutoScale{ pars().AutoScale()},
+      fInputPolarity{ pars().InputPolarity()},
       fNoiseDefault(fSamples, fLineNoiseRMS*fLineNoiseRMS*fSamples),
       fOutputProduct{ pars().OutputProduct() },
       fPostfilterConfig{ WfmExtraFilter_t( pars().Postfilter()) },
@@ -410,6 +417,7 @@ namespace opdet {
 
     //=== info print out ===
     auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
+    mfi<<"Input waveform polarity set to: " << fInputPolarity << "\n";
     // info on channel to SPE template map
     mfi<<"Channels mapped to SPE template files:\n";
     {
@@ -528,14 +536,15 @@ namespace opdet {
       }
 
       for (Int_t i= 0; i < fSamples; i++){
-          // Remove baseline
-          if (i < static_cast<int>(wf.Waveform().size())) xv[i] = (wf[i]-fPedestal);
+          // Remove baseline and deal with input waveform polarity: make sure xv has positive polarity
+          if (i < static_cast<int>(wf.Waveform().size())) xv[i] = fInputPolarity*(wf[i]-fPedestal);
           // if waveform is shorter than fSamples fill the rest with noise
           else xv[i] = CLHEP::RandGauss::shoot(0, fLineNoiseRMS);
        }
 
       //---------------------------------------------------- Guess input signal
       // Found maximum peak in the Waveform
+      // Assume xv has positive polarity
       Double_t SPE_Max = 0;
       double maxADC=*max_element(xv.begin(),xv.end());
       double maxAmplit= maxADC; // Pedestal already subtracted

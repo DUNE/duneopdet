@@ -42,6 +42,8 @@ dune_deconvolution:
   NoiseTemplateMapChannel: []
   NoiseTemplateMapTemplate: []
 
+  InputPolarity: 1 # polarity of the input raw waveform
+
   AutoScale:             true    # Scaling based on SPE amplitude from template (Use "true" for Wiener Filter and
                                  # "false" for Gauss Filter). If set to false the value of Scale is used.
   ApplyPostBLCorrection: false   # Correct baseline after the deconvolution process(Use "false" for Wiener).
