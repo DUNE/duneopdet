@@ -33,6 +33,7 @@ protodunehd_pds_channels.SPETemplateMapTemplates: [
 
 
 protodunehd_pds_channels.IgnoreChannels: [
+   -1, # ignore disconnected/unrecognized channels
    @sequence::protodunehd_pds_channels.Dead_channels,
    @sequence::protodunehd_pds_channels.Noise_channels,
    @sequence::protodunehd_pds_channels.APA1_full_stream_channels
