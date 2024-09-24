@@ -535,9 +535,15 @@ namespace opdet {
          out_recob_float.resize(fSamples);
       }
 
+      // Calculate pedestal
+      double pedestal = 0.;
+      for (int i = 0; i < int(fPreTrigger-fPedestalBuffer); ++i)
+	pedestal += wf[i];
+      pedestal /= (fPreTrigger-fPedestalBuffer);
+
       for (Int_t i= 0; i < fSamples; i++){
           // Remove baseline and deal with input waveform polarity: make sure xv has positive polarity
-          if (i < static_cast<int>(wf.Waveform().size())) xv[i] = fInputPolarity*(wf[i]-fPedestal);
+          if (i < static_cast<int>(wf.Waveform().size())) xv[i] = fInputPolarity*(wf[i]-pedestal);
           // if waveform is shorter than fSamples fill the rest with noise
           else xv[i] = CLHEP::RandGauss::shoot(0, fLineNoiseRMS);
        }
@@ -586,6 +592,7 @@ namespace opdet {
         }
 
         else if (fFilterConfig.fType == Deconvolution::kGauss){
+	  // vpec: FIXME: don't repeat this calculation every time? Can this be precalculated?
           // Compute gauss filter
           xG.fCmplx[0] = TComplex(0,0);
           xG.fCmplx.at(i) = TComplex::Exp(
@@ -621,6 +628,16 @@ namespace opdet {
         scale = filter_norm / (Double_t)fSamples;
       }
 
+       // calculate pedestal before prefilter - assuming filter has no effect on baseline
+      double decPedestal = 0;
+      if (fApplyPostBLCorr) {
+        for (size_t i=0; i<(fPreTrigger-fPedestalBuffer); i++){
+          decPedestal = decPedestal + xvdec[i];
+        }
+        decPedestal = decPedestal/int(fPreTrigger-fPedestalBuffer);
+
+      }
+
       if (fApplyPostfilter) {
         CmplxWaveform_t xxY(fSamples);
         std::vector<double> ytmp(xvdec.begin(), xvdec.end());
@@ -639,19 +656,12 @@ namespace opdet {
         }
       }
       //
-       // Correct baseline after deconvolution
-      double decPedestal = 0;
-      if (fApplyPostBLCorr) {
-        for (size_t i=0; i<fPreTrigger-fPedestalBuffer; i++){
-          decPedestal = decPedestal + xvdec[i];
-        }
-        decPedestal = decPedestal/int(fPreTrigger-fPedestalBuffer);
 
-      }
-
+      // Apply pedestal after post-filter
       for (int i=0; i<fSamples; i++){
         out_recob_float[i] = (xvdec[i]-decPedestal)*scale;
       }
+
 
       //---------------------Resize deconvoluted signals (using floats) to original waveform size
       if (int(out_recob_float.size()) <= OriginalWaveformSize) {
