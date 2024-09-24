@@ -11,8 +11,8 @@
 #ifndef SolarOpFlash_H
 #define SolarOpFlash_H 1
 
-#include "duneana/SolarNuAna/SolarAuxUtils.h"
-#include "duneana/SolarNuAna/AdjOpHitsUtils.h"
+#include "duneopdet/SolarNuUtils/SolarAuxUtils.h"
+#include "duneopdet/SolarNuUtils/AdjOpHitsUtils.h"
 
 // LArSoft includes
 #include "larcore/Geometry/Geometry.h"
