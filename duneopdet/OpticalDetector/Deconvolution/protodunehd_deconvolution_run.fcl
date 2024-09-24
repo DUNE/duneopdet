@@ -16,12 +16,20 @@ outputs.out1.outputCommands: [ "keep *_*_*_TestDeconv", "keep *_pdhddaphne_*_*" 
 
 physics.producers.opdec.Pedestal: 8180
 physics.producers.opdec.PreTrigger: 50
-physics.producers.opdec.PedestalBuffer: 20
+physics.producers.opdec.PedestalBuffer: 30
 physics.producers.opdec.InputModule: "pdhddaphne"
 physics.producers.opdec.InstanceName: "daq"
 
 # PD HD raw waveforms have negative polarity
 physics.producers.opdec.InputPolarity: -1
+
+
+physics.producers.opdec.LineNoiseRMS: 4.5
+
+
+physics.producers.opdec.ApplyPostfilter: true
+physics.producers.opdec.WfmPostfilter.Cutoff: 1.5
+physics.producers.opdec.ApplyPostBLCorrection: true
 
 
 physics.analyzers.opdecoana.InputModuleDeco: "opdec"
