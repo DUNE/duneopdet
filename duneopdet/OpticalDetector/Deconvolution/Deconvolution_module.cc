@@ -101,6 +101,9 @@ namespace opdet
       fhicl::Atom<bool> ApplyPostfilter{fhicl::Name("ApplyPostfilter"), false};
       fhicl::Atom<bool> ApplyPostBLCorrection{fhicl::Name("ApplyPostBLCorrection")};
       fhicl::Atom<bool> AutoScale{fhicl::Name("AutoScale"), false};
+
+      fhicl::Atom<short> InputPolarity{fhicl::Name("InputPolarity")};
+
       fhicl::Atom<std::string> OutputProduct{fhicl::Name("OutputProduct"), "decowave"};
 
       fhicl::Sequence<unsigned int> TemplateMap_channel{fhicl::Name("TemplateMapChannel")};
@@ -312,6 +315,7 @@ namespace opdet
     bool fApplyPostfilter;
     bool fApplyPostBLCorr;
     bool fAutoScale;
+
     short int fInputPolarity; //!< whether the input raw waveform is positive or negative
 
     // Additional parameters here
@@ -371,6 +375,29 @@ namespace opdet
   //---------------------------------------------------------------------------
   // Constructor
   Deconvolution::Deconvolution(const Parameters &pars)
+      : EDProducer{pars},
+        fInputModule{pars().InputModule()},
+        fInstanceName{pars().InstanceName()},
+        fPedestal{pars().Pedestal()},
+        fLineNoiseRMS{pars().LineNoiseRMS()},
+        fPreTrigger{pars().PreTrigger()},
+        fDigiDataFiles{pars().DigiDataFiles()},
+        fDigiDataColumn{pars().DigiDataColumn()},
+        fNoiseTemplateFiles{pars().NoiseTemplateFiles()},
+        fScale{pars().Scale()},
+        fSamples{pars().Samples()},
+        fPedestalBuffer{pars().PedestalBuffer()},
+        fApplyPostfilter{pars().ApplyPostfilter()},
+        fApplyPostBLCorr{pars().ApplyPostBLCorrection()},
+        fAutoScale{pars().AutoScale()},
+        fInputPolarity{pars().InputPolarity()},
+        fNoiseDefault(fSamples, fLineNoiseRMS * fLineNoiseRMS * fSamples),
+        fOutputProduct{pars().OutputProduct()},
+        fPostfilterConfig{WfmExtraFilter_t(pars().Postfilter())},
+        fFilterConfig{WfmFilter_t(pars().Filter())},
+        fxG0(fSamples),
+        fxG1(fSamples)
+            Deconvolution::Deconvolution(const Parameters &pars)
       : EDProducer{pars},
         fInputModule{pars().InputModule()},
         fInstanceName{pars().InstanceName()},
@@ -455,6 +482,7 @@ namespace opdet
 
     //=== info print out ===
     auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
+    mfi << "Input waveform polarity set to: " << fInputPolarity << "\n";
     mfi << "Input waveform polarity set to: " << fInputPolarity << "\n";
     // info on channel to SPE template map
     mfi << "Channels mapped to SPE template files:\n";
@@ -576,11 +604,17 @@ namespace opdet
         out_recob_float.resize(fSamples);
       }
 
+      // Calculate pedestal
+      double pedestal = 0.;
+      for (int i = 0; i < int(fPreTrigger - fPedestalBuffer); ++i)
+        pedestal += wf[i];
+      pedestal /= (fPreTrigger - fPedestalBuffer);
+
       for (Int_t i = 0; i < fSamples; i++)
       {
         // Remove baseline and deal with input waveform polarity: make sure xv has positive polarity
         if (i < static_cast<int>(wf.Waveform().size()))
-          xv[i] = fInputPolarity * (wf[i] - fPedestal);
+          xv[i] = fInputPolarity * (wf[i] - pedestal);
         // if waveform is shorter than fSamples fill the rest with noise
         else
           xv[i] = CLHEP::RandGauss::shoot(0, fLineNoiseRMS);
@@ -632,6 +666,7 @@ namespace opdet
 
         else if (fFilterConfig.fType == Deconvolution::kGauss)
         {
+          // vpec: FIXME: don't repeat this calculation every time? Can this be precalculated?
           // Compute gauss filter
           xG.fCmplx[0] = TComplex(0, 0);
           xG.fCmplx.at(i) = TComplex::Exp(
@@ -672,6 +707,17 @@ namespace opdet
         scale = filter_norm / (Double_t)fSamples;
       }
 
+      // calculate pedestal before prefilter - assuming filter has no effect on baseline
+      double decPedestal = 0;
+      if (fApplyPostBLCorr)
+      {
+        for (size_t i = 0; i < (fPreTrigger - fPedestalBuffer); i++)
+        {
+          decPedestal = decPedestal + xvdec[i];
+        }
+        decPedestal = decPedestal / int(fPreTrigger - fPedestalBuffer);
+      }
+
       if (fApplyPostfilter)
       {
         CmplxWaveform_t xxY(fSamples);
@@ -691,17 +737,7 @@ namespace opdet
           xvdec[i] = (xxy[i] * g1_scale);
         }
       }
-      // Correct baseline after deconvolution
-      double decPedestal = 0;
-      if (fApplyPostBLCorr)
-      {
-        for (size_t i = 0; i < fPreTrigger - fPedestalBuffer; i++)
-        {
-          decPedestal = decPedestal + xvdec[i];
-        }
-        decPedestal = decPedestal / int(fPreTrigger - fPedestalBuffer);
-      }
-
+      //
       for (int i = 0; i < fSamples; i++)
       {
         out_recob_float[i] = (xvdec[i] - decPedestal) * scale;
