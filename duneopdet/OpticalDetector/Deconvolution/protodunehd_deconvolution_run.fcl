@@ -27,6 +27,7 @@ physics.producers.opdec.InstanceName: "daq"
 physics.producers.opdec.InputPolarity: -1
 
 
+<<<<<<< HEAD
 physics.producers.opdec.LineNoiseRMS: 4.5
 
 
@@ -35,6 +36,8 @@ physics.producers.opdec.WfmPostfilter.Cutoff: 1.5
 physics.producers.opdec.ApplyPostBLCorrection: true
 
 
+=======
+>>>>>>> 67195ec (Added option to configure polarity of the input raw waveform. Setting the polarity to -1 for PD HD data.)
 physics.analyzers.opdecoana.InputModuleDeco: "opdec"
 physics.analyzers.opdecoana.InputModuleDigi: "pdhddaphne"
 physics.analyzers.opdecoana.InstanceNameDeco: ""
