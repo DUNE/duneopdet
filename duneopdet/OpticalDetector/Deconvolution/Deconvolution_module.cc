@@ -111,7 +111,7 @@ namespace opdet
       fhicl::Sequence<unsigned int> NoiseTemplateMap_channel{fhicl::Name("NoiseTemplateMapChannel")};
       fhicl::Sequence<unsigned int> NoiseTemplateMap_template{fhicl::Name("NoiseTemplateMapTemplate")};
 
-      fhicl::Sequence<unsigned int> IgnoreChannels{fhicl::Name("IgnoreChannels")};
+	fhicl::Sequence<int> IgnoreChannels{ fhicl::Name("IgnoreChannels") }; // integer to allow for channel -1 = unrecognized channel
 
       struct Filter
       {
@@ -320,13 +320,13 @@ namespace opdet
 
     // Additional parameters here
 
-    //--- Single photoelectron variables
-    std::vector<std::vector<double>> fSinglePEWaveforms;        //!< Vector that stores the single PE template in ADC*us
-    std::vector<CmplxWaveform_t> fSinglePEWaveforms_fft;        //!< Fourier transform of the tamplates
-    std::vector<double> fSinglePEAmplitudes;                    //!< single PE amplitude for found maximum peak in the template.
-    unsigned int WfDeco;                                        //!< Number of waveform processed
-    std::map<unsigned int, unsigned int> fChannelToTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSinglePEWaveforms)
-    std::set<unsigned int> fIgnoreChannels;                     //!< List of channels to ignore in deconvolution
+      //--- Single photoelectron variables
+      std::vector<std::vector<double> > fSinglePEWaveforms;    //!< Vector that stores the single PE template in ADC*us
+      std::vector<CmplxWaveform_t> fSinglePEWaveforms_fft;    //!< Fourier transform of the tamplates
+      std::vector<double> fSinglePEAmplitudes;                //!< single PE amplitude for found maximum peak in the template.
+      unsigned int WfDeco;                      //!< Number of waveform processed
+      std::map<unsigned int, unsigned int> fChannelToTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSinglePEWaveforms)
+      std::set<unsigned int> fIgnoreChannels; //!< List of channels to ignore in deconvolution
 
     // Noise templates -- input in frequency domain
     std::vector<std::vector<double>> fNoiseTemplates;                //!< Vector that stores noise template in frequency domain
