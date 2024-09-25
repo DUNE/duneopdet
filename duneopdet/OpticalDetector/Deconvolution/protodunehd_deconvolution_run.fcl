@@ -14,6 +14,9 @@ services:
 source.inputCommands: [ "keep *", "drop *_*_*_opdec" ]
 outputs.out1.outputCommands: [ "keep *_*_*_TestDeconv", "keep *_pdhddaphne_*_*" ]
 
+physics.producers.opdec: @local::protodunehd_deconvolution
+
+
 physics.producers.opdec.Pedestal: 8180
 physics.producers.opdec.PreTrigger: 50
 physics.producers.opdec.PedestalBuffer: 30
