@@ -40,8 +40,11 @@ dune_deconvolution:
   NoiseTemplateFiles:        []
   NoiseTemplateMapChannels:  []
   NoiseTemplateMapTemplates: []
+<<<<<<< HEAD
 
   InputPolarity: 1 # polarity of the input raw waveform
+=======
+>>>>>>> 9d1f5a4 (Reorganised configuration files. Changed names of template map configurables to reflect their list-like nature. Added configuration of the dummy white noise template.)
 
   InputPolarity: 1 # polarity of the input raw waveform
 
