@@ -2,18 +2,18 @@
 // OpHitFinderDeco_module.cc
 // This module is based on the larana/OpHitFinder module. It has been updated
 // to deal with deconvolved waveforms.The module takes either raw::OpDetWaveforms
-// (raw signals) or recob:OpWaveforms (deconvolved signals) as input,  
+// (raw signals) or recob:OpWaveforms (deconvolved signals) as input,
 // and generates OpHits as output.
 // The HitFinder algorithm can be chosen by the user.
-// Added the scaling factor inside the new RunHitFinder_deco function.  
+// Added the scaling factor inside the new RunHitFinder_deco function.
 // It scales the values of the deconvolved signals before the hit finder.
 //
 // @authors     : Daniele Guffanti, Maritza Delgado, Sergio Manthey Corchado
-// @created     : Oct, 2022 
+// @created     : Oct, 2022
 //================================================================================
- 
+
  // LArSoft includes
-#include "larcore/CoreUtils/ServiceUtil.h" 
+#include "larcore/CoreUtils/ServiceUtil.h"
 #include "larcore/Geometry/Geometry.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoCFD.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoFixedWindow.h"
@@ -76,7 +76,7 @@ namespace opdet {
 
       // The parameters we'll read from the .fcl file.
       std::string fInputModule; // Input tag for OpDetWaveform collection
-      std::string fInputModuledigi; 
+      std::string fInputModuledigi;
       std::string fGenModule;
       std::string fInputDigiType;
       std::vector<std::string> fInputLabels;
@@ -119,7 +119,7 @@ namespace opdet {
 
     auto const& geometry(*lar::providerFrom<geo::Geometry>());
     fMaxOpChannel = geometry.MaxOpChannel();
-    
+
     // If useCalibrator, get it from ART
     if (useCalibrator) {fCalib = lar::providerFrom<calib::IPhotonCalibratorService>();}
     // If not useCalibrator, make an internal one based on fhicl settings to hit finder.
@@ -202,16 +202,11 @@ namespace opdet {
       std::cout << "\nRunning Ophitfinder with InputDigiType = 'recob'\n";
       // Load pulses into WaveformVector
       art::Handle<std::vector<recob::OpWaveform>> decoHandle;
-      art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
-      
+
       evt.getByLabel(fInputModule,   decoHandle);
-      evt.getByLabel(fInputModuledigi,rawHandle);
-      
       assert(decoHandle.isValid());
-      assert(rawHandle.isValid());
-   
+
       RunHitFinder_deco(*decoHandle,
-                        *rawHandle,
                         *HitPtr,
                         fPulseRecoMgr,
                         *fThreshAlg,
@@ -221,7 +216,7 @@ namespace opdet {
                         clock_data,
                         calibrator,
                         fUseStartTime);
-      }
+    }
 
     if (fInputDigiType == "raw"){
       std::cout << "\nRunning Ophitfinder with InputDigiType = 'raw'\n";
@@ -229,7 +224,7 @@ namespace opdet {
       art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
       evt.getByLabel(fInputModuledigi,rawHandle);
       assert(rawHandle.isValid());
-      
+
       if (fChannelMasks.empty() && fInputLabels.size() < 2){
         art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
         if (fInputLabels.empty()) {evt.getByLabel(fInputModuledigi, rawHandle);}
@@ -243,7 +238,7 @@ namespace opdet {
                     fHitThreshold,
                     clock_data,
                     calibrator,
-                    fUseStartTime); 
+                    fUseStartTime);
       }
 
       else{
@@ -282,5 +277,5 @@ namespace opdet {
     // Store results into the event
     std:: cout << "Found hits: " << HitPtr->size() << "!\n";
     evt.put(std::move(HitPtr));
-  }   
+  }
 } // namespace opdet
