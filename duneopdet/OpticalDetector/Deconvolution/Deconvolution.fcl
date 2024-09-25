@@ -1,4 +1,4 @@
-#include "SPETemplates.fcl"
+#include "dune_opdet_channels.fcl"
 
 BEGIN_PROLOG
 
@@ -31,16 +31,15 @@ dune_deconvolution:
   Pedestal:          1500     # In [ADC]
   Samples:           1024     # Timewindow (ReadoutWindow) in [ticks]
   Scale:             1        # Scaling of resulting deconvolution signal.
-  DigiDataColumn:    0        # SPE template source file column.
-  DigiDataFiles:      @local::protodunehd_deconvolution_spetemplates.DigiDataFiles
-                     # The SPE template with undershoot and without pretrigger (in ADC*us),
-  TemplateMapChannel: @local::protodunehd_deconvolution_spetemplates.SingleFileSPETemplateMapChannel
-  TemplateMapTemplate: @local::protodunehd_deconvolution_spetemplates.SingleFileSPETemplateMapTemplate
-  IgnoreChannels:    @local::protodunehd_pds_channels.IgnoreChannels
+  DigiDataColumn:       0      # SPE template source file column.
+  DigiDataFiles:        []     # The SPE template with undershoot and without pretrigger (in ADC*us),
+  TemplateMapChannels:  []
+  TemplateMapTemplates: []
+  IgnoreChannels:       []
 
-  NoiseTemplateFiles: []
-  NoiseTemplateMapChannel: []
-  NoiseTemplateMapTemplate: []
+  NoiseTemplateFiles:        []
+  NoiseTemplateMapChannels:  []
+  NoiseTemplateMapTemplates: []
 
   InputPolarity: 1 # polarity of the input raw waveform
 
@@ -62,5 +61,30 @@ dune_deconvolution.WfmPostfilter.Cutoff: 1.8     # Use this value only for postf
 #By debbuging and review the values (SNR,H,S,N,G0,G1,G,V,v) of the Wiener filter:
 deconvolution_snr: @local::dune_deconvolution
 deconvolution_snr.OutputProduct: "SNR"
+
+
+### ProtoDUNE HD ###
+protodunehd_deconvolution: @local::dune_deconvolution
+protodunehd_deconvolution.Pedestal: 8180
+protodunehd_deconvolution.PreTrigger: 50
+protodunehd_deconvolution.PedestalBuffer: 30
+protodunehd_deconvolution.InputModule: "pdhddaphne"
+protodunehd_deconvolution.InstanceName: "daq"
+protodunehd_deconvolution.InputPolarity: -1
+protodunehd_deconvolution.ApplyPostfilter: true
+protodunehd_deconvolution.WfmPostfilter.Cutoff: 1.5
+protodunehd_deconvolution.ApplyPostBLCorrection: true
+
+protodunehd_deconvolution.IgnoreChannels:      @local::protodunehd_pds_channels.IgnoreChannels
+
+# SPE Template
+protodunehd_deconvolution.DigiDataFiles:       @local::protodunehd_pds_channels.SPETemplateFiles
+protodunehd_deconvolution.TemplateMapChannels:  @local::protodunehd_pds_channels.SPETemplateMapChannels
+protodunehd_deconvolution.TemplateMapTemplates: @local::protodunehd_pds_channels.SPETemplateMapTemplates
+# Noise template
+protodunehd_deconvolution.NoiseTemplateFiles:       @local::protodunehd_pds_channels.NoiseTemplateFiles
+protodunehd_deconvolution.NoiseTemplateMapChannels:  @local::protodunehd_pds_channels.NoiseTemplateMapChannels
+protodunehd_deconvolution.NoiseTemplateMapTemplates: @local::protodunehd_pds_channels.NoiseTemplateMapTemplates
+
 
 END_PROLOG

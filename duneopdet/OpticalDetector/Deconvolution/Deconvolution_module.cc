@@ -105,10 +105,10 @@ namespace opdet {
 
 	fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
 
-          fhicl::Sequence<unsigned int> TemplateMap_channel{ fhicl::Name("TemplateMapChannel") };
-          fhicl::Sequence<unsigned int> TemplateMap_template{ fhicl::Name("TemplateMapTemplate") };
-          fhicl::Sequence<unsigned int> NoiseTemplateMap_channel{ fhicl::Name("NoiseTemplateMapChannel") };
-          fhicl::Sequence<unsigned int> NoiseTemplateMap_template{ fhicl::Name("NoiseTemplateMapTemplate") };
+          fhicl::Sequence<unsigned int> TemplateMap_channels{ fhicl::Name("TemplateMapChannels") };
+          fhicl::Sequence<unsigned int> TemplateMap_templates{ fhicl::Name("TemplateMapTemplates") };
+          fhicl::Sequence<unsigned int> NoiseTemplateMap_channels{ fhicl::Name("NoiseTemplateMapChannels") };
+          fhicl::Sequence<unsigned int> NoiseTemplateMap_templates{ fhicl::Name("NoiseTemplateMapTemplates") };
 
 	fhicl::Sequence<int> IgnoreChannels{ fhicl::Name("IgnoreChannels") }; // integer to allow for channel -1 = unrecognized channel
 
@@ -390,8 +390,8 @@ namespace opdet {
 
     // prepare channel to template map
     {
-	auto channels = pars().TemplateMap_channel();
-	auto templates = pars().TemplateMap_template();
+	auto channels = pars().TemplateMap_channels();
+	auto templates = pars().TemplateMap_templates();
 	auto chann = channels.begin();
 	auto templ = templates.begin();
 	for (;chann != channels.end(); ++chann, ++templ) {
@@ -402,8 +402,8 @@ namespace opdet {
     // Prepare the noise templates
     SourceNoiseTemplateFiles();
     {
-	auto channels = pars().NoiseTemplateMap_channel();
-	auto templates = pars().NoiseTemplateMap_template();
+	auto channels = pars().NoiseTemplateMap_channels();
+	auto templates = pars().NoiseTemplateMap_templates();
 	auto chann = channels.begin();
 	auto templ = templates.begin();
 	for (;chann != channels.end(); ++chann, ++templ) {
