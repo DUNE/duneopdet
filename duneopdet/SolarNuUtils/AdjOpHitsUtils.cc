@@ -242,7 +242,7 @@ namespace solar
         int refHit1 = hit->OpChannel();
         int refHit2 = adjHit->OpChannel();
         auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
-        auto ref2 = wireReadoutOpDetGeoFromOpChannel(refHit2).GetCenter();
+        auto ref2 = wireReadout.OpDetGeoFromOpChannel(refHit2).GetCenter();
 
         if (fGeometry == "HD")
         {

@@ -83,9 +83,7 @@ namespace opdet {
      for (int i=0; i< int (opWaveformVector.size()); i++){
         recob::OpWaveform deco_waveform=opWaveformVector.at(i);
         int channel = static_cast<int>(deco_waveform.Channel());
-        //The raw timestamp is used
-        raw::OpDetWaveform waveform=opDetWaveformVector.at(i);
-        const double timeStamp = waveform.TimeStamp();
+        const double timeStamp = deco_waveform.TimeStamp();
        
         if (!wireReadout.IsValidOpChannel(channel)) {
           mf::LogError("OpHitFinder")
