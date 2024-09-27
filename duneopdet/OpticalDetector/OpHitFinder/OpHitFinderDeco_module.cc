@@ -211,7 +211,6 @@ namespace opdet {
       assert(rawHandle.isValid());
 
       RunHitFinder_deco(*decoHandle,
-                        *rawHandle,
                         *HitPtr,
                         fPulseRecoMgr,
                         *fThreshAlg,
@@ -221,7 +220,7 @@ namespace opdet {
                         clock_data,
                         calibrator,
                         fUseStartTime);
-      }
+    }
 
     if (fInputDigiType == "raw"){
       std::cout << "\nRunning Ophitfinder with InputDigiType = 'raw'\n";

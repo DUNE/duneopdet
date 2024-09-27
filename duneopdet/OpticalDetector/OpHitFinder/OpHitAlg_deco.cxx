@@ -1,13 +1,13 @@
 // ========================================================================================
 // OpHitAlg_deco.cxx
-// This module is based on the larana/OpHitAlg.cxx. It has been updated to deal with   
-// deconvolved signals. These are the algorithms used by OpHitFinderDeco to produce optical 
+// This module is based on the larana/OpHitAlg.cxx. It has been updated to deal with
+// deconvolved signals. These are the algorithms used by OpHitFinderDeco to produce optical
 // hits. recob::OpWaveform object has been included inside the RunHitFinder_deco function.
-// Added the scaling factor inside the new RunHitFinder_deco function. It scales the values 
+// Added the scaling factor inside the new RunHitFinder_deco function. It scales the values
 // of the deconvolved signals before the hit finder.
-// 
+//
 // @authors     : Daniele Guffanti, Maritza Delgado, Sergio Manthey Corchado
-// @created     : Oct, 2022 
+// @created     : Oct, 2022
 //=========================================================================================
 
 #include "OpHitAlg_deco.h"
@@ -26,7 +26,7 @@
 
 namespace opdet {
 
- 
+
   void RunHitFinder(std::vector<raw::OpDetWaveform> const& opDetWaveformVector,
                     std::vector<recob::OpHit>& hitVector,
                     pmtana::PulseRecoManager const& pulseRecoMgr,
@@ -69,7 +69,6 @@ namespace opdet {
 
   //----------------------------------------------------------------------------
   void RunHitFinder_deco(std::vector<recob::OpWaveform>const& opWaveformVector,
-                    std::vector<raw::OpDetWaveform> const& opDetWaveformVector,
                     std::vector<recob::OpHit>& hitVector,
                     pmtana::PulseRecoManager const& pulseRecoMgr,
                     pmtana::PMTPulseRecoBase const& threshAlg,
@@ -80,7 +79,7 @@ namespace opdet {
                     calib::IPhotonCalibrator const& calibrator,
                     bool use_start_time)
   {
-      
+
      for (int i=0; i< int (opWaveformVector.size()); i++){
         recob::OpWaveform deco_waveform=opWaveformVector.at(i);
         int channel = static_cast<int>(deco_waveform.Channel());
@@ -93,16 +92,16 @@ namespace opdet {
           << "Error! unrecognized channel number " << channel << ". Ignoring pulse";
          continue;
         }
-      
+
        // Loop to convert from float to short
        std::vector<short int> short_deco_waveform; //vector used to convert from float to short.
        for (unsigned int i_tick=0; i_tick < deco_waveform.Signal().size(); ++i_tick)
        {
        short_deco_waveform.emplace_back(static_cast<short int>(scale*deco_waveform.Signal().at(i_tick)));
        }
-         
+
        pulseRecoMgr.Reconstruct(short_deco_waveform);
-      
+
       // Get the result
       auto const& pulses = threshAlg.GetPulses();
       for (auto const& pulse : pulses)
@@ -116,7 +115,7 @@ namespace opdet {
                      use_start_time);
      }
  }
-  
+
   //----------------------------------------------------------------------------
   void ConstructHit(float hitThreshold,
                     int channel,
@@ -137,10 +136,10 @@ namespace opdet {
      int frame = clocksData.OpticalClock().Frame(timeStamp);
      double PE = 0.0;
 
-     if (calibrator.UseArea())   
+     if (calibrator.UseArea())
        PE = calibrator.PE(pulse.area, channel);
-     else    
-      PE = calibrator.PE(pulse.peak, channel);   
+     else
+      PE = calibrator.PE(pulse.peak, channel);
 
      double width = (pulse.t_end - pulse.t_start) * clocksData.OpticalClock().TickPeriod();
 
@@ -156,6 +155,6 @@ namespace opdet {
                            PE,
                            0.0);
   }
-  
+
 
 } // End namespace opdet
