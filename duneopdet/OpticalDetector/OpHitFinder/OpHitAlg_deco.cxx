@@ -24,38 +24,40 @@
 
 #include <vector>
 
-namespace opdet {
+namespace opdet
+{
 
-
-  void RunHitFinder(std::vector<raw::OpDetWaveform> const& opDetWaveformVector,
-                    std::vector<recob::OpHit>& hitVector,
-                    pmtana::PulseRecoManager const& pulseRecoMgr,
-                    pmtana::PMTPulseRecoBase const& threshAlg,
-                    geo::WireReadoutGeom const& wireReadout,
+  void RunHitFinder(std::vector<raw::OpDetWaveform> const &opDetWaveformVector,
+                    std::vector<recob::OpHit> &hitVector,
+                    pmtana::PulseRecoManager const &pulseRecoMgr,
+                    pmtana::PMTPulseRecoBase const &threshAlg,
+                    geo::WireReadoutGeom const &wireReadout,
                     float hitThreshold,
-                    detinfo::DetectorClocksData const& clocksData,
-                    calib::IPhotonCalibrator const& calibrator,
+                    detinfo::DetectorClocksData const &clocksData,
+                    calib::IPhotonCalibrator const &calibrator,
                     bool use_start_time)
   {
 
-    for (auto const& waveform : opDetWaveformVector) {
+    for (auto const &waveform : opDetWaveformVector)
+    {
 
       const int channel = static_cast<int>(waveform.ChannelNumber());
 
-      if (!wireReadout.IsValidOpChannel(channel)) {
+      if (!wireReadout.IsValidOpChannel(channel))
+      {
         mf::LogError("OpHitFinder")
-          << "Error! unrecognized channel number " << channel << ". Ignoring pulse";
+            << "Error! unrecognized channel number " << channel << ". Ignoring pulse";
         continue;
       }
 
       pulseRecoMgr.Reconstruct(waveform);
 
       // Get the result
-      auto const& pulses = threshAlg.GetPulses();
+      auto const &pulses = threshAlg.GetPulses();
 
       const double timeStamp = waveform.TimeStamp();
 
-      for (auto const& pulse : pulses)
+      for (auto const &pulse : pulses)
         ConstructHit(hitThreshold,
                      channel,
                      timeStamp,
@@ -68,49 +70,43 @@ namespace opdet {
   }
 
   //----------------------------------------------------------------------------
-  void RunHitFinder_deco(std::vector<recob::OpWaveform>const& opWaveformVector,
-                    std::vector<recob::OpHit>& hitVector,
-                    pmtana::PulseRecoManager const& pulseRecoMgr,
-                    pmtana::PMTPulseRecoBase const& threshAlg,
-                    geo::WireReadoutGeom const& wireReadout,
-                    float hitThreshold,
-                    float scale,  //It scales the values of the deconvolved signals.
-                    detinfo::DetectorClocksData const& clocksData,
-                    calib::IPhotonCalibrator const& calibrator,
-                    bool use_start_time)
+  void RunHitFinder_deco(std::vector<recob::OpWaveform> const &opWaveformVector,
+                         std::vector<recob::OpHit> &hitVector,
+                         pmtana::PulseRecoManager const &pulseRecoMgr,
+                         pmtana::PMTPulseRecoBase const &threshAlg,
+                         geo::WireReadoutGeom const &wireReadout,
+                         float hitThreshold,
+                         float scale, // It scales the values of the deconvolved signals.
+                         detinfo::DetectorClocksData const &clocksData,
+                         calib::IPhotonCalibrator const &calibrator,
+                         bool use_start_time)
   {
 
-     for (int i=0; i< int (opWaveformVector.size()); i++){
-        recob::OpWaveform deco_waveform=opWaveformVector.at(i);
-        int channel = static_cast<int>(deco_waveform.Channel());
-<<<<<<< HEAD
-        const double timeStamp = deco_waveform.TimeStamp();
+    for (int i = 0; i < int(opWaveformVector.size()); i++)
+    {
+      recob::OpWaveform deco_waveform = opWaveformVector.at(i);
+      int channel = static_cast<int>(deco_waveform.Channel());
+      const double timeStamp = deco_waveform.TimeStamp();
 
-        if (!geometry.IsValidOpChannel(channel)) {
-=======
-        //The raw timestamp is used
-        raw::OpDetWaveform waveform=opDetWaveformVector.at(i);
-        const double timeStamp = waveform.TimeStamp();
-       
-        if (!wireReadout.IsValidOpChannel(channel)) {
->>>>>>> 75cbf60 (Accommodate geometry-refactoring changes)
-          mf::LogError("OpHitFinder")
-          << "Error! unrecognized channel number " << channel << ". Ignoring pulse";
-         continue;
-        }
+      if (!wireReadout.IsValidOpChannel(channel))
+      {
+        mf::LogError("OpHitFinder")
+            << "Error! unrecognized channel number " << channel << ". Ignoring pulse";
+        continue;
+      }
 
-       // Loop to convert from float to short
-       std::vector<short int> short_deco_waveform; //vector used to convert from float to short.
-       for (unsigned int i_tick=0; i_tick < deco_waveform.Signal().size(); ++i_tick)
-       {
-       short_deco_waveform.emplace_back(static_cast<short int>(scale*deco_waveform.Signal().at(i_tick)));
-       }
+      // Loop to convert from float to short
+      std::vector<short int> short_deco_waveform; // vector used to convert from float to short.
+      for (unsigned int i_tick = 0; i_tick < deco_waveform.Signal().size(); ++i_tick)
+      {
+        short_deco_waveform.emplace_back(static_cast<short int>(scale * deco_waveform.Signal().at(i_tick)));
+      }
 
-       pulseRecoMgr.Reconstruct(short_deco_waveform);
+      pulseRecoMgr.Reconstruct(short_deco_waveform);
 
       // Get the result
-      auto const& pulses = threshAlg.GetPulses();
-      for (auto const& pulse : pulses)
+      auto const &pulses = threshAlg.GetPulses();
+      for (auto const &pulse : pulses)
         ConstructHit(hitThreshold,
                      channel,
                      timeStamp,
@@ -119,37 +115,38 @@ namespace opdet {
                      clocksData,
                      calibrator,
                      use_start_time);
-     }
- }
+    }
+  }
 
   //----------------------------------------------------------------------------
   void ConstructHit(float hitThreshold,
                     int channel,
                     double timeStamp,
-                    pmtana::pulse_param const& pulse,
-                    std::vector<recob::OpHit>& hitVector,
-                    detinfo::DetectorClocksData const& clocksData,
-                    calib::IPhotonCalibrator const& calibrator,
+                    pmtana::pulse_param const &pulse,
+                    std::vector<recob::OpHit> &hitVector,
+                    detinfo::DetectorClocksData const &clocksData,
+                    calib::IPhotonCalibrator const &calibrator,
                     bool use_start_time)
   {
 
-    if (pulse.peak < hitThreshold) return;
+    if (pulse.peak < hitThreshold)
+      return;
 
-     double absTime = timeStamp + clocksData.OpticalClock().TickPeriod() * (use_start_time ? pulse.t_start : pulse.t_max);
-     double relTime = absTime - clocksData.TriggerTime();
-     double startTime = timeStamp + clocksData.OpticalClock().TickPeriod() * pulse.t_start - clocksData.TriggerTime();
-     double riseTime = clocksData.OpticalClock().TickPeriod() * pulse.t_rise;
-     int frame = clocksData.OpticalClock().Frame(timeStamp);
-     double PE = 0.0;
+    double absTime = timeStamp + clocksData.OpticalClock().TickPeriod() * (use_start_time ? pulse.t_start : pulse.t_max);
+    double relTime = absTime - clocksData.TriggerTime();
+    double startTime = timeStamp + clocksData.OpticalClock().TickPeriod() * pulse.t_start - clocksData.TriggerTime();
+    double riseTime = clocksData.OpticalClock().TickPeriod() * pulse.t_rise;
+    int frame = clocksData.OpticalClock().Frame(timeStamp);
+    double PE = 0.0;
 
-     if (calibrator.UseArea())
-       PE = calibrator.PE(pulse.area, channel);
-     else
+    if (calibrator.UseArea())
+      PE = calibrator.PE(pulse.area, channel);
+    else
       PE = calibrator.PE(pulse.peak, channel);
 
-     double width = (pulse.t_end - pulse.t_start) * clocksData.OpticalClock().TickPeriod();
+    double width = (pulse.t_end - pulse.t_start) * clocksData.OpticalClock().TickPeriod();
 
-     hitVector.emplace_back(channel,
+    hitVector.emplace_back(channel,
                            relTime,
                            absTime,
                            startTime,
@@ -161,6 +158,5 @@ namespace opdet {
                            PE,
                            0.0);
   }
-
 
 } // End namespace opdet
