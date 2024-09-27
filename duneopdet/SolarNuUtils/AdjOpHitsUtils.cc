@@ -1,6 +1,8 @@
 #include "AdjOpHitsUtils.h"
 #include "SolarAuxUtils.h"
 
+#include "larcorealg/Geometry/OpDetGeo.h"
+
 namespace solar
 {
   AdjOpHitsUtils::AdjOpHitsUtils(fhicl::ParameterSet const &p)
@@ -65,7 +67,7 @@ namespace solar
       float HotPE = 0;
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
-        auto OpHitXYZ = geo->OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
+        auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
         if (PDSHit->PE() >= fOpFlashAlgoHotVertexThld * MaxPE)
         {
           XSum += OpHitXYZ.X() * PDSHit->PE();
@@ -88,7 +90,7 @@ namespace solar
       std::vector<float> varYZ;
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
-        auto OpHitXYZ = geo->OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
+        auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
         TimeWidth += (PDSHit->PeakTime() - Time) * (PDSHit->PeakTime() - Time);
         YWidth += (OpHitXYZ.Y() - Y) * (OpHitXYZ.Y() - Y);
         ZWidth += (OpHitXYZ.Z() - Z) * (OpHitXYZ.Z() - Z);
@@ -177,8 +179,8 @@ namespace solar
 
         int refHit1 = hit->OpChannel();
         int refHit2 = adjHit->OpChannel();
-        auto ref1 = geo->OpDetGeoFromOpChannel(refHit1).GetCenter();
-        auto ref2 = geo->OpDetGeoFromOpChannel(refHit2).GetCenter();
+        auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
+        auto ref2 = wireReadout.OpDetGeoFromOpChannel(refHit2).GetCenter();
 
         // If sign of x is the same (HD), then the two hits are in the same drift volume and can be clustered, else skip.
         // If x is smaller than drift (VD), then one hit is in membrane XAs and we skip (awaiting better implementation!!).
@@ -239,8 +241,8 @@ namespace solar
 
         int refHit1 = hit->OpChannel();
         int refHit2 = adjHit->OpChannel();
-        auto ref1 = geo->OpDetGeoFromOpChannel(refHit1).GetCenter();
-        auto ref2 = geo->OpDetGeoFromOpChannel(refHit2).GetCenter();
+        auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
+        auto ref2 = wireReadoutOpDetGeoFromOpChannel(refHit2).GetCenter();
 
         if (fGeometry == "HD")
         {
@@ -329,8 +331,8 @@ namespace solar
       if (hit->PE() >= fOpFlashAlgoHotVertexThld * Hits[maxPEIdx]->PE())
       {
         // Start with the first hit in the flash as reference point
-        double firstHitY = geo->OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
-        double firstHitZ = geo->OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
+        double firstHitY = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
+        double firstHitZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
 
         // Get the first hit PE and calculate the squared distance and angle to the reference point
         float firstHitPE = hit->PE();
@@ -348,8 +350,8 @@ namespace solar
     // Loop over all OpHits in the flash and compute the squared distance to the reference point
     for (const auto &hit : Hits)
     {
-      double hitY = geo->OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
-      double hitZ = geo->OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
+      double hitY = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
+      double hitZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
 
       // The expected distribution of PE corresponds to a decrease of 1/r² with the distance from the flash center. Between adjacent OpHits, the expected decrease in charge has the form r²/(r²+d²)
       float hitDistSq = pow(hitY - y, 2) + pow(hitZ - z, 2);
@@ -389,9 +391,9 @@ namespace solar
   //   double bestZ = 0.0;
 
   //   // Loop over possible x positions
-  //   double firstHitX = geo->OpDetGeoFromOpChannel(Hits[0]->OpChannel()).GetCenter().X();
-  //   double firstHitY = geo->OpDetGeoFromOpChannel(Hits[0]->OpChannel()).GetCenter().Y();
-  //   double firstHitZ = geo->OpDetGeoFromOpChannel(Hits[0]->OpChannel()).GetCenter().Z();
+  //   double firstHitX = wireReadout.OpDetGeoFromOpChannel(Hits[0]->OpChannel()).GetCenter().X();
+  //   double firstHitY = wireReadout.OpDetGeoFromOpChannel(Hits[0]->OpChannel()).GetCenter().Y();
+  //   double firstHitZ = wireReadout.OpDetGeoFromOpChannel(Hits[0]->OpChannel()).GetCenter().Z();
 
   //   for (double yPos = firstHitY - fOpFlashAlgoRad; yPos <= firstHitY + fOpFlashAlgoRad; yPos += 5)
   //   {
@@ -408,8 +410,8 @@ namespace solar
   //       // Loop over hits
   //       for (const auto &hit : Hits)
   //       {
-  //         double hitYPos = geo->OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
-  //         double hitZPos = geo->OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
+  //         double hitYPos = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
+  //         double hitZPos = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
 
   //         // Calculate the likelihood for the hit
   //         double hitLikelihood = GaussianPDF(hitYPos, yPos, sigma) * GaussianPDF(hitZPos, zPos, sigma);
