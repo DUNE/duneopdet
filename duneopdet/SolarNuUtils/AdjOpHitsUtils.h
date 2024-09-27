@@ -26,7 +26,7 @@
 #include "lardataobj/RecoBase/OpHit.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
-#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 #include "fhiclcpp/ParameterSet.h"
 
 #include "TH1I.h"
@@ -61,7 +61,7 @@ namespace solar
         // double GaussianPDF(double x, double mean, double sigma);
 
     private:
-        art::ServiceHandle<geo::Geometry> geo;
+        geo::WireReadoutGeom const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
         // From fhicl configuration
         const std::string fGeometry;
         const int fOpFlashAlgoNHit;
