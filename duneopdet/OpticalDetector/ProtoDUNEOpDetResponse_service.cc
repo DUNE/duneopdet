@@ -10,6 +10,8 @@
 #include "art/Framework/Services/Registry/ServiceDefinitionMacros.h"
 #include "TGeoNode.h"
 #include "TGeoBBox.h"
+#include "larcore/Geometry/WireReadout.h"
+#include "larcore/Geometry/Geometry.h"
 #include "larcorealg/Geometry/OpDetGeo.h"
 #include "larcore/CoreUtils/ServiceUtil.h" // lar::providerFrom()
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
@@ -21,14 +23,13 @@ namespace opdet{
 
 
     //--------------------------------------------------------------------
-    ProtoDUNEOpDetResponse::ProtoDUNEOpDetResponse(fhicl::ParameterSet const& pset,
-                                         art::ActivityRegistry &/*reg*/)
+    ProtoDUNEOpDetResponse::ProtoDUNEOpDetResponse(fhicl::ParameterSet const& pset)
     {
         this->doReconfigure(pset);
     }
 
     //--------------------------------------------------------------------
-    ProtoDUNEOpDetResponse::~ProtoDUNEOpDetResponse() throw()
+    ProtoDUNEOpDetResponse::~ProtoDUNEOpDetResponse()
     { }
 
 
@@ -87,11 +88,10 @@ namespace opdet{
     //--------------------------------------------------------------------
     int  ProtoDUNEOpDetResponse::doNOpChannels() const
     {
-        art::ServiceHandle<geo::Geometry> geom;
         if (fFastSimChannelConvert || fFullSimChannelConvert)
-            return geom->NOpChannels();
+            return art::ServiceHandle<geo::WireReadout>()->Get().NOpChannels();
         else
-            return geom->NOpDets();
+            return art::ServiceHandle<geo::Geometry>()->NOpDets();
 
     }
 
@@ -102,12 +102,13 @@ namespace opdet{
 
         // Find the Optical Detector using the geometry service
         art::ServiceHandle<geo::Geometry> geom;
+        auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
 
         if (fFullSimChannelConvert){
             // Override default number of channels for Fiber and Plank
-            float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+            float NOpHardwareChannels = wireReadout.NOpHardwareChannels(OpDet);
             int hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
-            newOpChannel = geom->OpChannel(OpDet, hardwareChannel);
+            newOpChannel = wireReadout.OpChannel(OpDet, hardwareChannel);
         }else{
             newOpChannel = OpDet;
         }
@@ -166,13 +167,14 @@ namespace opdet{
     {
         // Find the Optical Detector using the geometry service
         art::ServiceHandle<geo::Geometry> geom;
+        auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
 
         if (fFastSimChannelConvert){
             // Here OpDet must be opdet since we are introducing
             // channel mapping here.
-            float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+            float NOpHardwareChannels = wireReadout.NOpHardwareChannels(OpDet);
             int hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
-            newOpChannel = geom->OpChannel(OpDet, hardwareChannel);
+            newOpChannel = wireReadout.OpChannel(OpDet, hardwareChannel);
         }else{
             newOpChannel = OpDet;
         }
@@ -185,7 +187,7 @@ namespace opdet{
         // Check QE
       	  if ( CLHEP::RandFlat::shoot(1.0) > fQE ) return false;
         }else{ //if it is Arapuca
-          auto const xyz = geom->OpDetGeoFromOpChannel(OpDet).GetCenter();
+          auto const xyz = wireReadout.OpDetGeoFromOpChannel(OpDet).GetCenter();
           if(xyz.X()<0){ //beam side
             // Check QE
             if ( CLHEP::RandFlat::shoot(1.0) > fQEArapucaBeam ) return false;
@@ -203,13 +205,14 @@ namespace opdet{
     {
         // Find the Optical Detector using the geometry service
         art::ServiceHandle<geo::Geometry> geom;
+        auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
 
         if (fFastSimChannelConvert){
             // Here OpDet must be opdet since we are introducing
             // channel mapping here.
-            float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+            float NOpHardwareChannels = wireReadout.NOpHardwareChannels(OpDet);
             hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
-            newOpChannel = geom->OpChannel(OpDet, hardwareChannel);
+            newOpChannel = wireReadout.OpChannel(OpDet, hardwareChannel);
         }else{
             newOpChannel = OpDet;
         }
@@ -222,7 +225,7 @@ namespace opdet{
           // Check QE
           if ( CLHEP::RandFlat::shoot(1.0) > fQE ) return false;
         }else{ //if it is Arapuca
-          auto const xyz = geom->OpDetGeoFromOpChannel(OpDet).GetCenter();
+          auto const xyz = wireReadout.OpDetGeoFromOpChannel(OpDet).GetCenter();
           if(xyz.X()<0){ //beam side
             // Check QE
             if ( CLHEP::RandFlat::shoot(1.0) > fQEArapucaBeam ) return false;

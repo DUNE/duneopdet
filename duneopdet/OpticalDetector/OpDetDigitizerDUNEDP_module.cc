@@ -30,6 +30,8 @@
 
 // LArSoft includes
 
+#include "larcore/Geometry/WireReadout.h"
+#include "larcore/Geometry/Geometry.h"
 #include "lardataobj/Simulation/sim.h"
 #include "lardataobj/Simulation/SimPhotons.h"
 #include "larsim/Simulation/LArG4Parameters.h"
@@ -177,14 +179,14 @@ namespace opdet {
       // Produce waveform on one of the optical detectors
       void CreatePDWaveform(sim::SimPhotonsLite const&,
                             opdet::OpDetResponseInterface const&,
-                            geo::Geometry const&,
+                            geo::WireReadoutGeom const&,
                             std::vector< std::vector< double > >&,
                             std::vector<FocusList>&);
 
       // Produce waveform on one of the optical detectors
       void CreatePDWaveform(sim::SimPhotons const&,
                             opdet::OpDetResponseInterface const&,
-                            geo::Geometry const&,
+                            geo::WireReadoutGeom const&,
                             std::vector< std::vector< double > >&,
                             std::vector<FocusList>&);
 
@@ -425,6 +427,7 @@ namespace opdet {
 
     // Geometry service
     art::ServiceHandle< geo::Geometry > geometry;
+    auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
 
     // Service for determining optical detector responses
     art::ServiceHandle< opdet::OpDetResponseInterface > odResponse;
@@ -436,7 +439,7 @@ namespace opdet {
 
 //     unsigned int nChannelsPerOpDet=1;
 
-     unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(nOpDet);
+     unsigned int nChannelsPerOpDet = wireReadout.NOpHardwareChannels(nOpDet);
 
 
    // This vector stores waveforms created for each optical channel
@@ -472,7 +475,7 @@ namespace opdet {
           //unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
   	  // it is one by default in the dual phase geometry, but let's keep it to have compatible functions with single phase.
 
-          CreatePDWaveform(litePhotons, *odResponse, *geometry, pdWaveforms, fls[opDet]);
+          CreatePDWaveform(litePhotons, *odResponse, wireReadout, pdWaveforms, fls[opDet]);
           if((unsigned)modulecounter<fInputModule.size()) continue;//==fInputModule.size()
 
           if(fExportWaveformTree) for (unsigned int hardwareChannel = 0;
@@ -516,7 +519,7 @@ namespace opdet {
                                                                        waveformOfShorts) };
 
               //std::cout << "mapTickWaveform " << mapTickWaveform.size()<< std::endl;
-              unsigned int opChannel = geometry->OpChannel(opDet, hardwareChannel);
+              unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);
               for (auto const& pairTickWaveform : mapTickWaveform)
               {
                 double timeStamp =
@@ -550,7 +553,7 @@ namespace opdet {
        {
          if(opDet == (unsigned)Photons.OpChannel())
          {
-          CreatePDWaveform(Photons, *odResponse, *geometry, pdWaveforms, fls[opDet]);
+          CreatePDWaveform(Photons, *odResponse, wireReadout, pdWaveforms, fls[opDet]);
           if((unsigned)modulecounter<fInputModule.size()) continue;//==fInputModule.size()
 
           if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet], opDet);
@@ -579,7 +582,7 @@ namespace opdet {
                                                                        waveformOfShorts) };
 
               //std::cout << "mapTickWaveform " << mapTickWaveform.size()<< std::endl;
-              unsigned int opChannel = geometry->OpChannel(opDet, hardwareChannel);
+              unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);
               for (auto const& pairTickWaveform : mapTickWaveform)
               {
                 double timeStamp =
@@ -670,7 +673,7 @@ namespace opdet {
   void OpDetDigitizerDUNEDP::CreatePDWaveform
                              (sim::SimPhotonsLite const& litePhotons,
                               opdet::OpDetResponseInterface const& odResponse,
-                              geo::Geometry const& geometry,
+                              geo::WireReadoutGeom const& wireReadout,
                               std::vector< std::vector< double > >& pdWaveforms,
                               std::vector<FocusList>& fls)
   {
@@ -700,13 +703,13 @@ namespace opdet {
           if (CLHEP::RandFlat::shoot(1.0) <getQE(opDet))
           {
 	    odResponse.detectedLite(opDet, readoutChannel);
-            unsigned int hardwareChannel = geometry.HardwareChannelFromOpChannel(readoutChannel);
+            unsigned int hardwareChannel = wireReadout.HardwareChannelFromOpChannel(readoutChannel);
             // Convert the time of the pulse to ticks
             size_t timeBin = TimeToTick(photonTime);
             // Add 1 pulse to the waveform
             AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel], getGain(opDet));
             counter++;
-	    unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
+            unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);
 	    if(fDigiTree_SSP_LED){
 	    	op_photon.emplace_back(opChannel);
 	    	t_photon.emplace_back(photonTime);
@@ -724,7 +727,7 @@ namespace opdet {
   void OpDetDigitizerDUNEDP::CreatePDWaveform
                              (sim::SimPhotons const& Photons,
                               opdet::OpDetResponseInterface const& odResponse,
-                              geo::Geometry const& geometry,
+                              geo::WireReadoutGeom const& wireReadout,
                               std::vector< std::vector< double > >& pdWaveforms,
                               std::vector<FocusList>& fls)
   {
@@ -754,13 +757,13 @@ namespace opdet {
           if (CLHEP::RandFlat::shoot(1.0) <getQE(opDet))
           {
 	    odResponse.detectedLite(opDet, readoutChannel);
-            unsigned int hardwareChannel = geometry.HardwareChannelFromOpChannel(readoutChannel);
+            unsigned int hardwareChannel = wireReadout.HardwareChannelFromOpChannel(readoutChannel);
             // Convert the time of the pulse to ticks
             size_t timeBin = TimeToTick(photonTime);
             // Add 1 pulse to the waveform
             AddPulse(timeBin, CrossTalk(), pdWaveforms.at(hardwareChannel), fls[hardwareChannel], getGain(opDet));
             counter++;
-	    unsigned int opChannel = geometry.OpChannel(opDet, hardwareChannel);
+            unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);
 	    if(fDigiTree_SSP_LED){
 	    	op_photon.emplace_back(opChannel);
 	    	t_photon.emplace_back(photonTime);
@@ -894,9 +897,11 @@ namespace opdet {
 
     double maxDrift = 0.0;
     for (geo::TPCGeo const& tpc :
-           art::ServiceHandle< geo::Geometry >()->Iterate<geo::TPCGeo>())
-      if (maxDrift < tpc.DriftDistance()) maxDrift = tpc.DriftDistance();
-
+           art::ServiceHandle< geo::Geometry >()->Iterate<geo::TPCGeo>()) {
+      auto const driftDistance = tpc.DriftDistance();
+      if (maxDrift < driftDistance) maxDrift = driftDistance;
+    }
+    
     driftWindow = maxDrift / detProp.DriftVelocity();
 
     return driftWindow;

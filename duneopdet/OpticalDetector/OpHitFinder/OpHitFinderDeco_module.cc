@@ -14,7 +14,7 @@
 
  // LArSoft includes
 #include "larcore/CoreUtils/ServiceUtil.h"
-#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoCFD.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoFixedWindow.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
@@ -117,8 +117,8 @@ namespace opdet {
 
     for (auto const& ch : pset.get<std::vector<unsigned int>>("ChannelMasks", std::vector<unsigned int>()))fChannelMasks.insert(ch);
 
-    auto const& geometry(*lar::providerFrom<geo::Geometry>());
-    fMaxOpChannel = geometry.MaxOpChannel();
+    auto const& wireReadout = art::ServiceHandle<geo::WireReadout const>()->Get();
+    fMaxOpChannel = wireReadout.MaxOpChannel();
 
     // If useCalibrator, get it from ART
     if (useCalibrator) {fCalib = lar::providerFrom<calib::IPhotonCalibratorService>();}
@@ -193,7 +193,7 @@ namespace opdet {
 
     catch (art::Exception const& err) {if (err.categoryCode() != art::errors::ProductNotFound) throw;}
 
-    auto const& geometry(*lar::providerFrom<geo::Geometry>());
+    auto const& wireReadout = art::ServiceHandle<geo::WireReadout const>()->Get();
     auto const clock_data = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     auto const& calibrator(*fCalib);
 
@@ -202,15 +202,19 @@ namespace opdet {
       std::cout << "\nRunning Ophitfinder with InputDigiType = 'recob'\n";
       // Load pulses into WaveformVector
       art::Handle<std::vector<recob::OpWaveform>> decoHandle;
+      art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
 
       evt.getByLabel(fInputModule,   decoHandle);
+      evt.getByLabel(fInputModuledigi,rawHandle);
+
       assert(decoHandle.isValid());
+      assert(rawHandle.isValid());
 
       RunHitFinder_deco(*decoHandle,
                         *HitPtr,
                         fPulseRecoMgr,
                         *fThreshAlg,
-                        geometry,
+                        wireReadout,
                         fHitThreshold,
                         fScale,
                         clock_data,
@@ -231,14 +235,14 @@ namespace opdet {
         else {evt.getByLabel(fInputModuledigi, fInputLabels.front(), rawHandle);}
         assert(rawHandle.isValid());
         RunHitFinder(*rawHandle,
-                    *HitPtr,
-                    fPulseRecoMgr,
-                    *fThreshAlg,
-                    geometry,
-                    fHitThreshold,
-                    clock_data,
-                    calibrator,
-                    fUseStartTime);
+                     *HitPtr,
+                     fPulseRecoMgr,
+                     *fThreshAlg,
+                     wireReadout,
+                     fHitThreshold,
+                     clock_data,
+                     calibrator,
+                     fUseStartTime);
       }
 
       else{
@@ -264,14 +268,14 @@ namespace opdet {
         }
 
         RunHitFinder(WaveformVector,
-                    *HitPtr,
-                    fPulseRecoMgr,
-                    *fThreshAlg,
-                    geometry,
-                    fHitThreshold,
-                    clock_data,
-                    calibrator,
-                    fUseStartTime);
+                     *HitPtr,
+                     fPulseRecoMgr,
+                     *fThreshAlg,
+                     wireReadout,
+                     fHitThreshold,
+                     clock_data,
+                     calibrator,
+                     fUseStartTime);
       }
     }
     // Store results into the event
