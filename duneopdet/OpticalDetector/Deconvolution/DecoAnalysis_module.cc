@@ -4,7 +4,12 @@
 // with information from OpDetWaveforms and OpWaveforms.
 // @authors     : Daniele Guffanti, Maritza Delgado, Sergio Manthey Corchado
 // @created     : 2022
-//===========================================================================
+//
+// Modified: Oct 7, 2024, Viktor Pec
+//     Added raw waveforms to the output. Redid directory structure
+//     inside the root file. Set the maximum number of histograms to
+//     save to 400.
+//     ===========================================================================
 
 #ifndef DecoAnalysis_h
 #define DecoAnalysis_h
@@ -65,6 +70,8 @@ namespace opdet {
     double fSampleFreq;                    // in MHz
     //float fTimeBegin;                      // in us
     // float fTimeEnd;                        // in us
+
+    static const size_t MAX_WFMS = 400;
   };
 }
 
@@ -98,6 +105,9 @@ namespace opdet {
 
   //-----------------------------------------------------------------------
   void DecoAnalysis::analyze(const art::Event& evt){
+    auto mfi = mf::LogInfo("DecoAnalysis::analyze()");
+
+
     // Map to store how many waveforms are on one optical channel
     std::map< int, int > mapChannelWF;
 
@@ -126,15 +136,15 @@ namespace opdet {
     std::map<int,std::pair<art::TFileDirectory, art::TFileDirectory> > chan_dir_map;
 
 
-    std::cout<<std::endl
-	     <<"Number of deconvolved waveforms in this event: "<<OpWaveform.size()
-	     <<std::endl;
+    mfi<<"\n"
+       <<"Number of deconvolved waveforms in this event: "<<OpWaveform.size()
+       <<"\n";
 
-    size_t max_wfms = 400;
-    if (max_wfms > OpWaveform.size())
+    size_t max_wfms = MAX_WFMS;
+    if (MAX_WFMS > OpWaveform.size())
       max_wfms = OpWaveform.size();
 
-    std::cout<<"Number of deconvolved waveforms to be saved in this event: "<<max_wfms<<std::endl;
+    mfi<<"Number of deconvolved waveforms to be saved in this event: "<<max_wfms<<"\n";
 
     for (size_t i = 0; i < max_wfms; i++){
       raw::OpDetWaveform const& waveform = fopDigi.at(i).ref();
