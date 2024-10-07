@@ -6,6 +6,10 @@
 // Filter wiener/gauss -FFT
 // @authors     : Daniele Guffanti, Maritza Delgado, Sergio Manthey Corchado
 // @created     : Jan 26, 2022
+//
+// Modified:
+//     Oct 7, 2024, Viktor Pec
+//       Added possibility to use SPE and noise templates by channel.
 //=============================================================================
 
 #ifndef Deconvolution_h
@@ -359,6 +363,8 @@ namespace opdet {
       fxG0(fSamples),
       fxG1(fSamples)
   {
+    auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
+
     // Declare that we'll produce a vector of OpDetWaveforms
     WfDeco=0;
 
@@ -416,7 +422,6 @@ namespace opdet {
     }
 
     //=== info print out ===
-    auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
     mfi<<"Input waveform polarity set to: " << fInputPolarity << "\n";
     // info on channel to SPE template map
     mfi<<"Channels mapped to SPE template files:\n";
@@ -475,6 +480,7 @@ namespace opdet {
 
   //-------------------------------------------------------------------------
   void Deconvolution::produce(art::Event& evt){
+    auto mfi = mf::LogInfo("Deconvolution::produce()");
 
     art::Handle< std::vector< raw::OpDetWaveform > > wfHandle;
     evt.getByLabel(fInputModule, fInstanceName, wfHandle);
@@ -485,7 +491,7 @@ namespace opdet {
 
     std::vector<raw::OpDetWaveform> digi_wave = *wfHandle;
     int NOpDetWaveform = digi_wave.size(); //Number of waveforms in OpDetWaveform Object
-    std::cout << NOpDetWaveform << std::endl;
+    mfi << "Number of waveforms to process: " << NOpDetWaveform << "\n";
 
     //Pointer that will store produced DecoWaveform
     auto out_recob = std::make_unique< std::vector< recob::OpWaveform > >();
