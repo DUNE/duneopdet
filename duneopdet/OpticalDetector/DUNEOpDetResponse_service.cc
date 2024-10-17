@@ -10,6 +10,8 @@
 #include "TGeoNode.h"
 #include "TGeoBBox.h"
 #include "larcorealg/Geometry/OpDetGeo.h"
+#include "larcore/Geometry/WireReadout.h"
+#include "larcore/Geometry/Geometry.h"
 #include "larcore/CoreUtils/ServiceUtil.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -20,14 +22,13 @@ namespace opdet{
 
 
     //--------------------------------------------------------------------
-    DUNEOpDetResponse::DUNEOpDetResponse(fhicl::ParameterSet const& pset,
-                                         art::ActivityRegistry &/*reg*/)
+    DUNEOpDetResponse::DUNEOpDetResponse(fhicl::ParameterSet const& pset)
     {
         this->doReconfigure(pset);
     }
 
     //--------------------------------------------------------------------
-    DUNEOpDetResponse::~DUNEOpDetResponse() throw()
+    DUNEOpDetResponse::~DUNEOpDetResponse()
     { }
 
 
@@ -83,11 +84,10 @@ namespace opdet{
     //--------------------------------------------------------------------
     int  DUNEOpDetResponse::doNOpChannels() const
     {
-        art::ServiceHandle<geo::Geometry> geom;
         if (fFastSimChannelConvert || fFullSimChannelConvert)
-            return geom->NOpChannels();
+            return art::ServiceHandle<geo::WireReadout>()->Get().NOpChannels();
         else
-            return geom->NOpDets();
+            return art::ServiceHandle<geo::Geometry>()->NOpDets();
 
     }
 
@@ -96,15 +96,12 @@ namespace opdet{
     bool DUNEOpDetResponse::doDetected(int OpDet, const sim::OnePhoton& Phot, int &newOpChannel) const
     {
 
-        // Find the Optical Detector using the geometry service
-        art::ServiceHandle<geo::Geometry> geom;
-
-
         if (fFullSimChannelConvert){
             // Override default number of channels for Fiber and Plank
-            float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+            auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
+            float NOpHardwareChannels = wireReadout.NOpHardwareChannels(OpDet);
             int hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
-            newOpChannel = geom->OpChannel(OpDet, hardwareChannel);
+            newOpChannel = wireReadout.OpChannel(OpDet, hardwareChannel);
         }
         else{
             newOpChannel = OpDet;
@@ -120,7 +117,7 @@ namespace opdet{
 
         if (fLightGuideAttenuation) {
             // Get the length of the photon detector
-            const TGeoNode* node = geom->OpDetGeoFromOpDet(OpDet).Node();
+            const TGeoNode* node = art::ServiceHandle<geo::Geometry>()->OpDetGeoFromOpDet(OpDet).Node();
             TGeoBBox *box = (TGeoBBox*)node->GetVolume()->GetShape();
             double opdetLength = 0;
             double sipmDistance = 0;
@@ -169,12 +166,12 @@ namespace opdet{
         if (fFastSimChannelConvert){
 
             // Find the Optical Detector using the geometry service
-            art::ServiceHandle<geo::Geometry> geom;
+            auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
             // Here OpDet must be opdet since we are introducing
             // channel mapping here.
-            float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+            float NOpHardwareChannels = wireReadout.NOpHardwareChannels(OpDet);
             int hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
-            newOpChannel = geom->OpChannel(OpDet, hardwareChannel);
+            newOpChannel = wireReadout.OpChannel(OpDet, hardwareChannel);
         }
         else{
             newOpChannel = OpDet;
@@ -193,12 +190,12 @@ namespace opdet{
         if (fFastSimChannelConvert){
 
             // Find the Optical Detector using the geometry service
-            art::ServiceHandle<geo::Geometry> geom;
+            auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
             // Here OpDet must be opdet since we are introducing
             // channel mapping here.
-            float NOpHardwareChannels = geom->NOpHardwareChannels(OpDet);
+            float NOpHardwareChannels = wireReadout.NOpHardwareChannels(OpDet);
             hardwareChannel = (int) ( CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels );
-            newOpChannel = geom->OpChannel(OpDet, hardwareChannel);
+            newOpChannel = wireReadout.OpChannel(OpDet, hardwareChannel);
         }
         else{
             newOpChannel = OpDet;

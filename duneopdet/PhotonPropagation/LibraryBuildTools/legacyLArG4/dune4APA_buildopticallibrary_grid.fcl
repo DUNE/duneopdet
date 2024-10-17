@@ -32,8 +32,8 @@ services:
 
 
 services.Geometry.GDML: "dune4apa36deg.gdml"
-services.Geometry.ROOT: "dune4apa36deg.gdml"
 services.Geometry.SortingParameters.DetectorVersion: "dune4apa36deg"
+services.AuxDetGeometry.GDML: @local::services.Geometry.GDML
 
 services.OpDetResponseInterface.LongAxis: z
 
