@@ -1,0 +1,25 @@
+#include "PDFastSim_dune.fcl"
+
+BEGIN_PROLOG
+
+standard_photovis: 
+{
+   module_type:		   "PhotonVisibilityExport"
+   photovis_label:	 	   "photovis" 
+   photovis_map:         "photovis"
+   voxel_dx:                "10.00" # voxel x mesh step (in cm)
+   voxel_dy:                "10.00" # voxel y mesh step (in cm)
+   voxel_dz:                "10.00" # voxel z mesh step (in cm)
+   vis_model:      "semianalytical" # visibility model to be used
+                                    # (pick one between "semianalytical", "compgraph")
+   do_refl:                  @local::dunefd_pdfastsim_par_ar_refl.DoReflectedLight
+   do_include_anode_refl:   "false"
+   vuvhitspars:              @local::dunefd_pdfastsim_par_ar.VUVHits
+   vishitspars:              @local::dunefd_pdfastsim_par_ar_refl.VISHits
+   tfloaderpars:			       @local::dunevd_pdfastsim_ann_ar.TFLoaderTool
+
+   do_include_buffer:       false
+}
+
+END_PROLOG
+
