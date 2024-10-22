@@ -19,34 +19,51 @@
 #include <TCanvas.h>
 #include <TROOT.h>
 
-inline TH3* rebin_visibility_map(const TH3* h3, const int rbx, const int rby, const int rbz)
-{
-  TH3* h3rb = (TH3*)h3rb->Rebin3D(rbx, rby, rbz, Form("%s_rb_%i_%i_%i", h3->GetName(), rbx, rby, rbz)); 
 
-  float scale_factor = 1.0 / (rbx * rby *rbz); 
-  h3rb->Scale( scale_factor ); 
-  return h3rb; 
-}
-
-inline THnSparse* rebin_visibility_map(const THnSparse* hn, const int rbx, const int rby, const int rbz) 
+/**
+ * @brief Rebin the visibility map averaging the bin content after rebin
+ *
+ * @param hn visibility map
+ * @param rb0 bin group for axis 0
+ * @param rb1 bin group for axis 1
+ * @param rb2 bin group for axis 2
+ * @return rebinned visibility map
+ */
+inline THnSparse* rebin_visibility_map(
+    const THnSparse* hn, 
+    const int rb0, 
+    const int rb1, 
+    const int rb2) 
 {
-  const Int_t rbidx[3] = {rbx, rby, rbz}; 
+  const Int_t rbidx[3] = {rb0, rb1, rb2}; 
   THnSparse* hnrb = hn->Rebin(rbidx); 
   
-  float scale_factor = 1.0 / (rbx * rby * rbz); 
+  float scale_factor = 1.0 / (rb0 * rb1 * rb2); 
   hnrb->Scale( scale_factor ); 
   return hnrb; 
 }
 
-inline THn* rebin_visibility_map(const THn* hn, const int rbx, const int rby, const int rbz) {
-  const Int_t rbidx[3] = {rbx, rby, rbz}; 
+/**
+ * @brief Rebin the visibility map averaging the bin content after rebin
+ *
+ * @param hn visibility map
+ * @param rb0 bin group for axis 0
+ * @param rb1 bin group for axis 1
+ * @param rb2 bin group for axis 2
+ * @return rebinned visibility map
+ */
+inline THn* rebin_visibility_map(const THn* hn, const int rb0, const int rb1, const int rb2) {
+  const Int_t rbidx[3] = {rb0, rb1, rb2}; 
   THn* hnrb = hn->Rebin(rbidx); 
   
-  float scale_factor = 1.0 / (rbx * rby * rbz); 
+  float scale_factor = 1.0 / (rb0 * rb1 * rb2); 
   hnrb->Scale( scale_factor ); 
   return hnrb; 
 }
 
+/**
+ * @brief Get axis along which averaging the visibility (internal use)
+ */
 inline const int get_projection_axis(const int& axis0, const int& axis1) {
   assert(axis0 != axis1); 
   assert(axis1 < 2); 
@@ -55,7 +72,17 @@ inline const int get_projection_axis(const int& axis0, const int& axis1) {
   return (3-axis0-axis1);
 }
 
-inline TH2D* draw_projection(const THnBase* hn, 
+/**
+ * @brief Compute a 2D average visibility profile
+ *
+ * @param hn visibility map
+ * @param axis0 axis index on the projection y-axis
+ * @param axis1 axis index on the projection x-axis
+ * @param x0 lower edge of the projected axis range
+ * @param x1 upper edge of the projected axis range
+ * @return projected visibility
+ */
+inline TH2D* get_projection(const THnBase* hn, 
     const int& axis0,  
     const int& axis1, 
     const double& x0, 
@@ -73,77 +100,6 @@ inline TH2D* draw_projection(const THnBase* hn,
   hn->GetAxis(proj_axis)->SetRange(); 
   return h_proj;
 }
-
-inline void CanvasPartition(TCanvas *C,const Int_t Nx,const Int_t Ny,
-    Float_t lMargin, Float_t rMargin,
-    Float_t bMargin, Float_t tMargin)
-{
-  if (!C) return;
-  // Setup Pad layout:
-  Float_t vSpacing = 0.0;
-  Float_t vStep  = (1.- bMargin - tMargin - (Ny-1) * vSpacing) / Ny;
-  Float_t hSpacing = 0.0;
-  Float_t hStep  = (1.- lMargin - rMargin - (Nx-1) * hSpacing) / Nx;
-  Float_t vposd,vposu,vmard,vmaru,vfactor;
-  Float_t hposl,hposr,hmarl,hmarr,hfactor;
-  for (Int_t i=0;i<Nx;i++) {
-    if (i==0) {
-      hposl = 0.0;
-      hposr = lMargin + hStep;
-      hfactor = hposr-hposl;
-      hmarl = lMargin / hfactor;
-      hmarr = 0.0;
-    } else if (i == Nx-1) {
-      hposl = hposr + hSpacing;
-      hposr = hposl + hStep + rMargin;
-      hfactor = hposr-hposl;
-      hmarl = 0.0;
-      hmarr = rMargin / (hposr-hposl);
-    } else {
-      hposl = hposr + hSpacing;
-      hposr = hposl + hStep;
-      hfactor = hposr-hposl;
-      hmarl = 0.0;
-      hmarr = 0.0;
-    }
-    for (Int_t j=0;j<Ny;j++) {
-      if (j==0) {
-        vposd = 0.0;
-        vposu = bMargin + vStep;
-        vfactor = vposu-vposd;
-        vmard = bMargin / vfactor;
-        vmaru = 0.0;
-      } else if (j == Ny-1) {
-        vposd = vposu + vSpacing;
-        vposu = vposd + vStep + tMargin;
-        vfactor = vposu-vposd;
-        vmard = 0.0;
-        vmaru = tMargin / (vposu-vposd);
-      } else {
-        vposd = vposu + vSpacing;
-        vposu = vposd + vStep;
-        vfactor = vposu-vposd;
-        vmard = 0.0;
-        vmaru = 0.0;
-      }
-      C->cd(0);
-      char name[16];
-      sprintf(name,"pad_%i_%i",i,j);
-      TPad *pad = (TPad*) gROOT->FindObject(name);
-      if (pad) delete pad;
-      pad = new TPad(name,"",hposl,vposd,hposr,vposu);
-      pad->SetLeftMargin(hmarl);
-      pad->SetRightMargin(hmarr);
-      pad->SetBottomMargin(vmard);
-      pad->SetTopMargin(vmaru);
-      pad->SetFrameBorderMode(0);
-      pad->SetBorderMode(0);
-      pad->SetBorderSize(0);
-      pad->Draw();
-    }
-  }
-}
-
 
 #endif /* end of include guard DUNEVISUTILS_HPP */
 

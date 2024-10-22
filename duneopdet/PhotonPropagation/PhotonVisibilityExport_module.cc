@@ -1,7 +1,7 @@
 /**
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
  * @file        : PhotonVisibilityExport_module.cc
- * @created     : Thursday Feb 10, 2022 05:19:33 CST
+ * @created     : 2024-10-22 07:50
  */
 
 #ifndef PHOTONVISIBILITYEXPORT_MODULE_CC
@@ -51,6 +51,22 @@
 
 namespace opdet {
 
+  /**
+   * @class PhotonVisibilityExport
+   * @brief Export the visibility map of the detector volume and of each individual OpDet
+   *
+   * This module produces a visibility map of the detector volume and of each individual 
+   * optical detector, both inside the TPC volume (photoVisMap) and in the buffer region
+   * (photoVisMapBuffer). The TTree products can be converted into a 3D THn histogram with the 
+   * macro in the VisibilityMapTools/ folder. 
+   * In addition to the visibility tree, the module exports a tree containing the placement
+   * of the individual optical detector and a tree with the size and placementes of the 
+   * detector's TPCs. Finally, the tDimensions tree can be used to retrieve the overall size 
+   * of the detector. 
+   *
+   * The voxel grid used for sampling the detector visibility can be recovered on the basis
+   * of the three histograms hgrid[0-2].
+   */
   class PhotonVisibilityExport : public art::EDAnalyzer 
   {
     public:
@@ -157,12 +173,14 @@ namespace opdet {
   }
 
   void PhotonVisibilityExport::analyze(const art::Event&) {
-    ExportOpDetMap();
 
-    ExportTPCMap();
-    
-    ExportVisibility(); 
+    if (fIsDone == false) {
+      ExportOpDetMap();
 
+      ExportTPCMap();
+
+      ExportVisibility(); 
+    }
     return;
   }
 
@@ -192,7 +210,6 @@ namespace opdet {
     float tpcW = 0;
     float tpcL = 0;
     float tpcPos[3]; 
-    //const double voxelDim[3] = {fVoxelSizeX, fVoxelSizeY, fVoxelSizeZ}; 
 
     TTree* tTPC = tfs->make<TTree>("tpcMap", "tpcMap");
     tTPC->Branch("tpcH", &tpcH); 
@@ -213,7 +230,6 @@ namespace opdet {
     // loop over all TPCs to get the active volume dimensions
     for (geo::TPCGeo const& tpc : geom->Iterate<geo::TPCGeo>()) {
       auto point_center = tpc.GetCenter();
-      //point_center.GetCoordinates( tpcPos ); 
       double hlfW = tpc.ActiveHalfWidth (); tpcW = 2*hlfW;
       double hlfH = tpc.ActiveHalfHeight(); tpcH = 2*hlfH;
       double hlfL = tpc.ActiveHalfLength(); tpcL = 2*hlfL;
@@ -390,18 +406,8 @@ namespace opdet {
                auto mapped_vis = photonVisService->GetAllVisibilities(point); 
                size_t iopdet = 0; 
                for (auto &vis : mapped_vis) {
-                 if (vis < 0.0) {
-                   fprintf(stderr, "WARNIGN: negative buffer vis at (%.0f, %.0f, %.0f). visibility is %g\n", 
-                       x_, y_, z_, vis);
-                 }
-                 else if (vis > 1.0) {
-                   fprintf(stderr, "WARNIGN: tpc vis at (%.0f, %.0f, %.0f) is greater than 1. visibility is %g\n", 
-                       x_, y_, z_, vis);
-                 }
-                 else {
-                   opDet_visDirectBuff[iopdet] = vis;
-                   total_visDirectBuff += vis; 
-                 }
+                 opDet_visDirectBuff[iopdet] = vis;
+                 total_visDirectBuff += vis; 
                  iopdet++; 
                }
 
@@ -430,7 +436,7 @@ namespace opdet {
 
                if (kVisModel == kSemiAnalytical ) {
                  fVisibilityModel->detectedDirectVisibilities   (opdetvis_dir, xspot);
-                 //fVisibilityModel->detectedReflectedVisibilities(opdetvis_rfl, xspot, fIncludeAnodeReflections);
+                 fVisibilityModel->detectedReflectedVisibilities(opdetvis_rfl, xspot, fIncludeAnodeReflections);
                }
                else if (kVisModel == kCompGraph ) {
                  std::vector<Double_t> pos_tmp {xspot.x(), xspot.y(), xspot.z()}; 
@@ -440,14 +446,8 @@ namespace opdet {
 
                size_t iopdet = 0; 
                for (const auto &vis : opdetvis_dir) {
-                 if (vis < 0.0) {
-                   fprintf(stderr, "WARNIGN: negative tpc vis at (%.0f, %.0f, %.0f). visibility is %g\n", 
-                       x_, y_, z_, vis);
-                 }
-                 else {
-                   opDet_visDirect[iopdet] += vis;
-                   total_visDirect += vis;
-                 }
+                 opDet_visDirect[iopdet] += vis;
+                 total_visDirect += vis;
                  iopdet++;
                }
 
@@ -460,12 +460,11 @@ namespace opdet {
              }
 
              total_visDirect = total_visDirect / n_samplings; 
-             //total_visReflct = total_visReflct / n_samplings; 
+             total_visReflct = total_visReflct / n_samplings; 
 
              for (size_t i = 0; i < fNOpDets; i++) {
                opDet_visDirect[i] /= n_samplings;
                opDet_visReflct[i] /= n_samplings;
-               //printf("[%ld] - %g\n", i, opDet_visDirect[i]);
              }
 
              // Fill tree

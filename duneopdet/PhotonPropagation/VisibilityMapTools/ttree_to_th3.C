@@ -2,6 +2,7 @@
  * @author      : Daniele Guffanti (daniele.guffanti@mib.infn.it)
  * @file        : ttree_to_th3.C
  * @created     : 2024-10-18 08:13
+ * @description : Fill 3D visibility maps from TTree produced by the PhotonVisibilityExport
  */
 
 #include <cstdio>
@@ -31,7 +32,21 @@
 #include "TRandom3.h"
 #include "TROOT.h"
 
-void ttree_to_th3(const TString input_file, const TString vis_dir, const Double_t vis_threshold = 1e-4) 
+/** 
+ * Create THn visibility maps from the PhotonVisibilityExport_module's output
+ *
+ * Create visibility maps for the entire detector volume and for each individual OpDet.
+ * To reduce the resources needed for handling the visibility of the full set of 
+ * OpDet, we use three-dimensional THnSparse to store the visiblity map, rounding 
+ * the visibility to 0.0 when below the threshold set in vis_threshold.
+ *
+ * @param input_file input file path
+ * @param visexport_label label used for the PhotonVisibilityExport module 
+ * @param vis_threshold Set visibility to 0 if below this value. (Only for single OpDet maps)
+ */
+void ttree_to_th3(const TString input_file, 
+    const TString visexport_label, 
+    const Double_t vis_threshold = 1e-4) 
 {
   gStyle->SetTitleSize(0.06, "xyz");
   gStyle->SetLabelSize(0.06, "xyz");
@@ -40,7 +55,7 @@ void ttree_to_th3(const TString input_file, const TString vis_dir, const Double_
   TTree* tOpDet  = nullptr; 
   TTree* tVisTPC = nullptr; 
   TTree* tVisBuf = nullptr; 
-  TDirectoryFile* dunevis_dir = file->Get<TDirectoryFile>(vis_dir); 
+  TDirectoryFile* dunevis_dir = file->Get<TDirectoryFile>(visexport_label); 
   dunevis_dir->cd(); 
 
   TH1D* h_tmp[3] = {0}; 
@@ -65,9 +80,9 @@ void ttree_to_th3(const TString input_file, const TString vis_dir, const Double_
   TTreeReader reader(tVisTPC); 
   TTreeReaderArray<double> _xyz(reader, "coords"); 
   TTreeReaderArray<double> _opdet_visd(reader, "opDet_visDirect"); 
-  //TTreeReaderArray<double> _opdet_visr(reader, "opDet_visReflct"); 
+  TTreeReaderArray<double> _opdet_visr(reader, "opDet_visReflct"); 
   TTreeReaderValue<double> _vis_d(reader, "total_visDirect"); 
-  //TTreeReaderValue<double> _vis_r(reader, "total_visReflct"); 
+  TTreeReaderValue<double> _vis_r(reader, "total_visReflct"); 
 
   const Long64_t N_OPDET = tOpDet->GetEntries();
 
@@ -99,9 +114,9 @@ void ttree_to_th3(const TString input_file, const TString vis_dir, const Double_
       TTreeReader readerBuff(tVisBuf); 
       TTreeReaderArray<double> _buf_xyz(readerBuff, "coords"); 
       TTreeReaderArray<double> _buf_opdet_visd(readerBuff, "opDet_visDirectBuff"); 
-      //TTreeReaderArray<double> _buf_opdet_visr(readerBuff, "opDet_visReflctBuff"); 
+      TTreeReaderArray<double> _buf_opdet_visr(readerBuff, "opDet_visReflctBuff"); 
       TTreeReaderValue<double> _buf_vis_d(readerBuff, "total_visDirectBuff"); 
-      //TTreeReaderValue<double> _buf_vis_r(readerBuff, "total_visReflctBuff"); 
+      TTreeReaderValue<double> _buf_vis_r(readerBuff, "total_visReflctBuff"); 
 
       while( readerBuff.Next() ) {
         double xyz[3] = {_buf_xyz[0], _buf_xyz[1], _buf_xyz[2]};
@@ -118,7 +133,7 @@ void ttree_to_th3(const TString input_file, const TString vis_dir, const Double_
 
   TString output_name = input_file; 
   output_name.Resize( output_name.Index(".root") ); 
-  output_name += "_"+vis_dir+".root"; 
+  output_name += "_"+visexport_label+".root"; 
 
   TFile* output_h3 = new TFile(output_name, "recreate"); 
   h3total_vis->Write(); 
@@ -129,16 +144,4 @@ void ttree_to_th3(const TString input_file, const TString vis_dir, const Double_
 
   return;
 }
-
-TH3F* rebin_visibility_map(const TH3F* h3, const int rbx, const int rby, const int rbz)
-{
-  TH3F* h3rb = (TH3F*)h3->Clone(); 
-  h3rb = (TH3F*)h3rb->Rebin3D(rbx, rby, rbz, Form("%s_rb_%i_%i_%i", h3->GetName(), rbx, rby, rbz)); 
-
-  float scale_factor = 1.0 / (rbx * rby *rbz); 
-  h3rb->Scale( scale_factor ); 
-  
-  return h3rb; 
-}
-
 
