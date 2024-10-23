@@ -7,30 +7,22 @@
 
 #include <cstdio>
 #include <iostream>
-#include <fstream>
 #include <string.h>
-#include <sstream>
 
-#include "RtypesCore.h"
-#include "TFile.h"
-#include "TTree.h"
-#include "TTreeReader.h"
-#include "TTreeReaderArray.h"
-#include "TTreeReaderValue.h"
-#include "TDirectoryFile.h"
-#include "TSystem.h"
-#include "TStyle.h"
-#include "TCanvas.h"
-#include "TClonesArray.h"
-#include "TH1D.h"
-#include "TH3F.h"
+#include <RtypesCore.h>
+#include <TFile.h>
+#include <TTree.h>
+#include <TTreeReader.h>
+#include <TTreeReaderArray.h>
+#include <TTreeReaderValue.h>
+#include <TDirectoryFile.h>
+#include <TSystem.h>
+#include <TStyle.h>
+#include <TClonesArray.h>
 #include <THn.h>
 #include <THnSparse.h>
-#include "TH2D.h"
-#include "TGraphErrors.h"
-#include "TF1.h"
-#include "TRandom3.h"
-#include "TROOT.h"
+#include <TH1D.h>
+#include <TROOT.h>
 
 /** 
  * Create THn visibility maps from the PhotonVisibilityExport_module's output
@@ -43,10 +35,12 @@
  * @param input_file input file path
  * @param visexport_label label used for the PhotonVisibilityExport module 
  * @param vis_threshold Set visibility to 0 if below this value. (Only for single OpDet maps)
+ * @param split_fill Split the filling of OpDet visivility in N runs to reduce memory impact (default 5)
  */
 void ttree_to_th3(const TString input_file, 
     const TString visexport_label, 
-    const Double_t vis_threshold = 1e-4) 
+    const Double_t vis_threshold = 1e-4, 
+    const UInt_t split_fill = 5) 
 {
   gStyle->SetTitleSize(0.06, "xyz");
   gStyle->SetLabelSize(0.06, "xyz");
@@ -58,11 +52,11 @@ void ttree_to_th3(const TString input_file,
   TDirectoryFile* dunevis_dir = file->Get<TDirectoryFile>(visexport_label); 
   dunevis_dir->cd(); 
 
+  const TString axis_label[3] = {"x [cm]", "y [cm]", "z [cm]"}; 
   TH1D* h_tmp[3] = {0}; 
   h_tmp[0] = dunevis_dir->Get<TH1D>("hgrid0"); 
   h_tmp[1] = dunevis_dir->Get<TH1D>("hgrid1"); 
   h_tmp[2] = dunevis_dir->Get<TH1D>("hgrid2"); 
-
   const int nbins[3] = {h_tmp[0]->GetNbinsX(), h_tmp[1]->GetNbinsX(), h_tmp[2]->GetNbinsX()};
   const double xmin[3] ={
     h_tmp[0]->GetXaxis()->GetXmin(), 
@@ -84,63 +78,113 @@ void ttree_to_th3(const TString input_file,
   TTreeReaderValue<double> _vis_d(reader, "total_visDirect"); 
   TTreeReaderValue<double> _vis_r(reader, "total_visReflct"); 
 
-  const Long64_t N_OPDET = tOpDet->GetEntries();
-
-  THnF* h3total_vis = new THnF("h3VisMap", "Visibility Map", 3, nbins, xmin, xmax);
-  std::vector<THnSparseF*> h3opDet; 
-  h3opDet.reserve(N_OPDET);
-  for (size_t iopdet = 0; iopdet < N_OPDET; iopdet++) {
-    TString name = Form("h3VisMap_opDet%ld", iopdet); 
-    TString titl = Form("Visibility Map - OpDet %ld", iopdet);
-    h3opDet.emplace_back(new THnSparseF(name, titl, 3, nbins, xmin, xmax));
+  const size_t N_OPDET = tOpDet->GetEntries();
+  size_t nOpDetPerRun = N_OPDET;
+  UInt_t nRuns = 1;
+  if (split_fill > 1) {
+    nRuns = split_fill;
+    nOpDetPerRun = std::ceil( N_OPDET / (double)nRuns); 
   }
-
-  TH1D* h_opdet_vis_tpc = new TH1D("h_opdet_vis_tpc", "opdet visibility (TPC)", 100, -15, 1); 
-  TH1D* h_opdet_vis_buf = new TH1D("h_opdet_vis_buf", "opdet visibility (buffer)", 100, -15, 1); 
-
-  while( reader.Next() ) {
-    double xyz[3] = {_xyz[0], _xyz[1], _xyz[2]};
-    h3total_vis->Fill(xyz, *(_vis_d)); 
-    for (Long64_t i = 0; i < N_OPDET; i++) {
-      h_opdet_vis_tpc->Fill( log10(_opdet_visd[i]) ); 
-      if (_opdet_visd[i] > vis_threshold) {
-        h3opDet[i]->Fill(xyz, _opdet_visd[i]); 
-      }
-    }
-  }
-
-  if (tVisBuf) {
-    if (tVisBuf->GetEntries() > 0) {
-      TTreeReader readerBuff(tVisBuf); 
-      TTreeReaderArray<double> _buf_xyz(readerBuff, "coords"); 
-      TTreeReaderArray<double> _buf_opdet_visd(readerBuff, "opDet_visDirectBuff"); 
-      TTreeReaderArray<double> _buf_opdet_visr(readerBuff, "opDet_visReflctBuff"); 
-      TTreeReaderValue<double> _buf_vis_d(readerBuff, "total_visDirectBuff"); 
-      TTreeReaderValue<double> _buf_vis_r(readerBuff, "total_visReflctBuff"); 
-
-      while( readerBuff.Next() ) {
-        double xyz[3] = {_buf_xyz[0], _buf_xyz[1], _buf_xyz[2]};
-        h3total_vis->Fill(xyz, *(_buf_vis_d)); 
-        for (Long64_t i = 0; i < N_OPDET; i++) {
-          h_opdet_vis_buf->Fill( log10(_buf_opdet_visd[i]) ); 
-          if ( _buf_opdet_visd[i] > vis_threshold ) {
-            h3opDet[i]->Fill(xyz, _buf_opdet_visd[i]); 
-          }
-        }
-      }
+  std::vector<std::vector<size_t>> OpDetChunks(nRuns);
+  size_t iopdet = 0; 
+  for (size_t irun = 0; irun < nRuns; irun++) {
+    std::vector<size_t>& opdets_ = OpDetChunks.at(irun); 
+    opdets_.reserve(nOpDetPerRun); 
+    while (iopdet < N_OPDET && opdets_.size() <= nOpDetPerRun) {
+      opdets_.emplace_back(iopdet); 
+      iopdet++; 
     }
   }
 
   TString output_name = input_file; 
   output_name.Resize( output_name.Index(".root") ); 
   output_name += "_"+visexport_label+".root"; 
-
   TFile* output_h3 = new TFile(output_name, "recreate"); 
-  h3total_vis->Write(); 
-  for (auto& h3 : h3opDet) {
-    h3->Write(); 
+
+  size_t irun = 0; 
+  for (const auto& opdets : OpDetChunks) {
+    printf("Processing OpDet chunk %ld - [%ld - %ld]\n", irun, opdets.front(), opdets.back()); 
+
+    TClonesArray h3opDet("THnSparseF", opdets.size());
+    size_t iopdet_idx = 0;
+    for (const auto& iopdet : opdets) {
+      TString name = Form("h3VisMap_opDet%ld", iopdet); 
+      TString titl = Form("Visibility Map - OpDet %ld", iopdet);
+      new (h3opDet[iopdet_idx]) THnSparseF(name, titl, 3, nbins, xmin, xmax);
+      for (size_t idim = 0; idim < 3; idim++) {
+        ((THnSparseF*)h3opDet[iopdet_idx])->GetAxis(idim)->SetTitle(axis_label[idim]); 
+      }
+      iopdet_idx++; 
+    }
+
+    THnF* hnTotal = nullptr; 
+    if (irun == 0) {
+      hnTotal = new THnF("h3VisMap", "Detector visibility map", 3, nbins, xmin, xmax);
+      for (size_t idim = 0; idim < 3; idim++) {
+        hnTotal->GetAxis(idim)->SetTitle(axis_label[idim]); 
+      }
+    }
+
+    reader.Restart();
+
+    while (reader.Next()) {
+      double xyz[3] = {_xyz[0], _xyz[1], _xyz[2]};
+      iopdet_idx = 0; 
+      for (const auto& iopdet : opdets) {
+        double& vis = _opdet_visd[iopdet]; 
+        if (vis > vis_threshold) {
+          ((THnSparseF*)h3opDet[iopdet_idx])->Fill(xyz, vis); 
+        }
+        iopdet_idx++; 
+      }
+
+      if (irun == 0) {
+        hnTotal->Fill( xyz, *(_vis_d) ); 
+      }
+    }
+
+    if (tVisBuf) {
+      if (tVisBuf->GetEntries() > 0) {
+        TTreeReader readerBuff(tVisBuf); 
+        TTreeReaderArray<double> _buf_xyz(readerBuff, "coords"); 
+        TTreeReaderArray<double> _buf_opdet_visd(readerBuff, "opDet_visDirectBuff"); 
+        TTreeReaderArray<double> _buf_opdet_visr(readerBuff, "opDet_visReflctBuff"); 
+        TTreeReaderValue<double> _buf_vis_d(readerBuff, "total_visDirectBuff"); 
+        TTreeReaderValue<double> _buf_vis_r(readerBuff, "total_visReflctBuff"); 
+
+        while( readerBuff.Next() ) {
+          double xyz[3] = {_buf_xyz[0], _buf_xyz[1], _buf_xyz[2]};
+          iopdet_idx = 0; 
+          for (const auto& iopdet : opdets) {
+            double& vis = _opdet_visd[iopdet]; 
+            if ( vis > vis_threshold ) {
+              ((THnSparseF*)h3opDet[iopdet_idx])->Fill(xyz, vis); 
+            }
+            iopdet_idx++; 
+          }
+
+          if (irun == 0) {
+            hnTotal->Fill( xyz, *(_buf_vis_d) ); 
+          }
+
+        }
+      }
+    }
+
+    output_h3->cd(); 
+    if (irun == 0) {
+      hnTotal->Write(); 
+      delete hnTotal;
+    }
+    for (const auto& h3 : h3opDet) {
+      h3->Write(); 
+    }
+    h3opDet.Clear();
+
+    irun++; 
   }
-  output_h3->Close(); 
+
+  file->Close();
 
   return;
 }
