@@ -159,6 +159,9 @@ namespace opdet {
     // create the photo-detector visibility model
     if (kVisModel == kSemiAnalytical) {
       printf("Creating Semi-analytical visibility model\n");
+      (fDoReflectedLight) ? 
+        printf("Reflections included\n") : 
+        printf("Reflections NOT included\n"); 
       fVisibilityModel = std::make_unique<phot::SemiAnalyticalModel>(
           fVUVHitsParams, fVISHitsParams, 
           fDoReflectedLight, fIncludeAnodeReflections, fUseXeAbsorption
@@ -436,7 +439,9 @@ namespace opdet {
 
                if (kVisModel == kSemiAnalytical ) {
                  fVisibilityModel->detectedDirectVisibilities   (opdetvis_dir, xspot);
-                 fVisibilityModel->detectedReflectedVisibilities(opdetvis_rfl, xspot, fIncludeAnodeReflections);
+                 if (fDoReflectedLight) {
+                   fVisibilityModel->detectedReflectedVisibilities(opdetvis_rfl, xspot, fIncludeAnodeReflections);
+                 }
                }
                else if (kVisModel == kCompGraph ) {
                  std::vector<Double_t> pos_tmp {xspot.x(), xspot.y(), xspot.z()}; 

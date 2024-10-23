@@ -13,7 +13,7 @@ standard_photovis:
    vis_model:      "semianalytical" # visibility model to be used
                                     # (pick one between "semianalytical", "compgraph")
    do_refl:                  @local::dunefd_pdfastsim_par_ar_refl.DoReflectedLight
-   do_include_anode_refl:   "false"
+   do_include_anode_refl:    false
    vuvhitspars:              @local::dunefd_pdfastsim_par_ar.VUVHits
    vishitspars:              @local::dunefd_pdfastsim_par_ar_refl.VISHits
    tfloaderpars:			       @local::dunevd_pdfastsim_ann_ar.TFLoaderTool
