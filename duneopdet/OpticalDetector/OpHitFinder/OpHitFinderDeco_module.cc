@@ -12,13 +12,9 @@
 // @created     : Oct, 2022
 //================================================================================
 
- // LArSoft includes
+// LArSoft includes
 #include "larcore/CoreUtils/ServiceUtil.h"
-<<<<<<< HEAD
-#include "larcore/Geometry/Geometry.h"
-=======
 #include "larcore/Geometry/WireReadout.h"
->>>>>>> 75cbf60 (Accommodate geometry-refactoring changes)
 #include "larana/OpticalDetector/OpHitFinder/AlgoCFD.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoFixedWindow.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
@@ -55,99 +51,116 @@
 #include <memory>
 #include <string>
 
-namespace {
+namespace
+{
   template <typename T>
-  pmtana::PMTPulseRecoBase* thresholdAlgorithm(fhicl::ParameterSet const& hit_alg_pset,std::optional<fhicl::ParameterSet> const& rise_alg_pset){
-    if (rise_alg_pset){return new T(hit_alg_pset, art::make_tool<pmtana::RiseTimeCalculatorBase>(*rise_alg_pset) );}
-    else{return new T(hit_alg_pset, nullptr);}
+  pmtana::PMTPulseRecoBase *thresholdAlgorithm(fhicl::ParameterSet const &hit_alg_pset, std::optional<fhicl::ParameterSet> const &rise_alg_pset)
+  {
+    if (rise_alg_pset)
+    {
+      return new T(hit_alg_pset, art::make_tool<pmtana::RiseTimeCalculatorBase>(*rise_alg_pset));
+    }
+    else
+    {
+      return new T(hit_alg_pset, nullptr);
+    }
   }
 }
 
-namespace opdet {
-  class OpHitFinderDeco : public art::EDProducer {
-    public:
-      // Standard constructor and destructor for an ART module.
-      explicit OpHitFinderDeco(const fhicl::ParameterSet&);
-      virtual ~OpHitFinderDeco();
+namespace opdet
+{
+  class OpHitFinderDeco : public art::EDProducer
+  {
+  public:
+    // Standard constructor and destructor for an ART module.
+    explicit OpHitFinderDeco(const fhicl::ParameterSet &);
+    virtual ~OpHitFinderDeco();
 
-      // The producer routine, called once per event.
-      void produce(art::Event&);
+    // The producer routine, called once per event.
+    void produce(art::Event &);
 
-    private:
-      std::map<int, int> GetChannelMap();
-      std::vector<double> GetSPEScales();
-      std::vector<double> GetSPEShifts();
+  private:
+    std::map<int, int> GetChannelMap();
+    std::vector<double> GetSPEScales();
+    std::vector<double> GetSPEShifts();
 
-      // The parameters we'll read from the .fcl file.
-      std::string fInputModule; // Input tag for OpDetWaveform collection
-      std::string fInputModuledigi;
-      std::string fGenModule;
-      std::string fInputDigiType;
-      std::vector<std::string> fInputLabels;
-      std::set<unsigned int> fChannelMasks;
+    // The parameters we'll read from the .fcl file.
+    std::string fInputModule; // Input tag for OpDetWaveform collection
+    std::string fInputModuledigi;
+    std::string fGenModule;
+    std::string fInputDigiType;
+    std::vector<std::string> fInputLabels;
+    std::set<unsigned int> fChannelMasks;
 
-      pmtana::PulseRecoManager fPulseRecoMgr;
-      pmtana::PMTPulseRecoBase* fThreshAlg;
-      pmtana::PMTPedestalBase* fPedAlg;
+    pmtana::PulseRecoManager fPulseRecoMgr;
+    pmtana::PMTPulseRecoBase *fThreshAlg;
+    pmtana::PMTPedestalBase *fPedAlg;
 
-      Float_t fHitThreshold;
-      Float_t fScale;
-      unsigned int fMaxOpChannel;
-      bool fUseStartTime;
+    Float_t fHitThreshold;
+    Float_t fScale;
+    unsigned int fMaxOpChannel;
+    bool fUseStartTime;
 
-      calib::IPhotonCalibrator const* fCalib = nullptr;
+    calib::IPhotonCalibrator const *fCalib = nullptr;
   };
 
 }
 
-namespace opdet {
+namespace opdet
+{
   DEFINE_ART_MODULE(OpHitFinderDeco)
 }
 
-namespace opdet {
+namespace opdet
+{
   //----------------------------------------------------------------------------
   // Constructor
-  OpHitFinderDeco::OpHitFinderDeco(const fhicl::ParameterSet& pset) : EDProducer{pset}, fPulseRecoMgr(){
+  OpHitFinderDeco::OpHitFinderDeco(const fhicl::ParameterSet &pset) : EDProducer{pset}, fPulseRecoMgr()
+  {
     // Indicate that the Input Module comes from .fcl
-    fInputModule        = pset.get<std::string>("InputModule");
-    fInputModuledigi    = pset.get<std::string>("InputModuledigi");
-    fGenModule          = pset.get<std::string>("GenModule");
-    fInputDigiType      = pset.get<std::string>("InputDigiType");
-    fInputLabels        = pset.get<std::vector<std::string>>("InputLabels");
-    fUseStartTime       = pset.get<bool>("UseStartTime", false);
-    fHitThreshold       = pset.get<float>("HitThreshold");
-    fScale              = pset.get<float>("ScalingFactor");
-    bool useCalibrator  = pset.get<bool>("UseCalibrator");
+    fInputModule = pset.get<std::string>("InputModule");
+    fInputModuledigi = pset.get<std::string>("InputModuledigi");
+    fGenModule = pset.get<std::string>("GenModule");
+    fInputDigiType = pset.get<std::string>("InputDigiType");
+    fInputLabels = pset.get<std::vector<std::string>>("InputLabels");
+    fUseStartTime = pset.get<bool>("UseStartTime", false);
+    fHitThreshold = pset.get<float>("HitThreshold");
+    fScale = pset.get<float>("ScalingFactor");
+    bool useCalibrator = pset.get<bool>("UseCalibrator");
 
-    for (auto const& ch : pset.get<std::vector<unsigned int>>("ChannelMasks", std::vector<unsigned int>()))fChannelMasks.insert(ch);
+    for (auto const &ch : pset.get<std::vector<unsigned int>>("ChannelMasks", std::vector<unsigned int>()))
+      fChannelMasks.insert(ch);
 
-<<<<<<< HEAD
-    auto const& geometry(*lar::providerFrom<geo::Geometry>());
-    fMaxOpChannel = geometry.MaxOpChannel();
-=======
-    auto const& wireReadout = art::ServiceHandle<geo::WireReadout const>()->Get();
+    auto const &wireReadout = art::ServiceHandle<geo::WireReadout const>()->Get();
     fMaxOpChannel = wireReadout.MaxOpChannel();
->>>>>>> 75cbf60 (Accommodate geometry-refactoring changes)
 
     // If useCalibrator, get it from ART
-    if (useCalibrator) {fCalib = lar::providerFrom<calib::IPhotonCalibratorService>();}
+    if (useCalibrator)
+    {
+      fCalib = lar::providerFrom<calib::IPhotonCalibratorService>();
+    }
     // If not useCalibrator, make an internal one based on fhicl settings to hit finder.
-    else {
-      bool areaToPE   = pset.get<bool>("AreaToPE");
-      float SPEArea   = pset.get<float>("SPEArea");
-      float SPEShift  = pset.get<float>("SPEShift", 0.);
+    else
+    {
+      bool areaToPE = pset.get<bool>("AreaToPE");
+      float SPEArea = pset.get<float>("SPEArea");
+      float SPEShift = pset.get<float>("SPEShift", 0.);
       // Reproduce behavior from GetSPEScales()
-      if (!areaToPE) SPEArea = 20;
+      if (!areaToPE)
+        SPEArea = 20;
       // Delete and replace if we are reconfiguring
-      if (fCalib) { delete fCalib; }
+      if (fCalib)
+      {
+        delete fCalib;
+      }
       fCalib = new calib::PhotonCalibratorStandard(SPEArea, SPEShift, areaToPE);
     }
 
     // Initialize the rise time calculator tool
-    auto const rise_alg_pset  = pset.get_if_present<fhicl::ParameterSet>("RiseTimeCalculator");
+    auto const rise_alg_pset = pset.get_if_present<fhicl::ParameterSet>("RiseTimeCalculator");
 
     // Initialize the hit finder algorithm
-    auto const hit_alg_pset   = pset.get<fhicl::ParameterSet>("HitAlgoPset");
+    auto const hit_alg_pset = pset.get<fhicl::ParameterSet>("HitAlgoPset");
     std::string threshAlgName = hit_alg_pset.get<std::string>("Name");
     if (threshAlgName == "Threshold")
       fThreshAlg = thresholdAlgorithm<pmtana::AlgoThreshold>(hit_alg_pset, rise_alg_pset);
@@ -161,11 +174,11 @@ namespace opdet {
       fThreshAlg = thresholdAlgorithm<pmtana::AlgoCFD>(hit_alg_pset, rise_alg_pset);
     else
       throw art::Exception(art::errors::UnimplementedFeature)
-        << "Cannot find implementation for " << threshAlgName << " algorithm.\n";
+          << "Cannot find implementation for " << threshAlgName << " algorithm.\n";
 
     // Initialize the pedestal estimation algorithm
     auto const ped_alg_pset = pset.get<fhicl::ParameterSet>("PedAlgoPset");
-    std::string pedAlgName  = ped_alg_pset.get<std::string>("Name");
+    std::string pedAlgName = ped_alg_pset.get<std::string>("Name");
     if (pedAlgName == "Edges")
       fPedAlg = new pmtana::PedAlgoEdges(ped_alg_pset);
     else if (pedAlgName == "RollingMean")
@@ -174,7 +187,7 @@ namespace opdet {
       fPedAlg = new pmtana::PedAlgoUB(ped_alg_pset);
     else
       throw art::Exception(art::errors::UnimplementedFeature)
-        << "Cannot find implementation for " << pedAlgName << " algorithm.\n";
+          << "Cannot find implementation for " << pedAlgName << " algorithm.\n";
 
     produces<std::vector<recob::OpHit>>();
 
@@ -191,39 +204,38 @@ namespace opdet {
   }
 
   //----------------------------------------------------------------------------
-  void OpHitFinderDeco::produce(art::Event& evt)
+  void OpHitFinderDeco::produce(art::Event &evt)
   {
     // These is the storage pointer we will put in the event
     std::unique_ptr<std::vector<recob::OpHit>> HitPtr(new std::vector<recob::OpHit>);
-    std::vector<const sim::BeamGateInfo*> beamGateArray;
-    try {
+    std::vector<const sim::BeamGateInfo *> beamGateArray;
+    try
+    {
       evt.getView(fGenModule, beamGateArray);
     }
 
-    catch (art::Exception const& err) {if (err.categoryCode() != art::errors::ProductNotFound) throw;}
+    catch (art::Exception const &err)
+    {
+      if (err.categoryCode() != art::errors::ProductNotFound)
+        throw;
+    }
 
-    auto const& wireReadout = art::ServiceHandle<geo::WireReadout const>()->Get();
+    auto const &wireReadout = art::ServiceHandle<geo::WireReadout const>()->Get();
     auto const clock_data = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
-    auto const& calibrator(*fCalib);
+    auto const &calibrator(*fCalib);
 
     if (fInputDigiType == "recob")
     {
       std::cout << "\nRunning Ophitfinder with InputDigiType = 'recob'\n";
       // Load pulses into WaveformVector
       art::Handle<std::vector<recob::OpWaveform>> decoHandle;
-<<<<<<< HEAD
-
-      evt.getByLabel(fInputModule,   decoHandle);
-      assert(decoHandle.isValid());
-=======
       art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
 
-      evt.getByLabel(fInputModule,   decoHandle);
-      evt.getByLabel(fInputModuledigi,rawHandle);
+      evt.getByLabel(fInputModule, decoHandle);
+      evt.getByLabel(fInputModuledigi, rawHandle);
 
       assert(decoHandle.isValid());
       assert(rawHandle.isValid());
->>>>>>> 75cbf60 (Accommodate geometry-refactoring changes)
 
       RunHitFinder_deco(*decoHandle,
                         *HitPtr,
@@ -237,29 +249,27 @@ namespace opdet {
                         fUseStartTime);
     }
 
-    if (fInputDigiType == "raw"){
+    if (fInputDigiType == "raw")
+    {
       std::cout << "\nRunning Ophitfinder with InputDigiType = 'raw'\n";
       // Load pulses into WaveformVector
       art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
-      evt.getByLabel(fInputModuledigi,rawHandle);
+      evt.getByLabel(fInputModuledigi, rawHandle);
       assert(rawHandle.isValid());
 
-      if (fChannelMasks.empty() && fInputLabels.size() < 2){
+      if (fChannelMasks.empty() && fInputLabels.size() < 2)
+      {
         art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
-        if (fInputLabels.empty()) {evt.getByLabel(fInputModuledigi, rawHandle);}
-        else {evt.getByLabel(fInputModuledigi, fInputLabels.front(), rawHandle);}
+        if (fInputLabels.empty())
+        {
+          evt.getByLabel(fInputModuledigi, rawHandle);
+        }
+        else
+        {
+          evt.getByLabel(fInputModuledigi, fInputLabels.front(), rawHandle);
+        }
         assert(rawHandle.isValid());
         RunHitFinder(*rawHandle,
-<<<<<<< HEAD
-                    *HitPtr,
-                    fPulseRecoMgr,
-                    *fThreshAlg,
-                    geometry,
-                    fHitThreshold,
-                    clock_data,
-                    calibrator,
-                    fUseStartTime);
-=======
                      *HitPtr,
                      fPulseRecoMgr,
                      *fThreshAlg,
@@ -268,27 +278,39 @@ namespace opdet {
                      clock_data,
                      calibrator,
                      fUseStartTime);
->>>>>>> 75cbf60 (Accommodate geometry-refactoring changes)
       }
 
-      else{
+      else
+      {
         int totalsize = 0;
-        for (auto label : fInputLabels) {
+        for (auto label : fInputLabels)
+        {
           art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
           evt.getByLabel(fInputModuledigi, label, rawHandle);
-          if (!rawHandle.isValid()) {continue;} // Skip non-existent collections
+          if (!rawHandle.isValid())
+          {
+            continue;
+          } // Skip non-existent collections
           totalsize += rawHandle->size();
         }
 
         std::vector<raw::OpDetWaveform> WaveformVector;
         WaveformVector.reserve(totalsize);
 
-        for (auto label : fInputLabels){
+        for (auto label : fInputLabels)
+        {
           art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
           evt.getByLabel(fInputModuledigi, label, rawHandle);
-          if (!rawHandle.isValid()) {continue;} // Skip non-existent collections
-          for (auto const& wf : *rawHandle) {
-            if (fChannelMasks.find(wf.ChannelNumber()) != fChannelMasks.end()) {continue;}
+          if (!rawHandle.isValid())
+          {
+            continue;
+          } // Skip non-existent collections
+          for (auto const &wf : *rawHandle)
+          {
+            if (fChannelMasks.find(wf.ChannelNumber()) != fChannelMasks.end())
+            {
+              continue;
+            }
             WaveformVector.push_back(wf);
           }
         }
@@ -305,7 +327,7 @@ namespace opdet {
       }
     }
     // Store results into the event
-    std:: cout << "Found hits: " << HitPtr->size() << "!\n";
+    std::cout << "Found hits: " << HitPtr->size() << "!\n";
     evt.put(std::move(HitPtr));
   }
 } // namespace opdet

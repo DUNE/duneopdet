@@ -6,6 +6,10 @@
 // Filter wiener/gauss -FFT
 // @authors     : Daniele Guffanti, Maritza Delgado, Sergio Manthey Corchado
 // @created     : Jan 26, 2022
+//
+// Modified:
+//     Oct 7, 2024, Viktor Pec
+//       Added possibility to use SPE and noise templates by channel.
 //=============================================================================
 
 #ifndef Deconvolution_h
@@ -326,7 +330,7 @@ namespace opdet
     std::vector<double> fSinglePEAmplitudes;                    //!< single PE amplitude for found maximum peak in the template.
     unsigned int WfDeco;                                        //!< Number of waveform processed
     std::map<unsigned int, unsigned int> fChannelToTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSinglePEWaveforms)
-    std::set<unsigned int> fIgnoreChannels;                     //!< List of channels to ignore in deconvolution
+    std::set<int> fIgnoreChannels;                              //!< List of channels to ignore in deconvolution
 
     // Noise templates -- input in frequency domain
     std::vector<std::vector<double>> fNoiseTemplates;                //!< Vector that stores noise template in frequency domain
@@ -397,30 +401,9 @@ namespace opdet
         fFilterConfig{WfmFilter_t(pars().Filter())},
         fxG0(fSamples),
         fxG1(fSamples)
-            Deconvolution::Deconvolution(const Parameters &pars)
-      : EDProducer{pars},
-        fInputModule{pars().InputModule()},
-        fInstanceName{pars().InstanceName()},
-        fPedestal{pars().Pedestal()},
-        fLineNoiseRMS{pars().LineNoiseRMS()},
-        fPreTrigger{pars().PreTrigger()},
-        fDigiDataFiles{pars().DigiDataFiles()},
-        fDigiDataColumn{pars().DigiDataColumn()},
-        fNoiseTemplateFiles{pars().NoiseTemplateFiles()},
-        fScale{pars().Scale()},
-        fSamples{pars().Samples()},
-        fPedestalBuffer{pars().PedestalBuffer()},
-        fApplyPostfilter{pars().ApplyPostfilter()},
-        fApplyPostBLCorr{pars().ApplyPostBLCorrection()},
-        fAutoScale{pars().AutoScale()},
-        fInputPolarity{pars().InputPolarity()},
-        fNoiseDefault(fSamples, fLineNoiseRMS * fLineNoiseRMS * fSamples),
-        fOutputProduct{pars().OutputProduct()},
-        fPostfilterConfig{WfmExtraFilter_t(pars().Postfilter())},
-        fFilterConfig{WfmFilter_t(pars().Filter())},
-        fxG0(fSamples),
-        fxG1(fSamples)
   {
+    auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
+
     // Declare that we'll produce a vector of OpDetWaveforms
     WfDeco = 0;
 
@@ -480,8 +463,6 @@ namespace opdet
     }
 
     //=== info print out ===
-    auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
-    mfi << "Input waveform polarity set to: " << fInputPolarity << "\n";
     mfi << "Input waveform polarity set to: " << fInputPolarity << "\n";
     // info on channel to SPE template map
     mfi << "Channels mapped to SPE template files:\n";
@@ -542,6 +523,7 @@ namespace opdet
   //-------------------------------------------------------------------------
   void Deconvolution::produce(art::Event &evt)
   {
+    auto mfi = mf::LogInfo("Deconvolution::produce()");
 
     art::Handle<std::vector<raw::OpDetWaveform>> wfHandle;
     evt.getByLabel(fInputModule, fInstanceName, wfHandle);
@@ -552,7 +534,7 @@ namespace opdet
 
     std::vector<raw::OpDetWaveform> digi_wave = *wfHandle;
     int NOpDetWaveform = digi_wave.size(); // Number of waveforms in OpDetWaveform Object
-    std::cout << NOpDetWaveform << std::endl;
+    mfi << "Number of waveforms to process: " << NOpDetWaveform << "\n";
 
     // Pointer that will store produced DecoWaveform
     auto out_recob = std::make_unique<std::vector<recob::OpWaveform>>();
@@ -652,6 +634,7 @@ namespace opdet
 
       for (int i = 0; i < fSamples * 0.5 + 1; i++)
       {
+
         if (fFilterConfig.fType == Deconvolution::kWiener)
         {
           // Compute spectral density
@@ -737,6 +720,8 @@ namespace opdet
         }
       }
       //
+
+      // Apply pedestal after post-filter
       for (int i = 0; i < fSamples; i++)
       {
         out_recob_float[i] = (xvdec[i] - decPedestal) * scale;
