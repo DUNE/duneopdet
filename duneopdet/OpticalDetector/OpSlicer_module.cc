@@ -13,7 +13,8 @@
 #define OpSlicer_H 1
 
 // LArSoft includes
-#include "larcore/Geometry/Geometry.h"
+#include "larcore/Geometry/WireReadout.h"
+#include "larcorealg/Geometry/OpDetGeo.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "lardataobj/RecoBase/OpHit.h"
 #include "lardata/Utilities/AssociationUtil.h"
@@ -89,7 +90,7 @@ namespace opdet {
 
     double fTrigCoinc;
 
-    art::ServiceHandle<geo::Geometry> geo;
+    geo::WireReadoutGeom const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
   };
 
 }
@@ -199,12 +200,12 @@ namespace opdet {
   {
     // First need to ask the geometry for the y-z location of both OpHits
     int channela = a->OpChannel();
-    auto const xyza = geo->OpDetGeoFromOpChannel(channela).GetCenter();
+    auto const xyza = wireReadout.OpDetGeoFromOpChannel(channela).GetCenter();
     double ay = xyza.Y();
     double az = xyza.Z();
 
     int channelb = b->OpChannel();
-    auto const xyzb = geo->OpDetGeoFromOpChannel(channelb).GetCenter();
+    auto const xyzb = wireReadout.OpDetGeoFromOpChannel(channelb).GetCenter();
     double by = xyzb.Y();
     double bz = xyzb.Z();
 
@@ -249,7 +250,7 @@ namespace opdet {
     for (int cur : curN){
       art::Ptr<recob::OpHit> oh = ohits[cur];
       int channel = oh->OpChannel();
-      auto const xyz = geo->OpDetGeoFromOpChannel(channel).GetCenter();
+      auto const xyz = wireReadout.OpDetGeoFromOpChannel(channel).GetCenter();
       ys.push_back(xyz.Y());
       zs.push_back(xyz.Z());
     }
@@ -362,7 +363,7 @@ namespace opdet {
       // Time to make the OpFlash;
       // Y-Z coordinates come from the centroid
       int channelcentroid = centroid->OpChannel();
-      auto const xyzcentroid = geo->OpDetGeoFromOpChannel(channelcentroid).GetCenter();
+      auto const xyzcentroid = wireReadout.OpDetGeoFromOpChannel(channelcentroid).GetCenter();
       double yCenter = xyzcentroid.Y();
       double zCenter = xyzcentroid.Z();
       double tCenter = centroid->PeakTimeAbs();
@@ -392,8 +393,8 @@ namespace opdet {
       double minY = 1e6; double maxY = -1e6;
       double minZ = 1e6; double maxZ = -1e6;
 
-      std::vector<double> PEs (geo->MaxOpChannel() + 1,0.0);
-      std::vector<double> PE2s (geo->MaxOpChannel() + 1,0.0);
+      std::vector<double> PEs (wireReadout.MaxOpChannel() + 1,0.0);
+      std::vector<double> PE2s (wireReadout.MaxOpChannel() + 1,0.0);
       double fastToTotal = 0;
       for (int hIdx = 0; hIdx < int(ys.size()); hIdx++){
         int cIdx = curN[hIdx];
