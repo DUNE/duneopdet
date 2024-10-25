@@ -352,7 +352,7 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
          DefaultSimWindow: true # true for simulating the 2 drift-time windows.
          TimeBegin: -20 #in us, starting of the DAQ readout window, not used if DefaultSimWindow: true
          TimeEnd: 20 # in us,ending of the DAQ readout window, not used if DefaultSimWindow: true
-         ExportWaveformTree: true # true to export waveforms in a plain tree too.
+         ExportWaveformTree: false # true to export waveforms in a plain tree too.
          FullStreamingChannels: [120,121,122,123,124,125,126,127,
            128,129,130,131,132,133,134,135,136,137,138,139,140,141,142,143,144,145,146,147,
            148,149,150,151,152,153,154,155,156,157,158,159]
