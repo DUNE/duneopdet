@@ -193,7 +193,7 @@ namespace opdet {
       void CreateSinglePEWaveform();
     
       // Produce waveform on one of the optical detectors
-      void CreatePDWaveform(art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,
+      void CreatePDWaveform( const sim::OpDetBacktrackerRecord* btr_p,
                             geo::WireReadoutGeom const& wireReadout,
                             std::vector< std::vector< double > >& pdWaveforms,
                             std::vector<FocusList>& fls,
@@ -413,56 +413,38 @@ namespace opdet {
 
     // Geometry service
     auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
-    
-    auto const btr_handles = evt.getMany<std::vector<sim::OpDetBacktrackerRecord>>();
+     std::map< int, std::vector<std::pair<const sim::OpDetBacktrackerRecord *,bool> >> ODBByChannel;
+    for (auto tag: fInputModules) {
+      auto dr_handle = evt.getHandle< std::vector< sim::OpDetBacktrackerRecord > >(tag);
+      if (!dr_handle) {
+        mf::LogWarning("OpDetDigitizerProtoDUNE") << "Could not load ODBs " << tag << ". Skipping.";
+        continue;
+      }
+      for (auto const& dr : *dr_handle) {
+        ODBByChannel[dr.OpDetNum()].push_back( std::pair<const sim::OpDetBacktrackerRecord *,bool>(&dr,dr_handle.provenance()->productInstanceName() == "Reflected"));
+      }
+    }
 
-    if (btr_handles.size() == 0)
-      throw art::Exception(art::errors::ProductNotFound)<<"No OpDetBacktrackerRecords retrieved.";
+    // Now, loop through channels, treating all photons on a channel
+    for (auto const& [opDet, btr_vec]: ODBByChannel)
+    {
+      // Get number of channels in this optical detector
+      unsigned int nChannelsPerOpDet = wireReadout.NOpHardwareChannels(opDet);
 
-    for (auto btr_handle: btr_handles) {
-      // Do some checking before we proceed
-      if (!btr_handle.isValid()) continue;
-      if (!fInputModules.count(btr_handle.provenance()->moduleLabel())) continue;
+      std::vector<FocusList> fls(nChannelsPerOpDet, FocusList(nSamples, fPadding));
+      sim::OpDetDivRec DivRec(opDet);
 
-      bool Reflected = (btr_handle.provenance()->productInstanceName() == "Reflected");
-
-      
-      std::vector<art::Ptr<sim::OpDetBacktrackerRecord>> btr_vec;
-      art::fill_ptr_vector(btr_vec, btr_handle);
-    
-
-      // For every optical detector:
-      for (auto const& btr : btr_vec)
+      // This vector stores waveforms created for each optical channel
+      std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
+                                                       std::vector< double >(nSamples, static_cast< double >(fPedestal)));
+      // Loop over InputModules for each opDet:
+      for (auto const& [btr, Reflected]: btr_vec)
       {
-        int opDet = btr->OpDetNum();
-        //unsigned int opDet = btr->OpDetNum();
-      
-        // Get number of channels in this optical detector
-        unsigned int nChannelsPerOpDet = wireReadout.NOpHardwareChannels(opDet);
-      
-        std::vector<FocusList> fls(nChannelsPerOpDet, FocusList(nSamples, fPadding));
-        //std::vector<sim::OpDetDivRec> DivRec;
-        sim::OpDetDivRec DivRec(opDet);
-        //DivRec.chans.resize(nChannelsPerOpDet);
-      
-        // This vector stores waveforms created for each optical channel
-        std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
-                                                         std::vector< double >(nSamples, static_cast< double >(fPedestal)));
-      
         CreatePDWaveform(btr, wireReadout, pdWaveforms, fls, DivRec, Reflected);
-        //DivRec comes out with all of the ticks filled correctly, with each channel filled in it's map.
-        //Break here to investigate div recs as they are made and compare them to btrs
-      
+      }
       
         // Generate dark noise //I will not at this time include dark noise in my split backtracking records.
         if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls);
-      
-        // Uncomment to undo the effect of FocusLists. Replaces the accumulated
-        // lists with ones asserting we need to look at the whole trace.
-        // for(FocusList& fl: fls){
-        //        fl.ranges.clear();
-        //        fl.ranges.emplace_back(0, nSamples-1);
-        // }
       
         // Vary the pedestal
         if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls);
@@ -507,8 +489,7 @@ namespace opdet {
             }
           }
         }
-        bt_DivRec_p->push_back(std::move(DivRec));
-      }
+      bt_DivRec_p->push_back(std::move(DivRec));
     }
     
     if(fDigiTree_SSP_LED){
@@ -570,7 +551,7 @@ namespace opdet {
 
   //---------------------------------------------------------------------------
   void OpDetDigitizerProtoDUNE::CreatePDWaveform
-    (art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,
+    (const sim::OpDetBacktrackerRecord * btr_p,
      geo::WireReadoutGeom const& wireReadout,
      std::vector< std::vector< double > >& pdWaveforms,
      std::vector<FocusList>& fls,
