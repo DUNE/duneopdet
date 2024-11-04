@@ -30,6 +30,61 @@ namespace solar
         ClusterDistance = sqrt(pow(x12, 2) + pow(y1 - y2, 2) + pow(z1 - z2, 2));
     }
 
+    //......................................................
+    // This function fills a map with the MCParticles from a given MCTruth
+    void SolarAuxUtils::FillMyMaps(std::map<int, simb::MCParticle> &MyMap, art::FindManyP<simb::MCParticle> Assn, art::ValidHandle<std::vector<simb::MCTruth>> Hand)
+    {
+        for (size_t L1 = 0; L1 < Hand->size(); ++L1)
+        {
+        for (size_t L2 = 0; L2 < Assn.at(L1).size(); ++L2)
+        {
+            const simb::MCParticle ThisPar = (*Assn.at(L1).at(L2));
+            MyMap[abs(ThisPar.TrackId())] = ThisPar;
+        }
+        }
+        return;
+    }
+
+    //......................................................
+    // This function returns the type of generator particle that produced a given MCTruth
+    long unsigned int SolarAuxUtils::WhichGeneratorType(std::vector<std::map<int, simb::MCParticle>> GeneratorParticles, int TrID)
+    {
+        for (long unsigned int i = 0; i < GeneratorParticles.size(); i++)
+        {
+        if (InMyMap(TrID, GeneratorParticles[i]))
+        {
+            return i + 1;
+        }
+        }
+        return 0; // If no match, then who knows???
+    }
+
+    //......................................................
+    // This function checks if a given TrackID is in a given map
+    bool SolarAuxUtils::InMyMap(int TrID, std::map<int, simb::MCParticle> ParMap)
+    {
+        std::map<int, simb::MCParticle>::iterator Particle;
+        Particle = ParMap.find(TrID);
+        if (Particle != ParMap.end())
+        {
+        return true;
+        }
+        else
+        return false;
+    }
+
+    bool SolarAuxUtils::InMyMap(int TrID, std::map<int, float> TrackIDMap)
+    {
+        std::map<int, float>::iterator Particle;
+        Particle = TrackIDMap.find(TrID);
+        if (Particle != TrackIDMap.end())
+        {
+        return true;
+        }
+        else
+        return false;
+    }
+
     // This function creates a terminal color printout
     void SolarAuxUtils::PrintInColor(std::string MyString, int Color, std::string Type)
     {
