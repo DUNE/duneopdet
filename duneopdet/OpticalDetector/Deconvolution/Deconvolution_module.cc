@@ -109,7 +109,7 @@ namespace opdet {
 
 	fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
 
-          fhicl::Sequence<unsigned int> TemplateMap_channels{ fhicl::Name("TemplateMapChannels") };
+          fhicl::Sequence<int>          TemplateMap_channels{ fhicl::Name("TemplateMapChannels") };
           fhicl::Sequence<unsigned int> TemplateMap_templates{ fhicl::Name("TemplateMapTemplates") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_channels{ fhicl::Name("NoiseTemplateMapChannels") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_templates{ fhicl::Name("NoiseTemplateMapTemplates") };
@@ -136,6 +136,9 @@ namespace opdet {
       enum EInputShape {kDelta = 0, kScint = 1};
       //! Waveform filter type
       enum EFilterType {kOther = 0, kWiener = 1, kGauss = 2, kNone = 3};
+
+      enum {kDefaultChannel = -1};
+
 
       struct WfmExtraFilter_t {
         TString fName;
@@ -293,6 +296,7 @@ namespace opdet {
       std::vector<double> fSinglePEAmplitudes;                //!< single PE amplitude for found maximum peak in the template.
       unsigned int WfDeco;                      //!< Number of waveform processed
       std::map<unsigned int, unsigned int> fChannelToTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSinglePEWaveforms)
+      unsigned short fUseSingleSPETemplate;
       std::set<int> fIgnoreChannels; //!< List of channels to ignore in deconvolution
 
       // Noise templates -- input in frequency domain
@@ -356,6 +360,7 @@ namespace opdet {
       fApplyPostBLCorr{ pars().ApplyPostBLCorrection()},
       fAutoScale{ pars().AutoScale()},
       fInputPolarity{ pars().InputPolarity()},
+      fUseSingleSPETemplate(0),
       fNoiseDefault(fSamples, fLineNoiseRMS*fLineNoiseRMS*fSamples),
       fOutputProduct{ pars().OutputProduct() },
       fPostfilterConfig{ WfmExtraFilter_t( pars().Postfilter()) },
@@ -403,6 +408,15 @@ namespace opdet {
 	for (;chann != channels.end(); ++chann, ++templ) {
 	    fChannelToTemplateMap[*chann] = *templ;
 	}
+	// deal with a case where a single channel-to-template map was given for all channels
+	if ( fChannelToTemplateMap.size() == 1
+	     && channels[0] == kDefaultChannel
+	     && fSinglePEWaveforms.size() == 1) {
+	    fUseSingleSPETemplate = 1;
+	} else {
+	    // FIXME: Throw exception in case malformed configuration
+	}
+
     }
 
     // Prepare the noise templates
@@ -516,8 +530,13 @@ namespace opdet {
 	  continue;
 
       //auto &xh = fSinglePEWaveforms[fChannelToTemplateMap[channel]];
-      auto &xH = fSinglePEWaveforms_fft[fChannelToTemplateMap[channel]]; // get the SPE template relevant for this channel
-      auto &speapmlitude = fSinglePEAmplitudes[fChannelToTemplateMap[channel]];
+      // vvv allow to use default template for all channels vvv
+      auto effChannel = channel;
+      if (fUseSingleSPETemplate)
+	  effChannel = kDefaultChannel;
+      // ^^^
+      auto &xH = fSinglePEWaveforms_fft[fChannelToTemplateMap[effChannel]]; // get the SPE template relevant for this channel
+      auto &speapmlitude = fSinglePEAmplitudes[fChannelToTemplateMap[effChannel]];
 
       CmplxWaveform_t xV(fSamples);
       CmplxWaveform_t xS(fSamples);

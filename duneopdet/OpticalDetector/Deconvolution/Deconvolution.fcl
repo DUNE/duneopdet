@@ -58,10 +58,18 @@ dune_deconvolution:
 #Postfilter Cutoff
 dune_deconvolution.WfmPostfilter.Cutoff: 1.8     # Use this value only for postfilter.
 
-#By debbuging and review the values (SNR,H,S,N,G0,G1,G,V,v) of the Wiener filter:
-deconvolution_snr: @local::dune_deconvolution
-deconvolution_snr.OutputProduct: "SNR"
 
+### FD ###
+dune_fd_deconvolution: @local::dune_deconvolution
+dune_fd_deconvolution.DigitalDataFiles: ["SPE_DAPHNE2_FBK_2022.dat"]
+# Set SPE template channel map: channel = -1 for all channels
+dune_fd_deconvolution.TemplateMapChannels:  [-1]
+dune_fd_deconvolution.TemplateMapTemplates: [ 0]
+
+
+#By debbuging and review the values (SNR,H,S,N,G0,G1,G,V,v) of the Wiener filter:
+deconvolution_snr: @local::dune_fd_deconvolution
+deconvolution_snr.OutputProduct: "SNR"
 
 
 ### ProtoDUNE HD ###
