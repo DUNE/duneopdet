@@ -29,7 +29,7 @@ dune_deconvolution:
   LineNoiseRMS:      2.6      # Pedestal RMS in [ADC] counts, likely an underestimate
   PreTrigger:        100      # In [ticks]
   Pedestal:          1500     # In [ADC]
-  Samples:           1024     # Timewindow (ReadoutWindow) in [ticks]
+  Samples:           1000     # Timewindow (ReadoutWindow) in [ticks]
   Scale:             1        # Scaling of resulting deconvolution signal.
   DigiDataColumn:       0      # SPE template source file column.
   DigiDataFiles:        []     # The SPE template with undershoot and without pretrigger (in ADC*us),
@@ -63,10 +63,12 @@ deconvolution_snr: @local::dune_deconvolution
 deconvolution_snr.OutputProduct: "SNR"
 
 
+
 ### ProtoDUNE HD ###
 protodunehd_deconvolution: @local::dune_deconvolution
-protodunehd_deconvolution.Pedestal: 8180
-protodunehd_deconvolution.PreTrigger: 50
+protodunehd_deconvolution.Samples:        1024
+protodunehd_deconvolution.Pedestal:       8180
+protodunehd_deconvolution.PreTrigger:     50
 protodunehd_deconvolution.PedestalBuffer: 30
 protodunehd_deconvolution.InputModule: "pdhddaphne"
 protodunehd_deconvolution.InstanceName: "daq"
