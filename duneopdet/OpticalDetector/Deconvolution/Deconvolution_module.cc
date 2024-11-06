@@ -93,8 +93,8 @@ namespace opdet {
           fhicl::Atom<Double_t>    LineNoiseRMS{ fhicl::Name("LineNoiseRMS"), 1.0 };
           fhicl::Atom<size_t>      PreTrigger{ fhicl::Name("PreTrigger"), 0};
           fhicl::Atom<short>       Pedestal{ fhicl::Name("Pedestal"), 1500};
-          fhicl::Sequence<std::string> DigiDataFiles{ fhicl::Name("DigiDataFiles") };
-          fhicl::Atom<size_t>      DigiDataColumn{ fhicl::Name("DigiDataColumn"), 1 };
+          fhicl::Sequence<std::string> SPETemplateFiles{ fhicl::Name("SPETemplateFiles") };
+          fhicl::Atom<size_t>      SPETemplateFileDataColumn{ fhicl::Name("SPETemplateFileDataColumn"), 1 };
           fhicl::Sequence<std::string> NoiseTemplateFiles{ fhicl::Name("NoiseTemplateFiles") };
 
           fhicl::Atom<Int_t>       Samples{ fhicl::Name("Samples"), 1000 };
@@ -109,8 +109,8 @@ namespace opdet {
 
 	fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
 
-          fhicl::Sequence<int>          TemplateMap_channels{ fhicl::Name("TemplateMapChannels") };
-          fhicl::Sequence<unsigned int> TemplateMap_templates{ fhicl::Name("TemplateMapTemplates") };
+          fhicl::Sequence<int>          SPETemplateMap_channels{ fhicl::Name("TemplateMapChannels") };
+          fhicl::Sequence<unsigned int> SPETemplateMap_templates{ fhicl::Name("TemplateMapTemplates") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_channels{ fhicl::Name("NoiseTemplateMapChannels") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_templates{ fhicl::Name("NoiseTemplateMapTemplates") };
 
@@ -273,8 +273,8 @@ namespace opdet {
       short  fPedestal;                         //!< In ADC counts
       double  fLineNoiseRMS;                    //!< Pedestal RMS in ADC counts
       size_t fPreTrigger;                       //!< In ticks
-      std::vector<std::string> fDigiDataFiles;                //!< single p.e. template source file
-      size_t fDigiDataColumn;                   //!< single p.e. template source file column
+      std::vector<std::string> fSPETemplateFiles;                //!< single p.e. template source file
+      size_t fSPETemplateFileDataColumn;                   //!< single p.e. template source file column
       std::vector<std::string> fNoiseTemplateFiles;                //!< noise template source file
       double fScale;                            //!< Scaling of resulting wvfs
       int fSamples;                             //!< Same value as ReadoutWindow in digitizer
@@ -316,7 +316,7 @@ namespace opdet {
 
     private:
       int  CountFileColumns(const char* file_path);
-      void SourceSPEDigiDataFiles();
+      void SourceSPESPETemplateFiles();
       void SourceNoiseTemplateFiles();
       void BuildExtraFilter(CmplxWaveform_t& xF0, const WfmExtraFilter_t config);
       void ComputeExpectedInput(std::vector<double>& s, double nmax);
@@ -350,8 +350,8 @@ namespace opdet {
       fPedestal{ pars().Pedestal()},
       fLineNoiseRMS{ pars().LineNoiseRMS() },
       fPreTrigger{ pars().PreTrigger()},
-      fDigiDataFiles{ pars().DigiDataFiles()},
-      fDigiDataColumn{ pars().DigiDataColumn()},
+      fSPETemplateFiles{ pars().SPETemplateFiles()},
+      fSPETemplateFileDataColumn{ pars().SPETemplateFileDataColumn()},
       fNoiseTemplateFiles{ pars().NoiseTemplateFiles()},
       fScale{ pars().Scale()},
       fSamples{ pars().Samples()},
@@ -386,7 +386,7 @@ namespace opdet {
     fft_c2r = TVirtualFFT::FFT(1, &fSamples, "M C2R K");
 
     // Prepare the SPE waveform templates
-    SourceSPEDigiDataFiles();
+    SourceSPESPETemplateFiles();
     // Prepare the Fourier transforms
     for (auto &xh: fSinglePEWaveforms) {
       fSinglePEWaveforms_fft.push_back(CmplxWaveform_t(fSamples));
@@ -401,8 +401,8 @@ namespace opdet {
 
     // prepare channel to template map
     {
-	auto channels = pars().TemplateMap_channels();
-	auto templates = pars().TemplateMap_templates();
+	auto channels = pars().SPETemplateMap_channels();
+	auto templates = pars().SPETemplateMap_templates();
 	auto chann = channels.begin();
 	auto templ = templates.begin();
 	for (;chann != channels.end(); ++chann, ++templ) {
@@ -442,7 +442,7 @@ namespace opdet {
     {
       std::map< std::string, std::vector<int> > templ_to_channel_map;
       for (auto itm: fChannelToTemplateMap)
-	templ_to_channel_map[fDigiDataFiles[itm.second]].push_back(itm.first);
+	templ_to_channel_map[fSPETemplateFiles[itm.second]].push_back(itm.first);
       for (auto itm: templ_to_channel_map) {
 	mfi<<"    "<<itm.first<<": ";
 	for (auto ch: itm.second)
@@ -844,11 +844,11 @@ namespace opdet {
    * `fDigiDataFile` and set the variable `fSinglePEAmplitude` with the
    * amplitude of the single p.e. response. In case of a multi-column
    * template file, the relevant column can be selected by setting the
-   * variable `fDigiDataColumn`.
+   * variable `fSPETemplateFileDataColumn`.
    */
-  void Deconvolution::SourceSPEDigiDataFiles() {
+  void Deconvolution::SourceSPESPETemplateFiles() {
     cet::search_path sp("FW_SEARCH_PATH");
-    for (auto fname: fDigiDataFiles) {
+    for (auto fname: fSPETemplateFiles) {
       fSinglePEWaveforms.push_back(std::vector<double>()); // add a new empty waform
       auto &spewfrm = fSinglePEWaveforms.back(); // get the reference to the waveform vector
       std::string datafile;
@@ -859,10 +859,10 @@ namespace opdet {
       SPEData.open(datafile);
       size_t n_columns = CountFileColumns(datafile.c_str());
       std::cout << "ncols= " << n_columns << std::endl;
-      if (fDigiDataColumn >= n_columns) {
+      if (fSPETemplateFileDataColumn >= n_columns) {
 	printf("Deconvolution::SourceSPETemplate ERROR: ");
 	printf("The module is supposed to select column %lu, but only %lu columns are present.\n",
-	       fDigiDataColumn, n_columns);
+	       fSPETemplateFileDataColumn, n_columns);
 	throw art::Exception(art::errors::InvalidNumber);
       }
 
@@ -875,7 +875,7 @@ namespace opdet {
 	  int  icol = 0;
 	  while (ss) {ss >> buff[icol]; ++icol;}
 
-	  spewfrm.push_back(buff[fDigiDataColumn]);
+	  spewfrm.push_back(buff[fSPETemplateFileDataColumn]);
 	}
       } else {
 	printf("Deconvolution::produce ERROR ");
