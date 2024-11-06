@@ -110,8 +110,8 @@ protodunehd_mc_deconvolution: @local::protodunehd_deconvolution
 protodunehd_mc_deconvolution.LineNoiseRMS: 4.5
 protodunehd_mc_deconvolution.Pedestal: 8200
 protodunehd_mc_deconvolution.PreTrigger: 128
-protodunehd_mc_deconvolution.InputModule: "pdhddaphne"
-protodunehd_mc_deconvolution.InstanceName: "daq"
+protodunehd_mc_deconvolution.InputModule: "opdigi"
+protodunehd_mc_deconvolution.InstanceName: ""
 protodunehd_mc_deconvolution.InputPolarity: 1
 
 protodunehd_mc_deconvolution.IgnoreChannels: []
