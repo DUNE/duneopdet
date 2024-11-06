@@ -316,7 +316,7 @@ namespace opdet {
 
     private:
       int  CountFileColumns(const char* file_path);
-      void SourceSPESPETemplateFiles();
+      void SourceSPETemplateFiles();
       void SourceNoiseTemplateFiles();
       void BuildExtraFilter(CmplxWaveform_t& xF0, const WfmExtraFilter_t config);
       void ComputeExpectedInput(std::vector<double>& s, double nmax);
@@ -386,7 +386,7 @@ namespace opdet {
     fft_c2r = TVirtualFFT::FFT(1, &fSamples, "M C2R K");
 
     // Prepare the SPE waveform templates
-    SourceSPESPETemplateFiles();
+    SourceSPETemplateFiles();
     // Prepare the Fourier transforms
     for (auto &xh: fSinglePEWaveforms) {
       fSinglePEWaveforms_fft.push_back(CmplxWaveform_t(fSamples));
@@ -841,12 +841,12 @@ namespace opdet {
    * @brief Source the single p.e. response from file
    *
    * Source the single p.e. response template from the dat file set by
-   * `fDigiDataFile` and set the variable `fSinglePEAmplitude` with the
+   * `fSPETemplateFiles` and set the variable `fSinglePEAmplitude` with the
    * amplitude of the single p.e. response. In case of a multi-column
    * template file, the relevant column can be selected by setting the
    * variable `fSPETemplateFileDataColumn`.
    */
-  void Deconvolution::SourceSPESPETemplateFiles() {
+  void Deconvolution::SourceSPETemplateFiles() {
     cet::search_path sp("FW_SEARCH_PATH");
     for (auto fname: fSPETemplateFiles) {
       fSinglePEWaveforms.push_back(std::vector<double>()); // add a new empty waform
@@ -860,7 +860,7 @@ namespace opdet {
       size_t n_columns = CountFileColumns(datafile.c_str());
       std::cout << "ncols= " << n_columns << std::endl;
       if (fSPETemplateFileDataColumn >= n_columns) {
-	printf("Deconvolution::SourceSPETemplate ERROR: ");
+	printf("Deconvolution::SourceSPETemplateFiles ERROR: ");
 	printf("The module is supposed to select column %lu, but only %lu columns are present.\n",
 	       fSPETemplateFileDataColumn, n_columns);
 	throw art::Exception(art::errors::InvalidNumber);
