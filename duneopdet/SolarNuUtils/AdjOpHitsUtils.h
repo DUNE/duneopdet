@@ -53,6 +53,18 @@ namespace solar
             double ZWidth;
             double STD;
         };
+        struct OpFlashes
+        {
+            std::vector<double> OpFlashPE;
+            std::vector<double> OpFlashMaxPE;
+            std::vector<double> OpFlashX;
+            std::vector<double> OpFlashY;
+            std::vector<double> OpFlashZ;
+            std::vector<double> OpFlashT;
+            std::vector<int> OpFlashNHit;
+            std::vector<int> OpFlashGen;
+            std::vector<double> OpFlashPur;
+        };
         explicit AdjOpHitsUtils(fhicl::ParameterSet const &p);
         void CalcAdjOpHits(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<art::Ptr<recob::OpHit>>> &OpHitClusters, std::vector<std::vector<int>> &OpHitClusterIdx);
         void MakeFlashVector(std::vector<FlashInfo> &FlashVec, std::vector<std::vector<art::Ptr<recob::OpHit>>> &OpHitClusters, art::Event const &evt);
