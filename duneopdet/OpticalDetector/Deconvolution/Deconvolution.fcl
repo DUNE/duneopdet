@@ -61,7 +61,7 @@ dune_deconvolution.WfmPostfilter.Cutoff: 1.8     # Use this value only for postf
 
 # For backwards compatibility. This table is currently used in many workflows for different detectors, data and MC.
 dune_deconvolution: @local::generic_dune_deconvolution
-dune_deconvolution.DigitalDataFiles: ["SPE_DAPHNE2_FBK_2022.dat"]
+dune_deconvolution.SPETemplateFiles: ["SPE_DAPHNE2_FBK_2022.dat"]
 # Set SPE template channel map: channel = -1 for all channels
 dune_deconvolution.SPETemplateMapChannels:  [-1]
 dune_deconvolution.SPETemplateMapTemplates: [ 0]

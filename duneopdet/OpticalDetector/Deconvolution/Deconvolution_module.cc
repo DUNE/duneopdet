@@ -109,8 +109,8 @@ namespace opdet {
 
 	fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
 
-          fhicl::Sequence<int>          SPETemplateMap_channels{ fhicl::Name("TemplateMapChannels") };
-          fhicl::Sequence<unsigned int> SPETemplateMap_templates{ fhicl::Name("TemplateMapTemplates") };
+          fhicl::Sequence<int>          SPETemplateMap_channels{ fhicl::Name("SPETemplateMapChannels") };
+          fhicl::Sequence<unsigned int> SPETemplateMap_templates{ fhicl::Name("SPETemplateMapTemplates") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_channels{ fhicl::Name("NoiseTemplateMapChannels") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_templates{ fhicl::Name("NoiseTemplateMapTemplates") };
 
