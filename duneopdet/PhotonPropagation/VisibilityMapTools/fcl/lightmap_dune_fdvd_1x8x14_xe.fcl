@@ -33,19 +33,13 @@ physics:
 {
    analyzers:
    {
-      photovisXe: @local::standard_photovis
+      photovisXe: @local::photovisexport_fdvd_xe
    }
   
    anapath: [ photovisXe ]
    end_paths: [ anapath ]
 }
 
-# physics.analyzers.photovisXe.vis_model: "semianalytical"
-# physics.analyzers.photovisXe.do_include_buffer: "true"
-# physics.analyzers.photovisXe.vuvhitspars: @local::dunevd_pdfastsim_par_xe.VUVHits
-# physics.analyzers.photovisXe.do_refl: false
-# physics.analyzers.photovisXe.do_include_anode_refl: false
-physics.analyzers.photovisXe: @local::photovisexport_fdvd_xe
 physics.analyzers.photovisXe.voxel_dx: "15.0" # voxel x mesh step (in cm)
 physics.analyzers.photovisXe.voxel_dy: "15.0" # voxel y mesh step (in cm)
 physics.analyzers.photovisXe.voxel_dz: "15.0" # voxel z mesh step (in cm)

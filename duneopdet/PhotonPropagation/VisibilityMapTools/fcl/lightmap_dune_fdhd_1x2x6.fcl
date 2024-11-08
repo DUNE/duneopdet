@@ -32,17 +32,13 @@ physics:
 {
    analyzers:
    {
-      photovisAr: @local::standard_photovis
+      photovisAr: @local::photovisexport_fdhd
    }
   
    anapath: [ photovisAr ]
    end_paths: [ anapath ]
 }
 
-# physics.analyzers.photovisAr.vis_model: "semianalytical"
-# physics.analyzers.photovisAr.vuvhitspars: @local::dunefd_pdfastsim.VUVHits
-# physics.analyzers.photovisAr.do_include_buffer: "true"
-physics.analyzers.photovisAr: @local::photovisexport_fdhd
 physics.analyzers.photovisAr.voxel_dx: "15.0" # voxel x mesh step (in cm)
 physics.analyzers.photovisAr.voxel_dy: "15.0" # voxel y mesh step (in cm)
 physics.analyzers.photovisAr.voxel_dz: "15.0" # voxel z mesh step (in cm)
