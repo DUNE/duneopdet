@@ -13,15 +13,14 @@ services:
   MemoryTracker:         { } # default is one
   message:      @local::dune_message_services_prod
 
-  ### @table::dunefd_refactored_services
   @table::dunefdvd_1x8x14_3view_30deg_simulation_services
 }
 
-### Use the 1x2x6 geometry ###
+### Use the appropriate geometry ###
 services.Geometry: @local::dunevd10kt_1x8x14_3view_30deg_v5_geo
+### Setup the visibility service for Xe
 services.PhotonVisibilityService: @local::dune10kt_vd_photonvisibilityservice_Xe # changing to the xenon libaray. 
 
-#source is now a root file
 source:
 {
   module_type: RootInput
@@ -38,14 +37,15 @@ physics:
    }
   
    anapath: [ photovisXe ]
-   end_paths:     [ anapath ]
+   end_paths: [ anapath ]
 }
 
-physics.analyzers.photovisXe.vis_model: "semianalytical"
-physics.analyzers.photovisXe.do_include_buffer: "true"
-physics.analyzers.photovisXe.vuvhitspars: @local::dunevd_pdfastsim_par_xe.VUVHits
-physics.analyzers.photovisXe.do_refl: false
-physics.analyzers.photovisXe.do_include_anode_refl: false
+# physics.analyzers.photovisXe.vis_model: "semianalytical"
+# physics.analyzers.photovisXe.do_include_buffer: "true"
+# physics.analyzers.photovisXe.vuvhitspars: @local::dunevd_pdfastsim_par_xe.VUVHits
+# physics.analyzers.photovisXe.do_refl: false
+# physics.analyzers.photovisXe.do_include_anode_refl: false
+physics.analyzers.photovisXe: @local::photovisexport_fdvd_xe
 physics.analyzers.photovisXe.voxel_dx: "15.0" # voxel x mesh step (in cm)
 physics.analyzers.photovisXe.voxel_dy: "15.0" # voxel y mesh step (in cm)
 physics.analyzers.photovisXe.voxel_dz: "15.0" # voxel z mesh step (in cm)

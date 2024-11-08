@@ -13,7 +13,6 @@ services:
   MemoryTracker:         { } # default is one
   message:      @local::dune_message_services_prod
 
-  ### @table::dunefd_refactored_services
   @table::dunefd_1x2x6_services
   PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice
 }
@@ -21,7 +20,6 @@ services:
 ### Use the 1x2x6 geometry ###
 services.Geometry: @local::dune10kt_1x2x6_refactored_geo
 
-#source is now a root file
 source:
 {
   module_type: RootInput
@@ -38,12 +36,13 @@ physics:
    }
   
    anapath: [ photovisAr ]
-   end_paths:     [ anapath ]
+   end_paths: [ anapath ]
 }
 
-physics.analyzers.photovisAr.vis_model: "semianalytical"
-physics.analyzers.photovisAr.vuvhitspars: @local::dunefd_pdfastsim.VUVHits
-physics.analyzers.photovisAr.do_include_buffer: "true"
+# physics.analyzers.photovisAr.vis_model: "semianalytical"
+# physics.analyzers.photovisAr.vuvhitspars: @local::dunefd_pdfastsim.VUVHits
+# physics.analyzers.photovisAr.do_include_buffer: "true"
+physics.analyzers.photovisAr: @local::photovisexport_fdhd
 physics.analyzers.photovisAr.voxel_dx: "15.0" # voxel x mesh step (in cm)
 physics.analyzers.photovisAr.voxel_dy: "15.0" # voxel y mesh step (in cm)
 physics.analyzers.photovisAr.voxel_dz: "15.0" # voxel z mesh step (in cm)
