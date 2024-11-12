@@ -232,6 +232,8 @@ namespace opdet {
       // without any checks
       double  TickToTime(size_t tick) const;
       size_t TimeToTick(double  time) const;
+
+      void DynamicRangeSaturation(std::vector< short > &wvf);
     
 
       
@@ -621,9 +623,9 @@ namespace opdet {
 
  }
 
-   void DynamicRangeSaturation(std::vector< short > &wvf)
+   void OpDetDigitizerProtoDUNEHD::DynamicRangeSaturation(std::vector< short > &wvf)
   {
-     for(int i=0; i<wvf.size();i++)
+     for(size_t i=0; i<wvf.size();i++)
      {
        if(wvf[i]>fDynamicRangeSaturation) wvf[i]=fDynamicRangeSaturation;
        if(wvf[i]<0) wvf[i]=0;
