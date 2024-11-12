@@ -49,6 +49,7 @@
 #include "duneopdet/OpticalDetector/AlgoSSPLeadingEdge.h"
 #include "dunecore/DuneObj/OpDetDivRec.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
+#include "larcore/Geometry/WireReadout.h"
 
 // CLHEP includes
 
@@ -454,8 +455,7 @@ namespace opdet {
   //---------------------------------------------------------------------------
   void WaveformDigitizerSim::produce(art::Event& event)
   {
-    // Geometry service
-    art::ServiceHandle< geo::Geometry > geometry;
+    auto const& wireReadout = art::ServiceHandle<geo::WireReadout const>()->Get();
 
     // A pointer that will store produced OpDetWaveforms
     auto wave_forms_p = std::make_unique< vector< raw::OpDetWaveform > >();
@@ -482,7 +482,7 @@ namespace opdet {
     for (auto const& [opDet, vDivRecs]: DivRecsByChannel)
     {
       // Get number of readout channels in this optical detector
-      unsigned int nChannelsPerOpDet = geometry->NOpHardwareChannels(opDet);
+      unsigned int nChannelsPerOpDet = wireReadout.NOpHardwareChannels(opDet);
 
       // Create the vector (to address multiple readout channels per OpDet) of empty waveform vector and focus list
       std::vector< std::vector< double > > pdWaveforms(nChannelsPerOpDet,
@@ -494,7 +494,7 @@ namespace opdet {
 
       //Loop to correctly assign the waveforms to readout channels, if more than 1 per OpDet
       for(unsigned int rdCh=0; rdCh<nChannelsPerOpDet; rdCh++){
-        int readoutChannel = geometry->OpChannel(opDet, rdCh);
+        int readoutChannel = wireReadout.OpChannel(opDet, rdCh);
         // So that line noise is added to all ticks in full output mode
         if (fFullWaveformOutput)  fls[rdCh].everything(); 
 

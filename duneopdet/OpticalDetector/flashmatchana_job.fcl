@@ -11,6 +11,7 @@ services:
   MemoryTracker:         {}
   RandomNumberGenerator: {} #ART native random number generator
   FileCatalogMetadata:   @local::art_file_catalog_mc
+AuxDetGeometry: @local::dune10kt_1x2x6_auxdet_geo
   Geometry:              @local::dune10kt_1x2x6_geo
 }
 

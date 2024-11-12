@@ -13,7 +13,7 @@
 #include "OpHitAlg_deco.h"
 
 #include "larana/OpticalDetector/OpHitFinder/PulseRecoManager.h"
-#include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/Geometry/WireReadoutGeom.h"
 #include "lardataalg/DetectorInfo/DetectorClocks.h"
 #include "lardataalg/DetectorInfo/ElecClock.h"
 #include "lardataobj/RawData/OpDetWaveform.h"
@@ -31,7 +31,7 @@ namespace opdet {
                     std::vector<recob::OpHit>& hitVector,
                     pmtana::PulseRecoManager const& pulseRecoMgr,
                     pmtana::PMTPulseRecoBase const& threshAlg,
-                    geo::GeometryCore const& geometry,
+                    geo::WireReadoutGeom const& wireReadout,
                     float hitThreshold,
                     detinfo::DetectorClocksData const& clocksData,
                     calib::IPhotonCalibrator const& calibrator,
@@ -42,7 +42,7 @@ namespace opdet {
 
       const int channel = static_cast<int>(waveform.ChannelNumber());
 
-      if (!geometry.IsValidOpChannel(channel)) {
+      if (!wireReadout.IsValidOpChannel(channel)) {
         mf::LogError("OpHitFinder")
           << "Error! unrecognized channel number " << channel << ". Ignoring pulse";
         continue;
@@ -72,7 +72,7 @@ namespace opdet {
                     std::vector<recob::OpHit>& hitVector,
                     pmtana::PulseRecoManager const& pulseRecoMgr,
                     pmtana::PMTPulseRecoBase const& threshAlg,
-                    geo::GeometryCore const& geometry,
+                    geo::WireReadoutGeom const& wireReadout,
                     float hitThreshold,
                     float scale,  //It scales the values of the deconvolved signals.
                     detinfo::DetectorClocksData const& clocksData,
@@ -84,8 +84,8 @@ namespace opdet {
         recob::OpWaveform deco_waveform=opWaveformVector.at(i);
         int channel = static_cast<int>(deco_waveform.Channel());
         const double timeStamp = deco_waveform.TimeStamp();
-
-        if (!geometry.IsValidOpChannel(channel)) {
+       
+        if (!wireReadout.IsValidOpChannel(channel)) {
           mf::LogError("OpHitFinder")
           << "Error! unrecognized channel number " << channel << ". Ignoring pulse";
          continue;
