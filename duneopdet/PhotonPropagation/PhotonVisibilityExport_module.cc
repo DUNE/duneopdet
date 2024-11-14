@@ -96,6 +96,8 @@ namespace opdet {
       double fVoxelSizeY = {};
       double fVoxelSizeZ = {};
 
+      int fNSamplings = 1;
+
       fhicl::ParameterSet fVUVHitsParams;
       fhicl::ParameterSet fVISHitsParams;
       fhicl::ParameterSet fTFLoaderPars;
@@ -113,6 +115,10 @@ namespace opdet {
       void ExportOpDetMap(); 
       void ExportVoxelGrid(); 
       void ExportVisibility();
+
+      const bool is_valid(const phot::MappedCounts_t& visibilities) const;
+      const bool is_valid(const std::vector<double>& visibilities) const;
+      const geo::Point_t SampleVoxel(const geo::Point_t& vxc) const; 
 
   };
 
@@ -146,13 +152,14 @@ namespace opdet {
     fTFLoaderPars = pset.get<fhicl::ParameterSet>("tfloaderpars");
 
     TString vis_model_str = pset.get<std::string>("vis_model"); 
-
     if (vis_model_str.Contains("compgraph")) {
       kVisModel = kCompGraph;
     }
     else if (vis_model_str.Contains("semianalytical")) {
       kVisModel = kSemiAnalytical;
     }
+
+    fNSamplings = pset.get<int>("n_vis_samplings"); 
   }
 
   void PhotonVisibilityExport::beginJob() {
@@ -326,6 +333,32 @@ namespace opdet {
     return;
   }
 
+ const geo::Point_t PhotonVisibilityExport::SampleVoxel(const geo::Point_t& vxc) const
+ {
+   const geo::Vector_t delta(
+       gRandom->Uniform(-0.5*fVoxelSizeX, 0.5*fVoxelSizeX), 
+       gRandom->Uniform(-0.5*fVoxelSizeY, 0.5*fVoxelSizeY), 
+       gRandom->Uniform(-0.5*fVoxelSizeZ, 0.5*fVoxelSizeZ) );  
+
+   const geo::Point_t xspot = vxc + delta; 
+
+   return xspot;
+ }
+
+ const bool PhotonVisibilityExport::is_valid(const phot::MappedCounts_t& visibilities) const {
+   for (const auto& v : visibilities) {
+     if (v > 1.0) return false;
+   }
+   return true;
+ }
+
+ const bool PhotonVisibilityExport::is_valid(const std::vector<double>& visibilities) const {
+   for (const auto& v : visibilities) {
+     if (v > 1.0) return false;
+   }
+   return true;
+ }
+
 
  void PhotonVisibilityExport::ExportVisibility() {
    const auto photonVisService = art::ServiceHandle<phot::PhotonVisibilityService>(); 
@@ -364,7 +397,6 @@ namespace opdet {
    std::vector<double> opdetvis_rfl;
    
    bool tpc_range_x = false, tpc_range_y = false, tpc_range_z = false; 
-   const double voxelDim[3] = {fVoxelSizeX, fVoxelSizeY, fVoxelSizeZ}; 
 
    // here we can loop over the points of the pre-defined grid
    double x_= 0, y_= 0, z_= 0;
@@ -399,12 +431,27 @@ namespace opdet {
                }
 
                const geo::Point_t point( x_, y_, z_); 
-               auto mapped_vis = photonVisService->GetAllVisibilities(point); 
-               size_t iopdet = 0; 
-               for (auto &vis : mapped_vis) {
-                 opDet_visDirectBuff[iopdet] = vis;
-                 total_visDirectBuff += vis; 
-                 iopdet++; 
+
+               int nvalid = 0; 
+               while (nvalid < fNSamplings) {
+                 const auto xpoint = SampleVoxel( point ); 
+                 auto mapped_vis = photonVisService->GetAllVisibilities(xpoint); 
+                 if ( is_valid(mapped_vis) == false ) {
+                   continue; 
+                 }
+
+                 size_t iopdet = 0; 
+                 for (auto &vis : mapped_vis) {
+                   opDet_visDirectBuff[iopdet] += vis;
+                   total_visDirectBuff += vis; 
+                   iopdet++; 
+                 }
+                 nvalid++;
+               }
+
+               total_visDirectBuff = total_visDirectBuff / static_cast<double>(fNSamplings); 
+               for (size_t i = 0; i < fNOpDets; i++) {
+                 opDet_visDirectBuff[i] /= static_cast<double>(fNSamplings);
                }
 
                point.GetCoordinates( pointBuff_ ); 
@@ -420,15 +467,8 @@ namespace opdet {
                opDet_visReflct[i] = 0.0; 
              }
 
-             const double n_samplings = 5.0; 
-
-             for (int i = 0; i < n_samplings; i++) {
-               const geo::Vector_t delta(
-                   gRandom->Uniform(-0.5*voxelDim[0], 0.5*voxelDim[0]), 
-                   gRandom->Uniform(-0.5*voxelDim[1], 0.5*voxelDim[1]), 
-                   gRandom->Uniform(-0.5*voxelDim[2], 0.5*voxelDim[2]) );  
-
-               const geo::Point_t xspot = vpoint + delta; 
+             for (int i = 0; i < fNSamplings; i++) {
+               const geo::Point_t xspot = SampleVoxel( vpoint ); 
 
                if (kVisModel == kSemiAnalytical ) {
                  fVisibilityModel->detectedDirectVisibilities   (opdetvis_dir, xspot);
@@ -457,12 +497,12 @@ namespace opdet {
                } 
              }
 
-             total_visDirect = total_visDirect / n_samplings; 
-             total_visReflct = total_visReflct / n_samplings; 
+             total_visDirect = total_visDirect / static_cast<double>(fNSamplings); 
+             total_visReflct = total_visReflct / static_cast<double>(fNSamplings); 
 
              for (size_t i = 0; i < fNOpDets; i++) {
-               opDet_visDirect[i] /= n_samplings;
-               opDet_visReflct[i] /= n_samplings;
+               opDet_visDirect[i] /= static_cast<double>(fNSamplings);
+               opDet_visReflct[i] /= static_cast<double>(fNSamplings);
              }
 
              // Fill tree

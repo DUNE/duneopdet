@@ -12,6 +12,7 @@ standard_photovisexport:
    voxel_dz:                      "10.00" # voxel z mesh step (in cm)
    vis_model:            "semianalytical" # visibility model to be used
                                           # (pick one between "semianalytical", "compgraph")
+   n_vis_samplings:               "5"     # nr of visibility samplings inside the voxel (min 1)
    do_refl:                  @local::dunefd_pdfastsim_par_ar_refl.DoReflectedLight
    do_include_anode_refl:    false
    vuvhitspars:              @local::dunefd_pdfastsim_par_ar.VUVHits
