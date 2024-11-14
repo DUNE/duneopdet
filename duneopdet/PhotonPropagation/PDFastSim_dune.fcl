@@ -140,6 +140,9 @@ protodune_hd_pdfastsim_pvs_external.VUVTiming:	  	      @local::dune_vuv_timing_
 protodune_hd_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs_external
 protodune_hd_pdfastsim_pvs.SimulationLabel:          IonAndScint
 
+
+
+
 #############################################
 ### COMPUTABLE GRAPH MODEL CONFIGURATIONS ###
 #############################################
@@ -168,6 +171,26 @@ dunevd_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDoping10ppm
 dunevd_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/dunevd_175nm_tf2.6"
 
 
+################
+# protoDUNE-HD #
+################
+
+protodune_hd_pdfastsim_ann_ar:
+{
+       # Computable graph generated for protodunehd_v6_refactored.gdml
+       module_type:         "PDFastSimANN"
+       SimulationLabel:     "IonAndScint"
+       DoSlowComponent:     true
+       ScintTimeTool:       @local::ScintTimeLAr
+       TFLoaderTool:
+       {
+           tool_type:       TFLoaderMLP
+           ModelName:       "PhotonPropagation/ComputableGraph/protodune_hd_128nm_tf2.6"
+           InputsName:      ["serving_default_pos_x:0", "serving_default_pos_y:0", "serving_default_pos_z:0"]
+           OutputName:      "StatefulPartitionedCall:0"
+       }
+}
+
 
 ################
 # protoDUNE-VD #
@@ -190,6 +213,11 @@ protodune_vd_pdfastsim_ann_ar:
 }
 
 protodune_vd_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs
+
+protodune_vd_pdfastsim_ann_xe:                          @local::protodune_vd_pdfastsim_ann_ar
+protodune_vd_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDoping10ppm
+protodune_vd_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/protodune_vd_175nm_tf2.6"
+
 
 
 END_PROLOG

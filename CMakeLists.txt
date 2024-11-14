@@ -4,13 +4,14 @@
 
 
 # use cmake 3.14 or later
-cmake_minimum_required (VERSION 3.19 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.20 FATAL_ERROR)
+# cmake_policy(VERSION 3.19)
 
+
+find_package(cetmodules REQUIRED)
 project(duneopdet LANGUAGES CXX)
-set(${PROJECT_NAME}_CMAKE_PROJECT_VERSION_STRING 09.88.00d00)
-
-# cetbuildtools contains our cmake modules
-find_package(cetbuildtools REQUIRED)
+set(${PROJECT_NAME}_CMAKE_PROJECT_VERSION_STRING 10.01.00d00)
+set(${PROJECT_NAME}_FW_DIR  "config_data")
 
 include(CetCMakeEnv)
 cet_cmake_env()
@@ -23,28 +24,27 @@ cet_set_compiler_flags(DIAGS CAUTIOUS
 
 cet_report_compiler_flags()
 
-find_ups_product( art )
-find_ups_product( art_root_io )
-find_ups_product( canvas_root_io )
-find_ups_boost( )
-find_ups_root()
-find_ups_product( cetbuildtools )
-find_ups_product( larevt )
-find_ups_product( larsim )
-find_ups_product( eigen )
-find_ups_product( tensorflow )
-find_ups_product( larsimdnn )
-find_ups_product( larcore )
-find_ups_product( lardata )
-find_ups_product( lardataalg )
-find_ups_product( larreco )
-find_ups_product( larana )
-find_ups_product( larcorealg )
-find_ups_product( nurandom )
-find_ups_product( dunecore )
-find_ups_product( clhep )
-find_ups_product( fftw )
-find_ups_geant4( )
+find_package( art REQUIRED )
+find_package( art_root_io REQUIRED )
+find_package( canvas_root_io REQUIRED )
+find_package( Boost REQUIRED )
+find_package(ROOT REQUIRED)
+find_package( larevt REQUIRED EXPORT )
+find_package( larsim REQUIRED EXPORT )
+find_package( eigen )
+find_package( tensorflow )
+find_package( larsimdnn )
+find_package( larcore REQUIRED EXPORT )
+find_package( lardata REQUIRED EXPORT )
+find_package( lardataalg REQUIRED EXPORT )
+find_package( larreco REQUIRED EXPORT )
+find_package( larana REQUIRED EXPORT )
+find_package( larcorealg REQUIRED EXPORT )
+find_package( nurandom REQUIRED EXPORT )
+find_package( dunecore REQUIRED EXPORT )
+find_package( CLHEP REQUIRED )
+find_package( Geant4 REQUIRED )
+find_package( HDF5 REQUIRED )
 
 # macros for artdaq_dictionary and simple_plugin
 include(ArtDictionary)
@@ -52,6 +52,5 @@ include(ArtMake)
 include(BuildPlugins)
 
 add_subdirectory(duneopdet)
-add_subdirectory(ups)
 
-include(UseCPack)
+cet_cmake_config()

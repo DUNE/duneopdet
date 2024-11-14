@@ -221,12 +221,14 @@ namespace opdet {
     tTPC->Branch("tpcPos", &tpcPos, "tpcPos[3]/F");
 
     // get cryostat dimensions 
+    UInt_t icryo = 0; 
     for (geo::CryostatGeo const& cryo : geom->Iterate<geo::CryostatGeo>()) {
-      printf("cryostat: %u [%g, %g, %g] - [%g, %g, %g]\n", cryo.ID().getIndex(),
+      printf("cryostat %u: [%g, %g, %g] - [%g, %g, %g]\n", icryo,
           cryo.MinX(), cryo.MinY(), cryo.MinZ(), cryo.MaxX(), cryo.MaxY(), cryo.MaxZ()); 
       fCryostatMin[0] = cryo.MinX();   fCryostatMax[0] = cryo.MaxX(); 
       fCryostatMin[1] = cryo.MinY();   fCryostatMax[1] = cryo.MaxY(); 
       fCryostatMin[2] = cryo.MinZ();   fCryostatMax[2] = cryo.MaxZ(); 
+      icryo++; 
     }
 
 
@@ -302,31 +304,22 @@ namespace opdet {
     float opDetW = 0;
     float opDetL = 0;
     float opDetPos[3]; 
-    std::vector<size_t> opChannel; 
 
     TTree* tOpDet = tfs->make<TTree>("opDetMap", "opDetMap");
     tOpDet->Branch("opDetH", &opDetH); 
     tOpDet->Branch("opDetL", &opDetL); 
     tOpDet->Branch("opDetW", &opDetW);
     tOpDet->Branch("opDetPos", &opDetPos, "opDetPos[3]/F");
-    tOpDet->Branch("opDetCh", &opChannel); 
 
     // store info from Geometry service
     fNOpDets = geom->NOpDets();
     for (size_t i : util::counter(fNOpDets)) {
-      opChannel.clear(); 
       geo::OpDetGeo const& opDet = geom->OpDetGeoFromOpDet(i);
       auto center = opDet.GetCenter();
       center.GetCoordinates( opDetPos );
       opDetH = opDet.Height();
       opDetW = opDet.Width();
       opDetL = opDet.Length();
-
-      size_t n_ch = geom->NOpHardwareChannels(i); 
-      opChannel.resize(n_ch, 0); 
-      for (size_t ich = 0; ich < n_ch; ich++) {
-        opChannel.at(ich) = geom->OpChannel(i, ich);  
-      }
 
       tOpDet->Fill();
     }
