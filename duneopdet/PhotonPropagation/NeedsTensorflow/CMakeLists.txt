@@ -30,6 +30,9 @@ art_make(
                         lardata::headers
                         larsim::PhotonPropagation_PhotonVisibilityService_service
                         duneopdet::PhotonPropagation_PhotonVisibilityServiceS2_service
+                        TensorFlow::cc
+                        TensorFlow::framework
+                        larsimdnn::TFLoaderTool
                         larsim::Simulation 
                         nug4::ParticleNavigation
                         larcorealg::Geometry
@@ -56,9 +59,3 @@ art_make(
 install_headers()
 install_fhicl()
 install_source()
-
-if(DEFINED ENV{TENSORFLOW_DIR})
-  add_subdirectory(NeedsTensorflow)
-endif()
-add_subdirectory(LibraryBuildTools)
-add_subdirectory(ScintTimeTools)
