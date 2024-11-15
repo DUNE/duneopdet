@@ -1,0 +1,46 @@
+#include "PDFastSim_dune.fcl"
+#include "services_dunefd_horizdrift_1x2x6.fcl"
+#include "PhotonVisibilityExport.fcl"
+
+process_name: Ana
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "dunevis_fdhd_1x2x6_test.root" }
+  TimeTracker:       {}
+  RandomNumberGenerator: {}
+  MemoryTracker:         { } # default is one
+  message:      @local::dune_message_services_prod
+
+  @table::dunefd_1x2x6_services
+  PhotonVisibilityService: @local::dune10kt_1x2x6_photonvisibilityservice
+}
+
+### Use the 1x2x6 geometry ###
+services.Geometry: @local::dune10kt_1x2x6_refactored_geo
+
+source:
+{
+  module_type: RootInput
+  fileNames : ["dunevis_hd_1x2x6_source.root"]
+  maxEvents:   1
+}
+
+
+physics:
+{
+   analyzers:
+   {
+      photovisAr: @local::photovisexport_fdhd
+   }
+  
+   anapath: [ photovisAr ]
+   end_paths: [ anapath ]
+}
+
+physics.analyzers.photovisAr.voxel_dx: "15.0" # voxel x mesh step (in cm)
+physics.analyzers.photovisAr.voxel_dy: "15.0" # voxel y mesh step (in cm)
+physics.analyzers.photovisAr.voxel_dz: "15.0" # voxel z mesh step (in cm)
+
+
