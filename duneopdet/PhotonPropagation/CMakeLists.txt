@@ -13,6 +13,7 @@ art_make(
                         art::Framework_Services_Registry
                         art_root_io::tfile_support
                         ROOT::Core
+                        ROOT::Tree
                         art_root_io::TFileService_service
                         art::Framework_Services_Optional_RandomNumberGenerator_service
 			art::Persistency_Common
@@ -28,8 +29,12 @@ art_make(
                         larsim::LegacyLArG4
                         lardataobj::Simulation
                         lardata::headers
+                        larsim::PhotonPropagation_PhotonVisibilityService_service
                         duneopdet::PhotonPropagation_PhotonVisibilityServiceS2_service
                         larsim::Simulation 
+                        TensorFlow::cc
+                        TensorFlow::framework
+                        larsimdnn::TFLoaderTool
                         nug4::ParticleNavigation
                         larcorealg::Geometry
       	                larcore::Geometry_Geometry_service
@@ -38,6 +43,7 @@ art_make(
                         art::Framework_Services_Registry
                         art_root_io::tfile_support
                         ROOT::Core
+                        ROOT::Tree
                         art_root_io::TFileService_service
                         art::Framework_Services_Optional_RandomNumberGenerator_service
 			nurandom::RandomUtils_NuRandomService_service
