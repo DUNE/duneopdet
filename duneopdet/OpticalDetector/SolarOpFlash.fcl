@@ -16,8 +16,8 @@ solar_opflash_dune10kt_1x2x6:
     OpFlashAlgoTime:            1            # Time window to look for adj. OpHits in [tick] units.
     OpFlashAlgoRad:             300          # Distance to look for adj. OpHits in [cm] units.
     OpFlashAlgoPE:              1.5          # PE threshold to look for adj. OpHits.
-    OpFlashAlgoTriggerPE:       20           # PE threshold to trigger an OpFlash.
-    OpFlashAlgoHotVertexThld:   0            # Relative threshold to consider a hit as hot for opflash vertex determination [0-1].
+    OpFlashAlgoTriggerPE:       1            # PE threshold to trigger an OpFlash.
+    OpFlashAlgoHotVertexThld:   0.3          # Relative threshold to consider a hit as hot for opflash vertex determination [0-1].
     # OpFlashAlgoCentroid:        false        # Use the centroid computation of the flash based on a likelihood estimation.
 }
 
