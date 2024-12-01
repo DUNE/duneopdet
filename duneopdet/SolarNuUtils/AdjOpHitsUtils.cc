@@ -318,34 +318,24 @@ namespace solar
 
     // Find index of the hit with the highest PE
     int maxPEIdx = 0;
-    float refHitPE = 0;
     for (unsigned int i = 0; i < Hits.size(); i++)
     {
       if (Hits[i]->PE() > Hits[maxPEIdx]->PE())
         maxPEIdx = i;
     }
 
-    int hotHits = 0;
-    for (const auto &hit : Hits)
-    {
-      if (hit->PE() >= fOpFlashAlgoHotVertexThld * Hits[maxPEIdx]->PE())
-      {
-        // Start with the first hit in the flash as reference point
-        double firstHitY = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
-        double firstHitZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
+    // Start with the first hit in the flash as reference point
+    double firstHitY = wireReadout.OpDetGeoFromOpChannel(Hits[maxPEIdx]->OpChannel()).GetCenter().Y();
+    double firstHitZ = wireReadout.OpDetGeoFromOpChannel(Hits[maxPEIdx]->OpChannel()).GetCenter().Z();
 
-        // Get the first hit PE and calculate the squared distance and angle to the reference point
-        float firstHitPE = hit->PE();
-        float firstHitDistSq = pow(firstHitY - y, 2) + pow(firstHitZ - z, 2);
-        float firstHitAngle = atan2(sqrt(firstHitDistSq), abs(x));
+    // Get the first hit PE and calculate the squared distance and angle to the reference point
+    float firstHitPE = Hits[maxPEIdx]->PE();
+    float firstHitDistSq = pow(firstHitY - y, 2) + pow(firstHitZ - z, 2);
 
-        // Calculate the expected PE value for the reference point based on the first hit PE and the squared distance + angle
-        refHitPE += firstHitPE * (pow(x, 2) + firstHitDistSq) / pow(x, 2) / cos(firstHitAngle);
-        // float refHitPE = firstHitPE * (pow(x, 2) + firstHitDistSq) / pow(x, 2);
-        hotHits++;
-      }
-    }
-    refHitPE /= hotHits;
+    // Calculate the expected PE value for the reference point based on the first hit PE and the squared distance + angle
+    // float firstHitAngle = atan2(sqrt(firstHitDistSq), abs(x));
+    // float refHitPE = firstHitPE * (pow(x, 2) + firstHitDistSq) / pow(x, 2) / cos(firstHitAngle);
+    float refHitPE = firstHitPE * (pow(x, 2) + firstHitDistSq) / pow(x, 2);
 
     // Loop over all OpHits in the flash and compute the squared distance to the reference point
     for (const auto &hit : Hits)
@@ -355,21 +345,21 @@ namespace solar
 
       // The expected distribution of PE corresponds to a decrease of 1/r² with the distance from the flash center. Between adjacent OpHits, the expected decrease in charge has the form r²/(r²+d²)
       float hitDistSq = pow(hitY - y, 2) + pow(hitZ - z, 2);
-      float hitAngle = atan2(sqrt(hitDistSq), abs(x));
-      float predPE = refHitPE * cos(hitAngle) * pow(x, 2) / (pow(x, 2) + hitDistSq);
-      // float predPE = refHitPE * pow(x, 2) / (pow(x, 2) + hitDistSq);
+
+      // float hitAngle = atan2(sqrt(hitDistSq), abs(x));
+      // float predPE = refHitPE * cos(hitAngle) * pow(x, 2) / (pow(x, 2) + hitDistSq);
+      float predPE = refHitPE * pow(x, 2) / (pow(x, 2) + hitDistSq);
 
       Residual += pow(hit->PE() - predPE, 2);
       PE += hit->PE();
     }
 
-    Residual /= PE;
     Residual /= float(Hits.size());
     std::string debug = "PE: " + SolarAuxUtils::str(PE) +
-                        " X: " + SolarAuxUtils::str(x) +
-                        " RefPE: " + SolarAuxUtils::str(refHitPE) +
-                        " NHits: " + SolarAuxUtils::str(int(Hits.size())) +
-                        " Residual: " + SolarAuxUtils::str(Residual);
+      " X: " + SolarAuxUtils::str(x) +
+      " RefPE: " + SolarAuxUtils::str(refHitPE) +
+      " NHits: " + SolarAuxUtils::str(int(Hits.size())) +
+      " Residual: " + SolarAuxUtils::str(Residual);
 
     SolarAuxUtils::PrintInColor(debug, SolarAuxUtils::GetColor("yellow"), "Debug");
     return;
