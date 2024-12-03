@@ -1,0 +1,44 @@
+#include "deconvolution_run.fcl"
+
+process_name: TestDeconv
+
+services:
+{
+   # Load the service that manages root files for histograms.
+   TFileService: { fileName: "deconv_hist.root" }
+   RandomNumberGenerator: {} #ART native random number generator
+   message:      @local::standard_info
+   @table::protodunehd_services
+}
+
+source.inputCommands: [ "keep *", "drop *_*_*_opdec" ]
+outputs.out1.outputCommands: [ "keep *_*_*_TestDeconv", "keep *_pdhddaphne_*_*" ]
+
+physics.producers.opdec: @local::protodunehd_deconvolution
+
+
+physics.producers.opdec.Pedestal: 8180
+physics.producers.opdec.PreTrigger: 50
+physics.producers.opdec.PedestalBuffer: 30
+physics.producers.opdec.InputModule: "pdhddaphne"
+physics.producers.opdec.InstanceName: "daq"
+
+# PD HD raw waveforms have negative polarity
+physics.producers.opdec.InputPolarity: -1
+
+
+physics.producers.opdec.LineNoiseRMS: 4.5
+
+
+physics.producers.opdec.ApplyPostfilter: true
+physics.producers.opdec.WfmPostfilter.Cutoff: 1.5
+physics.producers.opdec.ApplyPostBLCorrection: true
+
+
+physics.analyzers.opdecoana.InputModuleDeco: "opdec"
+physics.analyzers.opdecoana.InputModuleDigi: "pdhddaphne"
+physics.analyzers.opdecoana.InstanceNameDeco: ""
+physics.analyzers.opdecoana.InstanceNameDigi: "daq"
+
+
+#physics.end_paths: [stream1]
