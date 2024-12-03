@@ -8,7 +8,8 @@ namespace solar
   AdjOpHitsUtils::AdjOpHitsUtils(fhicl::ParameterSet const &p)
       : fGeometry(p.get<std::string>("Geometry")),
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit")),
-        fOpFlashAlgoTime(p.get<float>("OpFlashAlgoTime")),
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime")),
+        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime")),
         fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad")),
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE")),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE")),
@@ -172,7 +173,7 @@ namespace solar
 
         auto &adjHit = OpHitVector[*it2]; // Update adjHit here
 
-        if (std::abs(adjHit->PeakTime() - hit->PeakTime()) > fOpFlashAlgoTime)
+        if (std::abs(adjHit->PeakTime() - hit->PeakTime()) > fOpFlashAlgoMaxTime)
           break;
         if (adjHit->PE() < fOpFlashAlgoPE)
           continue;
@@ -234,7 +235,7 @@ namespace solar
           break;
         auto &adjHit = OpHitVector[*it4];
 
-        if (std::abs(adjHit->PeakTime() - hit->PeakTime()) > fOpFlashAlgoTime)
+        if (std::abs(hit->PeakTime() - adjHit->PeakTime()) > fOpFlashAlgoMinTime)
           break;
         if (adjHit->PE() < fOpFlashAlgoPE)
           continue;
