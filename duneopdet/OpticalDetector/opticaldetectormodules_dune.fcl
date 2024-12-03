@@ -379,7 +379,7 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
          SelfTrigger_DaphneThresholdMap: [[45,[34,24,14,4]]] #Customized daphne selftrigger threshold,
                                                              #only 4 channels have a threshold of 45ADC
          SelfTrigger_Pretrigger: 128 # Daphne selftrigger configuration, number of pretrigger samples.
-         SelfTrigger_ReadoutWindow: 1000 #Daphne selftrigger configuration
+         SelfTrigger_ReadoutWindow: 1024 #Daphne selftrigger configuration
          CustomPDEperOpDet: true # true to use PDEVector
          PDE: 3 #percent. Not used if CustomPDEperOpDet is true 
          PDEVector:[
