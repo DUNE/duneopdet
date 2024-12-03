@@ -1,0 +1,45 @@
+#include "PDFastSim_dune.fcl"
+#include "services_dunefd_vertdrift_1x8x14.fcl"
+#include "PhotonVisibilityExport.fcl"
+
+process_name: Ana
+
+services:
+{
+  # Load the service that manages root files for histograms.
+  TFileService: { fileName: "dunevis_fdvd_1x8x14_ar.root" }
+  TimeTracker:       {}
+  RandomNumberGenerator: {}
+  MemoryTracker:         { } # default is one
+  message:      @local::dune_message_services_prod
+
+  @table::dunefdvd_1x8x14_3view_30deg_simulation_services
+}
+
+### Use the appropriate geometry ###
+services.Geometry: @local::dunevd10kt_1x8x14_3view_30deg_v5_geo
+
+source:
+{
+  module_type: RootInput
+  fileNames : ["dunevis_vd_1x8x14_source.root"]
+  maxEvents:   1
+}
+
+
+physics:
+{
+   analyzers:
+   {
+      photovisAr: @local::photovisexport_fdvd_ar
+   }
+  
+   anapath: [ photovisAr ]
+   end_paths: [ anapath ]
+}
+
+physics.analyzers.photovisAr.voxel_dx: 15.0 # voxel x mesh step (in cm)
+physics.analyzers.photovisAr.voxel_dy: 15.0 # voxel y mesh step (in cm)
+physics.analyzers.photovisAr.voxel_dz: 15.0 # voxel z mesh step (in cm)
+
+
