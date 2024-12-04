@@ -3,7 +3,6 @@ cet_make_library(
     SolarNuUtils
   SOURCE
     SolarAuxUtils.cc 
-    AdjHitsUtils.cc
     AdjOpHitsUtils.cc
   LIBRARIES
     ${ROOT_CORE}

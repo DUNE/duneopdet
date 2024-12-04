@@ -77,7 +77,8 @@ namespace solar
         // From fhicl configuration
         const std::string fGeometry;
         const int fOpFlashAlgoNHit;
-        const float fOpFlashAlgoTime;
+        const float fOpFlashAlgoMinTime;
+        const float fOpFlashAlgoMaxTime;
         const float fOpFlashAlgoRad;
         const float fOpFlashAlgoPE;
         const float fOpFlashAlgoTriggerPE;
