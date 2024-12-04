@@ -294,6 +294,8 @@ dune_vuv_RS100cm_hits_parameterization:
  
  DomePDCorr: false
 
+ MaxPDDistance: 1000 
+
  delta_angulo_vuv: 10
 }
 
@@ -316,6 +318,8 @@ dune_vuv_Xenon_hits_parameterization:
  GH_border_flat: @local::GH_border_Xenon_flat_dune
  
  DomePDCorr: false
+
+ MaxPDDistance: 2500
 
  delta_angulo_vuv: 10
 }
@@ -430,6 +434,8 @@ dune_vis_RS100cm_hits_parameterization:
  VIS_correction_flat:  @local::VIS_correction_flat_dune_argon
 
  DomePDCorr: false
+
+ MaxPDDistance: 2500
  
  delta_angulo_vis: 10
 }
@@ -540,6 +546,8 @@ dune_vis_xenon_hits_parameterization:
 
  DomePDCorr: false
  
+ MaxPDDistance: 2500
+
  delta_angulo_vis: 10
 }
 
@@ -598,6 +606,8 @@ dunevd_vuv_Argon_hits_parameterization:
 
  DomePDCorr: false
 
+ MaxPDDistance: 1000
+
  delta_angulo_vuv: 10
 
 }
@@ -655,6 +665,8 @@ dunevd_vuv_Xenon_hits_parameterization:
  GH_PARS_flat_lateral: @local::GH_PARS_Xenon_flat_lateral_dunevd
  GH_border_angulo_flat_lateral: @local::GH_border_Xenon_angulo_flat_lateral_dunevd
  GH_border_flat_lateral: @local::GH_border_Xenon_flat_lateral_dunevd
+
+ MaxPDDistance: 2500
 
  DomePDCorr: false 
 
