@@ -363,6 +363,8 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
          LineNoiseRMS: 4.5 #Based on F. Galizzi's study, see https://indico.fnal.gov/event/66616/
          Padding: 400
          Pedestal: 8200 # or baseline, around half of the dynamic range.
+         DynamicRangeSaturation: 16384 # maximum ADC count in the waveform
+         NegativeSignal: false #Activate to have negative signals as it is in data.
          SPETemplateMap: [ ["SPE_DAPHNE2_FBK_2022.dat" ,
            [4,14,24,34,40,42,45,46,47,49,50,52,55,56,57,59,60,62,65,66,67,69,70,72,
            75,76,77,79,84,85,86,87,94,95,96,97,104,105,106,107,114,115,116,117,120,
@@ -377,20 +379,21 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
          SelfTrigger_DaphneThresholdMap: [[45,[34,24,14,4]]] #Customized daphne selftrigger threshold,
                                                              #only 4 channels have a threshold of 45ADC
          SelfTrigger_Pretrigger: 128 # Daphne selftrigger configuration, number of pretrigger samples.
-         SelfTrigger_ReadoutWindow: 1000 #Daphne selftrigger configuration
+         SelfTrigger_ReadoutWindow: 1024 #Daphne selftrigger configuration
          CustomPDEperOpDet: true # true to use PDEVector
          PDE: 3 #percent. Not used if CustomPDEperOpDet is true 
-         PDEVector:[2.17,2.17,1.59,1.59,2.22,2.17,1.59,1.59,2.17,2.17,2.17,2.17,1.59,1.59,
-         2.22,2.17,1.59,1.59,2.17,2.17,2.17,2.17,1.59,1.59,2.22,2.17,1.59,1.59,2.17,2.17,
-         2.17,2.17,1.59,1.59,2.22,2.17,1.59,1.59,2.17,2.17,1.58,1.59,2.22,1.59,2.17,2.22,
-         1.58,2.22,2.17,2.22,1.58,1.59,2.22,1.59,2.17,2.22,1.58,2.22,2.17,2.22,1.58,1.59,
-         2.22,1.59,2.17,2.22,2.22,2.22,2.17,2.22,1.58,1.59,2.22,1.59,2.17,2.22,1.58,2.22,
-         2.17,2.22,1.59,2.17,1.59,2.17,1.58,1.58,1.58,2.22,2.17,1.59,1.59,2.17,1.59,2.17,
-         1.58,1.58,1.58,2.22,2.17,1.59,1.59,2.17,1.59,1.59,2.22,2.22,1.58,2.22,2.17,1.59,
-         1.59,2.17,1.59,1.59,2.22,2.22,1.58,2.22,2.17,1.59,2.22,1.58,2.17,1.59,1.58,2.22,
-         1.59,1.58,1.59,1.58,2.22,1.58,2.17,1.59,1.58,2.22,1.59,1.58,1.59,1.58,2.22,1.58,
-         2.17,2.17,2.22,2.22,1.59,1.58,1.59,1.58,2.22,1.58,2.17,2.17,2.22,2.22,1.59,1.58,
-         1.59,1.58] # percent, based on Eur. Phys. J. C 84, 1004 (2024) details on L. Perez's
+         PDEVector:[
+         2.17,2.17,1.59,1.59,2.22,2.17,1.59,1.59,2.17,2.17,2.17,2.17,1.59,1.59,2.22,2.17, #channels 0-15
+         1.59,1.59,2.17,2.17,2.17,2.17,1.59,1.59,2.22,2.17,1.59,1.59,2.17,2.17,2.17,2.17, #channels 16-31
+         1.59,1.59,2.22,2.17,1.59,1.59,2.17,2.17,1.58,1.59,2.22,1.59,2.17,2.22,1.58,2.22, #channels 32-47
+         2.17,2.22,1.58,1.59,2.22,1.59,2.17,2.22,1.58,2.22,2.17,2.22,1.58,1.59,2.22,1.59, #channels 48-63
+         2.17,1.58,2.22,2.22,2.17,2.22,1.58,1.59,2.22,1.59,2.17,2.22,1.58,2.22,2.17,2.22, #channels 64-79
+         1.59,2.17,1.59,2.17,1.58,1.58,1.58,2.22,2.17,1.59,1.59,2.17,1.59,2.17,1.58,1.58, #channels 80-95
+         1.58,2.22,2.17,1.59,1.59,2.17,1.59,1.59,2.22,2.22,1.58,2.22,2.17,1.59,1.59,2.17, #channels 96-11
+         1.59,1.59,2.22,2.22,1.58,2.22,2.17,1.59,2.22,1.58,2.17,1.59,1.58,2.22,1.59,1.58, #channels 112-127
+         1.59,1.58,2.22,1.58,2.17,1.59,1.58,2.22,1.59,1.58,1.59,1.58,2.22,1.58,2.17,2.17, #channels 128-143
+         2.22,2.22,1.59,1.58,1.59,1.58,2.22,1.58,2.17,2.17,2.22,2.22,1.59,1.58,1.59,1.58] #channels 144-159 
+          # percent, based on Eur. Phys. J. C 84, 1004 (2024) details on L. Perez's
          #talk, https://indico.fnal.gov/event/66616/
          CustomSPEAmplitudeperOpDet: true
          SPEAmplitude: 15 # not used if CustomSPEAmplitudeperOpDet: true, used vector instead
