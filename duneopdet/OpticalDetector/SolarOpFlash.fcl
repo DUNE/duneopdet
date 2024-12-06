@@ -1,11 +1,32 @@
-#include "SolarNuAna.fcl"
 
 BEGIN_PROLOG
 
-solar_opflash_dune10kt_1x2x6: @local::solar_nu_ana_hd
-solar_opflash_dune10kt_1x2x6.module_type: "SolarOpFlash"
+solar_opflash_dune10kt_1x2x6:
+{
+    OpHitLabel:         "ophitspe"     # The label for the process which ran the OpHit
+    module_type:        "SolarOpFlash"
 
-solar_opflash_dunevd10kt_1x8x14_3view_30deg: @local::solar_nu_ana_vd
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.module_type: "SolarOpFlash"
+    Geometry:                   "HD"
+    DetectorSizeX:              360          # 1 TPC drift (X) length in [cm].
+    DetectorSizeY:              600          # 1 TPC Y length in [cm].
+    DetectorSizeZ:              1400         # 1 TPC Z length in [cm].
+    DetectorDriftTime:          4500         # Don't change this value for HD unless you know what you are doing!!!
+
+    OpFlashAlgoNHit:            3            # Min number of hits to consider a flash. Change to > 3 for bkg productions.
+    OpFlashAlgoMinTime:         0.60         # Negative time window to look for adj. OpHits in [tick] units.
+    OpFlashAlgoMaxTime:         1.00         # Positive time window to look for adj. OpHits in [tick] units.
+    OpFlashAlgoRad:             300          # Distance to look for adj. OpHits in [cm] units.
+    OpFlashAlgoPE:              1.5          # PE threshold to look for adj. OpHits.
+    OpFlashAlgoTriggerPE:       1.5          # PE threshold to trigger an OpFlash.
+    OpFlashAlgoHotVertexThld:   0.3          # Relative threshold to consider a hit as hot for opflash vertex determination [0-1].
+    # OpFlashAlgoCentroid:        false        # Use the centroid computation of the flash based on a likelihood estimation.
+}
+
+solar_opflash_dunevd10kt_1x8x14_3view_30deg: @local::solar_opflash_dune10kt_1x2x6
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.Geometry: "VD"
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeX: 340
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeY: 680
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeZ: 2100
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorDriftTime: 8000
 
 END_PROLOG
