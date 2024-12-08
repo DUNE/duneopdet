@@ -233,7 +233,7 @@ namespace opdet {
       double  TickToTime(size_t tick) const;
       size_t TimeToTick(double  time) const;
 
-      void DynamicRangeSaturation(std::vector< short > &wvf);
+      void DynamicRangeSaturation( std::vector< double > &wvf);
     
 
       
@@ -294,7 +294,7 @@ namespace opdet {
     fDefaultSimWindow   = pset.get< bool   >("DefaultSimWindow"  ); //long readout window (2 drift windows).
     fPreTrigger         = pset.get< size_t >("PreTrigger"        ,0); //set to zero if TimeBegin<
     fPadding            = pset.get< int    >("Padding"           );
-    fDynamicRangeSaturation = pset.get< short    >("DynamicRangeSaturation");
+    fDynamicRangeSaturation = pset.get< double    >("DynamicRangeSaturation");
     fNegativeSignal = pset.get< bool    >("NegativeSignal");
     
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
@@ -445,7 +445,6 @@ namespace opdet {
       SubRun = evt.subRun();
       Event  = evt.event();
     }
-
     auto wave_forms_p = std::make_unique< std::vector< raw::OpDetWaveform > >();
     auto bt_DivRec_p  = std::make_unique< std::vector< sim::OpDetDivRec > >();
 
@@ -469,7 +468,6 @@ namespace opdet {
         ODBMap[btr.get()->OpDetNum()].push_back(&btr);
       }
     }
-    
     //now we start creating waveforms    
     for (size_t opDet=0; opDet<ODBMap.size();opDet++)
     {
@@ -483,7 +481,7 @@ namespace opdet {
 
       //We add all photons from ODBs to the waveform.
       for (size_t jj=0; jj<ODBMap[opDet].size();jj++)//(auto btr : btr_vec)
-      {        
+      {
         auto btr = ODBMap[opDet][jj];
         if(btr->get()->OpDetNum()!=(int)opDet)
           throw art::Exception(art::errors::LogicError)
@@ -510,11 +508,12 @@ namespace opdet {
            hardwareChannel < nChannelsPerOpDet; ++hardwareChannel)
       {
         for(const std::pair<int, int>& p: fls[hardwareChannel].ranges){
-          const std::vector<double> sub(pdWaveforms[hardwareChannel].begin()+p.first,
+          std::vector<double> sub(pdWaveforms[hardwareChannel].begin()+p.first,
                                         pdWaveforms[hardwareChannel].begin()+p.second+1);
-          
+
+          DynamicRangeSaturation(sub);
+
           std::vector< short > waveformOfShorts = VectorOfDoublesToVectorOfShorts(sub);
-          DynamicRangeSaturation(waveformOfShorts);
           
           std::map< size_t, std::vector < short > > mapTickWaveform =
             (SelfTrigger) ?
@@ -623,7 +622,7 @@ namespace opdet {
 
  }
 
-   void OpDetDigitizerProtoDUNEHD::DynamicRangeSaturation(std::vector< short > &wvf)
+   void OpDetDigitizerProtoDUNEHD::DynamicRangeSaturation(std::vector< double > &wvf)
   {
      for(size_t i=0; i<wvf.size();i++)
      {
@@ -758,6 +757,7 @@ namespace opdet {
   std::vector< short > OpDetDigitizerProtoDUNEHD::VectorOfDoublesToVectorOfShorts
     (std::vector< double > const& vectorOfDoubles) const
     {
+      //Warning, short variable has a range of ~32k ADC counts! Possible overflow!
       return std::vector<short>(vectorOfDoubles.begin(), vectorOfDoubles.end());
     }
 
