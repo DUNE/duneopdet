@@ -167,6 +167,8 @@ namespace opdet {
       double  getSPEAmplitude(int OpDet) const;
       double fSPEAmplitudesError;
       double fSPEWidth;
+      short fDynamicRangeSaturation;
+      bool fNegativeSignal;
       
       std::vector<int> fFullStreamingChannels;
       std::vector<std::pair<std::string,std::vector<int>>>fSPETemplateMap;
@@ -230,6 +232,8 @@ namespace opdet {
       // without any checks
       double  TickToTime(size_t tick) const;
       size_t TimeToTick(double  time) const;
+
+      void DynamicRangeSaturation(std::vector< short > &wvf);
     
 
       
@@ -290,6 +294,8 @@ namespace opdet {
     fDefaultSimWindow   = pset.get< bool   >("DefaultSimWindow"  ); //long readout window (2 drift windows).
     fPreTrigger         = pset.get< size_t >("PreTrigger"        ,0); //set to zero if TimeBegin<
     fPadding            = pset.get< int    >("Padding"           );
+    fDynamicRangeSaturation = pset.get< short    >("DynamicRangeSaturation");
+    fNegativeSignal = pset.get< bool    >("NegativeSignal");
     
     fDigiTree_SSP_LED   = pset.get< bool   >("SSP_LED_DigiTree"  );
     fUseSDPs            = pset.get< bool   >("UseSDPs", true     );
@@ -385,7 +391,7 @@ namespace opdet {
       fRunInfo->Branch("SampleSize"   , &SampleSize   , "SampleSize/D"     );
       fRunInfo->Branch("nOpDet"        , &nOpDet   , Form("nOpDet/I")    );
       fRunInfo->Branch("PDE"        , vaux   , Form("PDE[nOpDet]/D")    );
-      fRunInfo->Branch("SPEAmplitude"        , vaux   , Form("SPEAmplitude[nOpDet]/D")    );
+      fRunInfo->Branch("SPEAmplitude"        , vaux2   , Form("SPEAmplitude[nOpDet]/D")    );
       for (unsigned int i=0; i<nOpDet; i++) vaux[i]=getPDE(i);
       for (unsigned int i=0; i<nOpDet; i++) vaux2[i]=getSPEAmplitude(i);
       for (unsigned int i=0; i<nOpDet; i++) std::cout << " PDE [ " << i << " ] = " << vaux[i] << " percent." << std::endl;
@@ -508,6 +514,7 @@ namespace opdet {
                                         pdWaveforms[hardwareChannel].begin()+p.second+1);
           
           std::vector< short > waveformOfShorts = VectorOfDoublesToVectorOfShorts(sub);
+          DynamicRangeSaturation(waveformOfShorts);
           
           std::map< size_t, std::vector < short > > mapTickWaveform =
             (SelfTrigger) ?
@@ -584,7 +591,8 @@ namespace opdet {
   //---------------------------------------------------------------------------
   void OpDetDigitizerProtoDUNEHD::CreateSinglePEWaveforms()
   {
-//    fSPETemplateMap     = pset.get< std::vector<std::pair<std::string,std::vector<int>>>>("SPETemplateMap");
+      double Sign=1.0; //positive by default
+      if(fNegativeSignal) Sign=-1.0;
       for(auto v : fSPETemplateMap)
       {
         std::cout << "Using custom SPE response taken from " << v.first << std::endl;
@@ -600,8 +608,8 @@ namespace opdet {
           std::vector< double > SinglePEVec_x;   //1 column
           Double_t  x; Double_t xmax=0;
           while (SPEData >> x ) {
-            SinglePEVec_x.push_back(x);
             if(x>xmax)xmax=x;
+            SinglePEVec_x.push_back(Sign*x);
           }
           for(size_t i=0; i<SinglePEVec_x.size(); i++) SinglePEVec_x[i]/=xmax; 
           fSinglePEWaveforms.push_back(SinglePEVec_x);
@@ -615,6 +623,14 @@ namespace opdet {
 
  }
 
+   void OpDetDigitizerProtoDUNEHD::DynamicRangeSaturation(std::vector< short > &wvf)
+  {
+     for(size_t i=0; i<wvf.size();i++)
+     {
+       if(wvf[i]>fDynamicRangeSaturation) wvf[i]=fDynamicRangeSaturation;
+       if(wvf[i]<0) wvf[i]=0;
+     }
+  }
   //---------------------------------------------------------------------------
   void OpDetDigitizerProtoDUNEHD::CreatePDWaveform
     (art::Ptr<sim::OpDetBacktrackerRecord> const& btr_p,

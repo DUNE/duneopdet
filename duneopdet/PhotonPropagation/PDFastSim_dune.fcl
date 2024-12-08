@@ -52,7 +52,7 @@ dunefd_pdfastsim_par_xe_refl.VISHits:          @local::dune_vis_xenon_hits_param
 dunefd_pdfastsim_pvs:                          @local::standard_pdfastsim_pvs
 
 # Choose *the* pdfast sim module for the FD
-dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar_refl
+dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar
 
 
 ###########
