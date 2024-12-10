@@ -93,9 +93,12 @@ namespace opdet {
           fhicl::Atom<Double_t>    LineNoiseRMS{ fhicl::Name("LineNoiseRMS"), 1.0 };
           fhicl::Atom<size_t>      PreTrigger{ fhicl::Name("PreTrigger"), 0};
           fhicl::Atom<short>       Pedestal{ fhicl::Name("Pedestal"), 1500};
-          fhicl::Sequence<std::string> SPETemplateFiles{ fhicl::Name("SPETemplateFiles") };
-          fhicl::Atom<size_t>      SPETemplateFileDataColumn{ fhicl::Name("SPETemplateFileDataColumn"), 1 };
-          fhicl::Sequence<std::string> NoiseTemplateFiles{ fhicl::Name("NoiseTemplateFiles") };
+
+	  fhicl::Atom<std::string>      SPETemplatePath{ fhicl::Name("SPETemplatePath"), "" };
+          fhicl::Atom<std::string>      NoiseTemplatePath{ fhicl::Name("NoiseTemplatePath"), "" };
+	  fhicl::Sequence<std::string>  SPETemplateFiles{ fhicl::Name("SPETemplateFiles") };
+          fhicl::Atom<size_t>           SPETemplateFileDataColumn{ fhicl::Name("SPETemplateFileDataColumn"), 1 };
+          fhicl::Sequence<std::string>  NoiseTemplateFiles{ fhicl::Name("NoiseTemplateFiles") };
 
           fhicl::Atom<Int_t>       Samples{ fhicl::Name("Samples"), 1000 };
           fhicl::Atom<Int_t>       PedestalBuffer{ fhicl::Name("PedestalBuffer"), 10 };
@@ -104,17 +107,17 @@ namespace opdet {
           fhicl::Atom<bool>        ApplyPostBLCorrection{ fhicl::Name("ApplyPostBLCorrection") };
           fhicl::Atom<bool>        AutoScale{ fhicl::Name("AutoScale"), false };
 
-	fhicl::Atom<short>        InputPolarity{ fhicl::Name("InputPolarity") };
+	  fhicl::Atom<short>        InputPolarity{ fhicl::Name("InputPolarity") };
 
 
-	fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
+	  fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
 
           fhicl::Sequence<int>          SPETemplateMap_channels{ fhicl::Name("SPETemplateMapChannels") };
           fhicl::Sequence<unsigned int> SPETemplateMap_templates{ fhicl::Name("SPETemplateMapTemplates") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_channels{ fhicl::Name("NoiseTemplateMapChannels") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_templates{ fhicl::Name("NoiseTemplateMapTemplates") };
 
-	fhicl::Sequence<int> IgnoreChannels{ fhicl::Name("IgnoreChannels") }; // integer to allow for channel -1 = unrecognized channel
+	  fhicl::Sequence<int> IgnoreChannels{ fhicl::Name("IgnoreChannels") }; // integer to allow for channel -1 = unrecognized channel
 
 
           struct Filter {
@@ -295,11 +298,13 @@ namespace opdet {
       std::vector<CmplxWaveform_t> fSinglePEWaveforms_fft;    //!< Fourier transform of the tamplates
       std::vector<double> fSinglePEAmplitudes;                //!< single PE amplitude for found maximum peak in the template.
       unsigned int WfDeco;                      //!< Number of waveform processed
+      std::string fSPETemplatePath;
       std::map<unsigned int, unsigned int> fChannelToTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSinglePEWaveforms)
       unsigned short fUseSingleSPETemplate;
       std::set<int> fIgnoreChannels; //!< List of channels to ignore in deconvolution
 
       // Noise templates -- input in frequency domain
+      std::string fNoiseTemplatePath;
       std::vector<std::vector<double> > fNoiseTemplates;    //!< Vector that stores noise template in frequency domain
       std::map<unsigned int, unsigned int> fChannelToNoiseTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSingle
       std::vector<double> fNoiseDefault;
@@ -360,7 +365,9 @@ namespace opdet {
       fApplyPostBLCorr{ pars().ApplyPostBLCorrection()},
       fAutoScale{ pars().AutoScale()},
       fInputPolarity{ pars().InputPolarity()},
+      fSPETemplatePath{ pars().SPETemplatePath()},
       fUseSingleSPETemplate(0),
+      fNoiseTemplatePath{ pars().NoiseTemplatePath()},
       fNoiseDefault(fSamples, fLineNoiseRMS*fLineNoiseRMS*fSamples),
       fOutputProduct{ pars().OutputProduct() },
       fPostfilterConfig{ WfmExtraFilter_t( pars().Postfilter()) },
@@ -852,6 +859,8 @@ namespace opdet {
       fSinglePEWaveforms.push_back(std::vector<double>()); // add a new empty waform
       auto &spewfrm = fSinglePEWaveforms.back(); // get the reference to the waveform vector
       std::string datafile;
+      // Update the file name to search with a configured path prefix
+      fname = fSPETemplatePath + fname;
       // taking the file name as the first argument,
       // the second argument is the local variable where to store the full path - both are std::string objects
       sp.find_file(fname, datafile);
@@ -908,6 +917,8 @@ namespace opdet {
       fNoiseTemplates.push_back(std::vector<double>()); // add a new empty waform
       auto &noisewfrm = fNoiseTemplates.back(); // get the reference to the waveform vector
       std::string datafile;
+      // Update the file name to search with a configured path prefix
+      fname = fNoiseTemplatePath + fname;
       // taking the file name as the first argument,
       // the second argument is the local variable where to store the full path - both are std::string objects
       sp.find_file(fname, datafile);

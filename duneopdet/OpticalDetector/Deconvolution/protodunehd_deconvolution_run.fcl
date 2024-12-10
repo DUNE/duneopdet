@@ -14,6 +14,12 @@ services:
 source.inputCommands: [ "keep *", "drop *_*_*_opdec" ]
 outputs.out1.outputCommands: [ "keep *_*_*_TestDeconv", "keep *_pdhddaphne_*_*" ]
 
+
+physics.simulate: @erase
+physics.reco: [ opdec, rns ]
+physics.trigger_paths: [ reco ]
+
+
 physics.producers.opdec: @local::protodunehd_deconvolution
 
 
