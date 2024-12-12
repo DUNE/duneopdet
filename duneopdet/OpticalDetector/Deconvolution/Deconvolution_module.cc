@@ -368,12 +368,12 @@ namespace opdet {
       fSPETemplatePath{ pars().SPETemplatePath()},
       fUseSingleSPETemplate(0),
       fNoiseTemplatePath{ pars().NoiseTemplatePath()},
-      fNoiseDefault(fSamples, fLineNoiseRMS*fLineNoiseRMS*fSamples),
+      fNoiseDefault(fSamples/2+1, fLineNoiseRMS*fLineNoiseRMS*fSamples),
       fOutputProduct{ pars().OutputProduct() },
       fPostfilterConfig{ WfmExtraFilter_t( pars().Postfilter()) },
       fFilterConfig{ WfmFilter_t( pars().Filter() ) },
-      fxG0(fSamples),
-      fxG1(fSamples)
+      fxG0(fSamples/2+1),
+      fxG1(fSamples/2+1)
   {
     auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
 
@@ -545,12 +545,12 @@ namespace opdet {
       auto &xH = fSinglePEWaveforms_fft[fChannelToTemplateMap[effChannel]]; // get the SPE template relevant for this channel
       auto &speapmlitude = fSinglePEAmplitudes[fChannelToTemplateMap[effChannel]];
 
-      CmplxWaveform_t xV(fSamples);
-      CmplxWaveform_t xS(fSamples);
-      CmplxWaveform_t xG(fSamples);
-      CmplxWaveform_t xY(fSamples);
-      CmplxWaveform_t xGH(fSamples);
-      std::vector<float> xSNR(fSamples, 0.);
+      CmplxWaveform_t xV(fSamples/2+1);
+      CmplxWaveform_t xS(fSamples/2+1);
+      CmplxWaveform_t xG(fSamples/2+1);
+      CmplxWaveform_t xY(fSamples/2+1);
+      CmplxWaveform_t xGH(fSamples/2+1);
+      std::vector<float> xSNR(fSamples/2+1, 0.);
       int OriginalWaveformSize = wf.Waveform().size();
 
       // noise
@@ -611,7 +611,7 @@ namespace opdet {
       Double_t fFrequencyCutOff = fFilterConfig.fCutoff;
       Double_t fTickCutOff = fSamples*fFrequencyCutOff/fSampleFreq;
 
-      for (int i=0; i<fSamples*0.5+1; i++) {
+      for (int i=0; i<(fSamples/2+1); i++) {
 
         if (fFilterConfig.fType == Deconvolution::kWiener){
 	  // Compute spectral density
@@ -671,7 +671,7 @@ namespace opdet {
       }
 
       if (fApplyPostfilter) {
-        CmplxWaveform_t xxY(fSamples);
+        CmplxWaveform_t xxY(fSamples/2+1);
         std::vector<double> ytmp(xvdec.begin(), xvdec.end());
         fft_r2c->SetPoints(&ytmp[0]);
         fft_r2c->Transform();
@@ -784,14 +784,14 @@ namespace opdet {
       xf.at(i) = TMath::Gaus(i, mu, sigma, kTRUE);
     }
 
-    std::vector<Double_t> re_(fSamples, 0.);
-    std::vector<Double_t> im_(fSamples, 0.);
+    std::vector<Double_t> re_(fSamples/2+1, 0.);
+    std::vector<Double_t> im_(fSamples/2+1, 0.);
 
     fft_r2c->SetPoints(&xf[0]);
     fft_r2c->Transform();
     fft_r2c->GetPointsComplex(&re_[0], &im_[0]);
 
-    for (int i=0; i<0.5*fSamples+1; i++) {
+    for (int i=0; i<fSamples/2+1; i++) {
       TComplex F(re_.at(i), im_.at(i));
       TComplex phase = TComplex(0., -TMath::TwoPi()*i*mu/(fSamples));
       xF.fCmplx.at(i) = F*TComplex::Exp(phase);
@@ -940,7 +940,7 @@ namespace opdet {
 	throw art::Exception(art::errors::FileOpenError);
       }
 
-      noisewfrm.resize(fSamples, 0.);
+      noisewfrm.resize(fSamples/2+1, 0.); // for power spectrum, need only half of the sample size
 
       noiseData.close();
 
@@ -1017,7 +1017,7 @@ namespace opdet {
     // Apply a linear phase shift to make the "pulse" in the middle of the
     // time window
     const int shift = 0.5*fSamples;
-    for (int i=0; i<fSamples*0.5+1; i++) {
+    for (int i=0; i<fSamples/2+1; i++) {
      TComplex phase = TComplex(0., TMath::TwoPi()*i*shift/(fSamples));
      xGH.fCmplx.at(i) = xGH.fCmplx.at(i)*TComplex::Exp(phase);
     }
