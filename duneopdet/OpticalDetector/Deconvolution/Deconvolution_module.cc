@@ -376,6 +376,7 @@ namespace opdet {
       fxG1(fSamples/2+1)
   {
     auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
+    auto mfd = mf::LogDebug("Deconvolution::Deconvolution()");
 
     // Declare that we'll produce a vector of OpDetWaveforms
     WfDeco=0;
@@ -393,10 +394,11 @@ namespace opdet {
     fft_c2r = TVirtualFFT::FFT(1, &fSamples, "M C2R K");
 
     // Prepare the SPE waveform templates
+    mfi << "Will look in "<<fSPETemplatePath<<" for "<<fSPETemplateFiles.size()<<" SPE template files.\n";
     SourceSPETemplateFiles();
     // Prepare the Fourier transforms
     for (auto &xh: fSinglePEWaveforms) {
-      fSinglePEWaveforms_fft.push_back(CmplxWaveform_t(fSamples));
+      fSinglePEWaveforms_fft.push_back(CmplxWaveform_t(fSamples/2+1));
       auto &xH = fSinglePEWaveforms_fft.back();
 
       fft_r2c->SetPoints(&xh[0]);
@@ -427,6 +429,7 @@ namespace opdet {
     }
 
     // Prepare the noise templates
+    mfi << "Will look in "<<fNoiseTemplatePath<<" for "<<fNoiseTemplateFiles.size()<<" noise template files.\n";
     SourceNoiseTemplateFiles();
     {
 	auto channels = pars().NoiseTemplateMap_channels();
@@ -445,33 +448,33 @@ namespace opdet {
     //=== info print out ===
     mfi<<"Input waveform polarity set to: " << fInputPolarity << "\n";
     // info on channel to SPE template map
-    mfi<<"Channels mapped to SPE template files:\n";
+    mfd<<"Channels mapped to SPE template files:\n";
     {
       std::map< std::string, std::vector<int> > templ_to_channel_map;
       for (auto itm: fChannelToTemplateMap)
 	templ_to_channel_map[fSPETemplateFiles[itm.second]].push_back(itm.first);
       for (auto itm: templ_to_channel_map) {
-	mfi<<"    "<<itm.first<<": ";
+	mfd<<"    "<<itm.first<<": ";
 	for (auto ch: itm.second)
-	  mfi<<ch<<", ";
-	mfi<<"\n";
+	  mfd<<ch<<", ";
+	mfd<<"\n";
       }
     }
-    mfi<<"\n";
+    mfd<<"\n";
 
     // info on channel to noise template map
     mfi<<"Default white noise RMS: " << fLineNoiseRMS << "\n";
 
-    mfi<<"Channels mapped to noise template files:\n";
+    mfd<<"Channels mapped to noise template files:\n";
     {
       std::map< std::string, std::vector<int> > templ_to_channel_map;
       for (auto itm: fChannelToNoiseTemplateMap)
 	templ_to_channel_map[fNoiseTemplateFiles[itm.second]].push_back(itm.first);
       for (auto itm: templ_to_channel_map) {
-	mfi<<"    "<<itm.first<<": ";
+	mfd<<"    "<<itm.first<<": ";
 	for (auto ch: itm.second)
-	  mfi<<ch<<", ";
-	mfi<<"\n";
+	  mfd<<ch<<", ";
+	mfd<<"\n";
       }
     }
     if (!fChannelToNoiseTemplateMap.size())
@@ -738,10 +741,10 @@ namespace opdet {
     }//waveforms loop
 
     //-------------------------------------Print fType Filter
-       if (fFilterConfig.fType == Deconvolution::kWiener){printf("***Wiener Filter****");}
-       if (fFilterConfig.fType == Deconvolution::kGauss){printf("***Gauss Filter***");}
-       if (fFilterConfig.fType == Deconvolution::kOther){printf("***Standart dec***");}
-       if (fApplyPostfilter){printf("***ApplyPostfilter***");}
+       if (fFilterConfig.fType == Deconvolution::kWiener){mfi<<"***Wiener Filter****"<<"\n";}
+       if (fFilterConfig.fType == Deconvolution::kGauss){mfi<<"***Gauss Filter***"<<"\n";}
+       if (fFilterConfig.fType == Deconvolution::kOther){mfi<<"***Standart dec***"<<"\n";}
+       if (fApplyPostfilter){mfi<<"***ApplyPostfilter***"<<"\n";}
 
       //------------------------------------------------
 
@@ -854,6 +857,7 @@ namespace opdet {
    * variable `fSPETemplateFileDataColumn`.
    */
   void Deconvolution::SourceSPETemplateFiles() {
+    auto mfd = mf::LogDebug("Deconvolution::SourceSPETemplateFiles()");
     cet::search_path sp("FW_SEARCH_PATH");
     for (auto fname: fSPETemplateFiles) {
       fSinglePEWaveforms.push_back(std::vector<double>()); // add a new empty waform
@@ -864,10 +868,11 @@ namespace opdet {
       // taking the file name as the first argument,
       // the second argument is the local variable where to store the full path - both are std::string objects
       sp.find_file(fname, datafile);
+      mfd<<"Found SPE template file "<<datafile<<"\n";
       std::ifstream SPEData;
       SPEData.open(datafile);
       size_t n_columns = CountFileColumns(datafile.c_str());
-      std::cout << "ncols= " << n_columns << std::endl;
+      mfd << "ncols= " << n_columns << "\n";
       if (fSPETemplateFileDataColumn >= n_columns) {
 	printf("Deconvolution::SourceSPETemplateFiles ERROR: ");
 	printf("The module is supposed to select column %lu, but only %lu columns are present.\n",
@@ -882,7 +887,7 @@ namespace opdet {
 	while (std::getline(SPEData, temp_str)) {
 	  std::stringstream ss; ss << temp_str;
 	  int  icol = 0;
-	  while (ss) {ss >> buff[icol]; ++icol;}
+	  while (ss >> buff[icol])  ++icol;
 
 	  spewfrm.push_back(buff[fSPETemplateFileDataColumn]);
 	}
@@ -900,7 +905,7 @@ namespace opdet {
       // Set single p.e. maximum value
       fSinglePEAmplitudes.push_back( TMath::Max(1.0,
 						*(std::max_element(spewfrm.begin(), spewfrm.end()))) );
-      std::cout << "SPE Amplitude for template " << fSinglePEWaveforms.size() << ": " << fSinglePEAmplitudes.back() << std::endl;
+      mfd << "SPE Amplitude for template " << fSinglePEWaveforms.size() << ": " << fSinglePEAmplitudes.back() << "\n";
     }
     return;
   }
@@ -957,6 +962,8 @@ namespace opdet {
    * @return nr of columns
    */
   int Deconvolution::CountFileColumns(const char* file_path) {
+    auto mfd = mf::LogDebug("Deconvolution::CountFileColumns()");
+
     std::ifstream file_;
     file_.open(file_path);
 
@@ -976,13 +983,16 @@ namespace opdet {
       std::string sub;
       int n_columns = 0;
 
-      while (sstream) {
-        sstream >> sub;
-        if (sub.length()) ++n_columns;
+      while (sstream>>sub) {
+        if (sub.length()) {
+	    mfd<<" "<<sub;
+	    ++n_columns;
+	}
       }
+      mfd<<"\n";
 
-      if (iline == 1) {N_COLUMNS = n_columns;}
-      else if (iline > 1) {
+      if (iline == 0) {N_COLUMNS = n_columns;}
+      else if (iline > 0) {
         if (n_columns != N_COLUMNS) {
           printf("Deconvolution::CountFileColumns(%s): WARNING ",
               file_path);
