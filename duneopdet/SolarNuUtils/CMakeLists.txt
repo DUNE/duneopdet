@@ -21,4 +21,7 @@ cet_make_library(
     art_root_io::tfile_support
     messagefacility::MF_MessageLogger
     cetlib::cetlib
-)
+  )
+
+install_headers()
+  
