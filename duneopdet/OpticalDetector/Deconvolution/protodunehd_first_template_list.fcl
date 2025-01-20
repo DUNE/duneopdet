@@ -135,8 +135,8 @@ protodunehd_first_template_list: {
 
    noise_template_path: "ProtoDUNE/HD/opdetresponse/"
    noise_template_files: [
-      "FFT_Noise_Template_run27950_PDHD_VGain2318_fbk_Nov2024.txt",
-      "FFT_Noise_Template_run27950_PDHD_VGain2318_hpk_Nov2024.txt"
+      "FFT_Noise_Template_run27950_PDHD_VGain2318_sample513_fbk_Nov2024.txt",
+      "FFT_Noise_Template_run27950_PDHD_VGain2318_sample513_hpk_Nov2024.txt"
    ]
 
    noise_template_channels: [
