@@ -66,7 +66,8 @@ namespace solar
     std::string fOpHitLabel; // Input tag for OpHit collection
     int fOpFlashAlgoNHit;
     double fDetectorSizeX;
-    float fOpFlashAlgoTime;
+    float fOpFlashAlgoMinTime;
+    float fOpFlashAlgoMaxTime;
     float fOpFlashAlgoRad;
     float fOpFlashAlgoPE;
     float fOpFlashAlgoTriggerPE;
@@ -95,7 +96,8 @@ namespace solar
         fOpHitLabel(p.get<std::string>("OpHitLabel")),
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit")),
         fDetectorSizeX(p.get<double>("DetectorSizeX")),
-        fOpFlashAlgoTime(p.get<float>("OpFlashAlgoTime")),
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime")),
+        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime")),
         fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad")),
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE")),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE")),
