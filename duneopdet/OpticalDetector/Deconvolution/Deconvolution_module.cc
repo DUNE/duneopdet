@@ -93,9 +93,12 @@ namespace opdet {
           fhicl::Atom<Double_t>    LineNoiseRMS{ fhicl::Name("LineNoiseRMS"), 1.0 };
           fhicl::Atom<size_t>      PreTrigger{ fhicl::Name("PreTrigger"), 0};
           fhicl::Atom<short>       Pedestal{ fhicl::Name("Pedestal"), 1500};
-          fhicl::Sequence<std::string> SPETemplateFiles{ fhicl::Name("SPETemplateFiles") };
-          fhicl::Atom<size_t>      SPETemplateFileDataColumn{ fhicl::Name("SPETemplateFileDataColumn"), 1 };
-          fhicl::Sequence<std::string> NoiseTemplateFiles{ fhicl::Name("NoiseTemplateFiles") };
+
+	  fhicl::Atom<std::string>      SPETemplatePath{ fhicl::Name("SPETemplatePath"), "" };
+          fhicl::Atom<std::string>      NoiseTemplatePath{ fhicl::Name("NoiseTemplatePath"), "" };
+	  fhicl::Sequence<std::string>  SPETemplateFiles{ fhicl::Name("SPETemplateFiles") };
+          fhicl::Atom<size_t>           SPETemplateFileDataColumn{ fhicl::Name("SPETemplateFileDataColumn"), 1 };
+          fhicl::Sequence<std::string>  NoiseTemplateFiles{ fhicl::Name("NoiseTemplateFiles") };
 
           fhicl::Atom<Int_t>       Samples{ fhicl::Name("Samples"), 1000 };
           fhicl::Atom<Int_t>       PedestalBuffer{ fhicl::Name("PedestalBuffer"), 10 };
@@ -104,17 +107,17 @@ namespace opdet {
           fhicl::Atom<bool>        ApplyPostBLCorrection{ fhicl::Name("ApplyPostBLCorrection") };
           fhicl::Atom<bool>        AutoScale{ fhicl::Name("AutoScale"), false };
 
-	fhicl::Atom<short>        InputPolarity{ fhicl::Name("InputPolarity") };
+	  fhicl::Atom<short>        InputPolarity{ fhicl::Name("InputPolarity") };
 
 
-	fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
+	  fhicl::Atom<std::string> OutputProduct{ fhicl::Name("OutputProduct"), "decowave"};
 
           fhicl::Sequence<int>          SPETemplateMap_channels{ fhicl::Name("SPETemplateMapChannels") };
           fhicl::Sequence<unsigned int> SPETemplateMap_templates{ fhicl::Name("SPETemplateMapTemplates") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_channels{ fhicl::Name("NoiseTemplateMapChannels") };
           fhicl::Sequence<unsigned int> NoiseTemplateMap_templates{ fhicl::Name("NoiseTemplateMapTemplates") };
 
-	fhicl::Sequence<int> IgnoreChannels{ fhicl::Name("IgnoreChannels") }; // integer to allow for channel -1 = unrecognized channel
+	  fhicl::Sequence<int> IgnoreChannels{ fhicl::Name("IgnoreChannels") }; // integer to allow for channel -1 = unrecognized channel
 
 
           struct Filter {
@@ -295,11 +298,13 @@ namespace opdet {
       std::vector<CmplxWaveform_t> fSinglePEWaveforms_fft;    //!< Fourier transform of the tamplates
       std::vector<double> fSinglePEAmplitudes;                //!< single PE amplitude for found maximum peak in the template.
       unsigned int WfDeco;                      //!< Number of waveform processed
+      std::string fSPETemplatePath;
       std::map<unsigned int, unsigned int> fChannelToTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSinglePEWaveforms)
       unsigned short fUseSingleSPETemplate;
       std::set<int> fIgnoreChannels; //!< List of channels to ignore in deconvolution
 
       // Noise templates -- input in frequency domain
+      std::string fNoiseTemplatePath;
       std::vector<std::vector<double> > fNoiseTemplates;    //!< Vector that stores noise template in frequency domain
       std::map<unsigned int, unsigned int> fChannelToNoiseTemplateMap; //!< maps a channel id to the input SPE  template file (index in fSingle
       std::vector<double> fNoiseDefault;
@@ -360,15 +365,18 @@ namespace opdet {
       fApplyPostBLCorr{ pars().ApplyPostBLCorrection()},
       fAutoScale{ pars().AutoScale()},
       fInputPolarity{ pars().InputPolarity()},
+      fSPETemplatePath{ pars().SPETemplatePath()},
       fUseSingleSPETemplate(0),
-      fNoiseDefault(fSamples, fLineNoiseRMS*fLineNoiseRMS*fSamples),
+      fNoiseTemplatePath{ pars().NoiseTemplatePath()},
+      fNoiseDefault(fSamples/2+1, fLineNoiseRMS*fLineNoiseRMS*fSamples),
       fOutputProduct{ pars().OutputProduct() },
       fPostfilterConfig{ WfmExtraFilter_t( pars().Postfilter()) },
       fFilterConfig{ WfmFilter_t( pars().Filter() ) },
-      fxG0(fSamples),
-      fxG1(fSamples)
+      fxG0(fSamples/2+1),
+      fxG1(fSamples/2+1)
   {
     auto mfi = mf::LogInfo("Deconvolution::Deconvolution()");
+    auto mfd = mf::LogDebug("Deconvolution::Deconvolution()");
 
     // Declare that we'll produce a vector of OpDetWaveforms
     WfDeco=0;
@@ -386,10 +394,11 @@ namespace opdet {
     fft_c2r = TVirtualFFT::FFT(1, &fSamples, "M C2R K");
 
     // Prepare the SPE waveform templates
+    mfi << "Will look in "<<fSPETemplatePath<<" for "<<fSPETemplateFiles.size()<<" SPE template files.\n";
     SourceSPETemplateFiles();
     // Prepare the Fourier transforms
     for (auto &xh: fSinglePEWaveforms) {
-      fSinglePEWaveforms_fft.push_back(CmplxWaveform_t(fSamples));
+      fSinglePEWaveforms_fft.push_back(CmplxWaveform_t(fSamples/2+1));
       auto &xH = fSinglePEWaveforms_fft.back();
 
       fft_r2c->SetPoints(&xh[0]);
@@ -420,6 +429,7 @@ namespace opdet {
     }
 
     // Prepare the noise templates
+    mfi << "Will look in "<<fNoiseTemplatePath<<" for "<<fNoiseTemplateFiles.size()<<" noise template files.\n";
     SourceNoiseTemplateFiles();
     {
 	auto channels = pars().NoiseTemplateMap_channels();
@@ -438,33 +448,33 @@ namespace opdet {
     //=== info print out ===
     mfi<<"Input waveform polarity set to: " << fInputPolarity << "\n";
     // info on channel to SPE template map
-    mfi<<"Channels mapped to SPE template files:\n";
+    mfd<<"Channels mapped to SPE template files:\n";
     {
       std::map< std::string, std::vector<int> > templ_to_channel_map;
       for (auto itm: fChannelToTemplateMap)
 	templ_to_channel_map[fSPETemplateFiles[itm.second]].push_back(itm.first);
       for (auto itm: templ_to_channel_map) {
-	mfi<<"    "<<itm.first<<": ";
+	mfd<<"    "<<itm.first<<": ";
 	for (auto ch: itm.second)
-	  mfi<<ch<<", ";
-	mfi<<"\n";
+	  mfd<<ch<<", ";
+	mfd<<"\n";
       }
     }
-    mfi<<"\n";
+    mfd<<"\n";
 
     // info on channel to noise template map
     mfi<<"Default white noise RMS: " << fLineNoiseRMS << "\n";
 
-    mfi<<"Channels mapped to noise template files:\n";
+    mfd<<"Channels mapped to noise template files:\n";
     {
       std::map< std::string, std::vector<int> > templ_to_channel_map;
       for (auto itm: fChannelToNoiseTemplateMap)
 	templ_to_channel_map[fNoiseTemplateFiles[itm.second]].push_back(itm.first);
       for (auto itm: templ_to_channel_map) {
-	mfi<<"    "<<itm.first<<": ";
+	mfd<<"    "<<itm.first<<": ";
 	for (auto ch: itm.second)
-	  mfi<<ch<<", ";
-	mfi<<"\n";
+	  mfd<<ch<<", ";
+	mfd<<"\n";
       }
     }
     if (!fChannelToNoiseTemplateMap.size())
@@ -538,12 +548,12 @@ namespace opdet {
       auto &xH = fSinglePEWaveforms_fft[fChannelToTemplateMap[effChannel]]; // get the SPE template relevant for this channel
       auto &speapmlitude = fSinglePEAmplitudes[fChannelToTemplateMap[effChannel]];
 
-      CmplxWaveform_t xV(fSamples);
-      CmplxWaveform_t xS(fSamples);
-      CmplxWaveform_t xG(fSamples);
-      CmplxWaveform_t xY(fSamples);
-      CmplxWaveform_t xGH(fSamples);
-      std::vector<float> xSNR(fSamples, 0.);
+      CmplxWaveform_t xV(fSamples/2+1);
+      CmplxWaveform_t xS(fSamples/2+1);
+      CmplxWaveform_t xG(fSamples/2+1);
+      CmplxWaveform_t xY(fSamples/2+1);
+      CmplxWaveform_t xGH(fSamples/2+1);
+      std::vector<float> xSNR(fSamples/2+1, 0.);
       int OriginalWaveformSize = wf.Waveform().size();
 
       // noise
@@ -604,7 +614,7 @@ namespace opdet {
       Double_t fFrequencyCutOff = fFilterConfig.fCutoff;
       Double_t fTickCutOff = fSamples*fFrequencyCutOff/fSampleFreq;
 
-      for (int i=0; i<fSamples*0.5+1; i++) {
+      for (int i=0; i<(fSamples/2+1); i++) {
 
         if (fFilterConfig.fType == Deconvolution::kWiener){
 	  // Compute spectral density
@@ -664,7 +674,7 @@ namespace opdet {
       }
 
       if (fApplyPostfilter) {
-        CmplxWaveform_t xxY(fSamples);
+        CmplxWaveform_t xxY(fSamples/2+1);
         std::vector<double> ytmp(xvdec.begin(), xvdec.end());
         fft_r2c->SetPoints(&ytmp[0]);
         fft_r2c->Transform();
@@ -731,10 +741,10 @@ namespace opdet {
     }//waveforms loop
 
     //-------------------------------------Print fType Filter
-       if (fFilterConfig.fType == Deconvolution::kWiener){printf("***Wiener Filter****");}
-       if (fFilterConfig.fType == Deconvolution::kGauss){printf("***Gauss Filter***");}
-       if (fFilterConfig.fType == Deconvolution::kOther){printf("***Standart dec***");}
-       if (fApplyPostfilter){printf("***ApplyPostfilter***");}
+       if (fFilterConfig.fType == Deconvolution::kWiener){mfi<<"***Wiener Filter****"<<"\n";}
+       if (fFilterConfig.fType == Deconvolution::kGauss){mfi<<"***Gauss Filter***"<<"\n";}
+       if (fFilterConfig.fType == Deconvolution::kOther){mfi<<"***Standart dec***"<<"\n";}
+       if (fApplyPostfilter){mfi<<"***ApplyPostfilter***"<<"\n";}
 
       //------------------------------------------------
 
@@ -777,14 +787,14 @@ namespace opdet {
       xf.at(i) = TMath::Gaus(i, mu, sigma, kTRUE);
     }
 
-    std::vector<Double_t> re_(fSamples, 0.);
-    std::vector<Double_t> im_(fSamples, 0.);
+    std::vector<Double_t> re_(fSamples/2+1, 0.);
+    std::vector<Double_t> im_(fSamples/2+1, 0.);
 
     fft_r2c->SetPoints(&xf[0]);
     fft_r2c->Transform();
     fft_r2c->GetPointsComplex(&re_[0], &im_[0]);
 
-    for (int i=0; i<0.5*fSamples+1; i++) {
+    for (int i=0; i<fSamples/2+1; i++) {
       TComplex F(re_.at(i), im_.at(i));
       TComplex phase = TComplex(0., -TMath::TwoPi()*i*mu/(fSamples));
       xF.fCmplx.at(i) = F*TComplex::Exp(phase);
@@ -847,18 +857,22 @@ namespace opdet {
    * variable `fSPETemplateFileDataColumn`.
    */
   void Deconvolution::SourceSPETemplateFiles() {
+    auto mfd = mf::LogDebug("Deconvolution::SourceSPETemplateFiles()");
     cet::search_path sp("FW_SEARCH_PATH");
     for (auto fname: fSPETemplateFiles) {
       fSinglePEWaveforms.push_back(std::vector<double>()); // add a new empty waform
       auto &spewfrm = fSinglePEWaveforms.back(); // get the reference to the waveform vector
       std::string datafile;
+      // Update the file name to search with a configured path prefix
+      fname = fSPETemplatePath + fname;
       // taking the file name as the first argument,
       // the second argument is the local variable where to store the full path - both are std::string objects
       sp.find_file(fname, datafile);
+      mfd<<"Found SPE template file "<<datafile<<"\n";
       std::ifstream SPEData;
       SPEData.open(datafile);
       size_t n_columns = CountFileColumns(datafile.c_str());
-      std::cout << "ncols= " << n_columns << std::endl;
+      mfd << "ncols= " << n_columns << "\n";
       if (fSPETemplateFileDataColumn >= n_columns) {
 	printf("Deconvolution::SourceSPETemplateFiles ERROR: ");
 	printf("The module is supposed to select column %lu, but only %lu columns are present.\n",
@@ -873,7 +887,7 @@ namespace opdet {
 	while (std::getline(SPEData, temp_str)) {
 	  std::stringstream ss; ss << temp_str;
 	  int  icol = 0;
-	  while (ss) {ss >> buff[icol]; ++icol;}
+	  while (ss >> buff[icol])  ++icol;
 
 	  spewfrm.push_back(buff[fSPETemplateFileDataColumn]);
 	}
@@ -891,7 +905,7 @@ namespace opdet {
       // Set single p.e. maximum value
       fSinglePEAmplitudes.push_back( TMath::Max(1.0,
 						*(std::max_element(spewfrm.begin(), spewfrm.end()))) );
-      std::cout << "SPE Amplitude for template " << fSinglePEWaveforms.size() << ": " << fSinglePEAmplitudes.back() << std::endl;
+      mfd << "SPE Amplitude for template " << fSinglePEWaveforms.size() << ": " << fSinglePEAmplitudes.back() << "\n";
     }
     return;
   }
@@ -908,6 +922,8 @@ namespace opdet {
       fNoiseTemplates.push_back(std::vector<double>()); // add a new empty waform
       auto &noisewfrm = fNoiseTemplates.back(); // get the reference to the waveform vector
       std::string datafile;
+      // Update the file name to search with a configured path prefix
+      fname = fNoiseTemplatePath + fname;
       // taking the file name as the first argument,
       // the second argument is the local variable where to store the full path - both are std::string objects
       sp.find_file(fname, datafile);
@@ -929,7 +945,7 @@ namespace opdet {
 	throw art::Exception(art::errors::FileOpenError);
       }
 
-      noisewfrm.resize(fSamples, 0.);
+      noisewfrm.resize(fSamples/2+1, 0.); // for power spectrum, need only half of the sample size
 
       noiseData.close();
 
@@ -946,6 +962,8 @@ namespace opdet {
    * @return nr of columns
    */
   int Deconvolution::CountFileColumns(const char* file_path) {
+    auto mfd = mf::LogDebug("Deconvolution::CountFileColumns()");
+
     std::ifstream file_;
     file_.open(file_path);
 
@@ -965,13 +983,16 @@ namespace opdet {
       std::string sub;
       int n_columns = 0;
 
-      while (sstream) {
-        sstream >> sub;
-        if (sub.length()) ++n_columns;
+      while (sstream>>sub) {
+        if (sub.length()) {
+	    mfd<<" "<<sub;
+	    ++n_columns;
+	}
       }
+      mfd<<"\n";
 
-      if (iline == 1) {N_COLUMNS = n_columns;}
-      else if (iline > 1) {
+      if (iline == 0) {N_COLUMNS = n_columns;}
+      else if (iline > 0) {
         if (n_columns != N_COLUMNS) {
           printf("Deconvolution::CountFileColumns(%s): WARNING ",
               file_path);
@@ -1006,7 +1027,7 @@ namespace opdet {
     // Apply a linear phase shift to make the "pulse" in the middle of the
     // time window
     const int shift = 0.5*fSamples;
-    for (int i=0; i<fSamples*0.5+1; i++) {
+    for (int i=0; i<fSamples/2+1; i++) {
      TComplex phase = TComplex(0., TMath::TwoPi()*i*shift/(fSamples));
      xGH.fCmplx.at(i) = xGH.fCmplx.at(i)*TComplex::Exp(phase);
     }
