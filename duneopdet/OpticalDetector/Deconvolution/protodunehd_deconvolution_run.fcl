@@ -1,6 +1,6 @@
 #include "deconvolution_run.fcl"
 
-process_name: TestDeconv
+process_name: RecoDeconv
 
 services:
 {
@@ -11,35 +11,34 @@ services:
    @table::protodunehd_services
 }
 
-source.inputCommands: [ "keep *", "drop *_*_*_opdec" ]
-outputs.out1.outputCommands: [ "keep *_*_*_TestDeconv", "keep *_pdhddaphne_*_*" ]
-
-
 physics.simulate: @erase
 physics.reco: [ opdec, rns ]
 physics.trigger_paths: [ reco ]
 
 
-physics.producers.opdec: @local::protodunehd_deconvolution
+physics.producers.opdec: {
+   @table::protodunehd_deconvolution
+
+   Pedestal: 8180
+   PreTrigger: 50
+   PedestalBuffer: 30
+   InputModule: "pdhddaphne"
+   InstanceName: "daq"
+
+   # PD HD raw waveforms have negative polarity
+   InputPolarity: -1
 
 
-physics.producers.opdec.Pedestal: 8180
-physics.producers.opdec.PreTrigger: 50
-physics.producers.opdec.PedestalBuffer: 30
-physics.producers.opdec.InputModule: "pdhddaphne"
-physics.producers.opdec.InstanceName: "daq"
-
-# PD HD raw waveforms have negative polarity
-physics.producers.opdec.InputPolarity: -1
+   LineNoiseRMS: 4.5
 
 
-physics.producers.opdec.LineNoiseRMS: 4.5
-
-
-physics.producers.opdec.ApplyPostfilter: true
-physics.producers.opdec.WfmPostfilter.Cutoff: 1.5
-physics.producers.opdec.ApplyPostBLCorrection: true
-
+   ApplyPostfilter: true
+   WfmPostfilter: {
+      @table::protodunehd_deconvolution.WfmPostfilter
+      Cutoff: 1.5
+   }
+   ApplyPostBLCorrection: true
+}
 
 physics.analyzers.opdecoana.InputModuleDeco: "opdec"
 physics.analyzers.opdecoana.InputModuleDigi: "pdhddaphne"
