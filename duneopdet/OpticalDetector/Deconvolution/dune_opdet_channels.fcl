@@ -65,7 +65,8 @@ protodunehd_pds_channels_data: {
 
 ### ProtoDUNE HD MC ###
 protodunehd_pds_channels_mc: {
-   SPETemplateFiles:  ["SPE_DAPHNE2_FBK_2022.dat", "SPE_DAPHNE2_HPK_2022.dat"]
+   SPETemplatePath:   "ProtoDUNE/HD/opdetresponse/"
+   SPETemplateFiles:  ["SPE_NP04_FBK_2024_without_pretrigger.dat", "SPE_NP04_HPK_2024_without_pretrigger.dat"]
    SPETemplateMapChannels: [
       4,14,24,34,40,42,45,46,47,49,50,52,55,56,57,59,60,62,65,66,67,69,70,72,
       75,76,77,79,84,85,86,87,94,95,96,97,104,105,106,107,114,115,116,117,120,
