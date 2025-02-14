@@ -121,6 +121,7 @@ protodunehd_mc_deconvolution.InputPolarity: 1
 
 protodunehd_mc_deconvolution.IgnoreChannels: []
 
+protodunehd_mc_deconvolution.SPETemplatePath:         @local::protodunehd_pds_channels_mc.SPETemplatePath
 protodunehd_mc_deconvolution.SPETemplateFiles:        @local::protodunehd_pds_channels_mc.SPETemplateFiles
 protodunehd_mc_deconvolution.SPETemplateMapChannels:  @local::protodunehd_pds_channels_mc.SPETemplateMapChannels
 protodunehd_mc_deconvolution.SPETemplateMapTemplates: @local::protodunehd_pds_channels_mc.SPETemplateMapTemplates
