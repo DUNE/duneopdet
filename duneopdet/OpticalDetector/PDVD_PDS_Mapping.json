@@ -1,0 +1,323 @@
+[
+    {
+      "channel": 0,
+      "pd_type": "Membrane",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 1,
+      "pd_type": "Membrane",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 2,
+      "pd_type": "Membrane",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 3,
+      "pd_type": "Membrane",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 4,
+      "pd_type": "Cathode",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+        "channel": 5,
+        "pd_type": "Cathode",
+        "sens_Ar": true,
+        "sens_Xe": true,
+        "eff": 0.03,
+        "HardwareChannel": ""
+      },
+    {
+      "channel": 6,
+      "pd_type": "Cathode",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 7,
+      "pd_type": "Cathode",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 8,
+      "pd_type": "Cathode",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 9,
+      "pd_type": "Cathode",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 10,
+      "pd_type": "Cathode",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 11,
+      "pd_type": "Cathode",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 12,
+      "pd_type": "PMT TPB",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.12,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 13,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 14,
+      "pd_type": "PMT TPB",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.12,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 15,
+      "pd_type": "PMT TPB",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.12,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 16,
+      "pd_type": "Membrane + Q",
+      "sens_Ar": false,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 17,
+      "pd_type": "Membrane",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 18,
+      "pd_type": "PMT TPB",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.12,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 19,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 20,
+      "pd_type": "PMT TPB",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.12,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 21,
+      "pd_type": "PMT TPB",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.12,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 22,
+      "pd_type": "Membrane",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 23,
+      "pd_type": "Membrane",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.03,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 24,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 25,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 26,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 27,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 28,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 29,
+      "pd_type": "PMT PEN + Q",
+      "sens_Ar": false,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 30,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 31,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 32,
+      "pd_type": "PMT CLEAR",
+      "sens_Ar": false,
+      "sens_Xe": false,
+      "eff": "",
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 33,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 34,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 35,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 36,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 37,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 38,
+      "pd_type": "PMT PEN",
+      "sens_Ar": true,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+    {
+      "channel": 39,
+      "pd_type": "PMT PEN + Q",
+      "sens_Ar": false,
+      "sens_Xe": true,
+      "eff": 0.036,
+      "HardwareChannel": ""
+    },
+]
+
