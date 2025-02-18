@@ -58,6 +58,7 @@ dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar
 ###########
 # DUNE VD #
 ###########
+
 # Hits & Timing parameterization for DUNE VD, Ar scintillation
 dunevd_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
 dunevd_pdfastsim_par_ar.VUVTiming:             @local::dunevd_vuv_timing_parameterization
@@ -120,6 +121,7 @@ protodune_pdfastsim_pvs.SimulationLabel:       "IonAndScint:priorSCE"
 ################
 # ProtoDUNE-HD #
 ################
+
 # Hits & Timing parameterization for ProtoDUNE-HD
 protodune_hd_pdfastsim_par:                       @local::standard_pdfastsim_par_ar
 protodune_hd_pdfastsim_par.VUVTiming:             @local::dune_vuv_timing_parameterization
@@ -137,9 +139,24 @@ protodune_hd_pdfastsim_pvs_external.DoSlowComponent:          true
 protodune_hd_pdfastsim_pvs_external.DoReflectedLight:         false         
 protodune_hd_pdfastsim_pvs_external.VUVTiming:	  	      @local::dune_vuv_timing_parameterization
 
+
+
+#####################################
+### PHOTON LIBRARY CONFIGURATIONS ###
+#####################################
+
+################
+# ProtoDUNE-HD #
+################
+
 protodune_hd_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs_external
 protodune_hd_pdfastsim_pvs.SimulationLabel:          IonAndScint
 
+################
+# protoDUNE-VD #
+################
+
+protodune_vd_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs
 
 
 
@@ -198,7 +215,7 @@ protodune_hd_pdfastsim_ann_ar:
 
 protodune_vd_v2_pdfastsim_ann_ar:
 {
-       # Computable graph generated for protodunevd_v2_refactored.gdml
+       #Computable graph generated for protodunevd_v2_refactored.gdml
        module_type:         "PDFastSimANN"
        SimulationLabel:     "IonAndScint"
        DoSlowComponent:     true
@@ -212,12 +229,9 @@ protodune_vd_v2_pdfastsim_ann_ar:
        }
 }
 
-protodune_vd_v2_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs
-
 protodune_vd_v2_pdfastsim_ann_xe:                          @local::protodune_vd_v2_pdfastsim_ann_ar
 protodune_vd_v2_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDoping10ppm
 protodune_vd_v2_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/protodune_vd_v2_175nm_tf2.6"
-
 
 protodune_vd_v4_pdfastsim_ann_ar:
 {
