@@ -254,4 +254,9 @@ protodune_vd_v4_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDo
 protodune_vd_v4_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/protodune_vd_v4_175nm_tf2.6"
 
 
+#Official PDVD ANN fast sim
+protodune_vd_pdfastsim_ann_ar:                          @local::protodune_vd_v4_pdfastsim_ann_ar
+protodune_vd_pdfastsim_ann_xe:                          @local::protodune_vd_v4_pdfastsim_ann_xe
+
+
 END_PROLOG
