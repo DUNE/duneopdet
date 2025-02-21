@@ -163,6 +163,7 @@ protodunehd_first_template_list: {
    ]
 
    ignore_channels: [
+      -1, # ignore disconnected channels
       86,87,97,107,116,117,147, #dead  channels
       3,135, # noisy channels
       120,121,122,123,124,125,126,127,128,129,
