@@ -39,7 +39,7 @@
 #include "canvas/Persistency/Common/Ptr.h"
 #include "fhiclcpp/ParameterSet.h"
 
-namespace opdet {
+namespace duneopdet {
 
   class OpFlashAnaDeco : public art::EDAnalyzer {
   public:
@@ -127,7 +127,7 @@ namespace opdet {
 
 #endif
 
-namespace opdet {
+namespace duneopdet {
 
   //-----------------------------------------------------------------------
   // Constructor
@@ -439,8 +439,8 @@ namespace opdet {
     }
   }
 
-} // namespace opdet
+} // namespace duneopdet
 
-namespace opdet {
+namespace duneopdet {
   DEFINE_ART_MODULE(OpFlashAnaDeco)
 }

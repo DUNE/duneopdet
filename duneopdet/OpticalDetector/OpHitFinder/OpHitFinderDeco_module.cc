@@ -59,7 +59,7 @@ namespace {
   }
 }
 
-namespace opdet {
+namespace duneopdet {
   class OpHitFinderDeco : public art::EDProducer {
     public:
       // Standard constructor and destructor for an ART module.
@@ -96,11 +96,11 @@ namespace opdet {
 
 }
 
-namespace opdet {
+namespace duneopdet {
   DEFINE_ART_MODULE(OpHitFinderDeco)
 }
 
-namespace opdet {
+namespace duneopdet {
   //----------------------------------------------------------------------------
   // Constructor
   OpHitFinderDeco::OpHitFinderDeco(const fhicl::ParameterSet& pset) : EDProducer{pset}, fPulseRecoMgr(){
@@ -282,4 +282,4 @@ namespace opdet {
     std:: cout << "Found hits: " << HitPtr->size() << "!\n";
     evt.put(std::move(HitPtr));
   }
-} // namespace opdet
+} // namespace duneopdet
