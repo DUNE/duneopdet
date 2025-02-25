@@ -202,13 +202,10 @@ namespace duneopdet {
       std::cout << "\nRunning Ophitfinder with InputDigiType = 'recob'\n";
       // Load pulses into WaveformVector
       art::Handle<std::vector<recob::OpWaveform>> decoHandle;
-      art::Handle<std::vector<raw::OpDetWaveform>> rawHandle;
 
       evt.getByLabel(fInputModule,   decoHandle);
-      evt.getByLabel(fInputModuledigi,rawHandle);
 
       assert(decoHandle.isValid());
-      assert(rawHandle.isValid());
 
       RunHitFinder_deco(*decoHandle,
                         *HitPtr,
