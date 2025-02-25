@@ -152,8 +152,8 @@ namespace opdet {
       int channel = decowaveform.Channel();
 
       // Implement different end time for waveforms of variable length
-      double startTime = waveform.TimeStamp() - firstWaveformTime;
-      double endTime = double(waveform.size())/fSampleFreq + startTime;
+      double startTime = (waveform.TimeStamp() - firstWaveformTime);
+      double endTime = double(waveform.size()) + startTime;
 
 
       // create channel subdir
@@ -170,7 +170,7 @@ namespace opdet {
 
 
       // Create a new histogram
-      TH1D *decowaveformHist = chan_dir.second.make< TH1D >(TString::Format("waveform_%d", nth_waveform),  TString::Format(";t - %f (#mus);",firstWaveformTime), decowaveform.NSignal(), startTime, endTime);
+      TH1D *decowaveformHist = chan_dir.second.make< TH1D >(TString::Format("waveform_%d", nth_waveform),  TString::Format(";t - %f (ticks);",firstWaveformTime), decowaveform.NSignal(), startTime, endTime);
       // Copy values from the waveform into the histogram
       for(size_t tick = 0; tick < decowaveform.NSignal(); tick++){
         // Fill histogram with waveform
@@ -178,7 +178,7 @@ namespace opdet {
       }
 
       // Create a new histogram with raw waveform
-      TH1D *rawwaveformHist = chan_dir.first.make< TH1D >(TString::Format("waveform_%d", nth_waveform),  TString::Format(";t - %f (#mus);",firstWaveformTime), waveform.Waveform().size(), startTime, endTime);
+      TH1D *rawwaveformHist = chan_dir.first.make< TH1D >(TString::Format("waveform_%d", nth_waveform),  TString::Format(";t - %f (ticks);",firstWaveformTime), waveform.Waveform().size(), startTime, endTime);
       // Copy values from the waveform into the histogram
       for(size_t tick = 0; tick < waveform.Waveform().size(); tick++){
         // Fill histogram with waveform
