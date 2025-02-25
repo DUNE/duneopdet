@@ -31,7 +31,7 @@ namespace pmtana {
   class PulseRecoManager;
 }
 
-namespace opdet {
+namespace duneopdet {
 
   void RunHitFinder(std::vector<raw::OpDetWaveform> const&,
                     std::vector<recob::OpHit>&,
@@ -63,6 +63,6 @@ namespace opdet {
                     calib::IPhotonCalibrator const&,
                     bool use_start_time = false);
 
-} // End opdet namespace
+} // End duneopdet namespace
 
 #endif
