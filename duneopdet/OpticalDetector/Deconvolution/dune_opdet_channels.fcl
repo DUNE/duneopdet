@@ -1,8 +1,9 @@
+#include "protodunehd_first_template_list.fcl"
 BEGIN_PROLOG
 
 ### ProtoDUNE HD ###
 
-protodunehd_pds_channels: {
+protodunehd_pds_channels_data_dummy: {
    FBKChannels:          [4,14,24,34,40,42,45,46,47,49,50,52,55,56,57,59,60,62, 65,66,67,69,70,72,75,76,77,79,84,85,86,87,94,95,96,97,104,105,106,107,114,115,116,117,120,121,124,125,127,129,130,131,134,135,137,139,140,141,144,145,147,149,150,151,154,155,157,159] # 68 channels
 
    HPKChannels:         [0, 1,2,3,5,6,7,8,9,10,11,12,13,15,16,17,18,19,20,21,22,23,25,26,27,28,29,30,31,32,33,35,36,37,38,39,41,43,44,48,51,53,54,58,61,63,64,68,71,73,74,78,80,81,82,83,88,89,90,91,92,93,98,99,100,101,102,103,108,109,110,111,112,113,118,119,122,123,126,128,132,133,136,138,142,143,146,148,152,153,156,158] # 92 channels
@@ -30,29 +31,42 @@ protodunehd_pds_channels: {
    NoiseTemplateMapTemplates: [ 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 ]
 
 }
-
-
-protodunehd_pds_channels.SPETemplateMapChannels: [
-   @sequence::protodunehd_pds_channels.FBKChannels,
-   @sequence::protodunehd_pds_channels.HPKChannels
-]
-protodunehd_pds_channels.SPETemplateMapTemplates: [
-   @sequence::protodunehd_pds_channels.SPETemplateMapChannelToFile_FBK,
-   @sequence::protodunehd_pds_channels.SPETemplateMapChannelToFile_HPK
-]
-
-
-protodunehd_pds_channels.IgnoreChannels: [
+protodunehd_pds_channels_data_dummy.IgnoreChannels: [
    -1, # ignore disconnected/unrecognized channels
-   @sequence::protodunehd_pds_channels.Dead_channels,
-   @sequence::protodunehd_pds_channels.Noise_channels,
-   @sequence::protodunehd_pds_channels.APA1_full_stream_channels
+   @sequence::protodunehd_pds_channels_data_dummy.Dead_channels,
+   @sequence::protodunehd_pds_channels_data_dummy.Noise_channels,
+   @sequence::protodunehd_pds_channels_data_dummy.APA1_full_stream_channels
 ]
+protodunehd_pds_channels_data_dummy.SPETemplateMapChannels: [
+   @sequence::protodunehd_pds_channels_data_dummy.FBKChannels,
+   @sequence::protodunehd_pds_channels_data_dummy.HPKChannels
+]
+protodunehd_pds_channels_data_dummy.SPETemplateMapTemplates: [
+   @sequence::protodunehd_pds_channels_data_dummy.SPETemplateMapChannelToFile_FBK,
+   @sequence::protodunehd_pds_channels_data_dummy.SPETemplateMapChannelToFile_HPK
+]
+
+
+# ProtoDUNE HD data
+protodunehd_pds_channels_data: {
+   SPETemplatePath:		@local::protodunehd_first_template_list.spe_template_path
+   SPETemplateFiles:		@local::protodunehd_first_template_list.spe_template_files
+   SPETemplateMapChannels:	@local::protodunehd_first_template_list.spe_template_channels
+   SPETemplateMapTemplates:	@local::protodunehd_first_template_list.spe_template_id
+
+   NoiseTemplatePath:		@local::protodunehd_first_template_list.noise_template_path
+   NoiseTemplateFiles:		@local::protodunehd_first_template_list.noise_template_files
+   NoiseTemplateMapChannels:	@local::protodunehd_first_template_list.noise_template_channels
+   NoiseTemplateMapTemplates:	@local::protodunehd_first_template_list.noise_template_id
+
+   IgnoreChannels:		@local::protodunehd_first_template_list.ignore_channels
+}
 
 
 ### ProtoDUNE HD MC ###
 protodunehd_pds_channels_mc: {
-   SPETemplateFiles:  ["SPE_DAPHNE2_FBK_2022.dat", "SPE_DAPHNE2_HPK_2022.dat"]
+   SPETemplatePath:   "ProtoDUNE/HD/opdetresponse/"
+   SPETemplateFiles:  ["SPE_NP04_FBK_2024_without_pretrigger.dat", "SPE_NP04_HPK_2024_without_pretrigger.dat"]
    SPETemplateMapChannels: [
       4,14,24,34,40,42,45,46,47,49,50,52,55,56,57,59,60,62,65,66,67,69,70,72,
       75,76,77,79,84,85,86,87,94,95,96,97,104,105,106,107,114,115,116,117,120,

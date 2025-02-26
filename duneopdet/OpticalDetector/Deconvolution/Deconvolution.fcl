@@ -32,11 +32,14 @@ generic_dune_deconvolution:
   Samples:           1000     # Timewindow (ReadoutWindow) in [ticks]
   Scale:             1        # Scaling of resulting deconvolution signal.
   SPETemplateFileDataColumn: 0  # SPE template source file column.
+
+  SPETemplatePath: ""
   SPETemplateFiles:          [] # The SPE template with undershoot and without pretrigger (in ADC*us),
   SPETemplateMapChannels:    []
   SPETemplateMapTemplates:   []
   IgnoreChannels:       []
 
+  NoiseTemplatePath: ""
   NoiseTemplateFiles:        []
   NoiseTemplateMapChannels:  []
   NoiseTemplateMapTemplates: []
@@ -92,16 +95,18 @@ protodunehd_deconvolution.ApplyPostfilter: true
 protodunehd_deconvolution.WfmPostfilter.Cutoff: 1.5
 protodunehd_deconvolution.ApplyPostBLCorrection: true
 
-protodunehd_deconvolution.IgnoreChannels:      @local::protodunehd_pds_channels.IgnoreChannels
+protodunehd_deconvolution.IgnoreChannels:      @local::protodunehd_pds_channels_data.IgnoreChannels
 
 # SPE Template
-protodunehd_deconvolution.SPETemplateFiles:        @local::protodunehd_pds_channels.SPETemplateFiles
-protodunehd_deconvolution.SPETemplateMapChannels:  @local::protodunehd_pds_channels.SPETemplateMapChannels
-protodunehd_deconvolution.SPETemplateMapTemplates: @local::protodunehd_pds_channels.SPETemplateMapTemplates
+protodunehd_deconvolution.SPETemplatePath:        @local::protodunehd_pds_channels_data.SPETemplatePath
+protodunehd_deconvolution.SPETemplateFiles:        @local::protodunehd_pds_channels_data.SPETemplateFiles
+protodunehd_deconvolution.SPETemplateMapChannels:  @local::protodunehd_pds_channels_data.SPETemplateMapChannels
+protodunehd_deconvolution.SPETemplateMapTemplates: @local::protodunehd_pds_channels_data.SPETemplateMapTemplates
 # Noise template
-protodunehd_deconvolution.NoiseTemplateFiles:        @local::protodunehd_pds_channels.NoiseTemplateFiles
-protodunehd_deconvolution.NoiseTemplateMapChannels:  @local::protodunehd_pds_channels.NoiseTemplateMapChannels
-protodunehd_deconvolution.NoiseTemplateMapTemplates: @local::protodunehd_pds_channels.NoiseTemplateMapTemplates
+protodunehd_deconvolution.NoiseTemplatePath:        @local::protodunehd_pds_channels_data.NoiseTemplatePath
+protodunehd_deconvolution.NoiseTemplateFiles:        @local::protodunehd_pds_channels_data.NoiseTemplateFiles
+protodunehd_deconvolution.NoiseTemplateMapChannels:  @local::protodunehd_pds_channels_data.NoiseTemplateMapChannels
+protodunehd_deconvolution.NoiseTemplateMapTemplates: @local::protodunehd_pds_channels_data.NoiseTemplateMapTemplates
 
 
 ### ProtoDUNE HD MC ###
@@ -116,12 +121,13 @@ protodunehd_mc_deconvolution.InputPolarity: 1
 
 protodunehd_mc_deconvolution.IgnoreChannels: []
 
+protodunehd_mc_deconvolution.SPETemplatePath:         @local::protodunehd_pds_channels_mc.SPETemplatePath
 protodunehd_mc_deconvolution.SPETemplateFiles:        @local::protodunehd_pds_channels_mc.SPETemplateFiles
 protodunehd_mc_deconvolution.SPETemplateMapChannels:  @local::protodunehd_pds_channels_mc.SPETemplateMapChannels
 protodunehd_mc_deconvolution.SPETemplateMapTemplates: @local::protodunehd_pds_channels_mc.SPETemplateMapTemplates
 # no noise templates used in PDHD MC
-protodunehd_deconvolution.NoiseTemplateFiles:        []
-protodunehd_deconvolution.NoiseTemplateMapChannels:  []
-protodunehd_deconvolution.NoiseTemplateMapTemplates: []
+protodunehd_mc_deconvolution.NoiseTemplateFiles:        []
+protodunehd_mc_deconvolution.NoiseTemplateMapChannels:  []
+protodunehd_mc_deconvolution.NoiseTemplateMapTemplates: []
 
 END_PROLOG
