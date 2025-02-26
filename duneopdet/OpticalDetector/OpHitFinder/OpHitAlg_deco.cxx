@@ -95,10 +95,12 @@ namespace opdet {
        std::vector<short int> short_deco_waveform; //vector used to convert from float to short.
        for (unsigned int i_tick=0; i_tick < deco_waveform.Signal().size(); ++i_tick)
        {
-       short_deco_waveform.emplace_back(static_cast<short int>(scale*deco_waveform.Signal().at(i_tick)));
+        short_deco_waveform.emplace_back(static_cast<short int>(scale*deco_waveform.Signal().at(i_tick)));
        }
 
-       pulseRecoMgr.Reconstruct(short_deco_waveform);
+       raw::OpDetWaveform short_deco_waveform_reconstruct(timeStamp, channel,std::vector<short unsigned int> (short_deco_waveform.begin(),  short_deco_waveform.end())  );
+
+       pulseRecoMgr.Reconstruct(short_deco_waveform_reconstruct);
 
       // Get the result
       auto const& pulses = threshAlg.GetPulses();

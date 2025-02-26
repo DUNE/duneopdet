@@ -469,16 +469,16 @@ namespace opdet {
             // functions below take a begin()/end() pair.
             const std::vector<double> sub(pdWaveforms[hardwareChannel].begin()+p.first,
                                           pdWaveforms[hardwareChannel].begin()+p.second+1);
-          
-            std::vector< short > waveformOfShorts = VectorOfDoublesToVectorOfShorts(sub);
+            
+            unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);  
+            std::vector< short > _waveformOfShorts = VectorOfDoublesToVectorOfShorts(sub);
+            raw::OpDetWaveform waveformOfShorts(opChannel, -99999.,std::vector<short unsigned int> (_waveformOfShorts.begin(),  _waveformOfShorts.end()))
           
             std::map< size_t, std::vector < short > > mapTickWaveform =
               (!fFullWaveformOutput) ?
               SplitWaveform(waveformOfShorts, fls[hardwareChannel]) :
               std::map< size_t, std::vector< short > >{ std::make_pair(0,
                                                                        waveformOfShorts) };
-
-            unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);
 
             for (auto const& pairTickWaveform : mapTickWaveform)
             {
@@ -758,7 +758,9 @@ namespace opdet {
       ::pmtana::PedestalMean_t  ped_mean (waveform.size(),0);
       ::pmtana::PedestalSigma_t ped_sigma(waveform.size(),0);
 
-      fThreshAlg->Reconstruct(waveform,ped_mean,ped_sigma);
+      raw::OpDetWaveform myWaveform(-1, 1,std::vector<short unsigned int> (waveform.begin(),  waveform.end())  );
+
+      fThreshAlg->Reconstruct(myWaveform,ped_mean,ped_sigma);
 
       std::vector< pmtana::pulse_param > pulses;
       for (size_t pulseCounter = 0; pulseCounter < fThreshAlg->GetNPulse();

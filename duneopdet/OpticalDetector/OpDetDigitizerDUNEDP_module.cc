@@ -858,8 +858,10 @@ namespace opdet {
     ::pmtana::PedestalMean_t  ped_mean (waveform.size(),0);
     ::pmtana::PedestalSigma_t ped_sigma(waveform.size(),0);
 
+    raw::OpDetWaveform myWaveform(-1, 1,std::vector<short unsigned int> (waveform.begin(),  waveform.end())  );
 
-    fThreshAlg->Reconstruct(waveform,ped_mean,ped_sigma);
+
+    fThreshAlg->Reconstruct(myWaveform,ped_mean,ped_sigma);
 
     std::vector< pmtana::pulse_param > pulses;
     for (size_t pulseCounter = 0; pulseCounter < fThreshAlg->GetNPulse();
