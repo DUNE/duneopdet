@@ -729,7 +729,7 @@ namespace opdet {
 
   //---------------------------------------------------------------------------
   std::map< size_t, std::vector< short > > OpDetDigitizerProtoDUNE::
-    SplitWaveform(std::vector< short > const& waveform,
+    SplitWaveform(std::vector< short > const& waveform_short,
         const FocusList& fls)
     {
 
@@ -738,10 +738,9 @@ namespace opdet {
       ::pmtana::PedestalMean_t  ped_mean (waveform.size(),0);
       ::pmtana::PedestalSigma_t ped_sigma(waveform.size(),0);
 
-      raw::OpDetWaveform myWaveform(-1, 1,std::vector<short unsigned int> (waveform.begin(),  waveform.end())  );
+      raw::OpDetWaveform waveform(-1, -99999.,std::vector<short unsigned int> (waveform_short.begin(),  waveform_short.end())  );
 
-
-      fThreshAlg->Reconstruct(myWaveform,ped_mean,ped_sigma);
+      fThreshAlg->Reconstruct(waveform,ped_mean,ped_sigma);
 
       std::vector< pmtana::pulse_param > pulses;
       for (size_t pulseCounter = 0; pulseCounter < fThreshAlg->GetNPulse();
