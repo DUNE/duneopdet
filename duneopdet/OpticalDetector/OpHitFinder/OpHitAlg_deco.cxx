@@ -98,17 +98,26 @@ namespace duneopdet {
 
             pulseRecoMgr.Reconstruct(short_deco_waveform);
 
+            float rescale = 1/scale;
+
             // Get the result
-            auto const& pulses = threshAlg.GetPulses();
-            for (auto const& pulse : pulses)
+            auto const & pulses = threshAlg.GetPulses();
+            for (auto const & pulse : pulses) {
+                // scale back
+                pmtana::pulse_param rescaled_pulse = pulse;
+                rescaled_pulse.peak *= rescale;
+                rescaled_pulse.area *= rescale;
+                rescaled_pulse.ped_mean *= rescale;
+                rescaled_pulse.ped_sigma *= rescale;
                 ConstructHit(hitThreshold,
                              channel,
                              timeStamp,
-                             pulse,
+                             rescaled_pulse,
                              hitVector,
                              clocksData,
                              calibrator,
                              use_start_time);
+            }
         }
     }
 
