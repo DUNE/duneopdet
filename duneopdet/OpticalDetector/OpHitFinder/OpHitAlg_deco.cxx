@@ -24,7 +24,7 @@
 
 #include <vector>
 
-namespace opdet {
+namespace duneopdet {
 
 
   void RunHitFinder(std::vector<raw::OpDetWaveform> const& opDetWaveformVector,
@@ -155,4 +155,4 @@ namespace opdet {
   }
 
 
-} // End namespace opdet
+} // End namespace duneopdet

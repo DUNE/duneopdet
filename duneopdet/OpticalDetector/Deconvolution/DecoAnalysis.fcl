@@ -5,7 +5,8 @@ dune_deco_analysis:
      module_type:              "DecoAnalysis"
      InputModuleDeco:          "opdec" 
      InputModuleDigi:          "opdigi" 
-     InstanceName:             "" 
+     InstanceNameDeco:             "" 
+     InstanceNameDigi:             "" 
    }
 
 END_PROLOG
