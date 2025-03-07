@@ -1,3 +1,5 @@
+add_subdirectory(fcl)
+
 cet_make_library(
   LIBRARY_NAME
     SolarNuUtils
