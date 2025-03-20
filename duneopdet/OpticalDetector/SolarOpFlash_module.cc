@@ -11,8 +11,8 @@
 #ifndef SolarOpFlash_H
 #define SolarOpFlash_H 1
 
-#include "duneana/SolarNuAna/SolarAuxUtils.h"
-#include "duneana/SolarNuAna/AdjOpHitsUtils.h"
+#include "duneopdet/SolarNuUtils/SolarAuxUtils.h"
+#include "duneopdet/SolarNuUtils/AdjOpHitsUtils.h"
 
 // LArSoft includes
 #include "larcore/Geometry/Geometry.h"
@@ -44,11 +44,10 @@ namespace solar
   class SolarOpFlash : public art::EDProducer
   {
   public:
-    void ProduceOpFlash(const std::vector<std::vector<int>> &ohitsidx,
-                        const std::vector<AdjOpHitsUtils::FlashInfo> &oflashinfo,
+    void ProduceOpFlash(const std::vector<AdjOpHitsUtils::FlashInfo> &oflashinfo,
                         std::vector<recob::OpFlash> &oflashes,
-                        std::vector<std::vector<int>> &assoc,
                         detinfo::DetectorClocksData const &ts) const;
+
     // Standard constructor and destructor for an ART module.
     explicit SolarOpFlash(const fhicl::ParameterSet &);
     virtual ~SolarOpFlash();
@@ -67,7 +66,8 @@ namespace solar
     std::string fOpHitLabel; // Input tag for OpHit collection
     int fOpFlashAlgoNHit;
     double fDetectorSizeX;
-    float fOpFlashAlgoTime;
+    float fOpFlashAlgoMinTime;
+    float fOpFlashAlgoMaxTime;
     float fOpFlashAlgoRad;
     float fOpFlashAlgoPE;
     float fOpFlashAlgoTriggerPE;
@@ -96,7 +96,8 @@ namespace solar
         fOpHitLabel(p.get<std::string>("OpHitLabel")),
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit")),
         fDetectorSizeX(p.get<double>("DetectorSizeX")),
-        fOpFlashAlgoTime(p.get<float>("OpFlashAlgoTime")),
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime")),
+        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime")),
         fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad")),
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE")),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE")),
@@ -139,10 +140,6 @@ namespace solar
     std::unique_ptr<art::Assns<recob::OpFlash, recob::OpHit>>
         assnPtr(new art::Assns<recob::OpFlash, recob::OpHit>);
 
-    // This will keep track of what flashes will assoc to what ophits
-    // at the end of processing
-    std::vector<std::vector<int>> assocList;
-
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService>()->DataFor(evt);
 
     // Get OpHits from the event
@@ -161,22 +158,31 @@ namespace solar
     // Run the clustering
     adjophits->CalcAdjOpHits(OpHitList, OpHitVec, OpHitIdx);
     adjophits->MakeFlashVector(FlashVec, OpHitVec, evt);
-    ProduceOpFlash(OpHitIdx, FlashVec, *flashPtr, assocList, clockData);
+    ProduceOpFlash(FlashVec, *flashPtr, clockData);
 
     // Make the associations which we noted we need
-    for (size_t i = 0; i != assocList.size(); ++i)
+    for (size_t i = 0; i != OpHitIdx.size(); ++i)
     {
+      // std::cout << "OpFlash " << i << " has " << OpHitIdx.at(i).size() << " hits" << std::endl;
       art::PtrVector<recob::OpHit> opHitPtrVector;
-      for (int const &hitIndex : assocList.at(i))
+      for (int const &hitIndex : OpHitIdx.at(i))
       {
         art::Ptr<recob::OpHit> opHitPtr(opHitHandle, hitIndex);
         opHitPtrVector.push_back(opHitPtr);
       }
-
+      if (i < 10)
+      {
+        std::cout << "Genrating OpFlash " << i << " with " << opHitPtrVector.size() << " hits" << std::endl;
+      }
+      // Create the association between the flash and the OpHits
       util::CreateAssn(*this, evt, *flashPtr, opHitPtrVector,
                        *(assnPtr.get()), i);
+      if (i == OpHitIdx.size() - 1)
+      {
+        std::cout << "..." << std::endl;
+        std::cout << "Generated " << i + 1 << " OpFlashes" << std::endl;
+      }
     }
-
     // Store results into the event
     evt.put(std::move(flashPtr));
     evt.put(std::move(assnPtr));
@@ -184,10 +190,8 @@ namespace solar
 
   //--------------------------------------------------------------------------
 
-  void SolarOpFlash::ProduceOpFlash(const std::vector<std::vector<int>> &OpHitsIdx,
-                                    const std::vector<AdjOpHitsUtils::FlashInfo> &OpFlashInfo,
+  void SolarOpFlash::ProduceOpFlash(const std::vector<AdjOpHitsUtils::FlashInfo> &OpFlashInfo,
                                     std::vector<recob::OpFlash> &oflashes,
-                                    std::vector<std::vector<int>> &assoc,
                                     detinfo::DetectorClocksData const &ts) const
   {
     // Loop over the flashes with TheFlash being the flash
@@ -205,15 +209,8 @@ namespace solar
       double OpFlashdT = OpFlash.TimeWidth;
       std::vector<double> OpFlashPEs = OpFlash.PEperOpDet;
 
-      // Loop over the hits in the flash
-      std::vector<int> OpHitIdx;
-      for (int j = 0; j < int(OpHitsIdx[i].size()); j++)
-      {
-        OpHitIdx.push_back(OpHitsIdx[i][j]);
-      }
-
       // From OpFlashAlg
-      int Frame = ts.OpticalClock().Frame(OpFlashT - 18.1);
+      int Frame = ts.OpticalClock().Frame(OpFlashT - 18.1); // Hard coded 18.1 us offset should be moved to fcl
       if (Frame == 0)
         Frame = 1;
 
@@ -229,7 +226,6 @@ namespace solar
       oflashes.emplace_back(OpFlashT, OpFlashdT, OpFlashT, Frame,
                             OpFlashPEs, InBeamFrame, OnBeamTime, OpFlashFast2Tot,
                             OpFlashY, OpFlashdY, OpFlashZ, OpFlashdZ);
-      assoc.emplace_back(OpHitIdx);
     }
   }
 } // namespace solar
