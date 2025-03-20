@@ -14,8 +14,12 @@ namespace solar
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE")),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE")),
         fOpFlashAlgoHotVertexThld(p.get<float>("OpFlashAlgoHotVertexThld")),
-        fDetectorSizeX(p.get<double>("DetectorSizeX")) // Changed type to double
-                                                       // fOpFlashAlgoCentroid(p.get<bool>("OpFlashAlgoCentroid"))
+        fDetectorSizeX(p.get<double>("DetectorSizeX")), // Changed type to double
+        fXACathodeX(p.get<float>("XACathodeX")),
+        fXAMembraneY(p.get<float>("XAMembraneY")),
+        fXAFinalCapZ(p.get<float>("XAFinalCapZ")),
+        fXAStartCapZ(p.get<float>("XAStartCapZ"))
+        // fOpFlashAlgoCentroid(p.get<bool>("OpFlashAlgoCentroid"))
   {
   }
   void AdjOpHitsUtils::MakeFlashVector(std::vector<FlashInfo> &FlashVec, std::vector<std::vector<art::Ptr<recob::OpHit>>> &OpHitClusters, art::Event const &evt)
@@ -32,6 +36,7 @@ namespace solar
         std::stable_sort(Cluster.begin(), Cluster.end(), [](art::Ptr<recob::OpHit> a, art::Ptr<recob::OpHit> b)
                          { return a->PeakTime() < b->PeakTime(); });
       }
+      int Plane = -1;
       int NHit = 0;
       double Time = Cluster[0]->PeakTime();
       double TimeWidth = 0;
@@ -43,6 +48,7 @@ namespace solar
       double X = 0;
       double Y = 0;
       double Z = 0;
+      double XWidth = 0;
       double YWidth = 0;
       double ZWidth = 0;
       double XSum = 0;
@@ -53,12 +59,15 @@ namespace solar
       // Compute total number of PE and MaxPE.
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
+        Plane = GetOpHitPlane(PDSHit);
+
         NHit++;
         PE += PDSHit->PE();
         if (PDSHit->PE() > MaxPE)
         {
           MaxPE = PDSHit->PE();
         }
+
         PEperOpDet.push_back(PDSHit->PE());
         TimeSum += PDSHit->PeakTime() * PDSHit->PE();
       }
@@ -88,34 +97,28 @@ namespace solar
       // }
 
       // Compute the flash width and STD from divergence of 1/r² signal decay.
+      std::vector<float> varXY;
       std::vector<float> varYZ;
+      std::vector<float> varXZ;
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
         auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
         TimeWidth += (PDSHit->PeakTime() - Time) * (PDSHit->PeakTime() - Time);
+        XWidth += (OpHitXYZ.X() - X) * (OpHitXYZ.X() - X);
         YWidth += (OpHitXYZ.Y() - Y) * (OpHitXYZ.Y() - Y);
         ZWidth += (OpHitXYZ.Z() - Z) * (OpHitXYZ.Z() - Z);
+        varXY.push_back(sqrt(pow(X - OpHitXYZ.X(), 2) + pow(Y - OpHitXYZ.Y(), 2)) * PDSHit->PE());
         varYZ.push_back(sqrt(pow(Y - OpHitXYZ.Y(), 2) + pow(Z - OpHitXYZ.Z(), 2)) * PDSHit->PE());
+        varXZ.push_back(sqrt(pow(X - OpHitXYZ.X(), 2) + pow(Z - OpHitXYZ.Z(), 2)) * PDSHit->PE());
       }
 
       TimeWidth = sqrt(TimeWidth / Cluster.size());
+      XWidth = sqrt(XWidth / Cluster.size());
       YWidth = sqrt(YWidth / Cluster.size());
       ZWidth = sqrt(ZWidth / Cluster.size());
 
-      // Compute STD of varYZ
-      float varYZmean = 0;
-      for (float var : varYZ)
-      {
-        varYZmean += var;
-      }
-      varYZmean /= varYZ.size();
-      float varYZstd = 0;
-      for (float var : varYZ)
-      {
-        varYZstd += pow(var - varYZmean, 2);
-      }
-      varYZstd = sqrt(varYZstd / varYZ.size());
-      STD = varYZstd;
+      // Compute STD
+      STD = GetOpFlashPlaneSTD(Plane, varXY, varYZ, varXZ);
 
       // Compute FastToTotal according to the #PEs arriving within the first 10% of the time window wrt the total #PEs
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
@@ -124,9 +127,39 @@ namespace solar
           FastToTotal += PDSHit->PE();
       }
       FastToTotal /= PE;
-      FlashVec.push_back(FlashInfo{NHit, Time, TimeWidth, PE, MaxPE, PEperOpDet, FastToTotal, X, Y, Z, YWidth, ZWidth, STD});
+      FlashVec.push_back(FlashInfo{Plane, NHit, Time, TimeWidth, PE, MaxPE, PEperOpDet, FastToTotal, X, Y, Z, XWidth, YWidth, ZWidth, STD});
     }
     return;
+  }
+
+  float AdjOpHitsUtils::GetOpFlashPlaneSTD(const int Plane, const std::vector<float> varXY, const std::vector<float> varYZ, const std::vector<float> varXZ)
+  {
+    std::vector<float> var;
+    if (Plane == 0)
+    {
+      var = varYZ;
+    }
+    if (Plane == 1 || Plane == 2)
+    {
+      var = varXZ;
+    }
+    if (Plane == 3 || Plane == 4)
+    {
+      var = varXY;
+    }
+    float varmean = 0;
+    for (float v : var)
+    {
+      varmean += v;
+    }
+    varmean /= var.size();
+    float varstd = 0;
+    for (float v : var)
+    {
+      varstd += pow(v - varmean, 2);
+    }
+    varstd = sqrt(varstd / var.size());
+    return varstd;
   }
 
   void AdjOpHitsUtils::CalcAdjOpHits(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<art::Ptr<recob::OpHit>>> &OpHitClusters, std::vector<std::vector<int>> &OpHitClusterIdx)
@@ -146,6 +179,9 @@ namespace solar
     // Create a vector to track if a hit has been clustered or not
     std::vector<bool> ClusteredHits(OpHitVector.size(), false);
 
+    // Create the OpHitPlane map
+    std::map<int, int> OpHitPlane = GetOpHitPlaneMap(OpHitVector);
+
     for (auto it = sortingIndex.begin(); it != sortingIndex.end(); ++it)
     {
       std::string sOpHitClustering = "";
@@ -164,6 +200,9 @@ namespace solar
       AdjHitIdx.push_back(*it);
       sOpHitClustering += "Trigger hit found: PE " + SolarAuxUtils::str(hit->PE()) + " CH " + SolarAuxUtils::str(hit->OpChannel()) + " Time " + SolarAuxUtils::str(hit->PeakTime()) + "\n";
 
+      int refHit1 = hit->OpChannel();
+      auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
+      
       // Make use of the fact that the hits are sorted in time to only consider the hits that are adjacent in the vector up to a certain time range
       for (auto it2 = it + 1; it2 != sortingIndex.end(); ++it2)
       {
@@ -178,29 +217,13 @@ namespace solar
         if (adjHit->PE() < fOpFlashAlgoPE)
           continue;
 
-        int refHit1 = hit->OpChannel();
         int refHit2 = adjHit->OpChannel();
-        auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
         auto ref2 = wireReadout.OpDetGeoFromOpChannel(refHit2).GetCenter();
 
-        // If sign of x is the same (HD), then the two hits are in the same drift volume and can be clustered, else skip.
-        // If x is smaller than drift (VD), then one hit is in membrane XAs and we skip (awaiting better implementation!!).
-        if (fGeometry == "HD")
-        {
-          if (ref1.X() * ref2.X() < 0)
-            continue;
-        }
-        else if (fGeometry == "VD")
-        {
-          // Only use cathode hits in VD for now
-          if (ref1.X() > -fDetectorSizeX || ref2.X() > -fDetectorSizeX)
-            continue;
-        }
-        else // If the geometry is not HD or VD, skip
-        {
-          SolarAuxUtils::PrintInColor("Geometry not recognized: Must be 'HD' or 'VD'", SolarAuxUtils::GetColor("red"), "Error");
+        // Check if the hits are in the same plane and continue if they are not
+        if (!CheckOpHitPlane(OpHitPlane, refHit1, refHit2))
           continue;
-        }
+
         // If hit has already been clustered, skip
         if (ClusteredHits[*it2])
           continue;
@@ -240,27 +263,12 @@ namespace solar
         if (adjHit->PE() < fOpFlashAlgoPE)
           continue;
 
-        int refHit1 = hit->OpChannel();
         int refHit2 = adjHit->OpChannel();
-        auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
         auto ref2 = wireReadout.OpDetGeoFromOpChannel(refHit2).GetCenter();
 
-        if (fGeometry == "HD")
-        {
-          if (ref1.X() * ref2.X() < 0)
-            continue;
-        }
-        else if (fGeometry == "VD")
-        {
-          // Only use cothode hits in VD for now
-          if (ref1.X() > -fDetectorSizeX || ref2.X() > -fDetectorSizeX)
-            continue;
-        }
-        else // If the geometry is not HD or VD, skip
-        {
-          SolarAuxUtils::PrintInColor("Geometry not recognized: Must be 'HD' or 'VD'", SolarAuxUtils::GetColor("red"), "Error");
+        // Check if the hits are in the same plane and continue if they are not
+        if (!CheckOpHitPlane(OpHitPlane, refHit1, refHit2))
           continue;
-        }
 
         // if hit has already been clustered, skip
         if (ClusteredHits[*it4])
@@ -364,6 +372,56 @@ namespace solar
 
     SolarAuxUtils::PrintInColor(debug, SolarAuxUtils::GetColor("yellow"), "Debug");
     return;
+  }
+
+  int AdjOpHitsUtils::GetOpHitPlane(const art::Ptr<recob::OpHit> &hit)
+  {
+    auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter();
+    if (fGeometry == "VD")
+    {
+      if (OpHitXYZ.X() == fXACathodeX)
+        return 0;
+      else if (OpHitXYZ.Y() == fXAMembraneY)
+        return 1;
+      else if (OpHitXYZ.Y() == -fXAMembraneY)
+        return 2;
+      else if (OpHitXYZ.Z() == fXAFinalCapZ)
+        return 3;
+      else if (OpHitXYZ.Z() == fXAStartCapZ)
+        return 4;
+    }
+    else if (fGeometry == "HD")
+    {
+      if (OpHitXYZ.X() > 0)
+        return 0;
+      else if (OpHitXYZ.X() < 0)
+        return 1;
+    }
+    else
+    {
+      SolarAuxUtils::PrintInColor("Geometry not recognized: Must be 'HD' or 'VD'", SolarAuxUtils::GetColor("red"), "Error");
+    }
+    return -1;
+  }
+
+  // Define a function and map to get the plane of the hit. If geometry is VD the number of planes is 5 (cathode, leftmembrane, rightmembrane, startcap, finalcap). If geometry is HD the number of planes is 2 (leftdrift, rightdrift).
+  std::map<int, int> AdjOpHitsUtils::GetOpHitPlaneMap(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector)
+  {
+    std::map<int, int> OpHitPlane;
+    for (const auto &hit : OpHitVector)
+    {
+      OpHitPlane[hit->OpChannel()] = GetOpHitPlane(hit);
+    }
+    return OpHitPlane;
+  }
+
+  // Define a function to check if the adjhit is in the same plane as the reference hit using the OpHitPlane map
+  bool AdjOpHitsUtils::CheckOpHitPlane(std::map<int, int> OpHitPlane, int refHit, int adjHit)
+  {
+    if (OpHitPlane[refHit] == OpHitPlane[adjHit])
+      return true;
+    else
+      return false;
   }
 
   // Function to calculate the Gaussian probability density function
