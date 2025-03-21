@@ -3,7 +3,7 @@
 art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 LIBRARY_NAME duneopdet_OpticalDetector
                 LIB_LIBRARIES 
-                                duneana::SolarNuAna
+                                duneopdet::SolarNuUtils
                                 lardataobj::RecoBase
                                 larcorealg::Geometry
                                 larcore::Geometry_Geometry_service
