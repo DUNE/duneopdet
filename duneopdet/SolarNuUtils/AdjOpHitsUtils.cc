@@ -207,6 +207,8 @@ namespace solar
       for (auto it2 = it + 1; it2 != sortingIndex.end(); ++it2)
       {
         // make sure we don't go out of bounds and the pointer is valid
+        if (it == sortingIndex.end())
+          break;
         if (it2 == sortingIndex.end())
           break;
 
@@ -254,8 +256,11 @@ namespace solar
       for (auto it4 = it - 1; it4 != sortingIndex.begin(); --it4)
       {
         // make sure we don't go out of bounds and the pointer is valid
+        if (it == sortingIndex.begin())
+          break;
         if (it4 == sortingIndex.begin())
           break;
+        
         auto &adjHit = OpHitVector[*it4];
 
         if (std::abs(hit->PeakTime() - adjHit->PeakTime()) > fOpFlashAlgoMinTime)
