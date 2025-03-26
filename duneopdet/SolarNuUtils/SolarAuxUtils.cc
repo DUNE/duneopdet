@@ -18,7 +18,7 @@ namespace solar
         }
         else if (fGeometry == "VD")
         {
-            ClusterDistance = abs(t1 - t2) * fDetectorSizeX / (fDetectorDriftTime / 2);
+            ClusterDistance = fDetectorSizeX - (abs(t1 - t2) * 2 * fDetectorSizeX / fDetectorDriftTime);
         }
     }
 
