@@ -384,15 +384,15 @@ namespace solar
     auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter();
     if (fGeometry == "VD")
     {
-      if (OpHitXYZ.X() == fXACathodeX)
+      if (OpHitXYZ.X() > fXACathodeX -1 && OpHitXYZ.X() < fXACathodeX + 1)
         return 0;
-      else if (OpHitXYZ.Y() == fXAMembraneY)
+      else if (OpHitXYZ.Y() > fXAMembraneY - 1 && OpHitXYZ.Y() < fXAMembraneY + 1)
         return 1;
-      else if (OpHitXYZ.Y() == -fXAMembraneY)
+      else if (OpHitXYZ.Y() > -fXAMembraneY - 1 && OpHitXYZ.Y() < -fXAMembraneY + 1)
         return 2;
-      else if (OpHitXYZ.Z() == fXAFinalCapZ)
+      else if (OpHitXYZ.Z() > fXAFinalCapZ - 1 && OpHitXYZ.Z() < fXAFinalCapZ + 1)
         return 3;
-      else if (OpHitXYZ.Z() == fXAStartCapZ)
+      else if (OpHitXYZ.Z() > fXAStartCapZ - 1 && OpHitXYZ.Z() < fXAStartCapZ + 1)
         return 4;
     }
     else if (fGeometry == "HD")
