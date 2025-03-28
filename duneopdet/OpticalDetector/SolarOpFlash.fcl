@@ -3,14 +3,18 @@ BEGIN_PROLOG
 
 solar_opflash_dune10kt_1x2x6:
 {
-    OpHitLabel:         "ophitspe"     # The label for the process which ran the OpHit
-    module_type:        "SolarOpFlash"
+    OpHitLabel:                 "ophitspe"     # The label for the process which ran the OpHit
+    module_type:                "SolarOpFlash"
 
     Geometry:                   "HD"
     DetectorSizeX:              360          # 1 TPC drift (X) length in [cm].
     DetectorSizeY:              600          # 1 TPC Y length in [cm].
     DetectorSizeZ:              1400         # 1 TPC Z length in [cm].
     DetectorDriftTime:          4500         # Don't change this value for HD unless you know what you are doing!!!
+    XACathodeX:                 0            # X position of the VD cathode XAs in [cm].
+    XAMembraneY:                0            # Y position of the VD membrane XAs in [cm].
+    XAFinalCapZ:                0            # Z position of the VD final cap XAs in [cm].
+    XAStartCapZ:                0            # Z position of the VD start cap XAs in [cm].
 
     OpFlashAlgoNHit:            3            # Min number of hits to consider a flash. Change to > 3 for bkg productions.
     OpFlashAlgoMinTime:         0.60         # Negative time window to look for adj. OpHits in [tick] units.
@@ -29,5 +33,8 @@ solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeX: 340
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeY: 680
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeZ: 2100
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorDriftTime: 8000
-
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XACathodeX:         -327.5
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAMembraneY:         743.302
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAFinalCapZ:         2188.38
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAStartCapZ:        -96.5
 END_PROLOG

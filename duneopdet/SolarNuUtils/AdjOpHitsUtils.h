@@ -39,6 +39,7 @@ namespace solar
     public:
         struct FlashInfo
         {
+            int Plane;
             int NHit;
             double Time;
             double TimeWidth;
@@ -49,6 +50,7 @@ namespace solar
             double X;
             double Y;
             double Z;
+            double XWidth;
             double YWidth;
             double ZWidth;
             double STD;
@@ -69,6 +71,10 @@ namespace solar
         void CalcAdjOpHits(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<art::Ptr<recob::OpHit>>> &OpHitClusters, std::vector<std::vector<int>> &OpHitClusterIdx);
         void MakeFlashVector(std::vector<FlashInfo> &FlashVec, std::vector<std::vector<art::Ptr<recob::OpHit>>> &OpHitClusters, art::Event const &evt);
         void FlashMatchResidual(float &Residual, std::vector<art::Ptr<recob::OpHit>> Hits, double x, double y, double z);
+        float GetOpFlashPlaneSTD(const int Plane, const std::vector<float> varXY, const std::vector<float> varYZ, const std::vector<float> varXZ);
+        int GetOpHitPlane(const art::Ptr<recob::OpHit> &hit);
+        std::map<int, int> GetOpHitPlaneMap(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector);
+        bool CheckOpHitPlane(std::map<int, int> OpHitPlane, int refHit1, int refHit2);
         // void CalcCentroid(std::vector<art::Ptr<recob::OpHit>> Hits, double x, double y, double z);
         // double GaussianPDF(double x, double mean, double sigma);
 
@@ -84,6 +90,10 @@ namespace solar
         const float fOpFlashAlgoTriggerPE;
         const float fOpFlashAlgoHotVertexThld;
         const double fDetectorSizeX;
+        const float fXACathodeX;
+        const float fXAMembraneY;
+        const float fXAFinalCapZ;
+        const float fXAStartCapZ;
         // const bool fOpFlashAlgoCentroid;
     };
 }
