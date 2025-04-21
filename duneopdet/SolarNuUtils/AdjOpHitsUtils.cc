@@ -1,12 +1,12 @@
 #include "AdjOpHitsUtils.h"
 #include "SolarAuxUtils.h"
 
-#include "larcorealg/Geometry/OpDetGeo.h"
-
 namespace solar
 {
   AdjOpHitsUtils::AdjOpHitsUtils(fhicl::ParameterSet const &p)
       : fGeometry(p.get<std::string>("Geometry")),
+        fOpDetGeoFromOpDet(p.get<bool>("OpDetGeoFromOpDet")),
+        fOpDetGeoFromOpChannel(p.get<bool>("OpDetGeoFromOpChannel")),
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit")),
         fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime")),
         fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime")),
@@ -77,7 +77,9 @@ namespace solar
       float HotPE = 0;
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
-        auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
+        // auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
+        geo::OpDetGeo OpHitGeo = GetOpDetGeo(int(PDSHit->OpChannel()));
+        geo::Point_t OpHitXYZ = OpHitGeo.GetCenter();
         if (PDSHit->PE() >= fOpFlashAlgoHotVertexThld * MaxPE)
         {
           XSum += OpHitXYZ.X() * PDSHit->PE();
@@ -102,7 +104,9 @@ namespace solar
       std::vector<float> varXZ;
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
-        auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
+        // auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
+        geo::OpDetGeo OpHitGeo = GetOpDetGeo(int(PDSHit->OpChannel()));
+        geo::Point_t OpHitXYZ = OpHitGeo.GetCenter();
         TimeWidth += (PDSHit->PeakTime() - Time) * (PDSHit->PeakTime() - Time);
         XWidth += (OpHitXYZ.X() - X) * (OpHitXYZ.X() - X);
         YWidth += (OpHitXYZ.Y() - Y) * (OpHitXYZ.Y() - Y);
@@ -201,7 +205,9 @@ namespace solar
       sOpHitClustering += "Trigger hit found: PE " + SolarAuxUtils::str(hit->PE()) + " CH " + SolarAuxUtils::str(hit->OpChannel()) + " Time " + SolarAuxUtils::str(hit->PeakTime()) + "\n";
 
       int refHit1 = hit->OpChannel();
-      auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
+      // auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
+      geo::OpDetGeo OpHitGeo = GetOpDetGeo(refHit1);
+      geo::Point_t ref1 = OpHitGeo.GetCenter();
       
       // Make use of the fact that the hits are sorted in time to only consider the hits that are adjacent in the vector up to a certain time range
       for (auto it2 = it + 1; it2 != sortingIndex.end(); ++it2)
@@ -220,7 +226,9 @@ namespace solar
           continue;
 
         int refHit2 = adjHit->OpChannel();
-        auto ref2 = wireReadout.OpDetGeoFromOpChannel(refHit2).GetCenter();
+        // auto ref2 = wireReadout.OpDetGeoFromOpChannel(refHit2).GetCenter();
+        geo::OpDetGeo OpHitGeo = GetOpDetGeo(refHit2);
+        geo::Point_t ref2 = OpHitGeo.GetCenter();
 
         // Check if the hits are in the same plane and continue if they are not
         if (!CheckOpHitPlane(OpHitPlane, refHit1, refHit2))
@@ -269,7 +277,9 @@ namespace solar
           continue;
 
         int refHit2 = adjHit->OpChannel();
-        auto ref2 = wireReadout.OpDetGeoFromOpChannel(refHit2).GetCenter();
+        // auto ref2 = wireReadout.OpDetGeoFromOpChannel(refHit2).GetCenter();
+        geo::OpDetGeo OpHitGeo = GetOpDetGeo(refHit2);
+        geo::Point_t ref2 = OpHitGeo.GetCenter();
 
         // Check if the hits are in the same plane and continue if they are not
         if (!CheckOpHitPlane(OpHitPlane, refHit1, refHit2))
@@ -339,8 +349,12 @@ namespace solar
     }
 
     // Start with the first hit in the flash as reference point
-    double firstHitY = wireReadout.OpDetGeoFromOpChannel(Hits[maxPEIdx]->OpChannel()).GetCenter().Y();
-    double firstHitZ = wireReadout.OpDetGeoFromOpChannel(Hits[maxPEIdx]->OpChannel()).GetCenter().Z();
+    // double firstHitY = wireReadout.OpDetGeoFromOpChannel(Hits[maxPEIdx]->OpChannel()).GetCenter().Y();
+    // double firstHitZ = wireReadout.OpDetGeoFromOpChannel(Hits[maxPEIdx]->OpChannel()).GetCenter().Z();
+    geo::OpDetGeo OpHitGeo = GetOpDetGeo(Hits[maxPEIdx]->OpChannel());
+    geo::Point_t firstHit = OpHitGeo.GetCenter();
+    double firstHitY = firstHit.Y();
+    double firstHitZ = firstHit.Z();
 
     // Get the first hit PE and calculate the squared distance and angle to the reference point
     float firstHitPE = Hits[maxPEIdx]->PE();
@@ -354,8 +368,12 @@ namespace solar
     // Loop over all OpHits in the flash and compute the squared distance to the reference point
     for (const auto &hit : Hits)
     {
-      double hitY = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
-      double hitZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
+      // double hitY = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
+      // double hitZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
+      geo::OpDetGeo OpHitGeo = GetOpDetGeo(hit->OpChannel());
+      geo::Point_t hitXYZ = OpHitGeo.GetCenter();
+      double hitY = hitXYZ.Y();
+      double hitZ = hitXYZ.Z();
 
       // The expected distribution of PE corresponds to a decrease of 1/r² with the distance from the flash center. Between adjacent OpHits, the expected decrease in charge has the form r²/(r²+d²)
       float hitDistSq = pow(hitY - y, 2) + pow(hitZ - z, 2);
@@ -381,7 +399,9 @@ namespace solar
 
   int AdjOpHitsUtils::GetOpHitPlane(const art::Ptr<recob::OpHit> &hit)
   {
-    auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter();
+    // geo::Point_t OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter();
+    geo::OpDetGeo OpHitGeo = GetOpDetGeo(hit->OpChannel());
+    geo::Point_t OpHitXYZ = OpHitGeo.GetCenter();
     if (fGeometry == "VD")
     {
       if (OpHitXYZ.X() > fXACathodeX -1 && OpHitXYZ.X() < fXACathodeX + 1)
@@ -427,6 +447,47 @@ namespace solar
       return true;
     else
       return false;
+  }
+
+  // Function to get the OpDetGeo from OpChannel
+  geo::OpDetGeo AdjOpHitsUtils::GetOpDetGeo(const int ch)
+  {
+    art::ServiceHandle<geo::Geometry const> geo;
+    if (fOpDetGeoFromOpChannel && fOpDetGeoFromOpDet){
+      std::cout << "OpDetGeoFromOpChannel and OpDetGeoFromOpDet are both true. Start comparing results!" << std::endl;
+      geo::Point_t OpChannelHitXYZ = wireReadout.OpDetGeoFromOpChannel(ch).GetCenter();
+      geo::Point_t OpDetHitXYZ = geo->OpDetGeoFromOpDet(ch).GetCenter();
+      // Check that OpDetHitXYZ and OpChannelHitXYZ are equal
+      for (int i = 0; i < 3; i++)
+      {
+        if (OpDetHitXYZ.X() != OpChannelHitXYZ.X() || OpDetHitXYZ.Y() != OpChannelHitXYZ.Y() || OpDetHitXYZ.Z() != OpChannelHitXYZ.Z())
+        {
+          // SolarAuxUtils::PrintInColor("OpDetHitXYZ and OpChannelHitXYZ are not equal. Please set one to false and run again!", SolarAuxUtils::GetColor("red"), "Error");
+        std::cout << "OpDetHitXYZ and OpChannelHitXYZ are not equal. Please set OpDetGeoFromOpChannel or fOpDetGeoFromOpDet to false and run again!" << std::endl;
+        }
+      }
+      geo::OpDetGeo OpHitGeo = wireReadout.OpDetGeoFromOpChannel(ch);
+      return OpHitGeo;
+    }
+    else if (fOpDetGeoFromOpChannel)
+    {
+      std::cout << "OpDetGeoFromOpChannel is true" << std::endl;
+      geo::OpDetGeo OpHitGeo = wireReadout.OpDetGeoFromOpChannel(ch);
+      return OpHitGeo;
+    }
+    else if (fOpDetGeoFromOpDet)
+    {
+      std::cout << "OpDetGeoFromOpDet is true" << std::endl;
+      geo::OpDetGeo OpHitGeo = geo->OpDetGeoFromOpDet(ch);
+      return OpHitGeo;
+    }
+    else
+    {
+      // SolarAuxUtils::PrintInColor("OpDetGeoFromOpChannel and OpDetGeoFromOpDet are both false. Please set one to true and run again!", SolarAuxUtils::GetColor("red"), "Error");
+      std::cout << "OpDetGeoFromOpChannel and OpDetGeoFromOpDet are both false. Please set one to true and run again!" << std::endl;
+      geo::OpDetGeo OpHitGeo = wireReadout.OpDetGeoFromOpChannel(ch);
+      return OpHitGeo;
+    }
   }
 
   // Function to calculate the Gaussian probability density function

@@ -22,7 +22,10 @@
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "canvas/Persistency/Common/Ptr.h"
 #include "lardata/Utilities/AssociationUtil.h"
-#include "larcorealg/Geometry/GeometryCore.h"
+// #include "larana/OpticalDetector/OpDetResponseInterface.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcorealg/Geometry/CryostatGeo.h"
+#include "larcorealg/Geometry/OpDetGeo.h"
 #include "lardataobj/RecoBase/OpHit.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -75,6 +78,7 @@ namespace solar
         int GetOpHitPlane(const art::Ptr<recob::OpHit> &hit);
         std::map<int, int> GetOpHitPlaneMap(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector);
         bool CheckOpHitPlane(std::map<int, int> OpHitPlane, int refHit1, int refHit2);
+        geo::OpDetGeo GetOpDetGeo(int OpChannel);
         // void CalcCentroid(std::vector<art::Ptr<recob::OpHit>> Hits, double x, double y, double z);
         // double GaussianPDF(double x, double mean, double sigma);
 
@@ -82,6 +86,8 @@ namespace solar
         geo::WireReadoutGeom const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
         // From fhicl configuration
         const std::string fGeometry;
+        const bool fOpDetGeoFromOpDet;
+        const bool fOpDetGeoFromOpChannel;
         const int fOpFlashAlgoNHit;
         const float fOpFlashAlgoMinTime;
         const float fOpFlashAlgoMaxTime;
