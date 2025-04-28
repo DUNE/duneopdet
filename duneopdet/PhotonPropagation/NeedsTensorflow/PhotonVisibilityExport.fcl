@@ -2,6 +2,20 @@
 
 BEGIN_PROLOG
 
+semianalytical_model_settings: {
+  do_refl:                  @local::dunefd_pdfastsim_par_ar_refl.DoReflectedLight
+  do_include_anode_refl:    false
+  vuvhitspars:              @local::dunefd_pdfastsim_par_ar.VUVHits
+  vishitspars:              @local::dunefd_pdfastsim_par_ar_refl.VISHits
+}
+
+computablegraph_settings: {
+  tfloaderpars: @local::dunevd_pdfastsim_ann_ar.TFLoaderTool
+}
+
+photonlibrary_settings: {}
+
+
 standard_photovisexport: 
 {
    module_type:  "PhotonVisibilityExport"
@@ -13,40 +27,29 @@ standard_photovisexport:
    n_vis_samplings:               "5"     # nr of visibility samplings inside the voxel (min 1)
 
    tpc_vis_model: {
-      model_type: "semianalytical" # visibility model to be used
-                                   # (pick one between "semianalytical", "compgraph")
-      settings: {
-        do_refl:                  @local::dunefd_pdfastsim_par_ar_refl.DoReflectedLight
-        do_include_anode_refl:    false
-        vuvhitspars:              @local::dunefd_pdfastsim_par_ar.VUVHits
-        vishitspars:              @local::dunefd_pdfastsim_par_ar_refl.VISHits
-      }
-      #   model_type:        "compgraph" #
-      #   settings : {
-      #     tfloaderpars:			       @local::dunevd_pdfastsim_ann_ar.TFLoaderTool
-      #   }
+      model_type: "" # visibility model to be used
+      settings: {}
    }      
-   do_include_buffer:        true   # include buffer region 
 
+   do_include_buffer: true   # include buffer region 
    buf_vis_model: {
-    model_type: "photonlibrary"
+    model_type: ""
     settings: {}
-    #  model_type: "compgraph"
-    #  settings: {
-    #    tfloaderpars: @local::dunevd_pdfastsim_ann_ar.TFLoaderTool
-    #  }
-
    }
 }
 
 photovisexport_fdhd: @local::standard_photovisexport
+photovisexport_fdhd.tpc_vis_model.model_type: "semianalytical"
+photovisexport_fdhd.tpc_vis_model.settings: @local::semianalytical_model_settings
+photovisexport_fdhd.buf_vis_model.model_type: "photonlibrary"
+photovisexport_fdhd.buf_vis_model.settings: {}
 
-photovisexport_fdvd_ar: @local::standard_photovisexport
+photovisexport_fdvd_ar: @local::photovisexport_fdhd
 photovisexport_fdvd_ar.tpc_vis_model.vuvhitspars: @local::dunevd_pdfastsim_par_ar.VUVHits
 photovisexport_fdvd_ar.tpc_vis_model.do_refl: @local::dunevd_pdfastsim_par_ar.DoReflectedLight
 photovisexport_fdvd_ar.tpc_vis_model.do_include_anode_refl: @local::dunevd_pdfastsim_par_ar.IncludeAnodeReflections
 
-photovisexport_fdvd_xe: @local::standard_photovisexport
+photovisexport_fdvd_xe: @local::photovisexport_fdhd
 photovisexport_fdvd_xe.tpc_vis_model.vuvhitspars: @local::dunevd_pdfastsim_par_xe.VUVHits
 photovisexport_fdvd_xe.tpc_vis_model.do_refl: @local::dunevd_pdfastsim_par_xe.DoReflectedLight
 photovisexport_fdvd_xe.tpc_vis_model.do_include_anode_refl: @local::dunevd_pdfastsim_par_xe.IncludeAnodeReflections

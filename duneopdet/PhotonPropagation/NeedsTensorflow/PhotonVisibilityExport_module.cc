@@ -38,6 +38,7 @@
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Principal/Event.h"
 #include "fhiclcpp/ParameterSet.h"
+#include "fhiclcpp/type_traits.h"
 #include "art/Framework/Principal/Handle.h"
 #include "canvas/Persistency/Common/Ptr.h"
 #include "canvas/Persistency/Common/PtrVector.h"
@@ -50,33 +51,6 @@
 #include "canvas/Persistency/Common/FindManyP.h"
 
 namespace opdet {
-  struct SemiAnalyticalModelConfig {
-    fhicl::Atom<bool> do_refl {fhicl::Name("do_refl"), false};
-    fhicl::Atom<bool> do_include_anode_refl {fhicl::Name("do_include_anode_refl"), false};
-    fhicl::Table<fhicl::ParameterSet> vuvhitspars {fhicl::Name("vuvhitspars")};
-    fhicl::Table<fhicl::ParameterSet> vishitspars {fhicl::Name("vishitspars")};
-  };
-
-  struct CompGraphConfig {
-    fhicl::Table<fhicl::ParameterSet> tfloaderpars {fhicl::Name("tfloaderpars")};
-  };
-
-  struct VisModelBlock {
-    fhicl::Atom<std::string> EngineType { fhicl::Name("model_type") };
-    fhicl::Table<fhicl::ParameterSet> Config { fhicl::Name("config") }; // generico
-  };
-
-  struct Config {
-    fhicl::Atom<int> n_vis_samplings {fhicl::Name("n_vis_samplings"), 5};
-    fhicl::Atom<bool> do_include_buffer {fhicl::Name("do_include_buffer"), true};
-    fhicl::Atom<double> voxel_dx {fhicl::Name("voxel_dx"), 10.0};
-    fhicl::Atom<double> voxel_dy {fhicl::Name("voxel_dy"), 10.0};
-    fhicl::Atom<double> voxel_dz {fhicl::Name("voxel_dz"), 10.0};
-
-    fhicl::Table<VisModelBlock> tpc_vis_model { fhicl::Name("tpc_vis_model") };
-    fhicl::Table<VisModelBlock> buf_vis_model { fhicl::Name("buf_vis_model") };
-  };
-
   /**
    * @class PhotonVisibilityExport
    * @brief Export the visibility map of the detector volume and of each individual OpDet
@@ -97,13 +71,8 @@ namespace opdet {
   {
     public:
       enum EVisModel {kSemiAnalytical = 0, kCompGraph = 1, kPhotonLibrary = 2};
-      const std::map<TString, EVisModel> vismodel_label = {
-        {"seminalytical", EVisModel::kSemiAnalytical},
-        {"compgraph", EVisModel::kCompGraph}, 
-        {"photonlibrary", EVisModel::kPhotonLibrary}
-      };
-      
-      EVisModel get_vismodel_code(const TString& label) {
+      static const std::map<TString, EVisModel> vismodel_label;      
+      static EVisModel get_vismodel_code(const TString& label) {
         const auto& v = vismodel_label.find(label);
         if ( v == vismodel_label.end() ) {
           fprintf(stderr, "PhotonVisibilityExport::get_vismodel_code() ERROR: "); 
@@ -118,34 +87,64 @@ namespace opdet {
         return v->second;
       }
 
+      struct VisModelSettings_t {
+        TString fLabel = {};
+        EVisModel fModelCode = {};
+        fhicl::ParameterSet fFHiCLSettings = {};
+        VisModelSettings_t() {}; 
+        VisModelSettings_t(const fhicl::ParameterSet& pset) {
+          fLabel = pset.get<std::string>("model_type"); 
+          fModelCode = get_vismodel_code( fLabel ); 
+          fFHiCLSettings = pset.get<fhicl::ParameterSet>("settings");
+        }
+      };
+      
       static bool is_valid(const std::vector<double>& visibilities) ;
 
       class IVisibilityModel {
         public: 
-          virtual ~IVisibilityModel() = default;
-          virtual void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) = 0;
+          inline IVisibilityModel() {};
+          inline virtual ~IVisibilityModel() = default;
+          virtual void BuildVisModel (const fhicl::ParameterSet& pset) = 0; 
+          virtual void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) = 0; 
       };
 
       template<typename T> 
         class VisibilityModel : public IVisibilityModel {
           public:
             inline VisibilityModel() {}
-            inline VisibilityModel(T* engine) : fEngine(std::move(engine)) {}
-            inline void SetEngine(T* engine) { fEngine = std::move(engine); }
-            void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) override {}
+            inline ~VisibilityModel() {}
+            inline virtual void BuildVisMode(const fhicl::ParameterSet& pset) {}
+            virtual void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) {}; 
 
           protected: 
-            T* fEngine; 
+            T* fEngine = nullptr; 
         };
 
       class SemiAnalyticalVisModel : public VisibilityModel<phot::SemiAnalyticalModel> {
         public: 
           inline SemiAnalyticalVisModel() : VisibilityModel<phot::SemiAnalyticalModel>() {}
-          inline SemiAnalyticalVisModel(phot::SemiAnalyticalModel* engine) : VisibilityModel<phot::SemiAnalyticalModel>(engine) {}
+          inline ~SemiAnalyticalVisModel() {};
+          inline void BuildVisModel(const fhicl::ParameterSet& pset) override {
+            printf("Creating Semi-analytical visibility model\n");
+            (pset.get<bool>("do_refl", false) ) ? 
+              printf("Reflections included\n") : 
+              printf("Reflections NOT included\n"); 
+            fEngine = new phot::SemiAnalyticalModel(
+                pset.get<fhicl::ParameterSet>("vuvhitspars"), 
+                pset.get<fhicl::ParameterSet>("vishitspars"), 
+                pset.get<bool>("do_refl", false), 
+                pset.get<bool>("do_include_anode_refl", false),
+                pset.get<bool>("do_include_xe_absorption", false)
+                ); 
+            fIncludeAnodeReflections = pset.get<bool>("do_include_anode_refl", false);
+
+          }
           inline bool DoReflections() const {return fIncludeReflections;}
           inline bool DoIncludeAnodeReflections() const {return fIncludeAnodeReflections;}
           inline void SetAnodeReflections(const bool& anode_refl) {fIncludeAnodeReflections = anode_refl;}
           inline void EnableReflections(const bool& refl) {fIncludeReflections = refl;}
+          inline void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) override;
           inline void GetReflectedVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec)
           {
             fEngine->detectedReflectedVisibilities(vis_vec, xspot, fIncludeAnodeReflections);
@@ -159,17 +158,33 @@ namespace opdet {
       class CompGraphVisModel : public VisibilityModel<phot::TFLoader> {
         public: 
           inline CompGraphVisModel() : VisibilityModel<phot::TFLoader>() {}
-          inline CompGraphVisModel(phot::TFLoader* engine) : VisibilityModel<phot::TFLoader>(engine) {}
+          inline void BuildVisModel(const fhicl::ParameterSet& settings) override {
+            printf("Creating Computable-Graph visibility model\n"); 
+            fEngineHolder = 
+              art::make_tool<phot::TFLoader>(settings.get<fhicl::ParameterSet>("tfloaderpars"));
+            fEngine = fEngineHolder.get();
+            fEngine->Initialization();
+          }
+          inline void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) override;
+
+        private: 
+          std::unique_ptr<phot::TFLoader> fEngineHolder;
       };
       
       class PhotonLibraryVisModel : public VisibilityModel<phot::PhotonVisibilityService> {
         public:
           inline PhotonLibraryVisModel() : VisibilityModel<phot::PhotonVisibilityService>() {}
-          inline PhotonLibraryVisModel(phot::PhotonVisibilityService* engine) : VisibilityModel<phot::PhotonVisibilityService>(engine) {}
+          inline void BuildVisModel(const fhicl::ParameterSet& settings) override {
+            printf("Creating PhotonLibrary visibility model\n"); 
+            fEngine = art::ServiceHandle<phot::PhotonVisibilityService>().get(); 
+          }
+          inline void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) override;
+
+        private: 
+          std::unique_ptr<phot::PhotonVisibilityService> fEngineHolder; 
       };
 
-      using Parameters = art::EDAnalyzer::Table<Config>;
-      explicit PhotonVisibilityExport(Parameters const&);
+      explicit PhotonVisibilityExport(fhicl::ParameterSet const&);
       virtual ~PhotonVisibilityExport() {};
 
       void beginJob();
@@ -195,17 +210,17 @@ namespace opdet {
 
       TH1D* fhGrid[3] = {}; 
 
-      fhicl::Table<VisModelBlock> fTPCVisModelConfig; 
-      fhicl::Table<VisModelBlock> fBufVisModelConfig;
-      std::unique_ptr<IVisibilityModel> fTPCVisModel;
-      std::unique_ptr<IVisibilityModel> fBufVisModel;
+      VisModelSettings_t fTPCVisModelConfig; 
+      VisModelSettings_t fBufVisModelConfig;
+      IVisibilityModel* fTPCVisModel;
+      IVisibilityModel* fBufVisModel;
 
       void ExportTPCMap(); 
       void ExportOpDetMap(); 
       void ExportVoxelGrid(); 
       void ExportVisibility();
 
-      std::unique_ptr<IVisibilityModel> build_vismodel(const fhicl::Table<VisModelBlock>&);
+      IVisibilityModel* build_vismodel(const VisModelSettings_t&);
 
       const geo::Point_t SampleVoxel(const geo::Point_t& vxc) const; 
 
@@ -221,8 +236,7 @@ namespace opdet {
 #endif /* end of include guard VISMAPDUMP_MODULE_CC */
 
 namespace opdet {
-  template<>
-    inline void PhotonVisibilityExport::VisibilityModel<phot::TFLoader>::GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) {
+    inline void PhotonVisibilityExport::CompGraphVisModel::GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) {
       std::vector<double> xx(3, 0.0); 
       xx[0] = xspot.X(); xx[1] = xspot.Y(); xx[2] = xspot.Z();
       fEngine->Predict( xx ); 
@@ -230,14 +244,12 @@ namespace opdet {
       return;
     }
 
-  template<>
-    inline void PhotonVisibilityExport::VisibilityModel<phot::SemiAnalyticalModel>::GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) {
+    inline void PhotonVisibilityExport::SemiAnalyticalVisModel::GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) {
       fEngine->detectedDirectVisibilities(vis_vec, xspot);
       return;
     }
 
-  template<>
-    inline void PhotonVisibilityExport::VisibilityModel<phot::PhotonVisibilityService>::GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) {
+    inline void PhotonVisibilityExport::PhotonLibraryVisModel::GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) {
       auto mapped_vis = fEngine->GetAllVisibilities(xspot); 
 
       size_t iopdet = 0; 
@@ -248,71 +260,57 @@ namespace opdet {
       return;
     }
 
-  
-  PhotonVisibilityExport::PhotonVisibilityExport(Parameters const& params) :
+  const std::map<TString, PhotonVisibilityExport::EVisModel> 
+    PhotonVisibilityExport::vismodel_label = { 
+      {"semianalytical", EVisModel::kSemiAnalytical},
+      {"compgraph", EVisModel::kCompGraph}, 
+      {"photonlibrary", EVisModel::kPhotonLibrary}
+    };
+
+  PhotonVisibilityExport::PhotonVisibilityExport(fhicl::ParameterSet const& params) :
     art::EDAnalyzer{params},
-    fVoxelSizeX{ params().voxel_dx() }, 
-    fVoxelSizeY{ params().voxel_dy() }, 
-    fVoxelSizeZ{ params().voxel_dz() }, 
-    fNSamplings{ params().n_vis_samplings() },
-    fIncludeBuffer{ params().do_include_buffer() },
-    fTPCVisModelConfig{ params().tpc_vis_model }, 
-    fBufVisModelConfig{ params().buf_vis_model }
-  { }
+    fVoxelSizeX{ params.get<double>("voxel_dx") }, 
+    fVoxelSizeY{ params.get<double>("voxel_dy") }, 
+    fVoxelSizeZ{ params.get<double>("voxel_dz") }, 
+    fNSamplings{ params.get<int>("n_vis_samplings") },
+    fIncludeBuffer{ params.get<bool>("do_include_buffer")}, 
+    fTPCVisModelConfig{ params.get<fhicl::ParameterSet>("tpc_vis_model")}, 
+    fBufVisModelConfig{ params.get<fhicl::ParameterSet>("buf_vis_model")} 
+  { 
+  }
 
   void PhotonVisibilityExport::beginJob() {
+    printf("PhotonVisibilityExport::BeginJob() Building visibility models...\n"); 
     
     fTPCVisModel = build_vismodel( fTPCVisModelConfig );
-    fBufVisModel = build_vismodel( fBufVisModelConfig );
+    if (fIncludeBuffer) {
+      fBufVisModel = build_vismodel( fBufVisModelConfig );
+    }
 
     return;
   }
 
-  std::unique_ptr<PhotonVisibilityExport::IVisibilityModel> PhotonVisibilityExport::build_vismodel(const fhicl::Table<VisModelBlock>& vmodel_config)
+  PhotonVisibilityExport::IVisibilityModel* PhotonVisibilityExport::build_vismodel(const VisModelSettings_t& vmodel_config)
   {
-    const auto& vismodel_label = vmodel_config().EngineType();
-    const EVisModel vismode = get_vismodel_code( vismodel_label );
-    const auto& config_parset = vmodel_config().Config.get_PSet();
-    
-    if (vismode == kSemiAnalytical) {
-      opdet::SemiAnalyticalModelConfig sa_config;
-      fhicl::Table<opdet::SemiAnalyticalModelConfig> tconfig( fhicl::Name("config"), sa_config);
-      tconfig.validate( config_parset ); 
-      tconfig.set_value( config_parset ); 
-
-      printf("Creating Semi-analytical visibility model\n");
-      (tconfig().do_refl () ) ? 
-        printf("Reflections included\n") : 
-        printf("Reflections NOT included\n"); 
-      auto vis_model = new phot::SemiAnalyticalModel(
-          tconfig().vuvhitspars(), tconfig().vishitspars(), 
-          tconfig().do_refl(), tconfig().do_include_anode_refl(),
-          tconfig().do_include_anode_refl()
-          ); 
-      auto model = std::make_unique<SemiAnalyticalVisModel>(std::move(vis_model));
-      model->SetAnodeReflections(tconfig().do_include_anode_refl());
+    const auto& settings = vmodel_config.fFHiCLSettings;
+    if (vmodel_config.fModelCode == kSemiAnalytical) {
+       auto model = new SemiAnalyticalVisModel();
+       model->BuildVisModel(settings);
+       return model;
+    }
+    else if (vmodel_config.fModelCode == kCompGraph) {
+      auto model = new CompGraphVisModel();
+      model->BuildVisModel( settings ); 
       return model;
     }
-    else if (vismode == kCompGraph) {
-      opdet::CompGraphConfig cg_config; 
-      fhicl::Table<opdet::CompGraphConfig> tconfig(fhicl::Name("config"), cg_config); 
-      tconfig.validate( config_parset ); 
-      tconfig.set_value( config_parset ); 
-
-      printf("Creating Computable-Graph visibility model\n"); 
-      auto vis_model =
-            art::make_tool<phot::TFLoader>(tconfig().tfloaderpars());
-      vis_model->Initialization();
-
-      return std::make_unique<CompGraphVisModel>( vis_model.get() );
-    }
-    else if (vismode == kPhotonLibrary) {
-      auto vis_model = art::ServiceHandle<phot::PhotonVisibilityService>(); 
-      return std::make_unique<PhotonLibraryVisModel>(vis_model.get());
+    else if (vmodel_config.fModelCode == kPhotonLibrary) {
+      auto model = new PhotonLibraryVisModel();
+      model->BuildVisModel(settings); 
+      return model; 
     }
     else {
       fprintf(stderr, "PhotonVisibilityExport::build_vismodel ERROR in reading visibility model config.\n"); 
-      throw cet::exception("PhotonVisibilityExport") << "Wrong vis_model configuration " << vismode;
+      throw cet::exception("PhotonVisibilityExport") << "Wrong vis_model configuration " << vmodel_config.fLabel.Data();
       exit(EXIT_FAILURE);
     }
   }
@@ -346,6 +344,7 @@ namespace opdet {
   }
 
   void PhotonVisibilityExport::ExportTPCMap() {
+    printf("PhotonVisibilityExport::ExportTPCMap()...\n"); 
     // retrieve geometry
     const auto geom = art::ServiceHandle<geo::Geometry>();
 
@@ -437,6 +436,7 @@ namespace opdet {
   }
 
   void PhotonVisibilityExport::ExportOpDetMap() {
+    printf("PhotonVisibilityExport::ExportOpDetMap()...\n"); 
     // retrieve geometry
     const auto geom = art::ServiceHandle<geo::Geometry>();
 
@@ -606,7 +606,7 @@ namespace opdet {
 
                fTPCVisModel->GetVisibilities(xspot, opdetvis_dir);
 
-               if (auto model = dynamic_cast<SemiAnalyticalVisModel*>(fTPCVisModel.get())) {
+               if (auto model = dynamic_cast<SemiAnalyticalVisModel*>(fTPCVisModel)) {
                  if (model->DoReflections()) {
                    model->GetReflectedVisibilities(xspot, opdetvis_rfl);
                  }
