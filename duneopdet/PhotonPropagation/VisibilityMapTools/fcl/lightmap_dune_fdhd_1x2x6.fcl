@@ -20,14 +20,6 @@ services:
 ### Use the 1x2x6 geometry ###
 services.Geometry: @local::dune10kt_1x2x6_refactored_geo
 
-source:
-{
-  module_type: RootInput
-  fileNames : ["dunevis_hd_1x2x6_source.root"]
-  maxEvents:   1
-}
-
-
 physics:
 {
    analyzers:
