@@ -59,6 +59,10 @@ namespace opdet {
    * optical detector, both inside the TPC volume (photoVisMap) and in the buffer region
    * (photoVisMapBuffer). The TTree products can be converted into a 3D THn histogram with the 
    * macro in the VisibilityMapTools/ folder. 
+   * The module includes an interface to different visibility models 
+   * (semianalytical, computable graph, photon library) that should be configured independently 
+   * for the buffer region and for the TPC active volume. 
+   *
    * In addition to the visibility tree, the module exports a tree containing the placement
    * of the individual optical detector and a tree with the size and placementes of the 
    * detector's TPCs. Finally, the tDimensions tree can be used to retrieve the overall size 
@@ -70,8 +74,17 @@ namespace opdet {
   class PhotonVisibilityExport : public art::EDAnalyzer 
   {
     public:
+      /**
+       * @brief Descriptor of visibility model
+       */
       enum EVisModel {kSemiAnalytical = 0, kCompGraph = 1, kPhotonLibrary = 2};
       static const std::map<TString, EVisModel> vismodel_label;      
+      /**
+       * @brief Converts visibility model name into the corresponding enum 
+       *
+       * @param label visibility model name 
+       * @return visibility model enum
+       */
       static EVisModel get_vismodel_code(const TString& label) {
         const auto& v = vismodel_label.find(label);
         if ( v == vismodel_label.end() ) {
@@ -87,6 +100,10 @@ namespace opdet {
         return v->second;
       }
 
+      /**
+       * @class VisModelSettings_t
+       * @brief Visibility model configuration data structure
+       */
       struct VisModelSettings_t {
         TString fLabel = {};
         EVisModel fModelCode = {};
@@ -99,8 +116,23 @@ namespace opdet {
         }
       };
       
-      static bool is_valid(const std::vector<double>& visibilities) ;
+      /**
+       * @brief checks if visibilities are valid
+       *
+       * This function loops over the optical detector visibilities and check
+       * whether the values are smaller than 1. If `hard_mode` is `true`, the
+       * method returns `false` at the first instance of `vis > 1`, otherwise
+       * the method will "sanitize" the visibility capping it at 1.0.
+       *
+       * @param visibilities vector of optical detector visibilities
+       * @param hard_mode return false if vis > 1
+       */
+      static bool is_valid(std::vector<double>& visibilities, const bool hard_mode, const geo::Point_t&, const geo::Geometry*) ;
 
+      /**
+       * @class IVisibilityModel
+       * @brief Abstract visibility model interface class
+       */
       class IVisibilityModel {
         public: 
           inline IVisibilityModel() {};
@@ -109,22 +141,31 @@ namespace opdet {
           virtual void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) = 0; 
       };
 
+      /**
+       * @brief Template visibility model class 
+       *
+       * @tparam T Visibility model engine
+       */
       template<typename T> 
         class VisibilityModel : public IVisibilityModel {
           public:
             inline VisibilityModel() {}
             inline ~VisibilityModel() {}
-            inline virtual void BuildVisMode(const fhicl::ParameterSet& pset) {}
+            inline virtual void BuildVisModel(const fhicl::ParameterSet& pset) {}
             virtual void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) {}; 
 
           protected: 
             T* fEngine = nullptr; 
         };
 
+      /**
+       * @class SemiAnalyticalVisModel
+       * @brief Implementation of Semi-analytical visibility model
+       */
       class SemiAnalyticalVisModel : public VisibilityModel<phot::SemiAnalyticalModel> {
         public: 
           inline SemiAnalyticalVisModel() : VisibilityModel<phot::SemiAnalyticalModel>() {}
-          inline ~SemiAnalyticalVisModel() {};
+          inline ~SemiAnalyticalVisModel() { delete fEngine; };
           inline void BuildVisModel(const fhicl::ParameterSet& pset) override {
             printf("Creating Semi-analytical visibility model\n");
             (pset.get<bool>("do_refl", false) ) ? 
@@ -138,7 +179,6 @@ namespace opdet {
                 pset.get<bool>("do_include_xe_absorption", false)
                 ); 
             fIncludeAnodeReflections = pset.get<bool>("do_include_anode_refl", false);
-
           }
           inline bool DoReflections() const {return fIncludeReflections;}
           inline bool DoIncludeAnodeReflections() const {return fIncludeAnodeReflections;}
@@ -155,6 +195,10 @@ namespace opdet {
           bool fIncludeAnodeReflections = false;
       };
 
+      /**
+       * @class CompGraphVisModel
+       * @brief Implementation of Computable Graph visibility model
+       */
       class CompGraphVisModel : public VisibilityModel<phot::TFLoader> {
         public: 
           inline CompGraphVisModel() : VisibilityModel<phot::TFLoader>() {}
@@ -171,17 +215,22 @@ namespace opdet {
           std::unique_ptr<phot::TFLoader> fEngineHolder;
       };
       
+      /**
+       * @class PhotonLibraryVisModel
+       * @brief Implementation of Photon-Library visibility model
+       */
       class PhotonLibraryVisModel : public VisibilityModel<phot::PhotonVisibilityService> {
         public:
           inline PhotonLibraryVisModel() : VisibilityModel<phot::PhotonVisibilityService>() {}
           inline void BuildVisModel(const fhicl::ParameterSet& settings) override {
             printf("Creating PhotonLibrary visibility model\n"); 
-            fEngine = art::ServiceHandle<phot::PhotonVisibilityService>().get(); 
+            fEngineHolder = art::ServiceHandle<phot::PhotonVisibilityService>();
+            fEngine = fEngineHolder.get();
           }
           inline void GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) override;
 
         private: 
-          std::unique_ptr<phot::PhotonVisibilityService> fEngineHolder; 
+          art::ServiceHandle<phot::PhotonVisibilityService> fEngineHolder;
       };
 
       explicit PhotonVisibilityExport(fhicl::ParameterSet const&);
@@ -233,7 +282,7 @@ namespace opdet {
 }
 
 
-#endif /* end of include guard VISMAPDUMP_MODULE_CC */
+#endif /* end of include guard PHOTONVISIBILITYEXPORT_MODULE_CC */
 
 namespace opdet {
     inline void PhotonVisibilityExport::CompGraphVisModel::GetVisibilities(const geo::Point_t& xspot, std::vector<double>& vis_vec) {
@@ -254,7 +303,7 @@ namespace opdet {
 
       size_t iopdet = 0; 
       for (auto &vis : mapped_vis) {
-        vis_vec[iopdet] += vis;
+        vis_vec.at(iopdet) = vis;
         iopdet++; 
       }
       return;
@@ -280,13 +329,6 @@ namespace opdet {
   }
 
   void PhotonVisibilityExport::beginJob() {
-    printf("PhotonVisibilityExport::BeginJob() Building visibility models...\n"); 
-    
-    fTPCVisModel = build_vismodel( fTPCVisModelConfig );
-    if (fIncludeBuffer) {
-      fBufVisModel = build_vismodel( fBufVisModelConfig );
-    }
-
     return;
   }
 
@@ -487,17 +529,40 @@ namespace opdet {
    //return true;
  //}
 
- bool PhotonVisibilityExport::is_valid(const std::vector<double>& visibilities) {
-   for (const auto& v : visibilities) {
-     if (v > 1.0) return false;
+ bool PhotonVisibilityExport::is_valid(std::vector<double>& visibilities, const bool hard_mode, const geo::Point_t& xspot, const geo::Geometry* geom) {
+   int iopdet = 0; 
+
+   for (auto& v : visibilities) {
+     if (v > 1.0) {
+       if (v > 1.1) {
+         geo::OpDetGeo const& opDet = geom->OpDetGeoFromOpDet(iopdet);
+         auto& center = opDet.GetCenter();
+         const double d = sqrt((xspot - center).Mag2()); 
+         printf("PhotonVisibilityExport::is_valid(%.1f, %.1f, %.1f) WARNING: OpDet%i visibility %g (distance = %.1f cm).\n", 
+             xspot.X(), xspot.Y(), xspot.Z(), iopdet, v, d); 
+       }
+
+       if (hard_mode) return false;
+       else {
+         if (v > 1.1) printf("vis OpDet %i %g -> 1.0\n", iopdet, v);
+         v = 1.0; 
+       }
+     }
+     iopdet++;
    }
    return true;
  }
 
  void PhotonVisibilityExport::ExportVisibility() {
-   //const auto photonVisService = art::ServiceHandle<phot::PhotonVisibilityService>(); 
    // open file
    art::ServiceHandle< art::TFileService > tfs;
+   const auto geom = art::ServiceHandle<geo::Geometry>();
+
+   printf("PhotonVisibilityExport::ExportVisibility() Building visibility models...\n"); 
+   fTPCVisModel = build_vismodel( fTPCVisModelConfig );
+   if (fIncludeBuffer) {
+     fBufVisModel = build_vismodel( fBufVisModelConfig );
+   }
 
    Double_t point_[3];
    double total_visDirect = 0;
@@ -537,6 +602,13 @@ namespace opdet {
    printf("starting loop: fHGrid histos: [%p, %p, %p]\n", 
        static_cast<void*>(fhGrid[0]), static_cast<void*>(fhGrid[1]), static_cast<void*>(fhGrid[2])); 
 
+   const Long64_t N_BINS = fhGrid[0]->GetNbinsX()*fhGrid[1]->GetNbinsX()*fhGrid[2]->GetNbinsX();
+   const Long64_t N_CHUNCK = N_BINS / 20;
+   bool  validation_hard_mode = (fNSamplings > 1) ? true : false;
+   Long64_t ibin = -1; 
+
+   printf("Vibility validation mode: %i\n\n", validation_hard_mode);
+
    for (int ix=1; ix<=fhGrid[0]->GetNbinsX(); ix++) {
        x_ = fhGrid[0]->GetBinCenter(ix); 
        if (x_> fTPCMin[0] && x_< fTPCMax[0]) tpc_range_x = true;
@@ -548,12 +620,21 @@ namespace opdet {
          else tpc_range_y = false; 
 
          for (int iz=1; iz<=fhGrid[2]->GetNbinsX(); iz++) {
+           ibin++; 
+           if (ibin%N_CHUNCK == 0) 
+           {
+             printf("voxel %lld/%lld [%.0f%%]\n", 
+                 ibin, N_BINS, static_cast<double>(ibin)/N_BINS*100);
+           } 
+
            z_= fhGrid[2]->GetBinCenter(iz);            
            if (z_> fTPCMin[2] && z_< fTPCMax[2]) tpc_range_z = true; 
            else tpc_range_z = false; 
 
            opdetvis_dir.resize(fNOpDets, 0.0);
            opdetvis_rfl.resize(fNOpDets, 0.0); 
+
+           const geo::Point_t point( x_, y_, z_); 
 
            if ( (tpc_range_x && tpc_range_y && tpc_range_z) == false) {
              if (fIncludeBuffer) {
@@ -564,13 +645,16 @@ namespace opdet {
                   opDet_visReflctBuff[i] = 0.; 
                }
 
-               const geo::Point_t point( x_, y_, z_); 
-
                int nvalid = 0; 
+               int ntrials = 0;
                while (nvalid < fNSamplings) {
-                 const auto xpoint = SampleVoxel( point ); 
+                 const auto xpoint = (fNSamplings > 1) ? SampleVoxel( point ) : point; 
+                 ntrials++;
                  fBufVisModel->GetVisibilities( xpoint, opdetvis_dir);
-                 if ( is_valid(opdetvis_dir) == false ) {
+
+                 if ( is_valid(opdetvis_dir, 
+                       (ntrials < 10) ? validation_hard_mode : false, 
+                       xpoint, geom.get()) == false ) {
                    continue; 
                  }
 
@@ -593,7 +677,6 @@ namespace opdet {
              }
            } 
            else {
-             const geo::Point_t vpoint( x_, y_, z_); 
              total_visDirect = 0.;
              total_visReflct = 0.;
              for (size_t i = 0; i < fNOpDets; i++) {
@@ -601,30 +684,38 @@ namespace opdet {
                opDet_visReflct[i] = 0.0; 
              }
 
-             for (int i = 0; i < fNSamplings; i++) {
-               const geo::Point_t xspot = SampleVoxel( vpoint ); 
-
-               fTPCVisModel->GetVisibilities(xspot, opdetvis_dir);
-
+             int nvalid = 0; 
+             int ntrials = 0;
+             while (nvalid < fNSamplings) {
+               ntrials++;
+               const auto xpoint = (fNSamplings > 1) ? SampleVoxel( point ) : point; 
+               fTPCVisModel->GetVisibilities( xpoint, opdetvis_dir);
                if (auto model = dynamic_cast<SemiAnalyticalVisModel*>(fTPCVisModel)) {
                  if (model->DoReflections()) {
-                   model->GetReflectedVisibilities(xspot, opdetvis_rfl);
+                   model->GetReflectedVisibilities(xpoint, opdetvis_rfl);
                  }
                }
 
-               size_t iopdet = 0; 
-               for (const auto &vis : opdetvis_dir) {
-                 opDet_visDirect[iopdet] += vis;
-                 total_visDirect += vis;
-                 iopdet++;
+               if ( is_valid(opdetvis_dir, 
+                     (ntrials < 10) ? validation_hard_mode : false, 
+                     xpoint, geom.get()) == false ) {
+                 continue; 
                }
 
+               size_t iopdet = 0; 
+               for (auto &vis : opdetvis_dir) {
+                 opDet_visDirect[iopdet] += vis;
+                 total_visDirect += vis; 
+                 iopdet++; 
+               }
                iopdet = 0; 
                for (const auto &vis : opdetvis_rfl) {
                  opDet_visReflct[iopdet] += vis; 
                  total_visReflct += vis;
                  iopdet++;
                } 
+
+               nvalid++;
              }
 
              total_visDirect = total_visDirect / static_cast<double>(fNSamplings); 
@@ -636,7 +727,7 @@ namespace opdet {
              }
 
              // Fill tree
-             vpoint.GetCoordinates( point_ ); 
+             point.GetCoordinates( point_ ); 
              tMap->Fill();
            }
          }
