@@ -165,12 +165,11 @@ protodunehd_first_template_list: {
    ignore_channels: [
       -1, # ignore disconnected channels
       86,87,97,107,116,117,147, #dead  channels
-      3,135, # noisy channels
+      3,35, # noisy channels
       120,121,122,123,124,125,126,127,128,129,
       130,131,132,133,134,135,136,137,138,139,
       140,141,142,143,144,145,146,147,148,149,
-      150,151,152,153,154,155,156,157,158,159, # full-stream channels, ch 135 also noisy, ch 147 dead
-      35 # missing SPE template
+      150,151,152,153,154,155,156,157,158,159, # full-stream channels, ch 147 dead
    ]
 }
 
