@@ -19,14 +19,6 @@ services:
 ### Use the appropriate geometry ###
 services.Geometry: @local::dunevd10kt_1x8x14_3view_30deg_v5_geo
 
-source:
-{
-  module_type: RootInput
-  fileNames : ["dunevis_vd_1x8x14_source.root"]
-  maxEvents:   1
-}
-
-
 physics:
 {
    analyzers:
