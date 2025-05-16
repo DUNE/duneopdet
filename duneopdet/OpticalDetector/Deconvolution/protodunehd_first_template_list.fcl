@@ -37,6 +37,7 @@ protodunehd_first_template_list: {
       "SPE_Template_run28370_APA4_CH32_PDHD_hpk_Nov2024.txt",
       "SPE_Template_run28370_APA4_CH33_PDHD_hpk_Nov2024.txt",
       "SPE_Template_run28370_APA4_CH34_PDHD_fbk_Nov2024.txt",
+      "SPE_Template_run28368_APA4_CH35_PDHD_hpk_May2025_DSF.txt",
       "SPE_Template_run28370_APA4_CH36_PDHD_hpk_Nov2024.txt",
       "SPE_Template_run28370_APA4_CH37_PDHD_hpk_Nov2024.txt",
       "SPE_Template_run28370_APA4_CH38_PDHD_hpk_Nov2024.txt",
@@ -118,7 +119,7 @@ protodunehd_first_template_list: {
    ]
    spe_template_channels: [
       0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
-      21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 36, 37, 38, 39, 40,
+      21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40,
       41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60,
       61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80,
       81, 82, 83, 84, 85, 88, 89, 90, 91, 92, 93, 94, 95, 96, 98, 99, 100,
@@ -129,8 +130,8 @@ protodunehd_first_template_list: {
       20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
       40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59,
       60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
-      80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99,
-      100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111
+      80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96,
+      97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112
    ]
 
    noise_template_path: "ProtoDUNE/HD/opdetresponse/v0/"
@@ -165,12 +166,11 @@ protodunehd_first_template_list: {
    ignore_channels: [
       -1, # ignore disconnected channels
       86,87,97,107,116,117,147, #dead  channels
-      3,135, # noisy channels
+      3, # noisy channels
       120,121,122,123,124,125,126,127,128,129,
       130,131,132,133,134,135,136,137,138,139,
       140,141,142,143,144,145,146,147,148,149,
-      150,151,152,153,154,155,156,157,158,159, # full-stream channels, ch 135 also noisy, ch 147 dead
-      35 # missing SPE template
+      150,151,152,153,154,155,156,157,158,159 # full-stream channels, ch 147 dead
    ]
 }
 
