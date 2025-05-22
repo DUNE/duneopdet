@@ -59,8 +59,6 @@ namespace opdet {
     void RunFlashFinder(std::vector< recob::OpHit > const& HitVector,
                         std::vector< recob::OpFlash >&     FlashVector,
                         std::vector< std::vector< int > >& AssocList,
-                        geo::GeometryCore const&           geom,
-                        geo::WireReadoutGeom const&        wireReadout,
                         detinfo::DetectorClocksData const& ts,
                         float const&                       TrigCoinc);
     void AddHitContribution(recob::OpHit const&    currentHit,
@@ -70,10 +68,8 @@ namespace opdet {
                             double&                FastToTotal,
                             double&                AveAbsTime,
                             double&                TotalPE,
-                            std::vector< double >& PEs);
+                            std::vector<double> & PEs);
     void GetHitGeometryInfo(recob::OpHit const&      currentHit,
-                            geo::GeometryCore const& geom,
-                            geo::WireReadoutGeom const& wireReadout,
                             std::vector< double >&   sumw,
                             std::vector< double >&   sumw2,
                             double&                  sumy, 
@@ -87,23 +83,21 @@ namespace opdet {
                                   int hitnumber,
                                   std::vector<bool> &processed,
                                   float initimecluster,
-                                  std::vector<int> &sorted,
-                                  geo::WireReadoutGeom const& wireReadout);
+                                  std::vector<int> &sorted);
     void AssignHitsToFlash(std::vector< recob::OpHit > const&       HitVector,
-                           std::vector< std::vector< int > >&       HitsPerFlash,
-                           geo::WireReadoutGeom const& wireReadout);
+                           std::vector< std::vector< int > >&       HitsPerFlash);
     void ConstructFlash(std::vector< int > const&          HitsPerFlashVec,
                         std::vector< recob::OpHit > const& HitVector,
                         std::vector< recob::OpFlash >&     FlashVector,
-                        geo::GeometryCore const&           geom,
-                        geo::WireReadoutGeom const&        wireReadout,
                         detinfo::DetectorClocksData const& ts,
                         float const&                       TrigCoinc);
   private:
 
     // The parameters we'll read from the .fcl file.
-    std::string fInputModule; // Input tag for OpHit collection
-    
+    std::string fInputModule; // Input tag for OpHit collection    
+    const geo::GeometryCore * geometry;
+    geo::WireReadoutGeom const * wireReadout;
+
 
     Double_t fMaximumTimeDistance;        // time parameter for selecting time neighbouring hits
     Double_t fMaximumTimeWindow;          // time parameter for flash composition wrt attributed initial flash time
@@ -138,6 +132,12 @@ namespace opdet {
 
     produces< std::vector< recob::OpFlash > >();
     produces< art::Assns< recob::OpFlash, recob::OpHit > >();
+
+    geometry = &*(art::ServiceHandle<geo::Geometry>());  
+    wireReadout = &art::ServiceHandle<geo::WireReadout>()->Get();
+    
+//    geometry = *lar::providerFrom< geo::Geometry >();
+//    wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
 
   }
 
@@ -190,9 +190,6 @@ namespace opdet {
     // at the end of processing
     std::vector< std::vector< int > > assocList;
 
-    auto const& geometry(*lar::providerFrom< geo::Geometry >());
-    auto const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
-
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
 
     // Get OpHits from the event
@@ -201,8 +198,6 @@ namespace opdet {
     RunFlashFinder(*opHitHandle,
                    *flashPtr,
                    assocList,
-                   geometry,
-                   wireReadout,
                    clockData,
                    fTrigCoinc);
 
@@ -230,8 +225,6 @@ namespace opdet {
   void OpFlashFinderVerticalDrift::RunFlashFinder(std::vector< recob::OpHit > const& HitVector,
                                                   std::vector< recob::OpFlash >&     FlashVector,
                                                   std::vector< std::vector< int > >& AssocList,
-                                                  geo::GeometryCore const&           geom,
-                                                  geo::WireReadoutGeom const& wireReadout,
                                                   detinfo::DetectorClocksData const& ts,
                                                   float const&                       TrigCoinc)
   {
@@ -240,8 +233,7 @@ namespace opdet {
     std::vector< std::vector< int > > HitsPerFlash;
     
     AssignHitsToFlash(HitVector,
-                      HitsPerFlash,
-                      wireReadout);
+                      HitsPerFlash);
     
     // Now we have all our hits assigned to a flash. 
     // Make the recob::OpFlash objects
@@ -249,8 +241,6 @@ namespace opdet {
       ConstructFlash(HitsPerFlashVec,
                      HitVector,
                      FlashVector,
-                     geom,
-                     wireReadout,
                      ts,
                      TrigCoinc);
 
@@ -265,16 +255,14 @@ namespace opdet {
   void OpFlashFinderVerticalDrift::ConstructFlash(std::vector< int > const&          HitsPerFlashVec,
                                                   std::vector< recob::OpHit > const& HitVector,
                                                   std::vector< recob::OpFlash >&     FlashVector,
-                                                  geo::GeometryCore const&           geom,
-                                                  geo::WireReadoutGeom const&        wireReadout,
                                                   detinfo::DetectorClocksData const& ts,
                                                   float const&                       TrigCoinc)
   {
     double MaxTime = -1e9;
     double MinTime =  1e9;
     
-    std::vector< double > PEs(wireReadout.MaxOpChannel() + 1, 0.0);
-    unsigned int Nplanes = wireReadout.Nplanes();
+    std::vector<double > PEs(geometry->NOpDets(),0.0);
+    unsigned int Nplanes = wireReadout->Nplanes();
     //std::cout << "N planes: " << Nplanes << std::endl;
     std::vector< double > sumw (Nplanes, 0.0);
     std::vector< double > sumw2(Nplanes, 0.0);
@@ -298,8 +286,6 @@ namespace opdet {
                          TotalPE,
                          PEs);
       GetHitGeometryInfo(HitVector.at(HitID),
-                         geom,
-                         wireReadout,
                          sumw,
                          sumw2,
                          sumy, 
@@ -363,7 +349,7 @@ namespace opdet {
                           double&                FastToTotal,
                           double&                AveAbsTime,
                           double&                TotalPE,
-                          std::vector< double >& PEs) {
+                          std::vector<double >& PEs) {
 
     double PEThisHit   = currentHit.PE();
     double TimeThisHit = currentHit.PeakTime();
@@ -378,14 +364,13 @@ namespace opdet {
     
     // These are totals
     TotalPE     += PEThisHit;
-    PEs.at(static_cast< unsigned int >(currentHit.OpChannel())) += PEThisHit;
+    unsigned int thisOpDet = wireReadout->OpDetFromOpChannel(currentHit.OpChannel());
+    PEs.at(thisOpDet)+=PEThisHit;
 
   }
 
   //----------------------------------------------------------------------------
   void OpFlashFinderVerticalDrift::GetHitGeometryInfo(recob::OpHit const&      currentHit,
-                                                      geo::GeometryCore const& geom,
-                                                      geo::WireReadoutGeom const& wireReadout,
                                                       std::vector< double >&   sumw,
                                                       std::vector< double >&   sumw2,
                                                       double&                  sumy, 
@@ -393,17 +378,17 @@ namespace opdet {
                                                       double&                  sumz, 
                                                       double&                  sumz2) {
 
-    auto const xyz = wireReadout.OpDetGeoFromOpChannel(currentHit.OpChannel()).GetCenter();
+    auto const xyz = wireReadout->OpDetGeoFromOpChannel(currentHit.OpChannel()).GetCenter();
 
     double PEThisHit = currentHit.PE();
     
-    geo::TPCID tpc = geom.FindTPCAtPosition(xyz);
+    geo::TPCID tpc = geometry->FindTPCAtPosition(xyz);
     // if the point does not fall into any TPC,
     // it does not contribute to the average wire position
     if (tpc.isValid) {
-      for (size_t p = 0; p != wireReadout.Nplanes(); ++p) {
+      for (size_t p = 0; p != wireReadout->Nplanes(); ++p) {
         geo::PlaneID const planeID(tpc, p);
-        unsigned int w = wireReadout.NearestWireID(xyz, planeID).Wire;
+        unsigned int w = wireReadout->NearestWireID(xyz, planeID).Wire;
         sumw.at(p)  += PEThisHit*w;
         sumw2.at(p) += PEThisHit*w*w;
       }
@@ -430,8 +415,7 @@ namespace opdet {
                                                            int hitnumber, 
                                                            std::vector<bool> &processed, 
                                                            float initimecluster, 
-                                                           std::vector<int> &sorted,
-                                                           geo::WireReadoutGeom const& wireReadout)
+                                                           std::vector<int> &sorted)
  {
 
   int itTmin=0;
@@ -448,7 +432,7 @@ namespace opdet {
    std::vector<int> neighbors;
    float dx, dy, dz;
    float dt, dtmax;
-   auto const xyz_hitnumber = wireReadout.OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter();
+   auto const xyz_hitnumber = wireReadout->OpDetGeoFromOpChannel(HitVector[sorted[hitnumber]].OpChannel()).GetCenter();
 
    //std::cout <<"Earliest: "<< HitVector[sorted[hitnumber]].PeakTime() <<" " << xyz_hitnumber.X() << " " << xyz_hitnumber.Y() << " " << xyz_hitnumber.Z() << std::endl;
 
@@ -458,7 +442,7 @@ namespace opdet {
    {
      if(!processed[h])
      {
-       auto const xyz_h = wireReadout.OpDetGeoFromOpChannel(HitVector[sorted[h]].OpChannel()).GetCenter();
+       auto const xyz_h = wireReadout->OpDetGeoFromOpChannel(HitVector[sorted[h]].OpChannel()).GetCenter();
        std::cout << "Next:    " << HitVector[sorted[h]].PeakTime() << " "<< xyz_h.X() << " " << xyz_h.Y() << " " << xyz_h.Z() << std::endl; 
        dx  = (xyz_h - xyz_hitnumber).X();
        dy  = (xyz_h - xyz_hitnumber).Y();
@@ -507,8 +491,7 @@ namespace opdet {
  }
 // AssignHitsToFlash(HitVector, HitsPerFlash, MaximumDistance, MaximumTimeDistance, MaximumTimeWindow);
  void OpFlashFinderVerticalDrift::AssignHitsToFlash(std::vector< recob::OpHit > const&       HitVector,
-                                                    std::vector< std::vector< int > >&       HitsPerFlash,
-                                                    geo::WireReadoutGeom const& wireReadout)
+                                                    std::vector< std::vector< int > >&       HitsPerFlash)
  {
 
    int ntothits=HitVector.size();
@@ -530,12 +513,12 @@ namespace opdet {
        //std::cout << "Start h :" << h << std::endl;  
        processed[h]=true;
        std::vector<int> N; N.clear();
-       std::vector<int> nb =getNeighbors(HitVector,h, processed, HitVector[sorted[h]].PeakTime(),sorted,wireReadout); 
+       std::vector<int> nb =getNeighbors(HitVector,h, processed, HitVector[sorted[h]].PeakTime(),sorted); 
        N.insert( N.end(), nb.begin(), nb.end() );
        //std::cout << "Main go: " << nb.size() << std::endl;
        for (unsigned int i=0;i<N.size();i++)
        {
-           std::vector<int> nb2 =getNeighbors(HitVector,N[i], processed, HitVector[sorted[h]].PeakTime(),sorted,wireReadout); 
+           std::vector<int> nb2 =getNeighbors(HitVector,N[i], processed, HitVector[sorted[h]].PeakTime(),sorted); 
            //std::cout << "Go: " << i << nb2.size() << std::endl;
            N.insert( N.end(), nb2.begin(), nb2.end() );
        }
