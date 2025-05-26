@@ -14,7 +14,7 @@ namespace solar
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE")),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE")),
         fOpFlashAlgoHotVertexThld(p.get<float>("OpFlashAlgoHotVertexThld")),
-        fDetectorSizeX(p.get<double>("DetectorSizeX")), // Changed type to double
+        // fDetectorSizeX(p.get<double>("DetectorSizeX")), // Changed type to double
         fXACathodeX(p.get<float>("XACathodeX")),
         fXAMembraneY(p.get<float>("XAMembraneY")),
         fXAFinalCapZ(p.get<float>("XAFinalCapZ")),
