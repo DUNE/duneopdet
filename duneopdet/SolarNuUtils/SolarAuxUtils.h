@@ -38,8 +38,8 @@ namespace solar
     {
     public:
         explicit SolarAuxUtils(fhicl::ParameterSet const &p);
-        void ComputeDistanceX(double &ClusterDistance, double t1, double t2);
-        void ComputeDistance3D(double &ClusterDistance, double t1, double y1, double z1, double t2, double y2, double z2);
+        // void ComputeDistanceX(double &ClusterDistance, double t1, double t2);
+        // void ComputeDistance3D(double &ClusterDistance, double t1, double y1, double z1, double t2, double y2, double z2);
         void FillMyMaps(std::map<int, simb::MCParticle> &MyMap, art::FindManyP<simb::MCParticle> Assn, art::ValidHandle<std::vector<simb::MCTruth>> Hand);
         static long unsigned int WhichGeneratorType(std::vector<std::map<int, simb::MCParticle>> GeneratorParticles, int TrID);
         static bool InMyMap(int TrID, std::map<int, float> TrackIDMap);
