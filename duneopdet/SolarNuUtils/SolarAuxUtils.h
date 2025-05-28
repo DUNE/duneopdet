@@ -59,8 +59,6 @@ namespace solar
     private:
         // From fhicl configuration
         const std::string fGeometry;
-        const double fDetectorSizeX;
-        const double fDetectorDriftTime;
     };
 
 }
