@@ -19,6 +19,12 @@ cet_build_plugin(ScintTimeXeDoping art::tool
                 CLHEP::CLHEP
                 larsim::PhotonPropagation
               )
+cet_build_plugin(ScintTimeXeDoping2 art::tool
+                messagefacility::MF_MessageLogger
+                fhiclcpp::fhiclcpp
+                CLHEP::CLHEP
+                larsim::PhotonPropagation
+              )
 
 
 install_headers()
