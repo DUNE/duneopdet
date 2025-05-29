@@ -1,5 +1,5 @@
 
-#BEGIN_PROLOG
+BEGIN_PROLOG
 
 dunefdvd_opflash:
 {
@@ -17,4 +17,4 @@ dunefdvd_opflash:
 
 
 
-#END_PROLOG
+END_PROLOG
