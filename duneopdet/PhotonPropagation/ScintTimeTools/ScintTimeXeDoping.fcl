@@ -14,5 +14,33 @@ ScintTimeXeDoping10ppm:
     TauXX:           13550  # ns  XeXe* formation time
     TauN2:               0  # ns  0 = no nitrogen
 }
+ScintTimeTool10ppm_Xe:
+{
+    tool_type: "ScintTimeXeDoping2"
+    ArSingletTime: 6
+    ArTripletTime: 1440
+    TauAX: 5400
+    TauXX: 9200
+    TauN2ArAr: 4100
+    TauN2ArXe: 20300
+    Xe150nmTime: 4700
+    XeConcentration: 10.0
+    N2Concentration: 0.0
+    ArLight: false
+}
+ScintTimeTool10ppm_Ar:
+{
+    tool_type: "ScintTimeXeDoping2"
+    ArSingletTime: 6
+    ArTripletTime: 1440
+    TauAX: 5400
+    TauXX: 9200
+    TauN2ArAr: 4100
+    TauN2ArXe: 20300
+    Xe150nmTime: 4700
+    XeConcentration: 10.0
+    N2Concentration: 0.0
+    ArLight: true
+}
 
 END_PROLOG
