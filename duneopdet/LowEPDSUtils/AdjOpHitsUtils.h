@@ -23,11 +23,14 @@
 #include "canvas/Persistency/Common/Ptr.h"
 #include "lardata/Utilities/AssociationUtil.h"
 #include "larcorealg/Geometry/GeometryCore.h"
+#include "larcorealg/Geometry/OpDetGeo.h"
 #include "lardataobj/RecoBase/OpHit.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 #include "larcore/Geometry/WireReadout.h"
 #include "fhiclcpp/ParameterSet.h"
+
+#include "dunecore/ProducerUtils/ProducerUtils.h"
 
 #include "TH1I.h"
 #include "TH1F.h"
