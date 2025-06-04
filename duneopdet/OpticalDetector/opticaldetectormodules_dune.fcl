@@ -203,6 +203,61 @@ protodune_opflash_data_internal.InputModule: "ophitInternal"
 protodune_opflash_data_external: @local::protodune_opflash
 protodune_opflash_data_external.InputModule: "ophitExternal"
 
+protodunevd_daphne: {
+         DAPHNEInterface: {
+            tool_type: "DAPHNEInterface3"
+         }
+         InputLabel: "daq"
+         OutputLabel: "daq"
+         SubDetString: ["VD_Membrane_PDS","VD_Cathode_PDS"]
+         module_type: "DAPHNEReaderPDVD"
+         ExportWaveformTree: true
+      }
+
+protodunevd_ophit: {
+         AreaToPE: true
+         ChannelMasks: []
+         GenModule: "generator"
+         HitAlgoPset: {
+            ADCThreshold: 10
+            MinWidth: 60
+            Name: "SiPM"
+            Pedestal: 1500
+            SecondThreshold: 1
+         }
+         HitThreshold: 2e-1
+         InputLabels: [
+            "daq"
+         ]
+         InputModule: "pdvddaphne"
+         PedAlgoPset: {
+            Method: 0
+            Name: "Edges"
+            NumSampleFront: 3
+            NumSampleTail: 3
+         }
+         SPEArea: 410
+         SPEShift: 4.3e-1
+         SPESize: 4.51e-1
+         UseCalibrator: true
+         module_type: "OpHitFinder"
+         reco_man: {
+            module_type: "PulseRecoManager"
+         }
+      }
+protodunevd_opflash:
+{
+   module_type:          "OpFlashFinderVerticalDrift"
+   InputModule:          "ophit" 
+   MaximumTimeDistance:  2.0 # time parameter for selecting time neighbouring hits (us)
+   MaximumTimeWindow:    2.0 # time parameter for flash composition (us)
+   LMy:                  -700.0 # position inputs for identifying in which detecting plan a sensor is located
+   RMy:                  700.0 
+   Cx:                   -320.0
+   Cdyz:                 1500.0 # dist. criteria for neighbouring hits on cathode plane (cm)
+   CMdz:                 1500.0 # dist. criteria for neighbouring hits on cathode and membrane planes (cm)
+   MMdz:                 1500.0 # dist. criteria for neighbouring hits on membrane planes (cm) 
+}
 
 dunefd_opdigiana:
 {
