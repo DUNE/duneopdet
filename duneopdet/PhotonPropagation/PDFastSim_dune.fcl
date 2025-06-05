@@ -164,9 +164,9 @@ protodune_vd_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs
 ### COMPUTABLE GRAPH MODEL CONFIGURATIONS ###
 #############################################
 
-############################################
-# DUNE10KT (Full-size FDHD; 6000 channels) #
-###########################################
+##########################################
+# DUNE10KT (Full-size FDHD; 6k channels) #
+##########################################
 
 dune10kt_pdfastsim_ann_ar:
 {
