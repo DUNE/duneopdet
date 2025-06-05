@@ -13,7 +13,7 @@ WfmWienerfilter: {
 
 WfmGaussfilter: {
     Name: "Gauss"
-    Cutoff: 0.13     # In MHz.The cutoff frequency is defined by the standard deviation in the frequency domain.
+    Cutoff: 1.8      # In MHz.The cutoff frequency is defined by the standard deviation in the frequency domain.
 }                    # The cutoff value should be changed if signal smoothing is not observed.
 
 ###################################################################
