@@ -58,9 +58,6 @@ generic_dune_deconvolution:
   WfmPostfilter: @local::WfmGaussfilter  # Only available "Gauss" postfilter.
 }
 
-#Postfilter Cutoff
-dune_deconvolution.WfmPostfilter.Cutoff: 1.8     # Use this value only for postfilter.
-
 
 # For backwards compatibility. This table is currently used in many workflows for different detectors, data and MC.
 dune_deconvolution: @local::generic_dune_deconvolution
