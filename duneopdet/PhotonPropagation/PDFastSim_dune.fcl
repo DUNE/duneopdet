@@ -164,6 +164,26 @@ protodune_vd_pdfastsim_pvs: @local::protodune_hd_pdfastsim_pvs
 ### COMPUTABLE GRAPH MODEL CONFIGURATIONS ###
 #############################################
 
+##########################################
+# DUNE10KT (Full-size FDHD; 6k channels) #
+##########################################
+
+dune10kt_pdfastsim_ann_ar:
+{
+       module_type:         "PDFastSimANNFD1"
+       SimulationLabel:     "IonAndScint"
+       DoSlowComponent:     true
+       ScintTimeTool:       @local::ScintTimeLAr
+       TFLoaderTool:
+       {
+           tool_type:       TFLoaderMLP
+           ModelName:       "PhotonPropagation/ComputableGraph/dune10kt_128nm_tf2.6"   
+           InputsName:      ["serving_default_pos_x:0", "serving_default_pos_y:0", "serving_default_pos_z:0"]
+           OutputName:      "StatefulPartitionedCall:0"
+       }
+}
+
+
 ###########
 # DUNE-VD #
 ###########
