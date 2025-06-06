@@ -29,8 +29,8 @@ solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpHitLabel: "ophit10ppm"
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.Geometry: "VD"
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeY: 680
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeZ: 2100
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.XACathodeX:   -327.5
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAMembraneY:   743.302
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAFinalCapZ:   2188.38
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAStartCapZ:  -96.5
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XACathodeX:         -327.5
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAMembraneY:         743.302
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAFinalCapZ:         2188.38
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAStartCapZ:        -96.5
 END_PROLOG

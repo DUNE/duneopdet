@@ -11,8 +11,8 @@
 #ifndef SolarOpFlash_H
 #define SolarOpFlash_H 1
 
-#include "duneopdet/SolarNuUtils/SolarAuxUtils.h"
-#include "duneopdet/SolarNuUtils/AdjOpHitsUtils.h"
+#include "duneopdet/LowEPDSUtils/AdjOpHitsUtils.h"
+#include "dunecore/ProducerUtils/ProducerUtils.h"
 
 // LArSoft includes
 #include "larcore/Geometry/Geometry.h"
@@ -37,6 +37,8 @@
 #include <string>
 #include <memory>
 #include <limits>
+
+using namespace producer;
 
 namespace solar
 {
@@ -71,7 +73,7 @@ namespace solar
     float fOpFlashAlgoPE;
     float fOpFlashAlgoTriggerPE;
     // bool fOpFlashAlgoCentroid;
-    std::unique_ptr<solar::SolarAuxUtils> solaraux;
+    std::unique_ptr<producer::ProducerUtils> producer;
     std::unique_ptr<solar::AdjOpHitsUtils> adjophits;
   };
 
@@ -100,7 +102,7 @@ namespace solar
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE")),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE")),
         // fOpFlashAlgoCentroid(p.get<bool>("OpFlashAlgoCentroid")),
-        solaraux(new solar::SolarAuxUtils(p)),
+        producer(new producer::ProducerUtils(p)),
         adjophits(new solar::AdjOpHitsUtils(p))
   {
     reconfigure(p);
