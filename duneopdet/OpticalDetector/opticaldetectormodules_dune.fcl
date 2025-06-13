@@ -473,4 +473,58 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
          SSP_LED_DigiTree: false # true to generate a tree for debuging purposes
          module_type: "OpDetDigitizerProtoDUNEHD"
       }
+      
+      protodunevd_opdigi: {
+         PDMapTool: {
+           tool_type: "PDVDPDMapAlg"
+           MappingFile: "PDVD_PDS_Mapping_v04152025.json"
+         }
+         #XArapuca & PMT response paramters:
+         #FIX ME! HD VALUE! % for 45% PDE HPK from fig 15 DOI 10.1088/1748-0221/19/01/T01007
+         CrossTalkMap: [ "pd_type",  [["Cathode",0.09],
+                                       ["Membrane",  0.09],
+                                       ["PMT",       0.0]]
+                       ]
+                       
+         DarkCountRateMap: [ "pd_type",[["Cathode",415.0], # FIX ME! HD VALUE! in Hz 26*36mm2 * 48SiPMs = 415 Hz from fig 13 DOI 10.1088/1748-0221/19/01/T01007
+                                        ["Membrane",415.0], 
+                                        ["PMT",1.7e3]] # Dark noise rate in Hz - as stablished in arXiv:1806.04571 
+                           ]
+         LineNoiseRMS: 4.5 # FIX ME! HD VALUE! Based on F. Galizzi's study, see https://indico.fnal.gov/event/66616/
+
+         SPETemplateMap: [ "pd_type",[["Cathode","SPE_NP04_FBK_2024_without_pretrigger.dat"], #FIX ME! HD VALUE!
+                                      ["Membrane","SPE_NP04_FBK_2024_without_pretrigger.dat"],
+                                      ["PMT","PhotonPropagation/PMTResponse/protoDUNEDP_waveform_20180927.txt"]]
+                         ]
+         CustomSPEAmplitudeperOpDet: true
+         SPEAmplitude: 15 # not used if CustomSPEAmplitudeperOpDet: true, used vector instead
+         SPEAmplitudeMap: [ "pd_type",[["Cathode",15], #FIX ME! HD VALUE!
+                                      ["Membrane",15],
+                                      ["PMT",15]]
+                         ] 
+         # Daphne digitization parameters
+         DefaultSimWindow: true # true for simulating the 2 drift-time windows.
+         TimeBegin: -20 #in us, starting of the DAQ readout window, not used if DefaultSimWindow: true
+         TimeEnd: 20 # in us,ending of the DAQ readout window, not used if DefaultSimWindow: true
+         NegativeSignal: false #Activate to have negative signals as it is in data.
+         Padding: 400
+         Pedestal: 8200 # or baseline, around half of the dynamic range.
+         DynamicRangeSaturation: 16384 # maximum ADC count in the waveform
+         FullStreamingChannels: ["pd_type", ["Cathode"]]
+         
+         SelfTrigger_DaphneThreshold: 65 #Daphne selftrigger configuration, default threhold for self-trigger channels.
+         SelfTrigger_DaphneThresholdMap: [[45,[34,24,14,4]]] #Customized daphne selftrigger threshold,
+                                                             #only 4 channels have a threshold of 45ADC
+         SelfTrigger_Pretrigger: 128 # Daphne selftrigger configuration, number of pretrigger samples.
+         SelfTrigger_ReadoutWindow: 1024 #Daphne selftrigger configuration
+
+         
+         InputModulesAr: ["PDFastSim","PDFastSimAr"]
+         InputModulesXe: ["PDFastSimXe"]
+
+         ExportWaveformTree: false # true to export waveforms in a plain tree too.
+         
+         SSP_LED_DigiTree: false # true to generate a tree for debuging purposes
+         module_type: "OpDetDigitizerProtoDUNEVD"
+      }
 END_PROLOG
