@@ -632,7 +632,7 @@ void OpDetDigitizerProtoDUNEVD::produce(art::Event &evt) {
   }
 
   if (fDigiTree_SSP_LED) {
-    arvore2->Fill();
+    DebugTree->Fill();
     t_photon.clear();
     op_photon.clear();
   }
