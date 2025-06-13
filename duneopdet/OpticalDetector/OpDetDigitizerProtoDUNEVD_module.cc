@@ -170,10 +170,12 @@ private:
 
   //-----------------------------------------------------
   // Trigger analysis variables
-  std::vector<double> t_photon; // vitor
+  //Simple tree that stores time and channel of every photon
+  //added to the waveform, useful for debugging purposes
+  std::vector<double> t_photon; 
   std::vector<int> op_photon;
 
-  TTree *arvore2;
+  TTree *DebugTree;
   //-----------------------------------------------------
 
   // Random number engines
@@ -285,21 +287,15 @@ OpDetDigitizerProtoDUNEVD::OpDetDigitizerProtoDUNEVD(
       fInputModulesAr(pset.get<std::vector<std::string>>("InputModulesAr")),
       fInputModulesXe(pset.get<std::vector<std::string>>("InputModulesXe")) {
 
-  // Read the fcl-file
-  //    auto tempvec        =
-  //           =
-
-  /*
-           CrossTalkMap: [  "pd_type",[ ["Cathode",  0.09], # FIX ME! HD VALUE!
-     % for 45% PDE HPK from fig 15 DOI 10.1088/1748-0221/19/01/T01007
-                                         ["Membrane", 0.09],
-                                         ["PMT",      0.0  ]]
-  */
+  //Maps format here are a pair of a string and map. The string defines an OpDet quality defined in the 
+  //PDS map json file (for example pd_type), and the map contains the relation of quality values
+  // and the value assigned (for example CrosstalkMap["PMT"]=0)
+  
   auto AuxMap =
       pset.get<std::pair<std::string, std::vector<std::pair<std::string, double>>>>(
           "CrossTalkMap");
   fCrossTalkMap.first=AuxMap.first;
-  for (const auto& pair : AuxMap.second) fCrossTalkMap.second.insert(pair); // Insert each pair
+  for (const auto& pair : AuxMap.second) fCrossTalkMap.second.insert(pair); 
 
   fLineNoiseRMS = pset.get<double>("LineNoiseRMS");
 
@@ -307,13 +303,13 @@ OpDetDigitizerProtoDUNEVD::OpDetDigitizerProtoDUNEVD(
       pset.get<std::pair<std::string, std::vector<std::pair<std::string, double>>>>(
           "DarkCountRateMap");
   fDarkCountRateMap.first=AuxMap.first;
-  for (const auto& pair : AuxMap.second) fDarkCountRateMap.second.insert(pair); // Insert each pair
+  for (const auto& pair : AuxMap.second) fDarkCountRateMap.second.insert(pair);
 
   auto AuxMap2 =
       pset.get<std::pair<std::string, std::vector<std::pair<std::string, std::string>>>>(
           "SPETemplateMap");
   fSPETemplateMap.first=AuxMap2.first;
-  for (const auto& pair : AuxMap2.second) fSPETemplateMap.second.insert(pair); // Insert each pair
+  for (const auto& pair : AuxMap2.second) fSPETemplateMap.second.insert(pair);
 
   fPedestal = pset.get<short>("Pedestal");
   fDefaultSimWindow = pset.get<bool>(
@@ -353,7 +349,7 @@ OpDetDigitizerProtoDUNEVD::OpDetDigitizerProtoDUNEVD(
                     200); // Pretrigger samples in Selftrigger channels.
   fSelfTrigger_ReadoutWindow =
       pset.get<int>("SelfTrigger_ReadoutWindow",
-                    1000); // channels that are not here, are self-trigger.
+                    1000); // ReadoutWindow for self-trigger channels in time ticks.
   fSelfTrigger_DaphneThreshold =
       pset.get<int>("SelfTrigger_DaphneThreshold",
                     65); // Daphne selftrigger threshold default value.
@@ -384,9 +380,9 @@ OpDetDigitizerProtoDUNEVD::OpDetDigitizerProtoDUNEVD(
 
   art::ServiceHandle<art::TFileService> tfs;
   if (fDigiTree_SSP_LED) {
-    arvore2 = tfs->make<TTree>("PhotonData", "Photon_analysis");
-    arvore2->Branch("photon_opCh", &op_photon);
-    arvore2->Branch("photon_pulse", &t_photon);
+    DebugTree = tfs->make<TTree>("PhotonData", "Photon_analysis");
+    DebugTree->Branch("photon_opCh", &op_photon);
+    DebugTree->Branch("photon_pulse", &t_photon);
   }
 
   // This module produces (infrastructure piece)
