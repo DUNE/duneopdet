@@ -443,7 +443,7 @@ namespace opdet {
      if(!processed[h])
      {
        auto const xyz_h = wireReadout->OpDetGeoFromOpChannel(HitVector[sorted[h]].OpChannel()).GetCenter();
-       std::cout << "Next:    " << HitVector[sorted[h]].PeakTime() << " "<< xyz_h.X() << " " << xyz_h.Y() << " " << xyz_h.Z() << std::endl; 
+      // std::cout << "Next:    " << HitVector[sorted[h]].PeakTime() << " "<< xyz_h.X() << " " << xyz_h.Y() << " " << xyz_h.Z() << std::endl; 
        dx  = (xyz_h - xyz_hitnumber).X();
        dy  = (xyz_h - xyz_hitnumber).Y();
        dz  = (xyz_h - xyz_hitnumber).Z();
