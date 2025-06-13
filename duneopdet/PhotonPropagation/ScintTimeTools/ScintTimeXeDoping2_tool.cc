@@ -48,7 +48,15 @@ namespace phot
             << "  TauN2ArXe:           " << fTauN2ArXe << " ns\n"
             << "Calculated:" << "\n"
             << "  TauTA triplet:   " << fTauTA << " ns\n"
-            << "  TauTX:           " << fTauTX  << " ns\n";
+            << "  TauTX:           " << fTauTX  << " ns\n"
+            << "  fMaxProbs:       " << fMaxProbs << " \n"
+            << "  fMaxProbt:       " << fMaxProbt << " \n"
+            << "  fMaxTs:          " << fMaxTs << " ns\n"
+            << "  fMaxTt:          " << fMaxTt << " ns\n"
+            << "  FRTime:          " << FRTime << " ns\n"
+            << "  FDTime:          " << FDTime << " ns\n"
+            << "  SRTime:          " << SRTime << " ns\n"
+            << "  SDTime:          " << SDTime << " ns\n";
     }
             
     //......................................................................    

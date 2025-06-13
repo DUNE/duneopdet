@@ -15,7 +15,7 @@ namespace phot
     {
     public:
         explicit ScintTimeXeDoping2(fhicl::ParameterSet const& pset);
-        void GenScintTime(bool is_fast, CLHEP::HepRandomEngine& engine)  ;
+        void GenScintTime(bool is_fast, CLHEP::HepRandomEngine& engine) override;
         double fastScintTime() override;
         double slowScintTime() override;
 
