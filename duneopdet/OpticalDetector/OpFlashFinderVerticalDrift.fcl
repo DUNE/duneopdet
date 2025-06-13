@@ -1,5 +1,5 @@
 
-#BEGIN_PROLOG
+BEGIN_PROLOG
 
 dunefdvd_opflash:
 {
@@ -15,6 +15,4 @@ dunefdvd_opflash:
    MMdz:                 1500.0 # dist. criteria for neighbouring hits on membrane planes (cm) 
 }
 
-
-
-#END_PROLOG
+END_PROLOG

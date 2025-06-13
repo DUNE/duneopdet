@@ -1,7 +1,6 @@
 #include "AdjOpHitsUtils.h"
-#include "SolarAuxUtils.h"
 
-#include "larcorealg/Geometry/OpDetGeo.h"
+using namespace producer;
 
 namespace solar
 {
@@ -25,7 +24,7 @@ namespace solar
   {
     if (fOpFlashAlgoHotVertexThld > 1)
     {
-      SolarAuxUtils::PrintInColor("Hot vertex threshold must be between 0 and 1", SolarAuxUtils::GetColor("red"), "Error");
+      ProducerUtils::PrintInColor("Hot vertex threshold must be between 0 and 1", ProducerUtils::GetColor("red"), "Error");
       return;
     }
     for (std::vector<art::Ptr<recob::OpHit>> Cluster : OpHitClusters)
@@ -197,7 +196,7 @@ namespace solar
       ClusteredHits[*it] = true;
       AdjHitVec.push_back(hit);
       AdjHitIdx.push_back(*it);
-      sOpHitClustering += "Trigger hit found: PE " + SolarAuxUtils::str(hit->PE()) + " CH " + SolarAuxUtils::str(hit->OpChannel()) + " Time " + SolarAuxUtils::str(hit->PeakTime()) + "\n";
+      sOpHitClustering += "Trigger hit found: PE " + ProducerUtils::str(hit->PE()) + " CH " + ProducerUtils::str(hit->OpChannel()) + " Time " + ProducerUtils::str(hit->PeakTime()) + "\n";
 
       int refHit1 = hit->OpChannel();
       auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
@@ -235,20 +234,20 @@ namespace solar
           if (adjHit->PE() > hit->PE())
           {
             main_hit = false;
-            sOpHitClustering += "Hit with PE > TriggerPE found: PE " + SolarAuxUtils::str(adjHit->PE()) + " CH " + SolarAuxUtils::str(adjHit->OpChannel()) + " Time " + SolarAuxUtils::str(adjHit->PeakTime()) + "\n";
+            sOpHitClustering += "Hit with PE > TriggerPE found: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime()) + "\n";
 
             // Reset the ClusteredHits values for the hits that have been added to the cluster
             for (auto it3 = AdjHitIdx.begin(); it3 != AdjHitIdx.end(); ++it3)
             {
               ClusteredHits[*it3] = false;
-              sOpHitClustering += "Removing hit: CH " + SolarAuxUtils::str(OpHitVector[*it3]->OpChannel()) + " Time " + SolarAuxUtils::str(OpHitVector[*it3]->PeakTime()) + "\n";
+              sOpHitClustering += "Removing hit: CH " + ProducerUtils::str(OpHitVector[*it3]->OpChannel()) + " Time " + ProducerUtils::str(OpHitVector[*it3]->PeakTime()) + "\n";
             }
             break;
           }
           AdjHitVec.push_back(adjHit);
           AdjHitIdx.push_back(*it2);
           ClusteredHits[*it2] = true;
-          sOpHitClustering += "Adding hit: PE " + SolarAuxUtils::str(adjHit->PE()) + " CH " + SolarAuxUtils::str(adjHit->OpChannel()) + " Time " + SolarAuxUtils::str(adjHit->PeakTime()) + "\n";
+          sOpHitClustering += "Adding hit: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime()) + "\n";
         }
       }
 
@@ -284,20 +283,20 @@ namespace solar
           if (adjHit->PE() > hit->PE())
           {
             main_hit = false;
-            sOpHitClustering += "*** Hit with PE > TriggerPE found: PE " + SolarAuxUtils::str(adjHit->PE()) + " CH " + SolarAuxUtils::str(adjHit->OpChannel()) + " Time " + SolarAuxUtils::str(adjHit->PeakTime()) + "\n";
+            sOpHitClustering += "*** Hit with PE > TriggerPE found: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime()) + "\n";
 
             // Reset the ClusteredHits values for the hits that have been added to the cluster
             for (auto it5 = AdjHitIdx.begin(); it5 != AdjHitIdx.end(); ++it5)
             {
               ClusteredHits[*it5] = false;
-              sOpHitClustering += "Removing hit: CH " + SolarAuxUtils::str(OpHitVector[*it5]->OpChannel()) + " Time " + SolarAuxUtils::str(OpHitVector[*it5]->PeakTime()) + "\n";
+              sOpHitClustering += "Removing hit: CH " + ProducerUtils::str(OpHitVector[*it5]->OpChannel()) + " Time " + ProducerUtils::str(OpHitVector[*it5]->PeakTime()) + "\n";
             }
             break;
           }
           AdjHitVec.push_back(adjHit);
           AdjHitIdx.push_back(*it4);
           ClusteredHits[*it4] = true;
-          sOpHitClustering += "Adding hit: PE " + SolarAuxUtils::str(adjHit->PE()) + " CH " + SolarAuxUtils::str(adjHit->OpChannel()) + " Time " + SolarAuxUtils::str(adjHit->PeakTime()) + "\n";
+          sOpHitClustering += "Adding hit: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime()) + "\n";
         }
       }
 
@@ -306,12 +305,12 @@ namespace solar
         // Store the original indices of the clustered hits
         OpHitClusters.push_back(std::move(AdjHitVec));
         OpHitClusterIdx.push_back(std::move(AdjHitIdx));
-        sOpHitClustering += "Cluster size: " + SolarAuxUtils::str(int(OpHitClusters.back().size())) + "\n";
-        SolarAuxUtils::PrintInColor(sOpHitClustering, SolarAuxUtils::GetColor("green"), "Debug");
+        sOpHitClustering += "Cluster size: " + ProducerUtils::str(int(OpHitClusters.back().size())) + "\n";
+        ProducerUtils::PrintInColor(sOpHitClustering, ProducerUtils::GetColor("green"), "Debug");
       }
       else
       {
-        SolarAuxUtils::PrintInColor(sOpHitClustering, SolarAuxUtils::GetColor("red"), "Debug");
+        ProducerUtils::PrintInColor(sOpHitClustering, ProducerUtils::GetColor("red"), "Debug");
       }
     }
     return;
@@ -322,7 +321,7 @@ namespace solar
     if (Hits.size() == 0)
     {
       Residual = 1e6;
-      SolarAuxUtils::PrintInColor("Failed Residual Evaluation: Empty Flash!", SolarAuxUtils::GetColor("yellow"), "Error");
+      ProducerUtils::PrintInColor("Failed Residual Evaluation: Empty Flash!", ProducerUtils::GetColor("yellow"), "Error");
       return;
     }
     // Initialize variables
@@ -368,13 +367,13 @@ namespace solar
     }
 
     Residual /= float(Hits.size());
-    std::string debug = "PE: " + SolarAuxUtils::str(PE) +
-      " X: " + SolarAuxUtils::str(x) +
-      " RefPE: " + SolarAuxUtils::str(refHitPE) +
-      " NHits: " + SolarAuxUtils::str(int(Hits.size())) +
-      " Residual: " + SolarAuxUtils::str(Residual);
+    std::string debug = "PE: " + ProducerUtils::str(PE) +
+      " X: " + ProducerUtils::str(x) +
+      " RefPE: " + ProducerUtils::str(refHitPE) +
+      " NHits: " + ProducerUtils::str(int(Hits.size())) +
+      " Residual: " + ProducerUtils::str(Residual);
 
-    SolarAuxUtils::PrintInColor(debug, SolarAuxUtils::GetColor("yellow"), "Debug");
+    ProducerUtils::PrintInColor(debug, ProducerUtils::GetColor("yellow"), "Debug");
     return;
   }
 
@@ -403,7 +402,7 @@ namespace solar
     }
     else
     {
-      SolarAuxUtils::PrintInColor("Geometry not recognized: Must be 'HD' or 'VD'", SolarAuxUtils::GetColor("red"), "Error");
+      ProducerUtils::PrintInColor("Geometry not recognized: Must be 'HD' or 'VD'", ProducerUtils::GetColor("red"), "Error");
     }
     return -1;
   }

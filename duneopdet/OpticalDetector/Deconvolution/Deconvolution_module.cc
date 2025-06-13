@@ -611,8 +611,7 @@ namespace opdet {
       // Compute filters.
       //******************************
 
-      Double_t fFrequencyCutOff = fFilterConfig.fCutoff;
-      Double_t fTickCutOff = fSamples*fFrequencyCutOff/fSampleFreq;
+      Double_t fFrequencyCutOff = fFilterConfig.fCutoff/sqrt(log(2));
 
       for (int i=0; i<(fSamples/2+1); i++) {
 
@@ -631,7 +630,7 @@ namespace opdet {
           // Compute gauss filter
           xG.fCmplx[0] = TComplex(0,0);
           xG.fCmplx.at(i) = TComplex::Exp(
-            -0.5*TMath::Power(i*fSampleFreq/(fSamples*fTickCutOff),2))
+            -0.5*TMath::Power(i*fSampleFreq/(fSamples*fFrequencyCutOff),2))
             /xH.fCmplx.at(i);
         }
 
