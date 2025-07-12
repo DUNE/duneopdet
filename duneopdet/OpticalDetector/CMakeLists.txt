@@ -24,7 +24,6 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 cetlib::cetlib 
 				cetlib_except::cetlib_except 
                                 Boost::filesystem
-                                duneprototypes::Protodune_vd_ChannelMap
                                 opdet_PDVDPDMapAlg
 
   
@@ -62,7 +61,6 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
 				CLHEP::CLHEP
                                 Boost::filesystem
                                 FFTW3::FFTW3
-                                duneprototypes::Protodune_vd_ChannelMap
                                 opdet_PDVDPDMapAlg
 
                 SERVICE_LIBRARIES
