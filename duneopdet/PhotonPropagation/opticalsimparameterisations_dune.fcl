@@ -294,7 +294,7 @@ dune_vuv_RS100cm_hits_parameterization:
  
  DomePDCorr: false
 
- MaxPDDistance: 1000 
+ MaxPDDistance: 1000
 
  delta_angulo_vuv: 10
 }
