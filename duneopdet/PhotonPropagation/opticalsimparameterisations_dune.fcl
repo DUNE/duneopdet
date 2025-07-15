@@ -52,7 +52,7 @@ dune_vuv_timing_parameterization:
   # Discretisation step size in cm
   step_size: 1.
   # Min and maximum distance in cm parameterisations are generated for (only generated when required to prevent long initial loading time)
-  max_d: 2500.
+  max_d: 1000.
   min_d: 25.
   # VUV group velocity in cm/ns
   vuv_vgroup_mean: 13.5
