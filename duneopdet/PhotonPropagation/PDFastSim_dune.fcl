@@ -3,6 +3,8 @@
 #include "ScintTimeXeDoping.fcl"
 #include "opticalsimparameterisations_dune.fcl"
 #inlcude "photpropservices_dune.fcl"
+#include "opticalpath_tool.fcl"
+#include "duneopticalpath_tool.fcl"
 
 BEGIN_PROLOG
 
@@ -11,13 +13,14 @@ BEGIN_PROLOG
 ############################################
 
 ###########
-# DUNE FD #
+# DUNE HD 10kt #
 ###########
 
 # Hits & Timing parameterization for DUNE FD, Ar scintillation
 dunefd_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
 dunefd_pdfastsim_par_ar.VUVTiming:             @local::dune_vuv_timing_parameterization
 dunefd_pdfastsim_par_ar.VUVHits:               @local::dune_vuv_RS100cm_hits_parameterization
+dunefd_pdfastsim_par_ar.OpticalPathTool:       @local::DUNEHD10ktOpticalPath
 
 # As above, with cathode reflections included
 dunefd_pdfastsim_par_ar_refl:                  @local::dunefd_pdfastsim_par_ar
@@ -36,6 +39,7 @@ dunefd_pdfastsim_par_xe.VUVHits:               @local::dune_vuv_Xenon_hits_param
 dunefd_pdfastsim_par_xe.IncludePropTime:       false          # Xe propoagation time not yet calculated
 #dunefd_pdfastsim_par_xe.VUVTiming:                           # Xe propoagation time not yet calculated
 dunefd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
+dunefd_pdfastsim_par_xe.OpticalPathTool:       @local::DUNEHD10ktOpticalPath
 
 # Same as above, but for higher Xe concentration
 dunefd_pdfastsim_par_xe50:                       @local::dunefd_pdfastsim_par_xe
@@ -51,8 +55,38 @@ dunefd_pdfastsim_par_xe_refl.VISHits:          @local::dune_vis_xenon_hits_param
 # Photon library (or PVS parameterization) is not recommended for the FD
 dunefd_pdfastsim_pvs:                          @local::standard_pdfastsim_pvs
 
-# Choose *the* pdfast sim module for the FD
+# Choose *the* pdfast sim module for the HD 10kt
 dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar
+
+
+###########
+# DUNE HD 10kt 1x2x6 #
+###########
+
+# Parameterisations currently identical for 1x2x6
+# But need different optical path tool, using standard tool rather than custom dune 10kt one
+# Do this for each configuation
+
+dunefd_1x2x6_pdfastsim_par_ar:                       @local::dunefd_pdfastsim_par_ar
+dunefd_1x2x6_pdfastsim_par_ar.OpticalPathTool:       @local::StandardOpticalPath
+
+dunefd_1x2x6_pdfastsim_par_ar_refl:                  @local::dunefd_pdfastsim_par_ar_refl
+dunefd_1x2x6_pdfastsim_par_ar_refl.OpticalPathTool:  @local::StandardOpticalPath
+
+dunefd_1x2x6_pdfastsim_par_ar_fastonly:                     @local::dunefd_pdfastsim_par_ar_fastonly
+dunefd_1x2x6_pdfastsim_par_ar_fastonly.OpticalPathTool:     @local::StandardOpticalPath
+
+dunefd_1x2x6_pdfastsim_par_xe:                       @local::dunefd_pdfastsim_par_xe
+dunefd_1x2x6_pdfastsim_par_xe.OpticalPathTool:       @local::StandardOpticalPath
+
+dunefd_1x2x6_pdfastsim_par_xe50:                     @local::dunefd_pdfastsim_par_xe50
+dunefd_1x2x6_pdfastsim_par_xe50.OpticalPathTool:     @local::StandardOpticalPath
+
+dunefd_1x2x6_pdfastsim_par_xe_refl:                  @local::dunefd_pdfastsim_par_xe_refl
+dunefd_1x2x6_pdfastsim_par_xe_refl.OpticalPathTool:  @local::StandardOpticalPath
+
+# Choose *the* pdfast sim module for the HD 10kt 1x2x6
+dunefd_1x2x6_pdfastsim:                              @local::dunefd_1x2x6_pdfastsim_par_ar
 
 
 ###########
