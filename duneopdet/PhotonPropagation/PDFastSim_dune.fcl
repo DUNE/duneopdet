@@ -16,7 +16,7 @@ BEGIN_PROLOG
 # DUNE HD 10kt #
 ###########
 
-# Hits & Timing parameterization for DUNE FD, Ar scintillation
+# Hits & Timing parameterization for DUNE HD, Ar scintillation
 dunefd_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
 dunefd_pdfastsim_par_ar.VUVTiming:             @local::dune_vuv_timing_parameterization
 dunefd_pdfastsim_par_ar.VUVHits:               @local::dune_vuv_RS100cm_hits_parameterization
@@ -33,7 +33,7 @@ dunefd_pdfastsim_par_ar_refl.VISHits:          @local::dune_vis_RS100cm_hits_par
 dunefd_pdfastsim_par_ar_fastonly:              @local::dunefd_pdfastsim_par_ar
 dunefd_pdfastsim_par_ar_fastonly.DoSlowComponent: false
 
-# Hits parameterization for DUNE FD, Xe scintillation at 10 ppm
+# Hits parameterization for DUNE HD, Xe scintillation at 10 ppm
 dunefd_pdfastsim_par_xe:                       @local::standard_pdfastsim_par_ar
 dunefd_pdfastsim_par_xe.DoFastComponent:       false          # Only slow Xe light
 dunefd_pdfastsim_par_xe.VUVHits:               @local::dune_vuv_Xenon_hits_parameterization
@@ -68,26 +68,32 @@ dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar
 # Parameterisations currently identical for 1x2x6, except not using vertical border correction mode
 # Require different optical path tool, using standard tool rather than custom dune 10kt one
 
+# Hits & Timing parameterization for DUNE HD 1x2x6, Ar scintillation
 dunefd_1x2x6_pdfastsim_par_ar:                       @local::dunefd_pdfastsim_par_ar
 dunefd_1x2x6_pdfastsim_par_ar.OpticalPathTool:       @local::StandardOpticalPath
 dunefd_1x2x6_pdfastsim_par_ar.VUVHits.VerticalBorderCorrectionMode: false
 
+# As above, with cathode reflections included
 dunefd_1x2x6_pdfastsim_par_ar_refl:                  @local::dunefd_pdfastsim_par_ar_refl
 dunefd_1x2x6_pdfastsim_par_ar_refl.OpticalPathTool:  @local::StandardOpticalPath
 dunefd_1x2x6_pdfastsim_par_ar_refl.VUVHits.VerticalBorderCorrectionMode: false
 
+# As above, but fast-only scintillation for high Xe concentration
 dunefd_1x2x6_pdfastsim_par_ar_fastonly:                     @local::dunefd_pdfastsim_par_ar_fastonly
 dunefd_1x2x6_pdfastsim_par_ar_fastonly.OpticalPathTool:     @local::StandardOpticalPath
 dunefd_1x2x6_pdfastsim_par_ar_fastonly.VUVHits.VerticalBorderCorrectionMode: false
 
+# Hits parameterization for DUNE HD 1x2x6, Xe scintillation at 10 ppm
 dunefd_1x2x6_pdfastsim_par_xe:                       @local::dunefd_pdfastsim_par_xe
 dunefd_1x2x6_pdfastsim_par_xe.OpticalPathTool:       @local::StandardOpticalPath
 dunefd_1x2x6_pdfastsim_par_xe.VUVHits.VerticalBorderCorrectionMode: false
 
+# As above, but for higher Xe concentration
 dunefd_1x2x6_pdfastsim_par_xe50:                     @local::dunefd_pdfastsim_par_xe50
 dunefd_1x2x6_pdfastsim_par_xe50.OpticalPathTool:     @local::StandardOpticalPath
 dunefd_1x2x6_pdfastsim_par_xe50.VUVHits.VerticalBorderCorrectionMode: false
 
+# As above, with cathode reflections included
 dunefd_1x2x6_pdfastsim_par_xe_refl:                  @local::dunefd_pdfastsim_par_xe_refl
 dunefd_1x2x6_pdfastsim_par_xe_refl.OpticalPathTool:  @local::StandardOpticalPath
 dunefd_1x2x6_pdfastsim_par_xe_refl.VUVHits.VerticalBorderCorrectionMode: false
