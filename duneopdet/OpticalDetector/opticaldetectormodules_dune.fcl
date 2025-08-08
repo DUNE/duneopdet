@@ -475,6 +475,7 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
       }
       
       protodunevd_opdigi: {
+         module_type:   "OpDetDigitizerProtoDUNEVD"
          PDMapTool: {
            tool_type: "PDVDPDMapAlg"
            MappingFile: "PDVD_PDS_Mapping_v04152025.json"
@@ -492,15 +493,15 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
                            ]
          LineNoiseRMS: 4.5 # FIX ME! HD VALUE! Based on F. Galizzi's study, see https://indico.fnal.gov/event/66616/
 
-         SPETemplateMap: [ "pd_type",[["Cathode","SPE_NP04_FBK_2024_without_pretrigger.dat"], #FIX ME! HD VALUE!
-                                      ["Membrane","SPE_NP04_FBK_2024_without_pretrigger.dat"],
+         SPETemplateMap: [ "pd_type",[["Cathode","SPE_NP02_estimate_without_pretrigger.dat"], #FIX ME! Temporary simple PE with Amplitude 10 ADC, RiseTime: 0.013 us, DecayTime: 0.386 us!
+                                      ["Membrane","SPE_NP02_estimate_without_pretrigger.dat"],
                                       ["PMT","PhotonPropagation/PMTResponse/protoDUNEDP_waveform_20180927.txt"]]
                          ]
          CustomSPEAmplitudeperOpDet: true
-         SPEAmplitude: 15 # not used if CustomSPEAmplitudeperOpDet: true, used vector instead
-         SPEAmplitudeMap: [ "pd_type",[["Cathode",15], #FIX ME! HD VALUE!
-                                      ["Membrane",15],
-                                      ["PMT",15]]
+         SPEAmplitude: 10 # not used if CustomSPEAmplitudeperOpDet: true, used vector instead
+         SPEAmplitudeMap: [ "pd_type",[["Cathode",10], #FIX ME! TEMPORARY VALUE!
+                                      ["Membrane",10],
+                                      ["PMT",10]]
                          ] 
          # Daphne digitization parameters
          DefaultSimWindow: true # true for simulating the 2 drift-time windows.
@@ -508,11 +509,11 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
          TimeEnd: 20 # in us,ending of the DAQ readout window, not used if DefaultSimWindow: true
          NegativeSignal: false #Activate to have negative signals as it is in data.
          Padding: 400
-         Pedestal: 8200 # or baseline, around half of the dynamic range.
+         Pedestal: 500 # or baseline. FIX ME! TEMPORARY VALUE!
          DynamicRangeSaturation: 16384 # maximum ADC count in the waveform
          FullStreamingChannels: ["pd_type", ["Cathode"]]
          
-         SelfTrigger_DaphneThreshold: 65 #Daphne selftrigger configuration, default threhold for self-trigger channels.
+         SelfTrigger_DaphneThreshold: 15 #Daphne selftrigger configuration, default threhold for self-trigger channels (1.5 pe).
          SelfTrigger_DaphneThresholdMap: [[45,[34,24,14,4]]] #Customized daphne selftrigger threshold,
                                                              #only 4 channels have a threshold of 45ADC
          SelfTrigger_Pretrigger: 128 # Daphne selftrigger configuration, number of pretrigger samples.
@@ -525,6 +526,5 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
          ExportWaveformTree: false # true to export waveforms in a plain tree too.
          
          SSP_LED_DigiTree: false # true to generate a tree for debuging purposes
-         module_type: "OpDetDigitizerProtoDUNEVD"
       }
 END_PROLOG
