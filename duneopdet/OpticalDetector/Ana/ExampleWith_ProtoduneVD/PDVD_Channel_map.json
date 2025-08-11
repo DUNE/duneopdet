@@ -1,0 +1,381 @@
+[  
+   {  
+      "channel": 0,
+      "pd_type": "Membrane",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "M1",
+      "HardwareChannel": [ {"Slot": 7, "Link" : 0, "DaphneChannel" : 47, "OfflineChannel": 2010} ,
+                           {"Slot": 7, "Link" : 0, "DaphneChannel" : 45, "OfflineChannel": 2011} ]
+    },
+    {
+      "channel": 1,
+      "pd_type": "Membrane",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "M3",
+      "HardwareChannel": [ {"Slot": 7, "Link" : 0, "DaphneChannel" : 46, "OfflineChannel": 2030 },
+                           {"Slot": 7, "Link" : 0, "DaphneChannel" : 44, "OfflineChannel": 2031} ]
+    },
+    {
+      "channel": 2,
+      "pd_type": "Membrane",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "M2",
+      "HardwareChannel": [ {"Slot": 7, "Link" : 0, "DaphneChannel" : 40, "OfflineChannel": 2020} ,
+                           {"Slot": 7, "Link" : 0, "DaphneChannel" : 42, "OfflineChannel": 2021} ]
+    },
+    {
+      "channel": 3,
+      "pd_type": "Membrane",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "M4",
+      "HardwareChannel": [ {"Slot": 7, "Link" : 0, "DaphneChannel" : 43, "OfflineChannel": 2040} ,
+                           {"Slot": 7, "Link" : 0, "DaphneChannel" : 41, "OfflineChannel": 2041} ]
+    },
+    {
+        "channel": 4,
+        "pd_type": "Cathode",
+        "wls" : "PTP",
+        "eff_Ar": 0.03,
+        "eff_Xe": 0.03,
+        "name":  "C2",
+        "HardwareChannel": [ {"Slot": 6, "Link" : 0, "DaphneChannel" :30, "OfflineChannel": 1020},
+                             {"Slot": 6, "Link" : 0, "DaphneChannel" :31, "OfflineChannel": 1021}]
+    },
+    {
+      "channel": 5,
+      "pd_type": "Cathode",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "C6",
+      "HardwareChannel": [ {"Slot": 6, "Link" : 0, "DaphneChannel" : 1, "OfflineChannel": 1060} ,
+                           {"Slot": 6, "Link" : 0, "DaphneChannel" : 3, "OfflineChannel": 1061} ]
+    },
+    {
+      "channel": 6,
+      "pd_type": "Cathode",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "C1",
+      "HardwareChannel": [ {"Slot": 6, "Link" : 0, "DaphneChannel" : 32, "OfflineChannel": 1010} ,
+                           {"Slot": 6, "Link" : 0, "DaphneChannel" : 33, "OfflineChannel": 1011} ]
+    },
+    {
+      "channel": 7,
+      "pd_type": "Cathode",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "C5",
+      "HardwareChannel": [ {"Slot": 6, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 1050} ,
+                           {"Slot": 6, "Link" : 0, "DaphneChannel" : 2, "OfflineChannel": 1051} ]
+    },
+    {
+      "channel": 8,
+      "pd_type": "Cathode",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "C3",
+      "HardwareChannel": [ {"Slot": 6, "Link" : 0, "DaphneChannel" : 34, "OfflineChannel": 1030} ,
+                           {"Slot": 6, "Link" : 0, "DaphneChannel" : 35, "OfflineChannel": 1031} ]
+    },
+    {
+      "channel": 9,
+      "pd_type": "Cathode",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "C7",
+      "HardwareChannel": [ {"Slot": 6, "Link" : 0, "DaphneChannel" : 5, "OfflineChannel": 1070} ,
+                           {"Slot": 6, "Link" : 0, "DaphneChannel" : 7, "OfflineChannel": 1071} ]
+    },
+    {
+      "channel": 10,
+      "pd_type": "Cathode",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "C4",
+      "HardwareChannel": [ {"Slot": 6, "Link" : 0, "DaphneChannel" : 36, "OfflineChannel": 1040} ,
+                           {"Slot": 6, "Link" : 0, "DaphneChannel" : 37, "OfflineChannel": 1041} ]
+    },
+    {
+      "channel": 11,
+      "pd_type": "Cathode",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "C8",
+      "HardwareChannel": [ {"Slot": 6, "Link" : 0, "DaphneChannel" : 4, "OfflineChannel": 1080} ,
+                           {"Slot": 6, "Link" : 0, "DaphneChannel" : 6, "OfflineChannel": 1081} ]
+    },
+    {
+      "channel": 12,
+      "pd_type": "Membrane",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "M5",
+      "HardwareChannel": [ {"Slot": 7, "Link" : 0, "DaphneChannel" : 7, "OfflineChannel": 2050} ,
+                           {"Slot": 7, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 2051} ]
+    },
+    {
+      "channel": 13,
+      "pd_type": "Membrane",
+      "wls" : "None",
+      "eff_Ar": 0.0,
+      "eff_Xe": 0.03,
+      "name":  "M7",
+      "HardwareChannel": [ {"Slot": 7, "Link" : 0, "DaphneChannel" : 37, "OfflineChannel": 2070} ,
+                           {"Slot": 7, "Link" : 0, "DaphneChannel" : 30, "OfflineChannel": 2071} ]
+    },
+    {
+      "channel": 14,
+      "pd_type": "PMT",
+      "wls" : "TPB",
+      "eff_Ar": 0.12,
+      "eff_Xe": 0.12,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3010}]
+    },
+    {
+      "channel": 15,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 6, "Link" : 0, "DaphneChannel" : 45, "OfflineChannel": 3020}]
+    },
+    {
+      "channel": 16,
+      "pd_type": "PMT",
+      "wls" : "TPB",
+      "eff_Ar": 0.12,
+      "eff_Xe": 0.12,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3030}]
+    },
+    {
+      "channel": 17,
+      "pd_type": "PMT",
+      "wls" : "TPB",
+      "eff_Ar": 0.12,
+      "eff_Xe": 0.12,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3040}]
+    },
+    {
+      "channel": 18,
+      "pd_type": "Membrane",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "M6",
+      "HardwareChannel": [ {"Slot": 7, "Link" : 0, "DaphneChannel" : 27, "OfflineChannel": 2060} ,
+                           {"Slot": 7, "Link" : 0, "DaphneChannel" : 20, "OfflineChannel": 2061} ]
+    },
+    {
+      "channel": 19,
+      "pd_type": "Membrane",
+      "wls" : "PTP",
+      "eff_Ar": 0.03,
+      "eff_Xe": 0.03,
+      "name":  "M8",
+      "HardwareChannel": [ {"Slot": 7, "Link" : 0, "DaphneChannel" : 17, "OfflineChannel": 2080} ,
+                           {"Slot": 7, "Link" : 0, "DaphneChannel" : 10, "OfflineChannel": 2081} ]
+    },
+    {
+      "channel": 20,
+      "pd_type": "PMT",
+      "wls" : "TPB",
+      "eff_Ar": 0.12,
+      "eff_Xe": 0.12,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3050}]
+    },
+    {
+      "channel": 21,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3060}]
+    },
+    {
+      "channel": 22,
+      "pd_type": "PMT",
+      "wls" : "TPB",
+      "eff_Ar": 0.12,
+      "eff_Xe": 0.12,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3070}]
+    },
+    {
+      "channel": 23,
+      "pd_type": "PMT",
+      "wls" : "TPB",
+      "eff_Ar": 0.12,
+      "eff_Xe": 0.12,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3080}]
+    },
+    {
+      "channel": 24,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3090}]
+    },
+    {
+      "channel": 25,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3100}]
+    },
+    {
+      "channel": 26,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3110}]
+    },
+    {
+      "channel": 27,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3120}]
+    },
+    {
+      "channel": 28,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3130}]
+    },
+    {
+      "channel": 29,
+      "pd_type": "PMT",
+      "wls" : "PEN+Q",
+      "eff_Ar": 0.0,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3140}]
+    },
+    {
+      "channel": 30,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3150}]
+    },
+    {
+      "channel": 31,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "eff": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3160}]
+    },
+    {
+      "channel": 32,
+      "pd_type": "PMT",
+      "wls" : "None",
+      "eff_Ar": 0.0,
+      "eff_Xe": 0.0,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3170}]
+    },
+    {
+      "channel": 33,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3180}]
+    },
+    {
+      "channel": 34,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "eff": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3190}]
+    },
+    {
+      "channel": 35,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3200}]
+    },
+    {
+      "channel": 36,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3210}]
+    },
+    {
+      "channel": 37,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3220}]
+    },
+    {
+      "channel": 38,
+      "pd_type": "PMT",
+      "wls" : "PEN",
+      "eff_Ar": 0.036,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3230}]
+    },
+    {
+      "channel": 39,
+      "pd_type": "PMT",
+      "wls" : "PEN+Q",
+      "eff_Ar": 0.0,
+      "eff_Xe": 0.036,
+      "name":  "",
+      "HardwareChannel": [{"Slot": 0, "Link" : 0, "DaphneChannel" : 0, "OfflineChannel": 3240}]
+    }
+]
+
