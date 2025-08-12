@@ -1,0 +1,15 @@
+// dune optical path tools
+
+BEGIN_PROLOG
+
+DUNEHD10ktOpticalPath:
+{
+    tool_type: DUNEHD10ktOpticalPath
+}
+
+ProtoDUNEHDOpticalPath:
+{
+    tool_type: ProtoDUNEHDOpticalPath
+}
+
+END_PROLOG
