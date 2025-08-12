@@ -1,21 +1,21 @@
 /**
- * DumpWaveformInfo.C
+ * DumpWaveformInfo_PDVD.C
  *
  * Author: Angelo Ralaikoto
  *
  * Functionality:
- *  - Loads a channel map JSON file (e.g., PDVD_Channel_map.json)
+ *  - Loads a channel map JSON file (e.g., PDVD_PDS_Mapping_v07082025.json)
  *  - Opens a ROOT file containing waveform histograms from the analyzer: "OpDetDigiAnaDUNE" (e.g., detsimHist.root)
  *  - Looks for histograms with names like: 
  *        event_<N>_opchannel_<OfflineChannel>_waveform_<M>
  *  - Extracts OfflineChannel from the name and retrieves full metadata from the JSON:
  *        channel, pd_type, wls, eff_Ar, eff_Xe, name, Slot, Link, DaphneChannel
  *  - Plots each waveform and saves it as a PNG in waveform_plots/
- *  - Creates waveform_channels_info.txt summarizing waveform metadata
+ *  - Creates waveform_channels_info_PDVD.txt summarizing waveform metadata
  *
  * Usage inside ROOT:
  *   root -l
- *   .x DumpWaveformInfo.C("PDVD_Channel_map.json", "detsimHist.root")
+ *   .x DumpWaveformInfo_PDVD.C
  */
 
 #include <TFile.h>
@@ -85,17 +85,17 @@ std::map<int, ChannelInfo> LoadChannelMap(const std::string& filename) {
     return offlineMap;
 }
 
-void DumpWaveformInfo(const char* jsonFile = "PDVD_Channel_map.json",
-                      const char* rootFile = "detsimHist.root") {
+void DumpWaveformInfo(const char* jsonFile = "../../../../dunecore/dunecore/ChannelMap/PDVD_PDS_Mapping_v07082025.json",
+                      const char* rootFile = "../../../../detsim_single_protoDUNE_hist.root") {
     gROOT->SetBatch(kTRUE); // no GUI popups
     gStyle->SetOptStat(0);  // no stats box
     gSystem->mkdir("waveform_plots", kTRUE);
 
     std::map<int, ChannelInfo> channelMap = LoadChannelMap(jsonFile);
 
-    std::ofstream outFile("waveform_channels_info.txt");
+    std::ofstream outFile("waveform_channels_info_PDVD.txt");
     if (!outFile.is_open()) {
-        std::cerr << "Error: cannot create waveform_channels_info.txt\n";
+        std::cerr << "Error: cannot create waveform_channels_info_PDVD.txt\n";
         return;
     }
 
@@ -166,6 +166,6 @@ void DumpWaveformInfo(const char* jsonFile = "PDVD_Channel_map.json",
     outFile.close();
     file->Close();
 
-    std::cout << "Done. Saved " << count << " plots and created waveform_channels_info.txt\n";
+    std::cout << "Done. Saved " << count << " plots and created waveform_channels_info_PDVD.txt\n";
 }
 
