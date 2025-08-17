@@ -175,7 +175,7 @@ namespace opdet {
             fEngine = new phot::SemiAnalyticalModel(
                 pset.get<fhicl::ParameterSet>("vuvhitspars"), 
                 pset.get<fhicl::ParameterSet>("vishitspars"),
-                std::shared_ptr<phot::OpticalPath>(std::move(art::make_tool<phot::OpticalPath>(pset.get<fhicl::ParameterSet>("OpticalPathTool")))), 
+                std::shared_ptr<phot::OpticalPath>(art::make_tool<phot::OpticalPath>(pset.get<fhicl::ParameterSet>("OpticalPathTool"))), 
                 pset.get<bool>("do_refl", false), 
                 pset.get<bool>("do_include_anode_refl", false),
                 pset.get<bool>("do_include_xe_absorption", false)
