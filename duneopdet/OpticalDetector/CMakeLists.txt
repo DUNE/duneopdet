@@ -24,6 +24,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 cetlib::cetlib 
 				cetlib_except::cetlib_except 
                                 Boost::filesystem
+                                dunecore::opdet_PDVDPDMapAlg
 
   
                 MODULE_LIBRARIES
@@ -60,8 +61,8 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
 				CLHEP::CLHEP
                                 Boost::filesystem
                                 FFTW3::FFTW3
+                                dunecore::opdet_PDVDPDMapAlg
 				nlohmann_json::nlohmann_json
-				duneprototypes::opdet_PDVDPDMapAlg
 
                 SERVICE_LIBRARIES
                                 larcorealg::Geometry
