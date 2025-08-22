@@ -1,6 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////////////
 // Class:       SolarOpFlash                                                      //
 // Module Type: producer                                                          //
+// Module Label solarflash                                                        //
 // File:        SolarOpFlash_module.cc                                            //
 //                                                                                //
 // OpHit clusterer, based on time and proximity information.                      //
@@ -46,10 +47,6 @@ namespace solar
   class SolarOpFlash : public art::EDProducer
   {
   public:
-    void ProduceOpFlash(const std::vector<AdjOpHitsUtils::FlashInfo> &oflashinfo,
-                        std::vector<recob::OpFlash> &oflashes,
-                        detinfo::DetectorClocksData const &ts) const;
-
     // Standard constructor and destructor for an ART module.
     explicit SolarOpFlash(const fhicl::ParameterSet &);
     virtual ~SolarOpFlash();
@@ -61,10 +58,12 @@ namespace solar
     // The producer routine, called once per event.
     void produce(art::Event &);
 
+    void ProduceOpFlash(const std::vector<AdjOpHitsUtils::FlashInfo> &oflashinfo,
+                        std::vector<recob::OpFlash> &oflashes,
+                        detinfo::DetectorClocksData const &ts) const;
   private:
     // The parameters we'll read from the .fcl file.
     art::ServiceHandle<geo::Geometry> geo;
-    std::string fGeometry;
     std::string fOpHitLabel; // Input tag for OpHit collection
     int fOpFlashAlgoNHit;
     float fOpFlashAlgoMinTime;
@@ -72,9 +71,9 @@ namespace solar
     float fOpFlashAlgoRad;
     float fOpFlashAlgoPE;
     float fOpFlashAlgoTriggerPE;
-    // bool fOpFlashAlgoCentroid;
-    std::unique_ptr<producer::ProducerUtils> producer;
-    std::unique_ptr<solar::AdjOpHitsUtils> adjophits;
+    float fOpFlashTimeOffset;
+    producer::ProducerUtils *producer;
+    solar::AdjOpHitsUtils *adjophits;
   };
 
 }
@@ -93,15 +92,14 @@ namespace solar
   // Constructor
   SolarOpFlash::SolarOpFlash(const fhicl::ParameterSet &p)
       : EDProducer{p},
-        fGeometry(p.get<std::string>("Geometry")),
-        fOpHitLabel(p.get<std::string>("OpHitLabel")),
-        fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit")),
-        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime")),
-        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime")),
-        fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad")),
-        fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE")),
-        fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE")),
-        // fOpFlashAlgoCentroid(p.get<bool>("OpFlashAlgoCentroid")),
+        fOpHitLabel(p.get<std::string>("OpHitLabel", "ophitspe")),
+        fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit", 3)),
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.60)),
+        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 1.00)),
+        fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 300.0)),
+        fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE", 1.5)),
+        fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE", 1.5)),
+        fOpFlashTimeOffset(p.get<float>("OpFlashTimeOffset", 0.0)),
         producer(new producer::ProducerUtils(p)),
         adjophits(new solar::AdjOpHitsUtils(p))
   {
@@ -119,6 +117,7 @@ namespace solar
   // Destructor
   SolarOpFlash::~SolarOpFlash()
   {
+    delete producer;
   }
   //--------------------------------------------------------------------------
   void SolarOpFlash::beginJob()
@@ -133,7 +132,7 @@ namespace solar
   //--------------------------------------------------------------------------
   void SolarOpFlash::produce(art::Event &evt)
   {
-
+    ProducerUtils::PrintInColor("SolarOpFlash::produce called", ProducerUtils::GetColor("green"), "Debug");
     // These are the storage pointers we will put in the event
     std::unique_ptr<std::vector<recob::OpFlash>>
         flashPtr(new std::vector<recob::OpFlash>);
@@ -172,15 +171,17 @@ namespace solar
       }
       if (i < 10)
       {
-        std::cout << "Genrating OpFlash " << i << " with " << opHitPtrVector.size() << " hits" << std::endl;
+        // std::cout << "Generating OpFlash " << i << " with " << opHitPtrVector.size() << " hits" << std::endl;
+        ProducerUtils::PrintInColor("Generating OpFlash " + ProducerUtils::str(i) + " with " + ProducerUtils::str(opHitPtrVector.size()) + " hits", ProducerUtils::GetColor("green"), "Debug");
       }
       // Create the association between the flash and the OpHits
       util::CreateAssn(*this, evt, *flashPtr, opHitPtrVector,
                        *(assnPtr.get()), i);
       if (i == OpHitIdx.size() - 1)
       {
-        std::cout << "..." << std::endl;
-        std::cout << "Generated " << i + 1 << " OpFlashes" << std::endl;
+        // std::cout << "..." << std::endl;
+        // std::cout << "Generated " << i + 1 << " OpFlashes" << std::endl;
+        ProducerUtils::PrintInColor("Generated " + ProducerUtils::str(i + 1) + " OpFlashes", ProducerUtils::GetColor("green"), "Debug");
       }
     }
     // Store results into the event
@@ -205,15 +206,26 @@ namespace solar
       double OpFlashdY = OpFlash.YWidth;
       double OpFlashZ = OpFlash.Z;
       double OpFlashdZ = OpFlash.ZWidth;
-      double OpFlashT = OpFlash.Time;
-      double OpFlashdT = OpFlash.TimeWidth;
+      double OpFlashT = OpFlash.Time * ts.OpticalClock().TickPeriod() - fOpFlashTimeOffset; // Convert to time in seconds
+      double OpFlashdT = OpFlash.TimeWidth * ts.OpticalClock().TickPeriod(); // Convert to time in seconds
       std::vector<double> OpFlashPEs = OpFlash.PEperOpDet;
 
       // From OpFlashAlg
-      int Frame = ts.OpticalClock().Frame(OpFlashT - 18.1); // Hard coded 18.1 us offset should be moved to fcl
-      if (Frame == 0)
-        Frame = 1;
+      // Use Frame to save the OpFlash Plane -> more usefull for analysis
+      // Use InBeamFrame to save if the OpFlash is in a correct Plane
+      int Plane = -1;
+      bool OnPlane = false;
+      if (OpFlash.Plane > -1){
+        Plane = OpFlash.Plane;
+        OnPlane = true;
+      }
+      else
+      {
+        // If the plane is not set, we use the OpFlashT to determine the frame
+        Plane = 9999; // Default unsigned value for no plane
+      }
 
+      int Frame = ts.OpticalClock().Frame(OpFlashT); // Hard coded 18.1 us offset should be moved to fcl
       int BeamFrame = ts.OpticalClock().Frame(ts.TriggerTime());
       bool InBeamFrame = false;
       if (!(ts.TriggerTime() < 0))
@@ -223,8 +235,8 @@ namespace solar
       if (InBeamFrame)
         OnBeamTime = 1;
 
-      oflashes.emplace_back(OpFlashT, OpFlashdT, OpFlashT, Frame,
-                            OpFlashPEs, InBeamFrame, OnBeamTime, OpFlashFast2Tot,
+      oflashes.emplace_back(OpFlashT, OpFlashdT, OpFlashT, Plane,
+                            OpFlashPEs, OnPlane, OnBeamTime, OpFlashFast2Tot,
                             OpFlashY, OpFlashdY, OpFlashZ, OpFlashdZ);
     }
   }

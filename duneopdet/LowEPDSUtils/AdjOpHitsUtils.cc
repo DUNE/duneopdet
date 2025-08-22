@@ -5,19 +5,17 @@ using namespace producer;
 namespace solar
 {
   AdjOpHitsUtils::AdjOpHitsUtils(fhicl::ParameterSet const &p)
-      : fGeometry(p.get<std::string>("Geometry")),
-        fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit")),
-        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime")),
-        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime")),
-        fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad")),
-        fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE")),
-        fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE")),
-        fOpFlashAlgoHotVertexThld(p.get<float>("OpFlashAlgoHotVertexThld")),
-        fXACathodeX(p.get<float>("XACathodeX")),
-        fXAMembraneY(p.get<float>("XAMembraneY")),
-        fXAFinalCapZ(p.get<float>("XAFinalCapZ")),
-        fXAStartCapZ(p.get<float>("XAStartCapZ"))
-        // fOpFlashAlgoCentroid(p.get<bool>("OpFlashAlgoCentroid"))
+      : fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit", 3)),       // Minimum number of OpHits in a cluster to consider it for flash creation.
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 1.00)), // Positive time window to look for adj. OpHits in [tick] units.
+        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.60)), // Negative time window to look for adj. OpHits in [tick] units.
+        fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 300.0)),     // Radius to look for adj. OpHits in [cm] units.
+        fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE", 1.5)),         // Minimum PE of OpHit to consider it for flash creation.
+        fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE", 1.5)), // Minimum PE of OpHit to consider it as a trigger for flash creation.
+        fOpFlashAlgoHotVertexThld(p.get<float>("OpFlashAlgoHotVertexThld", 0.3)), // Fraction of MaxPE to consider an OpHit as part of the flash center calculation.
+        fXACathodeX(p.get<float>("XACathodeX", -327.5)),
+        fXAMembraneY(p.get<float>("XAMembraneY", 743.302)),
+        fXAFinalCapZ(p.get<float>("XAFinalCapZ", 2188.38)),
+        fXAStartCapZ(p.get<float>("XAStartCapZ", -96.5))
   {
   }
   void AdjOpHitsUtils::MakeFlashVector(std::vector<FlashInfo> &FlashVec, std::vector<std::vector<art::Ptr<recob::OpHit>>> &OpHitClusters, art::Event const &evt)
@@ -379,6 +377,21 @@ namespace solar
 
   int AdjOpHitsUtils::GetOpHitPlane(const art::Ptr<recob::OpHit> &hit)
   {
+    art::ServiceHandle<geo::Geometry> geom;
+    std::string geoName = geom->DetectorName();
+    std::string fGeometry = "";
+    if (geoName.find("dune10kt") != std::string::npos)
+    {
+        fGeometry = "HD";
+    }
+    else if(geoName.find("dunevd10kt") != std::string::npos)
+    {
+        fGeometry = "VD";
+    }
+    else
+    {
+        ProducerUtils::PrintInColor("Unknown geometry: " + geoName, ProducerUtils::GetColor("red"));
+    }
     auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter();
     if (fGeometry == "VD")
     {

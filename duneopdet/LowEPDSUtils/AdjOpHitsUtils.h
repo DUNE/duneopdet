@@ -84,7 +84,6 @@ namespace solar
     private:
         geo::WireReadoutGeom const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
         // From fhicl configuration
-        const std::string fGeometry;
         const int fOpFlashAlgoNHit;
         const float fOpFlashAlgoMinTime;
         const float fOpFlashAlgoMaxTime;
@@ -96,7 +95,6 @@ namespace solar
         const float fXAMembraneY;
         const float fXAFinalCapZ;
         const float fXAStartCapZ;
-        // const bool fOpFlashAlgoCentroid;
     };
 }
 #endif
