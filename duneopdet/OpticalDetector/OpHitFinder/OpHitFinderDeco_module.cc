@@ -27,6 +27,7 @@
 #include "larana/OpticalDetector/OpHitFinder/PedAlgoUB.h"
 #include "larana/OpticalDetector/OpHitFinder/PulseRecoManager.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
+#include "lardataobj/RawData/RDTimeStamp.h"
 #include "lardataobj/RawData/OpDetWaveform.h"
 #include "lardataobj/RecoBase/OpWaveform.h"
 #include "lardataobj/RecoBase/OpHit.h"
@@ -45,6 +46,7 @@
 #include "fhiclcpp/ParameterSet.h"
 
 // ROOT includes
+#include "RtypesCore.h"
 
 // C++ Includes
 #include <map>
@@ -184,6 +186,14 @@ namespace duneopdet {
   //----------------------------------------------------------------------------
   void OpHitFinderDeco::produce(art::Event& evt)
   {
+      art::Handle<raw::RDTimeStamp> tsHandle;
+      evt.getByLabel("daq:trigger", tsHandle);
+      ULong64_t TpcTimestamp = 0;
+      if (tsHandle.isValid())
+          TpcTimestamp = tsHandle->GetTimeStamp();
+
+      std::cout<<"TpcTimestamp = "<<TpcTimestamp<<std::endl;
+
     // These is the storage pointer we will put in the event
     std::unique_ptr<std::vector<recob::OpHit>> HitPtr(new std::vector<recob::OpHit>);
     std::vector<const sim::BeamGateInfo*> beamGateArray;
@@ -216,6 +226,7 @@ namespace duneopdet {
                         fScale,
                         clock_data,
                         calibrator,
+                        TpcTimestamp,
                         fUseStartTime);
     }
 

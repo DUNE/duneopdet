@@ -77,8 +77,10 @@ namespace duneopdet {
                            float scale,  //It scales the values of the deconvolved signals.
                            detinfo::DetectorClocksData const& clocksData,
                            calib::IPhotonCalibrator const& calibrator,
+                           ULong64_t tpc_timestamp,
                            bool use_start_time)
     {
+
         for (int i=0; i< int (opWaveformVector.size()); i++){
             recob::OpWaveform deco_waveform=opWaveformVector.at(i);
             int channel = static_cast<int>(deco_waveform.Channel());
@@ -116,6 +118,7 @@ namespace duneopdet {
                              hitVector,
                              clocksData,
                              calibrator,
+                             tpc_timestamp,
                              use_start_time);
             }
         }
@@ -129,15 +132,19 @@ namespace duneopdet {
                       std::vector<recob::OpHit>& hitVector,
                       detinfo::DetectorClocksData const& clocksData,
                       calib::IPhotonCalibrator const& calibrator,
+                      ULong64_t tpc_timestamp,
                       bool use_start_time)
     {
 
         if (pulse.peak < hitThreshold) return;
 
-        double relTime = (use_start_time ? pulse.t_start : pulse.t_max);
-        double absTime = timeStamp + relTime; // clocksData.OpticalClock().TickPeriod() *
-        double startTime = pulse.t_start; // clocksData.OpticalClock().TickPeriod() *, - clocksData.TriggerTime()
-        double riseTime =  pulse.t_rise; // clocksData.OpticalClock().TickPeriod() *
+        // FIXME: what if the time stamp is already in [us]?
+        double relTime = ((timeStamp - tpc_timestamp)
+                          + (use_start_time ? pulse.t_start : pulse.t_max))*clocksData.OpticalClock().TickPeriod();
+        double absTime = relTime + timeStamp*clocksData.OpticalClock().TickPeriod();
+        double startTime = pulse.t_start * clocksData.OpticalClock().TickPeriod();
+        double riseTime =  pulse.t_rise * clocksData.OpticalClock().TickPeriod();
+        // FIXME: is this a proper use of the timestamp?
         int frame = clocksData.OpticalClock().Frame(timeStamp);
         double PE = 0.0;
 

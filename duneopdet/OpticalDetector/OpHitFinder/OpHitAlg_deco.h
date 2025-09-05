@@ -19,6 +19,8 @@
 #include "lardataobj/RecoBase/OpWaveform.h"
 #include "lardataobj/RecoBase/OpHit.h"
 
+#include "RtypesCore.h"
+
 #include <vector>
 
 namespace calib {
@@ -44,15 +46,16 @@ namespace duneopdet {
                     bool use_start_time = false);
 
   void RunHitFinder_deco(std::vector<recob::OpWaveform> const&,
-                    std::vector<recob::OpHit>&,
-                    pmtana::PulseRecoManager const&,
-                    pmtana::PMTPulseRecoBase const&,
-                    geo::WireReadoutGeom const&,
-                    float,
-                    float,
-                    detinfo::DetectorClocksData const&,
-                    calib::IPhotonCalibrator const&,
-                    bool use_start_time = false);
+                         std::vector<recob::OpHit>&,
+                         pmtana::PulseRecoManager const&,
+                         pmtana::PMTPulseRecoBase const&,
+                         geo::WireReadoutGeom const&,
+                         float,
+                         float,
+                         detinfo::DetectorClocksData const&,
+                         calib::IPhotonCalibrator const&,
+                         ULong64_t tpc_timestamp,
+                         bool use_start_time = false);
 
   void ConstructHit(float,
                     int,
@@ -61,6 +64,7 @@ namespace duneopdet {
                     std::vector<recob::OpHit>&,
                     detinfo::DetectorClocksData const&,
                     calib::IPhotonCalibrator const&,
+                    ULong64_t tpc_timestamp,
                     bool use_start_time = false);
 
 } // End duneopdet namespace
