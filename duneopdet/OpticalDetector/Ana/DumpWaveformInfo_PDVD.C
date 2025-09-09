@@ -13,9 +13,14 @@
  *  - Plots each waveform and saves it as a PNG in waveform_plots/
  *  - Creates waveform_channels_info_PDVD.txt summarizing waveform metadata
  *
+ * Requirement :
+ * - Install nlohmann/json
+ * wget https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
+ * 
  * Usage inside ROOT:
- *   root -l
- *   .x DumpWaveformInfo_PDVD.C
+ * root -l
+ *  .L DumpWaveformInfo_PDVD.C+
+ * DumpWaveformInfo() 
  */
 
 #include <TFile.h>
@@ -28,7 +33,7 @@
 #include <TROOT.h>
 #include <TStyle.h>
 
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 
 #include <fstream>
 #include <iostream>
@@ -168,4 +173,3 @@ void DumpWaveformInfo(const char* jsonFile = "../../../../dunecore/dunecore/Chan
 
     std::cout << "Done. Saved " << count << " plots and created waveform_channels_info_PDVD.txt\n";
 }
-
