@@ -478,7 +478,7 @@ dunefddphase_opdigiana: @local::dunefd_opdigiana
          module_type:   "OpDetDigitizerProtoDUNEVD"
          PDMapTool: {
            tool_type: "PDVDPDMapAlg"
-           MappingFile: "PDVD_PDS_Mapping_v04152025.json"
+           MappingFile: "PDVD_PDS_Mapping_v07082025.json"
          }
          #XArapuca & PMT response paramters:
          #FIX ME! HD VALUE! % for 45% PDE HPK from fig 15 DOI 10.1088/1748-0221/19/01/T01007
