@@ -7,17 +7,15 @@ solar_opflash_dune10kt_1x2x6:
     module_type:                "SolarOpFlash"
     OpFlashTimeOffset:          0            # Time offset to be applied to the OpFlash time in [us] units.
 
-    DetectorSizeY:              600          # 1 TPC Y length in [cm].
-    DetectorSizeZ:              1400         # 1 TPC Z length in [cm].
     XACathodeX:                 0            # X position of the VD cathode XAs in [cm].
     XAMembraneY:                0            # Y position of the VD membrane XAs in [cm].
     XAFinalCapZ:                0            # Z position of the VD final cap XAs in [cm].
     XAStartCapZ:                0            # Z position of the VD start cap XAs in [cm].
 
     OpFlashAlgoNHit:            3            # Min number of hits to consider a flash. Change to > 3 for bkg productions.
-    OpFlashAlgoMinTime:         0.60         # Negative time window to look for adj. OpHits in [tick] units.
-    OpFlashAlgoMaxTime:         1.00         # Positive time window to look for adj. OpHits in [tick] units.
-    OpFlashAlgoRad:             300          # Distance to look for adj. OpHits in [cm] units.
+    OpFlashAlgoMinTime:         0.05         # Negative time window to look for adj. OpHits in [us] units.
+    OpFlashAlgoMaxTime:         0.10         # Positive time window to look for adj. OpHits in [us] units.
+    OpFlashAlgoRad:             500          # Distance to look for adj. OpHits in [cm] units.
     OpFlashAlgoPE:              1.5          # PE threshold to look for adj. OpHits.
     OpFlashAlgoTriggerPE:       1.5          # PE threshold to trigger an OpFlash.
     OpFlashAlgoHotVertexThld:   0.3          # Relative threshold to consider a hit as hot for opflash vertex determination [0-1].
@@ -27,8 +25,6 @@ solar_opflash_dune10kt_1x2x6:
 
 solar_opflash_dunevd10kt_1x8x14_3view_30deg: @local::solar_opflash_dune10kt_1x2x6
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpHitLabel: "ophit10ppm"
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeY: 680
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.DetectorSizeZ: 2100
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.XACathodeX:   -327.5
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAMembraneY:   743.302
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAFinalCapZ:   2188.38

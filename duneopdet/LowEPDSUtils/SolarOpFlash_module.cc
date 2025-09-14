@@ -65,6 +65,7 @@ namespace solar
     // The parameters we'll read from the .fcl file.
     art::ServiceHandle<geo::Geometry> geo;
     std::string fOpHitLabel; // Input tag for OpHit collection
+    std::string fOpHitTimeVariable;
     int fOpFlashAlgoNHit;
     float fOpFlashAlgoMinTime;
     float fOpFlashAlgoMaxTime;
@@ -93,9 +94,10 @@ namespace solar
   SolarOpFlash::SolarOpFlash(const fhicl::ParameterSet &p)
       : EDProducer{p},
         fOpHitLabel(p.get<std::string>("OpHitLabel", "ophitspe")),
+        fOpHitTimeVariable(p.get<std::string>("OpHitTimeVariable", "PeakTime")),
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit", 3)),
-        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.60)),
-        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 1.00)),
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.30)),
+        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.50)),
         fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 300.0)),
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE", 1.5)),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE", 1.5)),
@@ -155,23 +157,21 @@ namespace solar
     }
 
     // Run the clustering
-    adjophits->CalcAdjOpHits(OpHitList, OpHitVec, OpHitIdx);
+    adjophits->CalcAdjOpHits(OpHitList, OpHitVec, OpHitIdx, evt);
     adjophits->MakeFlashVector(FlashVec, OpHitVec, evt);
     ProduceOpFlash(FlashVec, *flashPtr, clockData);
 
     // Make the associations which we noted we need
     for (size_t i = 0; i != OpHitIdx.size(); ++i)
     {
-      // std::cout << "OpFlash " << i << " has " << OpHitIdx.at(i).size() << " hits" << std::endl;
       art::PtrVector<recob::OpHit> opHitPtrVector;
       for (int const &hitIndex : OpHitIdx.at(i))
       {
-        art::Ptr<recob::OpHit> opHitPtr(opHitHandle, hitIndex);
-        opHitPtrVector.push_back(opHitPtr);
+        // art::Ptr<recob::OpHit> opHitPtr(opHitHandle, hitIndex);
+        opHitPtrVector.push_back(OpHitList.at(hitIndex));
       }
       if (i < 10)
       {
-        // std::cout << "Generating OpFlash " << i << " with " << opHitPtrVector.size() << " hits" << std::endl;
         ProducerUtils::PrintInColor("Generating OpFlash " + ProducerUtils::str(i) + " with " + ProducerUtils::str(opHitPtrVector.size()) + " hits", ProducerUtils::GetColor("green"), "Debug");
       }
       // Create the association between the flash and the OpHits
@@ -179,8 +179,6 @@ namespace solar
                        *(assnPtr.get()), i);
       if (i == OpHitIdx.size() - 1)
       {
-        // std::cout << "..." << std::endl;
-        // std::cout << "Generated " << i + 1 << " OpFlashes" << std::endl;
         ProducerUtils::PrintInColor("Generated " + ProducerUtils::str(i + 1) + " OpFlashes", ProducerUtils::GetColor("green"), "Debug");
       }
     }
@@ -202,12 +200,14 @@ namespace solar
 
       // Time to make the OpFlash collect the info from the opflashinfo struct
       double OpFlashFast2Tot = OpFlash.FastToTotal;
+      double OpFlashX = OpFlash.X;
+      double OpFlashdX = OpFlash.XWidth;
       double OpFlashY = OpFlash.Y;
       double OpFlashdY = OpFlash.YWidth;
       double OpFlashZ = OpFlash.Z;
       double OpFlashdZ = OpFlash.ZWidth;
-      double OpFlashT = OpFlash.Time * ts.OpticalClock().TickPeriod() - fOpFlashTimeOffset; // Convert to time in seconds
-      double OpFlashdT = OpFlash.TimeWidth * ts.OpticalClock().TickPeriod(); // Convert to time in seconds
+      double OpFlashT = OpFlash.Time - fOpFlashTimeOffset; // Convert to time to us happens in MakeFlashVector
+      double OpFlashdT = OpFlash.TimeWidth; // Convert to time to us happens in MakeFlashVector
       std::vector<double> OpFlashPEs = OpFlash.PEperOpDet;
 
       // From OpFlashAlg
@@ -237,7 +237,7 @@ namespace solar
 
       oflashes.emplace_back(OpFlashT, OpFlashdT, OpFlashT, Plane,
                             OpFlashPEs, OnPlane, OnBeamTime, OpFlashFast2Tot,
-                            OpFlashY, OpFlashdY, OpFlashZ, OpFlashdZ);
+                            OpFlashX, OpFlashdX, OpFlashY, OpFlashdY, OpFlashZ, OpFlashdZ);
     }
   }
 } // namespace solar
