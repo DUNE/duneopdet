@@ -96,9 +96,9 @@ namespace solar
         fOpHitLabel(p.get<std::string>("OpHitLabel", "ophitspe")),
         fOpHitTimeVariable(p.get<std::string>("OpHitTimeVariable", "PeakTime")),
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit", 3)),
-        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.30)),
-        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.50)),
-        fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 300.0)),
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.010)), // 10 ns [0.6 tick]
+        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.016)), // 16 ns [1 tick]
+        fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 500.0)),
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE", 1.5)),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE", 1.5)),
         fOpFlashTimeOffset(p.get<float>("OpFlashTimeOffset", 0.0)),

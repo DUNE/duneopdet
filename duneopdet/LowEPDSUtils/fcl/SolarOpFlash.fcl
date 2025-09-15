@@ -13,8 +13,8 @@ solar_opflash_dune10kt_1x2x6:
     XAStartCapZ:                0            # Z position of the VD start cap XAs in [cm].
 
     OpFlashAlgoNHit:            3            # Min number of hits to consider a flash. Change to > 3 for bkg productions.
-    OpFlashAlgoMinTime:         0.05         # Negative time window to look for adj. OpHits in [us] units.
-    OpFlashAlgoMaxTime:         0.10         # Positive time window to look for adj. OpHits in [us] units.
+    OpFlashAlgoMinTime:         0.005        # Negative time window to look for adj. OpHits in [us] units.
+    OpFlashAlgoMaxTime:         0.016        # Positive time window to look for adj. OpHits in [us] units.
     OpFlashAlgoRad:             500          # Distance to look for adj. OpHits in [cm] units.
     OpFlashAlgoPE:              1.5          # PE threshold to look for adj. OpHits.
     OpFlashAlgoTriggerPE:       1.5          # PE threshold to trigger an OpFlash.
@@ -25,8 +25,10 @@ solar_opflash_dune10kt_1x2x6:
 
 solar_opflash_dunevd10kt_1x8x14_3view_30deg: @local::solar_opflash_dune10kt_1x2x6
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpHitLabel: "ophit10ppm"
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.XACathodeX:   -327.5
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAMembraneY:   743.302
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAFinalCapZ:   2188.38
-solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAStartCapZ:  -96.5
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpFlashAlgoMinTime:   0.030 # Negative time window to look for adj. OpHits in [us] units.
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpFlashAlgoMaxTime:   0.030 # Positive time window to look for adj. OpHits in [us] units.
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XACathodeX:        -327.5
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAMembraneY:        743.302
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAFinalCapZ:       2188.38
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAStartCapZ:        -96.5
 END_PROLOG
