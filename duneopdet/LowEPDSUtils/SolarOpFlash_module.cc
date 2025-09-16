@@ -73,8 +73,8 @@ namespace solar
     float fOpFlashAlgoPE;
     float fOpFlashAlgoTriggerPE;
     float fOpFlashTimeOffset;
-    producer::ProducerUtils *producer;
-    solar::AdjOpHitsUtils *adjophits;
+    std::unique_ptr<producer::ProducerUtils> producer;
+    std::unique_ptr<solar::AdjOpHitsUtils> adjophits;
   };
 
 }
@@ -119,7 +119,6 @@ namespace solar
   // Destructor
   SolarOpFlash::~SolarOpFlash()
   {
-    delete producer;
   }
   //--------------------------------------------------------------------------
   void SolarOpFlash::beginJob()

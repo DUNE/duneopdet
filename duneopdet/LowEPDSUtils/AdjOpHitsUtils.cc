@@ -65,8 +65,8 @@ namespace solar
         NHit++;
         auto thisPlane = GetOpHitPlane(PDSHit, 0.01);
         if (thisPlane != Plane) {
-          Plane = -1; // Set plane to -1 if hits in cluster are not in the same plane
           ProducerUtils::PrintInColor("OpHit in cluster not in same plane: CH " + ProducerUtils::str(PDSHit->OpChannel()) + " Plane " + ProducerUtils::str(thisPlane) + " Expected Plane " + ProducerUtils::str(Plane), ProducerUtils::GetColor("red"), "Error");
+          Plane = -1; // Set plane to -1 if hits in cluster are not in the same plane
         }
 
         PE += PDSHit->PE();
@@ -490,7 +490,7 @@ namespace solar
       }
     }
     else {
-      ProducerUtils::PrintInColor("Unknown geometry: " + geoName, ProducerUtils::GetColor("red"));
+      ProducerUtils::PrintInColor("Unknown geometry: " + geoName, ProducerUtils::GetColor("red"), "Error");
       return -1;
     }
   }
