@@ -390,12 +390,14 @@ namespace opdet {
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataForJob();
     fSampleFreq = clockData.OpticalClock().Frequency();
 
-    fft_r2c = TVirtualFFT::FFT(1, &fSamples, "M R2C K");
-    fft_c2r = TVirtualFFT::FFT(1, &fSamples, "M C2R K");
+
+    fft_r2c = TVirtualFFT::FFT(1, &fSamples, "ES R2C K");
+    fft_c2r = TVirtualFFT::FFT(1, &fSamples, "ES C2R K");
 
     // Prepare the SPE waveform templates
     mfi << "Will look in "<<fSPETemplatePath<<" for "<<fSPETemplateFiles.size()<<" SPE template files.\n";
     SourceSPETemplateFiles();
+
     // Prepare the Fourier transforms
     for (auto &xh: fSinglePEWaveforms) {
       fSinglePEWaveforms_fft.push_back(CmplxWaveform_t(fSamples/2+1));
