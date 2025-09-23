@@ -224,7 +224,7 @@ namespace solar
         Plane = 9999; // Default unsigned value for no plane
       }
 
-      int Frame = ts.OpticalClock().Frame(OpFlashT); // Hard coded 18.1 us offset should be moved to fcl
+      int Frame = ts.OpticalClock().Frame(OpFlashT); // Hard coded 18.1 us offset moved to fcl
       int BeamFrame = ts.OpticalClock().Frame(ts.TriggerTime());
       bool InBeamFrame = false;
       if (!(ts.TriggerTime() < 0))
