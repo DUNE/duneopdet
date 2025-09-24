@@ -5,6 +5,7 @@ solar_opflash_dune10kt_1x2x6:
 {
     OpHitLabel:                 "ophitspe"     # The label for the process which ran the OpHit
     module_type:                "SolarOpFlash"
+    OpHitTimeVariable:          "PeakTime"     # Time variable to use for OpHit selection: "PeakTime" or "StartTime".
     OpFlashTimeOffset:           18.1        # Time offset to be applied to the OpFlash time in [us] units.
 
     XACathodeX:                 0            # X position of the VD cathode XAs in [cm].
@@ -15,7 +16,7 @@ solar_opflash_dune10kt_1x2x6:
     OpFlashAlgoNHit:            3            # Min number of hits to consider a flash. Change to > 3 for bkg productions.
     OpFlashAlgoMinTime:         0.005        # Negative time window to look for adj. OpHits in [us] units.
     OpFlashAlgoMaxTime:         0.016        # Positive time window to look for adj. OpHits in [us] units.
-    OpFlashAlgoRad:             500          # Distance to look for adj. OpHits in [cm] units.
+    OpFlashAlgoRad:             300          # Distance to look for adj. OpHits in [cm] units.
     OpFlashAlgoPE:              1.5          # PE threshold to look for adj. OpHits.
     OpFlashAlgoTriggerPE:       1.5          # PE threshold to trigger an OpFlash.
     OpFlashAlgoHotVertexThld:   0.3          # Relative threshold to consider a hit as hot for opflash vertex determination [0-1].
@@ -25,6 +26,7 @@ solar_opflash_dune10kt_1x2x6:
 
 solar_opflash_dunevd10kt_1x8x14_3view_30deg: @local::solar_opflash_dune10kt_1x2x6
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpHitLabel: "ophit10ppm"
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpHitTimeVariable: "StartTime"
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpFlashTimeOffset:    0
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.XACathodeX:        -327.5
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAMembraneY:        743.302
@@ -32,4 +34,5 @@ solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAFinalCapZ:       2188.38
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.XAStartCapZ:        -96.5
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpFlashAlgoMinTime:   0.030 # Negative time window to look for adj. OpHits in [us] units.
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpFlashAlgoMaxTime:   0.030 # Positive time window to look for adj. OpHits in [us] units.
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpFlashAlgoRad:       500.  # Distance to look for adj. OpHits in [cm] units.
 END_PROLOG
