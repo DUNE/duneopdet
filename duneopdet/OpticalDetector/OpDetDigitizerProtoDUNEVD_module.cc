@@ -204,7 +204,8 @@ private:
                     const std::vector<FocusList> &fls) const;
 
   void AddDarkNoise(std::vector<std::vector<double>> &,
-                    std::vector<FocusList> &fls, int opDet, double dc) const;
+                    std::vector<FocusList> &fls, int opDet, double dc,
+                    geo::WireReadoutGeom const &wireReadout) const;
 
   // Create a vector of shorts from a vector of doubles
   // rounding it properly
@@ -587,7 +588,7 @@ void OpDetDigitizerProtoDUNEVD::produce(art::Event &evt) {
         fls[hardwareChannel].Reset();
 
     // Generate dark noise
-    AddDarkNoise(pdWaveforms, fls, opDet,getDarkCountRate(opDet));
+    AddDarkNoise(pdWaveforms, fls, opDet,getDarkCountRate(opDet),wireReadout);
 
     // Vary the pedestal
     if (fLineNoiseRMS > 0.0)
@@ -771,7 +772,7 @@ void OpDetDigitizerProtoDUNEVD::CreatePDWaveform(
           if (CLHEP::RandFlat::shoot(1.0) < getPDE(opDet)) {
             float NOpHardwareChannels = wireReadout.NOpHardwareChannels(opDet);
             int hardwareChannel =
-                (int)(CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels);
+                (int)(CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels); // 0 or 1
             //                 int readoutChannel = geometry.OpChannel(opDet,
             //                 hardwareChannel);
 
@@ -780,11 +781,12 @@ void OpDetDigitizerProtoDUNEVD::CreatePDWaveform(
             // Add 1 pulse to the waveform
             if (timeBin >= fReadoutWindow)
               continue;
-            AddPulse(timeBin, CrossTalk(opDet), pdWaveforms.at(hardwareChannel),
-                     fls[hardwareChannel], hardwareChannel);
-
             unsigned int opChannel =
                 wireReadout.OpChannel(opDet, hardwareChannel);
+
+            AddPulse(timeBin, CrossTalk(opChannel), pdWaveforms.at(hardwareChannel),
+                     fls[hardwareChannel], opChannel);
+
             
             // Set/find tick. Set/find Channel
             sim::OpDet_Time_Chans::stored_time_t tmp_time = time_sdps.first;
@@ -821,9 +823,11 @@ void OpDetDigitizerProtoDUNEVD::AddLineNoise(
 //---------------------------------------------------------------------------
 void OpDetDigitizerProtoDUNEVD::AddDarkNoise(
     std::vector<std::vector<double>> &waveforms, std::vector<FocusList> &fls,
-    int opDet, double fDarkNoiseRate) const {
+    int opDet, double fDarkNoiseRate, geo::WireReadoutGeom const &wireReadout) const {
   int i = 0;
-  for (auto &waveform : waveforms) {
+  for (auto &waveform : waveforms) { // one waveform per offline channel
+     unsigned int OfflineChannel = //offline channel
+                 wireReadout.OpChannel(opDet, i); //i is the hardwarechannel
     // Multiply by 10^6 since fDarkNoiseRate is in Hz
     double darkNoiseTime =
         static_cast<double>(fRandExponential->fire(1.0 / fDarkNoiseRate) *
@@ -833,7 +837,7 @@ void OpDetDigitizerProtoDUNEVD::AddDarkNoise(
       size_t timeBin = TimeToTick(darkNoiseTime);
       if (timeBin >= fReadoutWindow)
         continue;
-      AddPulse(timeBin, CrossTalk(opDet), waveform, fls[i], opDet);
+      AddPulse(timeBin, CrossTalk(OfflineChannel), waveform, fls[i], OfflineChannel);
       // Find next time to simulate a single PE pulse
       darkNoiseTime += static_cast<double>(
           fRandExponential->fire(1.0 / fDarkNoiseRate) * 1000000.0);
@@ -950,7 +954,7 @@ double OpDetDigitizerProtoDUNEVD::getPDE_Xe(int OpDet) const {
 }
 double OpDetDigitizerProtoDUNEVD::getDarkCountRate(int OpDet) const {
   return fDarkCountRateMap.second.at(
-      fPDMapTool->getOpDetProperty(OpDet, fDarkCountRateMap.first));
+      fPDMapTool->getOfflineChannelProperty(OpDet, fDarkCountRateMap.first));
 }
 
 double OpDetDigitizerProtoDUNEVD::getSPEAmplitude(int OpDet) const {
@@ -958,7 +962,7 @@ double OpDetDigitizerProtoDUNEVD::getSPEAmplitude(int OpDet) const {
     return fSPEAmplitude;
   else
     return fSPEAmplitudeMap.second.at(
-        fPDMapTool->getOpDetProperty(OpDet, fSPEAmplitudeMap.first));
+        fPDMapTool->getOfflineChannelProperty(OpDet, fSPEAmplitudeMap.first));
 }
 double OpDetDigitizerProtoDUNEVD::getDaphneThreshold(int OpDet) const {
   if (fSelfTrigger_DaphneThresholdMap.find(OpDet) ==
@@ -969,7 +973,7 @@ double OpDetDigitizerProtoDUNEVD::getDaphneThreshold(int OpDet) const {
 }
 unsigned short OpDetDigitizerProtoDUNEVD::CrossTalk(int OpDet) const {
   double fCrossTalk = fCrossTalkMap.second.at(
-      fPDMapTool->getOpDetProperty(OpDet, fCrossTalkMap.first));
+      fPDMapTool->getOfflineChannelProperty(OpDet, fCrossTalkMap.first));
   // Sometimes this should produce 3 or more PEs (not implemented)
   if (fCrossTalk <= 0.0)
     return 1;
@@ -984,9 +988,9 @@ bool OpDetDigitizerProtoDUNEVD::IsFullStreamingChannel(int OpDet) const {
                 fPDMapTool->getOpDetProperty(
                     OpDet, fFullStreamingChannelsMap.first)) != vv.end();
 }
-std::vector<double> const * OpDetDigitizerProtoDUNEVD::getSinglePEWaveforms(int OpDet) const {
+std::vector<double> const * OpDetDigitizerProtoDUNEVD::getSinglePEWaveforms(int OfflineChannel) const {
   return &(fSinglePEWaveforms.at(
-      fPDMapTool->getOpDetProperty(OpDet, fSPETemplateMap.first)));
+      fPDMapTool->getOfflineChannelProperty(OfflineChannel, fSPETemplateMap.first)));
 }
 
 } // namespace opdet
