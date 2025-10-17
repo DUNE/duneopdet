@@ -7,9 +7,9 @@ namespace solar
   AdjOpHitsUtils::AdjOpHitsUtils(fhicl::ParameterSet const &p)
       : fOpHitTimeVariable(p.get<std::string>("OpHitTimeVariable", "PeakTime")), // Variable to use for time sorting ("StartTime" or "PeakTime")
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit", 3)),       // Minimum number of OpHits in a cluster to consider it for flash creation.
-        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.05)), // Negative time window to look for adj. OpHits in [us] units.
-        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.10)), // Positive time window to look for adj. OpHits in [us] units.
-        fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 500.0)),     // Radius to look for adj. OpHits in [cm] units.
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.010)), // Negative time window to look for adj. OpHits. Default for HD 10 ns [0.6 tick]
+        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.016)), // Positive time window to look for adj. OpHits. Default for HD 16 ns [1 tick]
+        fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 300.0)),     // Radius to look for adj. OpHits in [cm] units.
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE", 1.5)),         // Minimum PE of OpHit to consider it for flash creation.
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE", 1.5)), // Minimum PE of OpHit to consider it as a trigger for flash creation.
         fOpFlashAlgoHotVertexThld(p.get<float>("OpFlashAlgoHotVertexThld", 0.3)), // Fraction of MaxPE to consider an OpHit as part of the flash center calculation.
@@ -97,12 +97,6 @@ namespace solar
       Y = YSum / HotPE;
       Z = ZSum / HotPE;
 
-      // Alternatively compute the centroid of the flash in 3D space. NEEDS TO BE IMPLEMENTED!
-      // if (fOpFlashAlgoCentroid)
-      // {
-      //   CalcCentroid(Cluster, X, Y, Z);
-      // }
-
       // Compute the flash width and STD from divergence of 1/r² signal decay.
       std::vector<float> varXY;
       std::vector<float> varYZ;
@@ -153,7 +147,7 @@ namespace solar
     std::vector<float> var;
     std::string geoName = geom->DetectorName();
     if (geoName.find("dune10kt") != std::string::npos) {
-      var = varYZ; // In HD geometry, only two planes (0 and 1) corresponding to YZ and XZ
+      var = varYZ; // In HD geometry, only 1 plane
     }
     else if (geoName.find("dunevd10kt") != std::string::npos) {
       if (Plane == 0) {
@@ -466,12 +460,10 @@ namespace solar
     std::string geoName = geom->DetectorName();
     auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter();
     if (geoName.find("dune10kt") != std::string::npos) {
-      if (OpHitXYZ.X() < 0)
+      if (abs(OpHitXYZ.X()) < buffer)
         return 0;
-      else if (OpHitXYZ.X() > 0)
-        return 1;
       else
-        return -1; // Return -1 if the hit is exactly at the center
+        return -1; // Return -1 if the hit not at the center
     }
     else if(geoName.find("dunevd10kt") != std::string::npos) {
       if (OpHitXYZ.X() > fXACathodeX - buffer && OpHitXYZ.X() < fXACathodeX + buffer)
@@ -520,69 +512,5 @@ namespace solar
     else
       return false;
   }
-
-  // Function to calculate the Gaussian probability density function
-  // double AdjOpHitsUtils::GaussianPDF(double x, double mean, double sigma)
-  // {
-  //   return exp(-0.5 * pow((x - mean) / sigma, 2)) / (sqrt(2 * M_PI) * sigma);
-  // }
-
-  // void AdjOpHitsUtils::CalcCentroid(std::vector<art::Ptr<recob::OpHit>> Hits, double x, double y, double z)
-  // {
-  //   const double sigma = fOpFlashAlgoRad; // Gaussian sigma (range in cm)
-
-  //   // Initialize variables
-  //   double maxLikelihood = 0.0;
-  //   double bestY = 0.0;
-  //   double bestZ = 0.0;
-
-  //   // Loop over possible x positions
-  //   double firstHitX = wireReadout.OpDetGeoFromOpChannel(Hits[0]->OpChannel()).GetCenter().X();
-  //   double firstHitY = wireReadout.OpDetGeoFromOpChannel(Hits[0]->OpChannel()).GetCenter().Y();
-  //   double firstHitZ = wireReadout.OpDetGeoFromOpChannel(Hits[0]->OpChannel()).GetCenter().Z();
-
-  //   for (double yPos = firstHitY - fOpFlashAlgoRad; yPos <= firstHitY + fOpFlashAlgoRad; yPos += 5)
-  //   {
-  //     for (double zPos = firstHitZ - fOpFlashAlgoRad; zPos <= firstHitZ + fOpFlashAlgoRad; zPos += 5)
-  //     {
-  //       // Skipt the yPos and zPos that are outside the circle of radius sigma around the first hit
-  //       if (pow(yPos - firstHitY, 2) + pow(zPos - firstHitZ, 2) > pow(sigma, 2))
-  //         continue;
-  //       double likelihood = 0.0;
-  //       double sumY = 0.0;
-  //       double sumZ = 0.0;
-  //       int count = 0;
-
-  //       // Loop over hits
-  //       for (const auto &hit : Hits)
-  //       {
-  //         double hitYPos = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
-  //         double hitZPos = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
-
-  //         // Calculate the likelihood for the hit
-  //         double hitLikelihood = GaussianPDF(hitYPos, yPos, sigma) * GaussianPDF(hitZPos, zPos, sigma);
-
-  //         // Accumulate the likelihood and calculate the weighted sum of Y and Z coordinateslarsoft_v09_91_02/work/prodmarley_nue_cc_flat_radiological_decay0_dune10kt_1x2x6_centralAPA/solar_ana_flash_dune10kt_1x2x6.fcl
-  //         likelihood += log(hitLikelihood);
-  //         sumY += hitLikelihood * hitYPos;
-  //         sumZ += hitLikelihood * hitZPos;
-  //         count++;
-  //       }
-
-  //       // Check if the current likelihood is the maximum
-  //       if (likelihood > maxLikelihood)
-  //       {
-  //         maxLikelihood = likelihood;
-  //         bestY = sumY / count;
-  //         bestZ = sumZ / count;
-  //       }
-  //     }
-  //   }
-
-  //   // Set the best 3D spacepoint
-  //   x = firstHitX;
-  //   y = bestY;
-  //   z = bestZ;
-  // }
 
 } // namespace solar
