@@ -39,7 +39,7 @@ namespace solar
           std::stable_sort(Cluster.begin(), Cluster.end(), [](art::Ptr<recob::OpHit> a, art::Ptr<recob::OpHit> b)
                           { return a->PeakTime() < b->PeakTime(); });
       }
-      int Plane = GetOpHitPlane(Cluster[0], 0.01);
+      int Plane = GetOpHitPlane(Cluster[0], 0.1);
       int NHit = 0;
       double Time = -1e6;
       double TimeWidth = 0;
@@ -63,7 +63,7 @@ namespace solar
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
         NHit++;
-        auto thisPlane = GetOpHitPlane(PDSHit, 0.01);
+        auto thisPlane = GetOpHitPlane(PDSHit, 0.1);
         if (thisPlane != Plane) {
           ProducerUtils::PrintInColor("OpHit in cluster not in same plane: CH " + ProducerUtils::str(PDSHit->OpChannel()) + " Plane " + ProducerUtils::str(thisPlane) + " Expected Plane " + ProducerUtils::str(Plane), ProducerUtils::GetColor("red"), "Error");
           Plane = -1; // Set plane to -1 if hits in cluster are not in the same plane
@@ -493,7 +493,7 @@ namespace solar
     std::map<int, int> OpHitPlane;
     for (const auto &hit : OpHitVector)
     {
-      OpHitPlane[hit->OpChannel()] = GetOpHitPlane(hit, 0.01);
+      OpHitPlane[hit->OpChannel()] = GetOpHitPlane(hit, 0.1);
     }
     return OpHitPlane;
   }
