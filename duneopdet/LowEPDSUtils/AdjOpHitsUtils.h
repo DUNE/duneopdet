@@ -93,6 +93,7 @@ namespace solar
         const float fOpFlashAlgoPE;
         const float fOpFlashAlgoTriggerPE;
         const float fOpFlashAlgoHotVertexThld;
+        const bool  fOpFlashAlgoHitDuplicates;
         const float fXACathodeX;
         const float fXAMembraneY;
         const float fXAFinalCapZ;

@@ -13,6 +13,7 @@ namespace solar
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE", 1.5)),         // Minimum PE of OpHit to consider it for flash creation.
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE", 1.5)), // Minimum PE of OpHit to consider it as a trigger for flash creation.
         fOpFlashAlgoHotVertexThld(p.get<float>("OpFlashAlgoHotVertexThld", 0.3)), // Fraction of MaxPE to consider an OpHit as part of the flash center calculation.
+        fOpFlashAlgoHitDuplicates(p.get<bool>("OpFlashAlgoHitDuplicates", true)), // Whether to allow OpHits to be part of multiple clusters.
         fXACathodeX(p.get<float>("XACathodeX", -327.5)),
         fXAMembraneY(p.get<float>("XAMembraneY", 743.302)),
         fXAFinalCapZ(p.get<float>("XAFinalCapZ", 2188.38)),
@@ -217,7 +218,6 @@ namespace solar
 
       std::vector<int> AdjHitIdx = {};
       std::vector<art::Ptr<recob::OpHit>> AdjHitVec = {};
-      std::vector<bool> ClusteredAdjHits(OpHitVector.size(), false); // Temporary vector to track clustered hits in case we need to reset
 
       const auto &hit = OpHitVector[*it];
       if (hit->PE() < fOpFlashAlgoTriggerPE)
@@ -270,7 +270,7 @@ namespace solar
           continue;
 
         // If hit has already been clustered, skip
-        if (ClusteredAdjHits[*it2] == true) {
+        if (ClusteredHits[*it2] == true && !fOpFlashAlgoHitDuplicates) {
           sOpHitClustering += "Skipping already clustered hit: CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime() * TickPeriod) + "\n";
           continue;
         }
@@ -290,7 +290,6 @@ namespace solar
             {
               sOpHitClustering += "---Removing hit: CH " + ProducerUtils::str(OpHitVector[*it3]->OpChannel()) + " Time " + ProducerUtils::str(OpHitVector[*it3]->PeakTime() * TickPeriod) + "\n";
               ClusteredHits[*it3] = false;
-              ClusteredAdjHits[*it3] = false; // Reset the evaluated status for the adjacent hits
             }
             break;
           }
@@ -299,7 +298,6 @@ namespace solar
             AdjHitVec.push_back(adjHit);
             AdjHitIdx.push_back(*it2);
             ClusteredHits[*it2] = true;
-            ClusteredAdjHits[*it2] = true;
           }
         }
       }
@@ -345,7 +343,7 @@ namespace solar
           continue;
 
         // if hit has already been clustered, skip
-        if (ClusteredHits[*it4] == true) {
+        if (ClusteredHits[*it4] == true && !fOpFlashAlgoHitDuplicates) {
           sOpHitClustering += "Skipping already clustered hit: CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime() * TickPeriod) + "\n";
           continue;
         }
@@ -365,7 +363,6 @@ namespace solar
             {
               sOpHitClustering += "---Removing hit: CH " + ProducerUtils::str(OpHitVector[*it5]->OpChannel()) + " Time " + ProducerUtils::str(OpHitVector[*it5]->PeakTime() * TickPeriod) + "\n";
               ClusteredHits[*it5] = false;
-              ClusteredAdjHits[*it5] = false; // Reset the evaluated status for the adjacent hits
             }
             break;
           }
@@ -374,7 +371,6 @@ namespace solar
             AdjHitVec.push_back(adjHit);
             AdjHitIdx.push_back(*it4);
             ClusteredHits[*it4] = true;
-            ClusteredAdjHits[*it4] = true;
           }
         }
       }

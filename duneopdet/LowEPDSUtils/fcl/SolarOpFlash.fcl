@@ -20,6 +20,7 @@ solar_opflash_dune10kt_1x2x6:
     OpFlashAlgoPE:              1.5          # PE threshold to look for adj. OpHits.
     OpFlashAlgoTriggerPE:       1.5          # PE threshold to trigger an OpFlash.
     OpFlashAlgoHotVertexThld:   0.3          # Relative threshold to consider a hit as hot for opflash vertex determination [0-1].
+    OpFlashAlgoHitDuplicates:   true         # If true, allow hits to be used in multiple flashes.
 
     Debug:                      true         # If true, the module will print debug information.
 }
