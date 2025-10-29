@@ -321,12 +321,6 @@ protodune_vd_v4_pdfastsim_ann_xe:                          @local::protodune_vd_
 protodune_vd_v4_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDoping10ppm
 protodune_vd_v4_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/protodune_vd_v4_175nm_tf2.6"
 
-
-#Official PDVD ANN fast sim
-protodune_vd_pdfastsim_ann_ar:                          @local::protodune_vd_v4_pdfastsim_ann_ar
-protodune_vd_pdfastsim_ann_xe:                          @local::protodune_vd_v4_pdfastsim_ann_xe
-
-
 protodune_vd_v5_pdfastsim_ann_ar:
 {
        #Computable graph generated for protodunevd_v5_ggd.gdml
@@ -342,6 +336,13 @@ protodune_vd_v5_pdfastsim_ann_ar:
            OutputName:      "StatefulPartitionedCall:0"
        }
 }
+
+
+#Official PDVD ANN fast sim
+protodune_vd_pdfastsim_ann_ar:                          @local::protodune_vd_v5_pdfastsim_ann_ar
+#NOTE: ONE SHOULD NOT RUN DIFFERENT VERSIONS OF THE COMPGRAPH TOGETHER AND THERE IS CURRENTLY A MISMATCH BETWEEN AR AND XE DEFAULT SETTINGS.
+#IF YOU NEED TO RUN XE DOPING SIM, PLEASE CONTACT LAURA PAULUCCI FOR INSTRUCTIONS.
+protodune_vd_pdfastsim_ann_xe:                          @local::protodune_vd_v4_pdfastsim_ann_xe
 
 
 END_PROLOG
