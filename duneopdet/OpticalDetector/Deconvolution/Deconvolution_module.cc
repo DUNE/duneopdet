@@ -107,6 +107,8 @@ namespace opdet {
           fhicl::Atom<bool>        ApplyPostBLCorrection{ fhicl::Name("ApplyPostBLCorrection") };
           fhicl::Atom<bool>        AutoScale{ fhicl::Name("AutoScale"), false };
 
+          fhicl::Atom<bool>        OptimizeFFT{ fhicl::Name("OptimizeFFT"), false }; // Whether to optimize instantiation of the ROOT's FFT objects - slow for long waveforms
+
 	  fhicl::Atom<short>        InputPolarity{ fhicl::Name("InputPolarity") };
 
 
@@ -287,6 +289,8 @@ namespace opdet {
       bool fApplyPostBLCorr;
       bool fAutoScale;
 
+      bool fOptimizeFFT;
+
     short int fInputPolarity; //!< whether the input raw waveform is positive or negative
 
 
@@ -364,6 +368,7 @@ namespace opdet {
       fApplyPostfilter{ pars().ApplyPostfilter()},
       fApplyPostBLCorr{ pars().ApplyPostBLCorrection()},
       fAutoScale{ pars().AutoScale()},
+      fOptimizeFFT{ pars().OptimizeFFT()},
       fInputPolarity{ pars().InputPolarity()},
       fSPETemplatePath{ pars().SPETemplatePath()},
       fUseSingleSPETemplate(0),
@@ -391,8 +396,10 @@ namespace opdet {
     fSampleFreq = clockData.OpticalClock().Frequency();
 
 
-    fft_r2c = TVirtualFFT::FFT(1, &fSamples, "ES R2C K");
-    fft_c2r = TVirtualFFT::FFT(1, &fSamples, "ES C2R K");
+    string optimization = (fOptimizeFFT)?"M":"ES";
+    mf::LogInfo("Deconvolution::Deconvolution()")<<"Creating FFT with "<<(optimization+" R2C K").c_str();
+    fft_r2c = TVirtualFFT::FFT(1, &fSamples, (optimization+" R2C K").c_str());
+    fft_c2r = TVirtualFFT::FFT(1, &fSamples, (optimization+" C2R K").c_str());
 
     // Prepare the SPE waveform templates
     mfi << "Will look in "<<fSPETemplatePath<<" for "<<fSPETemplateFiles.size()<<" SPE template files.\n";
