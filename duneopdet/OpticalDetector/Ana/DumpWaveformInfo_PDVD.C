@@ -173,4 +173,3 @@ void DumpWaveformInfo(const char* jsonFile = "../../../../dunecore/dunecore/Chan
 
     std::cout << "Done. Saved " << count << " plots and created waveform_channels_info_PDVD.txt\n";
 }
-
