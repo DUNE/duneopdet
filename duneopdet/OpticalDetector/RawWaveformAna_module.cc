@@ -17,6 +17,9 @@
 #include "lardataobj/RecoBase/OpWaveform.h"
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
+#include "detdataformats/trigger/TriggerCandidateData2.hpp"
+
+
 // Framework includes
 #include "art/Framework/Core/EDAnalyzer.h"
 #include "art/Framework/Core/ModuleMacros.h"
@@ -73,7 +76,7 @@ namespace opdet {
         double SampleSize;
         std::vector<short> adc_value;
         unsigned int nOpDet;
-        int TriggerType;
+        unsigned int TriggerType;
 
     };
 }
@@ -90,7 +93,7 @@ namespace opdet {
         : EDAnalyzer(pset){
         // Read the fcl-file
         fInputModuleLabel  =   pset.get< std::string >("InputModule");
-        //fTriggerModuleLabel  =   pset.get< std::string >("TriggerModule");
+        fTriggerModuleLabel  =   pset.get< std::string >("TriggerModule");
 
         art::ServiceHandle< art::TFileService > tfs;
 
@@ -125,13 +128,14 @@ namespace opdet {
         art::Handle< std::vector< raw::OpDetWaveform >> wfmHndl;
         evt.getByLabel(fInputModuleLabel, wfmHndl);
 
-        // auto trigHndl = evt.getHandle< std::vector<raw::Trigger>>(fTriggerModuleLabel);
-        // auto &trig = trigHndl[0];
+
+        auto trigHndl = evt.getHandle< std::vector<dunedaq::trgdataformats2::TriggerCandidateData>>(fTriggerModuleLabel);
+        auto &trig = trigHndl->at(0);
 
         Run = evt.id().run();
         SubRun = evt.id().subRun();
         Event = evt.id().event();
-        TriggerType = 0;
+        TriggerType = (unsigned int)trig.type;
 
         for (auto &wfm: *wfmHndl) {
             OpChannel = wfm.ChannelNumber();

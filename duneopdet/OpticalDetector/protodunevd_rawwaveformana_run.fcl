@@ -68,6 +68,7 @@ physics: {
       rawwfmana: {
          module_type: "RawWaveformAna"
          InputModule: "pdvddaphne:daq"
+         TriggerModule: "triggerrawdecoder:daq"
       }
    }
 

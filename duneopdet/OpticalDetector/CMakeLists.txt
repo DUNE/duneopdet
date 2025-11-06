@@ -1,8 +1,10 @@
 #add_subdirectory(BackTrackingTests)
 
+include_directories("${dunedetdataformats_DIR}/../../../include")
+
 art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                 LIBRARY_NAME duneopdet_OpticalDetector
-                LIB_LIBRARIES 
+                LIB_LIBRARIES
                                 lardataobj::RecoBase
                                 larcorealg::Geometry
                                 larcore::Geometry_Geometry_service
@@ -19,14 +21,14 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 art_root_io::TFileService_service
                                 art::Framework_Services_Optional_RandomNumberGenerator_service
                                 art::Persistency_Common
-                                art::Utilities 
+                                art::Utilities
 				canvas::canvas
-                                cetlib::cetlib 
-				cetlib_except::cetlib_except 
+                                cetlib::cetlib
+				cetlib_except::cetlib_except
                                 Boost::filesystem
                                 dunecore::opdet_PDVDPDMapAlg
 
-  
+
                 MODULE_LIBRARIES
                                 dunecore::DuneObj
                                 lardataalg::DetectorInfo
@@ -38,7 +40,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 larcore::Geometry_Geometry_service
                                 duneopdet::OpticalDetector
                                 larsim::MCCheater_ParticleInventoryService_service
-                                larsim::MCCheater_PhotonBackTrackerService_service 
+                                larsim::MCCheater_PhotonBackTrackerService_service
                                 nusimdata::SimulationBase
                                 nurandom::RandomUtils_NuRandomService_service
                                 fhiclcpp::fhiclcpp
@@ -54,9 +56,9 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 art::Framework_Services_Optional_RandomNumberGenerator_service
                                 art::Persistency_Provenance
                                 art::Persistency_Common
-                                art::Utilities 
+                                art::Utilities
 				canvas::canvas
-                                cetlib::cetlib 
+                                cetlib::cetlib
 				cetlib_except::cetlib_except
 				CLHEP::CLHEP
                                 Boost::filesystem
@@ -79,7 +81,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 ROOT::Core
                                 art_root_io::TFileService_service
                                 art::Persistency_Common
-                                art::Utilities 
+                                art::Utilities
 				canvas::canvas
                                 cetlib::cetlib cetlib_except::cetlib_except
 				CLHEP::CLHEP
