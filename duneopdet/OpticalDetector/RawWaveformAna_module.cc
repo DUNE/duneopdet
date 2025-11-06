@@ -1,15 +1,11 @@
 //===========================================================================
 // RawWaveformAna_module.cc
-// This analyzer module for Deconvolution creates histograms
-// with information from OpDetWaveforms and OpWaveforms.
-// @authors     : Daniele Guffanti, Maritza Delgado, Sergio Manthey Corchado
-// @created     : 2022
+// This analyzer module for raw data creates simple ROOT TTree
+// with information from raw::OpDetWaveform
 //
-// Modified: Oct 7, 2024, Viktor Pec
-//     Added raw waveforms to the output. Redid directory structure
-//     inside the root file. Set the maximum number of histograms to
-//     save to 400.
-//     ===========================================================================
+// @author     : Viktor Pec
+// @created    : Oct, 2025
+//===========================================================================
 
 #ifndef RawWaveformAna_h
 #define RawWaveformAna_h
