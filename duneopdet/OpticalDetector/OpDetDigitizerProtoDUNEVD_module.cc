@@ -46,8 +46,8 @@
 #include "lardataobj/Simulation/sim.h"
 #include "larsim/Simulation/LArG4Parameters.h"
 
-#include "duneprototypes/Protodune/vd/ChannelMap/PDMapAlg.h"
-#include "duneprototypes/Protodune/vd/ChannelMap/PDVDPDMapAlg.hh"
+#include "dunecore/ChannelMap/PDMapAlg.h"
+#include "dunecore/ChannelMap/PDVDPDMapAlg.hh"
 
 // CLHEP includes
 

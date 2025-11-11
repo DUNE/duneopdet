@@ -3,6 +3,8 @@
 #include "ScintTimeXeDoping.fcl"
 #include "opticalsimparameterisations_dune.fcl"
 #inlcude "photpropservices_dune.fcl"
+#include "opticalpath_tool.fcl"
+#include "duneopticalpath_tool.fcl"
 
 BEGIN_PROLOG
 
@@ -11,13 +13,15 @@ BEGIN_PROLOG
 ############################################
 
 ###########
-# DUNE FD #
+# DUNE HD 10kt #
 ###########
 
-# Hits & Timing parameterization for DUNE FD, Ar scintillation
+# Hits & Timing parameterization for DUNE HD, Ar scintillation
 dunefd_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
 dunefd_pdfastsim_par_ar.VUVTiming:             @local::dune_vuv_timing_parameterization
 dunefd_pdfastsim_par_ar.VUVHits:               @local::dune_vuv_RS100cm_hits_parameterization
+dunefd_pdfastsim_par_ar.OpticalPathTool:       @local::DUNEHD10ktOpticalPath
+dunefd_pdfastsim_par_ar.VUVHits.VerticalBorderCorrectionMode: true
 
 # As above, with cathode reflections included
 dunefd_pdfastsim_par_ar_refl:                  @local::dunefd_pdfastsim_par_ar
@@ -29,13 +33,15 @@ dunefd_pdfastsim_par_ar_refl.VISHits:          @local::dune_vis_RS100cm_hits_par
 dunefd_pdfastsim_par_ar_fastonly:              @local::dunefd_pdfastsim_par_ar
 dunefd_pdfastsim_par_ar_fastonly.DoSlowComponent: false
 
-# Hits parameterization for DUNE FD, Xe scintillation at 10 ppm
+# Hits parameterization for DUNE HD, Xe scintillation at 10 ppm
 dunefd_pdfastsim_par_xe:                       @local::standard_pdfastsim_par_ar
 dunefd_pdfastsim_par_xe.DoFastComponent:       false          # Only slow Xe light
 dunefd_pdfastsim_par_xe.VUVHits:               @local::dune_vuv_Xenon_hits_parameterization
+dunefd_pdfastsim_par_xe.VUVHits.VerticalBorderCorrectionMode: true
 dunefd_pdfastsim_par_xe.IncludePropTime:       false          # Xe propoagation time not yet calculated
 #dunefd_pdfastsim_par_xe.VUVTiming:                           # Xe propoagation time not yet calculated
 dunefd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
+dunefd_pdfastsim_par_xe.OpticalPathTool:       @local::DUNEHD10ktOpticalPath
 
 # Same as above, but for higher Xe concentration
 dunefd_pdfastsim_par_xe50:                       @local::dunefd_pdfastsim_par_xe
@@ -51,8 +57,49 @@ dunefd_pdfastsim_par_xe_refl.VISHits:          @local::dune_vis_xenon_hits_param
 # Photon library (or PVS parameterization) is not recommended for the FD
 dunefd_pdfastsim_pvs:                          @local::standard_pdfastsim_pvs
 
-# Choose *the* pdfast sim module for the FD
+# Choose *the* pdfast sim module for the HD 10kt
 dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar
+
+
+###########
+# DUNE HD 10kt 1x2x6 #
+###########
+
+# Parameterisations currently identical for 1x2x6, except not using vertical border correction mode
+# Require different optical path tool, using standard tool rather than custom dune 10kt one
+
+# Hits & Timing parameterization for DUNE HD 1x2x6, Ar scintillation
+dunefd_1x2x6_pdfastsim_par_ar:                       @local::dunefd_pdfastsim_par_ar
+dunefd_1x2x6_pdfastsim_par_ar.OpticalPathTool:       @local::StandardOpticalPath
+dunefd_1x2x6_pdfastsim_par_ar.VUVHits.VerticalBorderCorrectionMode: false
+
+# As above, with cathode reflections included
+dunefd_1x2x6_pdfastsim_par_ar_refl:                  @local::dunefd_pdfastsim_par_ar_refl
+dunefd_1x2x6_pdfastsim_par_ar_refl.OpticalPathTool:  @local::StandardOpticalPath
+dunefd_1x2x6_pdfastsim_par_ar_refl.VUVHits.VerticalBorderCorrectionMode: false
+
+# As above, but fast-only scintillation for high Xe concentration
+dunefd_1x2x6_pdfastsim_par_ar_fastonly:                     @local::dunefd_pdfastsim_par_ar_fastonly
+dunefd_1x2x6_pdfastsim_par_ar_fastonly.OpticalPathTool:     @local::StandardOpticalPath
+dunefd_1x2x6_pdfastsim_par_ar_fastonly.VUVHits.VerticalBorderCorrectionMode: false
+
+# Hits parameterization for DUNE HD 1x2x6, Xe scintillation at 10 ppm
+dunefd_1x2x6_pdfastsim_par_xe:                       @local::dunefd_pdfastsim_par_xe
+dunefd_1x2x6_pdfastsim_par_xe.OpticalPathTool:       @local::StandardOpticalPath
+dunefd_1x2x6_pdfastsim_par_xe.VUVHits.VerticalBorderCorrectionMode: false
+
+# As above, but for higher Xe concentration
+dunefd_1x2x6_pdfastsim_par_xe50:                     @local::dunefd_pdfastsim_par_xe50
+dunefd_1x2x6_pdfastsim_par_xe50.OpticalPathTool:     @local::StandardOpticalPath
+dunefd_1x2x6_pdfastsim_par_xe50.VUVHits.VerticalBorderCorrectionMode: false
+
+# As above, with cathode reflections included
+dunefd_1x2x6_pdfastsim_par_xe_refl:                  @local::dunefd_pdfastsim_par_xe_refl
+dunefd_1x2x6_pdfastsim_par_xe_refl.OpticalPathTool:  @local::StandardOpticalPath
+dunefd_1x2x6_pdfastsim_par_xe_refl.VUVHits.VerticalBorderCorrectionMode: false
+
+# Choose *the* pdfast sim module for the HD 10kt 1x2x6
+dunefd_1x2x6_pdfastsim:                              @local::dunefd_1x2x6_pdfastsim_par_ar
 
 
 ###########
@@ -128,6 +175,7 @@ protodune_hd_pdfastsim_par.VUVTiming:             @local::dune_vuv_timing_parame
 protodune_hd_pdfastsim_par.VUVHits:               @local::protodune_hd_vuv_hits_parameterization
 protodune_hd_pdfastsim_par.OnlyActiveVolume: 	  true
 protodune_hd_pdfastsim_par.SimulationLabel:       "IonAndScint:priorSCE"
+protodune_hd_pdfastsim_par.OpticalPathTool:       @local::ProtoDUNEHDOpticalPath
 
 # External region (hybrid model)
 protodune_hd_pdfastsim_pvs_external:                          @local::standard_pdfastsim_pvs
@@ -273,9 +321,27 @@ protodune_vd_v4_pdfastsim_ann_xe:                          @local::protodune_vd_
 protodune_vd_v4_pdfastsim_ann_xe.ScintTimeTool:            @local::ScintTimeXeDoping10ppm
 protodune_vd_v4_pdfastsim_ann_xe.TFLoaderTool.ModelName:   "PhotonPropagation/ComputableGraph/protodune_vd_v4_175nm_tf2.6"
 
+protodune_vd_v5_pdfastsim_ann_ar:
+{
+       #Computable graph generated for protodunevd_v5_ggd.gdml
+       module_type:         "PDFastSimANN"
+       SimulationLabel:     "IonAndScint"
+       DoSlowComponent:     true
+       ScintTimeTool:       @local::ScintTimeLAr
+       TFLoaderTool:
+       {
+           tool_type:       TFLoaderMLP
+           ModelName:       "PhotonPropagation/ComputableGraph/protodune_vd_v5_128nm_tf2.6"
+           InputsName:      ["serving_default_pos_x:0", "serving_default_pos_y:0", "serving_default_pos_z:0"]
+           OutputName:      "StatefulPartitionedCall:0"
+       }
+}
+
 
 #Official PDVD ANN fast sim
-protodune_vd_pdfastsim_ann_ar:                          @local::protodune_vd_v4_pdfastsim_ann_ar
+protodune_vd_pdfastsim_ann_ar:                          @local::protodune_vd_v5_pdfastsim_ann_ar
+#NOTE: ONE SHOULD NOT RUN DIFFERENT VERSIONS OF THE COMPGRAPH TOGETHER AND THERE IS CURRENTLY A MISMATCH BETWEEN AR AND XE DEFAULT SETTINGS.
+#IF YOU NEED TO RUN XE DOPING SIM, PLEASE CONTACT LAURA PAULUCCI FOR INSTRUCTIONS.
 protodune_vd_pdfastsim_ann_xe:                          @local::protodune_vd_v4_pdfastsim_ann_xe
 
 
