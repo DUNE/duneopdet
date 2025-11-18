@@ -11,7 +11,6 @@ art_make(LIB_LIBRARIES
         art::Framework_Principal
         art::Framework_Services_Registry
         art_root_io::tfile_support
-        ROOT::Core
         art_root_io::TFileService_service
         art::Framework_Services_Optional_RandomNumberGenerator_service
         art::Persistency_Common
@@ -21,20 +20,12 @@ art_make(LIB_LIBRARIES
 	cetlib_except::cetlib_except 
         Boost::filesystem
          MODULE_LIBRARIES
- 
         duneopdet::OpticalDetector
-	nusimdata::SimulationBase
-#	dunereco::FDSensOpt_FDSensOptData
 	art::Persistency_Provenance
 	ROOT::Geom
 	ROOT::XMLIO
 	ROOT::Gdml
 	ROOT::Core ROOT::Hist ROOT::Tree
-
-  # lardataobj_Simulation
-        SERVICE_LIBRARIES
-        art_root_io::tfile_support
-
 )
 
 install_headers()
