@@ -24,6 +24,8 @@
 #include "lardata/Utilities/AssociationUtil.h"
 #include "larcorealg/Geometry/GeometryCore.h"
 #include "larcorealg/Geometry/OpDetGeo.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
+#include "lardataobj/RecoBase/OpWaveform.h"
 #include "lardataobj/RecoBase/OpHit.h"
 #include "lardataobj/RecoBase/OpFlash.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
@@ -46,6 +48,7 @@ namespace solar
             int NHit;
             double Time;
             double TimeWidth;
+            double TimeWeighted;
             double PE;
             double MaxPE;
             std::vector<double> PEperOpDet;
@@ -57,6 +60,7 @@ namespace solar
             double YWidth;
             double ZWidth;
             double STD;
+            std::vector<int> MainOpWaveform;
         };
         struct OpFlashes
         {
@@ -78,17 +82,21 @@ namespace solar
         int GetOpHitPlane(const art::Ptr<recob::OpHit> &hit, float buffer);
         std::map<int, int> GetOpHitPlaneMap(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector);
         bool CheckOpHitPlane(std::map<int, int> OpHitPlane, int refHit1, int refHit2);
-        // void CalcCentroid(std::vector<art::Ptr<recob::OpHit>> Hits, double x, double y, double z);
-        // double GaussianPDF(double x, double mean, double sigma);
+        void GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<art::Ptr<raw::OpDetWaveform>> &OpDetWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt);
+        void GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<art::Ptr<recob::OpWaveform>> &OpDetWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt);
+        void GetOpHitSignal(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<int>> &OpDetWvfIntVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt);
 
     private:
         art::ServiceHandle<geo::Geometry> geom;
         geo::WireReadoutGeom const& wireReadout = art::ServiceHandle<geo::WireReadout>()->Get();
         // From fhicl configuration
+        const std::string fOpWaveformLabel;
+        const std::string fOpHitLabel;
         const std::string fOpHitTimeVariable;
         const int fOpFlashAlgoNHit;
         const float fOpFlashAlgoMinTime;
         const float fOpFlashAlgoMaxTime;
+        const float fOpFlashAlgoWeightedTime;
         const float fOpFlashAlgoRad;
         const float fOpFlashAlgoPE;
         const float fOpFlashAlgoTriggerPE;

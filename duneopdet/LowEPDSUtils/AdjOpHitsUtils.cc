@@ -5,10 +5,13 @@ using namespace producer;
 namespace solar
 {
   AdjOpHitsUtils::AdjOpHitsUtils(fhicl::ParameterSet const &p)
-      : fOpHitTimeVariable(p.get<std::string>("OpHitTimeVariable", "PeakTime")), // Variable to use for time sorting ("StartTime" or "PeakTime")
+      : fOpWaveformLabel(p.get<std::string>("OpWaveformLabel", "opdetwaveform")), // Label for OpDetWaveform collection
+        fOpHitLabel(p.get<std::string>("OpHitLabel", "ophit")), // Label for OpHit collection
+        fOpHitTimeVariable(p.get<std::string>("OpHitTimeVariable", "PeakTime")), // Variable to use for time sorting ("StartTime" or "PeakTime")
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit", 3)),       // Minimum number of OpHits in a cluster to consider it for flash creation.
-        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.010)), // Negative time window to look for adj. OpHits. Default for HD 10 ns [0.6 tick]
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.08)), // Negative time window to look for adj. OpHits. Default for HD 8 ns [0.5 tick]
         fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.016)), // Positive time window to look for adj. OpHits. Default for HD 16 ns [1 tick]
+        fOpFlashAlgoWeightedTime(p.get<bool>("OpFlashAlgoWeightedTime", false)), // Whether to use weighted time of trigger time for flash time reference.
         fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 300.0)),     // Radius to look for adj. OpHits in [cm] units.
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE", 1.5)),         // Minimum PE of OpHit to consider it for flash creation.
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE", 1.5)), // Minimum PE of OpHit to consider it as a trigger for flash creation.
@@ -20,15 +23,17 @@ namespace solar
         fXAStartCapZ(p.get<float>("XAStartCapZ", -96.5))
   {
   }
+  
+  
   void AdjOpHitsUtils::MakeFlashVector(std::vector<FlashInfo> &FlashVec, std::vector<std::vector<art::Ptr<recob::OpHit>>> &OpHitClusters, art::Event const &evt)
   {
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService>()->DataFor(evt);
     auto TickPeriod = clockData.OpticalClock().TickPeriod();
-    if (fOpFlashAlgoHotVertexThld > 1)
-    {
+    if (fOpFlashAlgoHotVertexThld > 1) {
       ProducerUtils::PrintInColor("Hot vertex threshold must be between 0 and 1", ProducerUtils::GetColor("red"), "Error");
       return;
     }
+    
     for (std::vector<art::Ptr<recob::OpHit>> Cluster : OpHitClusters)
     {
       if (!Cluster.empty())
@@ -40,10 +45,14 @@ namespace solar
           std::stable_sort(Cluster.begin(), Cluster.end(), [](art::Ptr<recob::OpHit> a, art::Ptr<recob::OpHit> b)
                           { return a->PeakTime() < b->PeakTime(); });
       }
+
       int Plane = GetOpHitPlane(Cluster[0], 0.1);
+      int MaxIdx = 0;
+      int Idx = 0;
       int NHit = 0;
-      double Time = -1e6;
+      double TimeMax = -1e6;
       double TimeWidth = 0;
+      double TimeWeighted = -1e6;
       double TimeSum = 0;
       double PE = 0;
       double MaxPE = 0;
@@ -59,30 +68,52 @@ namespace solar
       double YSum = 0;
       double ZSum = 0;
       double STD = 0;
+      std::vector<int> MainOpWaveform = {}; // Make vector for main OpWaveform with 1000 entries (max waveform size)
+
+      std::vector<bool> OpHitWvfValid = {};
+      std::vector<std::vector<int>> OpHitWvfIntVector = {};
+      GetOpHitSignal(Cluster, OpHitWvfIntVector, OpHitWvfValid, evt); // Get OpHit waveforms
 
       // Compute total number of PE and MaxPE.
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
         NHit++;
+        double thisTime = -1e6;
+        double thisPE = PDSHit->PE();
         auto thisPlane = GetOpHitPlane(PDSHit, 0.1);
+        
         if (thisPlane != Plane) {
           ProducerUtils::PrintInColor("OpHit in cluster not in same plane: CH " + ProducerUtils::str(PDSHit->OpChannel()) + " Plane " + ProducerUtils::str(thisPlane) + " Expected Plane " + ProducerUtils::str(Plane), ProducerUtils::GetColor("red"), "Error");
           Plane = -1; // Set plane to -1 if hits in cluster are not in the same plane
         }
 
-        PE += PDSHit->PE();
-        if (PDSHit->PE() > MaxPE)
-          MaxPE = PDSHit->PE();
+        if (fOpHitTimeVariable == "StartTime") {
+          thisTime = PDSHit->StartTime() * TickPeriod; // Use StartTime
+        }
+        else {
+          thisTime = PDSHit->PeakTime() * TickPeriod; // Default to PeakTime
+        }
+        
+        PE += thisPE;
+        TimeSum += thisTime * thisPE;
+        
+        if (thisPE > MaxPE) {
+          MaxPE = thisPE;
+          MaxIdx = Idx;
+          TimeMax = thisTime;
+        }
 
-        PEperOpDet.push_back(PDSHit->PE());
-        if (fOpHitTimeVariable == "StartTime")
-          TimeSum += PDSHit->StartTime() * TickPeriod * PDSHit->PE();
-        else // Default to PeakTime
-          TimeSum += PDSHit->PeakTime() * TickPeriod * PDSHit->PE();
+        PEperOpDet.push_back(thisPE);
+        Idx++;
+      }
+
+      if (OpHitWvfValid[MaxIdx]) {
+        MainOpWaveform = OpHitWvfIntVector[MaxIdx];
       }
 
       float HotPE = 0;
-      Time = TimeSum / PE;
+      TimeWeighted = TimeSum / PE;
+
       // Compute flash center from weighted average of "hottest" ophits.
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
@@ -106,9 +137,9 @@ namespace solar
       {
         auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
         if (fOpHitTimeVariable == "StartTime")
-          TimeWidth += (PDSHit->StartTime() * TickPeriod - Time) * (PDSHit->StartTime() * TickPeriod - Time);
+          TimeWidth += (TimeMax - PDSHit->StartTime() * TickPeriod) * (TimeMax - PDSHit->StartTime() * TickPeriod);
         else // Default to PeakTime
-          TimeWidth += (PDSHit->PeakTime() * TickPeriod - Time) * (PDSHit->PeakTime() * TickPeriod - Time);
+          TimeWidth += (TimeMax - PDSHit->PeakTime() * TickPeriod) * (TimeMax - PDSHit->PeakTime() * TickPeriod);
         
         XWidth += (OpHitXYZ.X() - X) * (OpHitXYZ.X() - X);
         YWidth += (OpHitXYZ.Y() - Y) * (OpHitXYZ.Y() - Y);
@@ -128,20 +159,22 @@ namespace solar
       // Compute FastToTotal according to the #PEs arriving within the first 10% of the time window wrt the total #PEs
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
-        auto thisTime = 0.0;
+        auto thisTime = -1e6;
         if (fOpHitTimeVariable == "StartTime")
           thisTime = PDSHit->StartTime() * TickPeriod;
         else // Default to PeakTime
           thisTime = PDSHit->PeakTime() * TickPeriod;
         
-        if (thisTime < Time + TimeWidth / 10)
+        // Check if thisTime is within 10% of the time window in positive and negative direction
+        if (std::abs(thisTime - TimeMax) <= 0.05 * TimeWidth)
           FastToTotal += PDSHit->PE();
       }
       FastToTotal /= PE;
-      FlashVec.push_back(FlashInfo{Plane, NHit, Time, TimeWidth, PE, MaxPE, PEperOpDet, FastToTotal, X, Y, Z, XWidth, YWidth, ZWidth, STD});
+      FlashVec.push_back(FlashInfo{Plane, NHit, TimeMax, TimeWidth, TimeWeighted, PE, MaxPE, PEperOpDet, FastToTotal, X, Y, Z, XWidth, YWidth, ZWidth, STD, MainOpWaveform});
     }
     return;
   }
+
 
   float AdjOpHitsUtils::GetOpFlashPlaneSTD(const int Plane, const std::vector<float> varXY, const std::vector<float> varYZ, const std::vector<float> varXZ)
   {
@@ -184,6 +217,7 @@ namespace solar
     varstd = sqrt(varstd / var.size());
     return varstd;
   }
+
 
   void AdjOpHitsUtils::CalcAdjOpHits(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<art::Ptr<recob::OpHit>>> &OpHitClusters, std::vector<std::vector<int>> &OpHitClusterIdx, art::Event const &evt)
   {
@@ -390,6 +424,7 @@ namespace solar
     return;
   }
 
+
   void AdjOpHitsUtils::FlashMatchResidual(float &Residual, std::vector<art::Ptr<recob::OpHit>> Hits, double x, double y, double z)
   {
     if (Hits.size() == 0)
@@ -451,6 +486,7 @@ namespace solar
     return;
   }
 
+
   int AdjOpHitsUtils::GetOpHitPlane(const art::Ptr<recob::OpHit> &hit, float buffer)
   {
     std::string geoName = geom->DetectorName();
@@ -483,9 +519,9 @@ namespace solar
     }
   }
 
-  // Define a function and map to get the plane of the hit. If geometry is VD the number of planes is 5 (cathode, leftmembrane, rightmembrane, startcap, finalcap). If geometry is HD the number of planes is 2 (leftdrift, rightdrift).
+
   std::map<int, int> AdjOpHitsUtils::GetOpHitPlaneMap(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector)
-  {
+  { // Define a function and map to get the plane of the hit. If geometry is VD the number of planes is 5 (cathode, leftmembrane, rightmembrane, startcap, finalcap). If geometry is HD the number of planes is 2 (leftdrift, rightdrift).
     std::map<int, int> OpHitPlane;
     for (const auto &hit : OpHitVector)
     {
@@ -494,9 +530,9 @@ namespace solar
     return OpHitPlane;
   }
 
-  // Define a function to check if the adjhit is in the same plane as the reference hit using the OpHitPlane map
+
   bool AdjOpHitsUtils::CheckOpHitPlane(std::map<int, int> OpHitPlane, int refHit, int adjHit)
-  {
+  { // Define a function to check if the adjhit is in the same plane as the reference hit using the OpHitPlane map
     // Check that both hits are in the map
     if (OpHitPlane.find(refHit) == OpHitPlane.end() || OpHitPlane.find(adjHit) == OpHitPlane.end()) {
       ProducerUtils::PrintInColor("Hit not found in OpHitPlane map: refHit " + ProducerUtils::str(refHit) + " adjHit " + ProducerUtils::str(adjHit), ProducerUtils::GetColor("red"), "Error");
@@ -507,6 +543,136 @@ namespace solar
       return true;
     else
       return false;
+  }
+
+
+  void AdjOpHitsUtils::GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<art::Ptr<raw::OpDetWaveform>> &OpHitWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
+  { // Define a function to get the OpHit waveforms that correspond to each OpHit in the input vector
+    // Get the OpDetWaveform handle
+    art::Handle<std::vector<raw::OpDetWaveform>> opDetWvfHandle;
+    evt.getByLabel(fOpWaveformLabel, opDetWvfHandle);
+    auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
+    if (!opDetWvfHandle.isValid())
+    {
+      ProducerUtils::PrintInColor("Invalid OpDetWaveform handle", ProducerUtils::GetColor("red"), "Error");
+      for (size_t i = 0; i < OpHitVector.size(); i++)
+      {
+        OpHitWvfVector.push_back(art::Ptr<raw::OpDetWaveform>());  // Fill with a null pointer to keep the indices consistent
+        OpHitWvfValid.push_back(false);
+      }
+      return;
+    }
+
+    // Loop over the OpHit vector and get the corresponding OpDetWaveform
+    for (const auto &hit : OpHitVector)
+    {
+      bool found = false;
+      unsigned int opChannel = hit->OpChannel();
+      float hitTime = hit->PeakTime() * clockData.OpticalClock().TickPeriod();
+      for (size_t i = 0; i < opDetWvfHandle->size(); i++)
+      { // Match by channel number and amplitude
+        if ((*opDetWvfHandle)[i].ChannelNumber() == opChannel && hitTime >= (*opDetWvfHandle)[i].TimeStamp() && hitTime <= (*opDetWvfHandle)[i].TimeStamp() + (*opDetWvfHandle)[i].Waveform().size() * clockData.OpticalClock().TickPeriod())
+        {
+          ProducerUtils::PrintInColor("Matching OpDetWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("green"), "Debug");
+          art::Ptr<raw::OpDetWaveform> wvfPtr(opDetWvfHandle, i);
+          OpHitWvfVector.push_back(wvfPtr);
+          OpHitWvfValid.push_back(true);
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+      {
+        ProducerUtils::PrintInColor("No matching OpDetWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("red"), "Debug");
+        OpHitWvfVector.push_back(art::Ptr<raw::OpDetWaveform>());  // Fill with a null pointer to keep the indices consistent
+        OpHitWvfValid.push_back(false);
+      }
+    }
+    return;
+  }
+
+
+  void AdjOpHitsUtils::GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<art::Ptr<recob::OpWaveform>> &OpHitWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
+  { // Repeat the function but for waveforms of type std::vector<recob::OpWaveform>
+    // Get the OpWaveform handle
+    art::Handle<std::vector<recob::OpWaveform>> opWvfHandle;
+    evt.getByLabel(fOpWaveformLabel, opWvfHandle);
+    auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
+    if (!opWvfHandle.isValid())
+    {
+      ProducerUtils::PrintInColor("Invalid OpWaveform handle", ProducerUtils::GetColor("red"), "Error");
+      return;
+    }
+
+    // Loop over the OpHit vector and get the corresponding OpWaveform
+    for (const auto &hit : OpHitVector)
+    {
+      bool found = false;
+      unsigned int opChannel = hit->OpChannel();
+      float hitTime = hit->PeakTime() * clockData.OpticalClock().TickPeriod();
+      for (size_t i = 0; i < opWvfHandle->size(); i++)
+      { // Match by channel number and amplitude
+        if ((*opWvfHandle)[i].Channel() == opChannel && hitTime >= (*opWvfHandle)[i].TimeStamp() && hitTime <= (*opWvfHandle)[i].TimeStamp() + (*opWvfHandle)[i].Signal().size() * clockData.OpticalClock().TickPeriod())
+        {
+          ProducerUtils::PrintInColor("Matching OpWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("green"), "Debug");
+          art::Ptr<recob::OpWaveform> wvfPtr(opWvfHandle, i);
+          OpHitWvfVector.push_back(wvfPtr);
+          OpHitWvfValid.push_back(true);
+          found = true;
+          break;
+        }
+      }
+
+      if (!found) {
+        ProducerUtils::PrintInColor("No matching OpWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("red"), "Debug");
+        OpHitWvfVector.push_back(art::Ptr<recob::OpWaveform>());
+        OpHitWvfValid.push_back(false);
+      }
+    }
+    return;
+  }
+
+
+  void AdjOpHitsUtils::GetOpHitSignal(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<int>> &OpHitWvfIntVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
+  {
+    auto geoName = geom->DetectorName();
+    if (geoName.find("dune10kt") != std::string::npos) {
+      std::vector<art::Ptr<recob::OpWaveform>> OpHitWvfVector;
+      GetOpHitWaveforms(OpHitVector, OpHitWvfVector, OpHitWvfValid, evt);
+      // Get entries in OpHitWvfvector and save to OpHitWvfIntVector as integers
+      for (int i = 0; i < int(OpHitWvfVector.size()); i++)
+      {
+        art::Ptr<recob::OpWaveform> wvf = OpHitWvfVector[i];
+        if (OpHitWvfValid[i]) {
+          std::vector<int> wvfInt;
+          for (auto adc : wvf->Signal()) {
+            wvfInt.push_back(int(adc));
+          }
+          OpHitWvfIntVector.push_back(wvfInt);
+        }
+        else {
+          OpHitWvfIntVector.push_back(std::vector<int>{});
+        }
+      } 
+    }
+    else if (geoName.find("dunevd10kt") != std::string::npos) {
+      std::vector<art::Ptr<raw::OpDetWaveform>> OpHitWvfVector;
+      GetOpHitWaveforms(OpHitVector, OpHitWvfVector, OpHitWvfValid, evt);
+      for (int i = 0; i < int(OpHitWvfVector.size()); i++)
+      {
+        art::Ptr<raw::OpDetWaveform> wvf = OpHitWvfVector[i];
+        if (OpHitWvfValid[i]) {
+          std::vector<int> wvfInt;
+          for (auto adc : wvf->Waveform()) {
+            wvfInt.push_back(int(adc));
+          }
+          OpHitWvfIntVector.push_back(wvfInt);
+        }
+        else {
+          OpHitWvfIntVector.push_back(std::vector<int>{});
+        }
+      }
+    }
   }
 
 } // namespace solar

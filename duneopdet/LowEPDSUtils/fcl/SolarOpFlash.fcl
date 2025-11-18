@@ -3,6 +3,7 @@ BEGIN_PROLOG
 
 solar_opflash_dune10kt_1x2x6:
 {
+    OpWaveformLabel:            "opdec"     # The label for the process which ran the OpDigi
     OpHitLabel:                 "ophitspe"     # The label for the process which ran the OpHit
     module_type:                "SolarOpFlash"
     OpHitTimeVariable:          "PeakTime"     # Time variable to use for OpHit selection: "PeakTime" or "StartTime".
@@ -26,6 +27,7 @@ solar_opflash_dune10kt_1x2x6:
 }
 
 solar_opflash_dunevd10kt_1x8x14_3view_30deg: @local::solar_opflash_dune10kt_1x2x6
+solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpWaveformLabel: "opdigi10ppm"
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpHitLabel: "ophit10ppm"
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpHitTimeVariable: "StartTime"
 solar_opflash_dunevd10kt_1x8x14_3view_30deg.OpFlashTimeOffset:    0
