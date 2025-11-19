@@ -36,15 +36,18 @@ namespace solar
     
     for (std::vector<art::Ptr<recob::OpHit>> Cluster : OpHitClusters)
     {
-      if (!Cluster.empty())
+      if (Cluster.empty())
       {
-        if (fOpHitTimeVariable == "StartTime")
-          std::stable_sort(Cluster.begin(), Cluster.end(), [](art::Ptr<recob::OpHit> a, art::Ptr<recob::OpHit> b)
-                           { return a->StartTime() < b->StartTime(); });
-        else // Default to PeakTime
-          std::stable_sort(Cluster.begin(), Cluster.end(), [](art::Ptr<recob::OpHit> a, art::Ptr<recob::OpHit> b)
-                          { return a->PeakTime() < b->PeakTime(); });
+        continue;
       }
+      
+      // Sorting already done in CalcAdjOpHits
+      // if (fOpHitTimeVariable == "StartTime")
+      //   std::stable_sort(Cluster.begin(), Cluster.end(), [](art::Ptr<recob::OpHit> a, art::Ptr<recob::OpHit> b)
+      //                    { return a->StartTime() < b->StartTime(); });
+      // else // Default to PeakTime
+      //   std::stable_sort(Cluster.begin(), Cluster.end(), [](art::Ptr<recob::OpHit> a, art::Ptr<recob::OpHit> b)
+      //                   { return a->PeakTime() < b->PeakTime(); });
 
       int Plane = GetOpHitPlane(Cluster[0], 0.1);
       int MaxIdx = 0;
@@ -54,9 +57,10 @@ namespace solar
       double TimeWidth = 0;
       double TimeWeighted = -1e6;
       double TimeSum = 0;
+      double Amplitude = 0;
       double PE = 0;
       double MaxPE = 0;
-      std::vector<double> PEperOpDet;
+      std::vector<double> PEperOpDet = {};
       double FastToTotal = 1;
       double X = 0;
       double Y = 0;
@@ -69,10 +73,13 @@ namespace solar
       double ZSum = 0;
       double STD = 0;
       std::vector<int> MainOpWaveform = {}; // Make vector for main OpWaveform with 1000 entries (max waveform size)
+      bool MainOpWaveformValid = false;
+      float MainOpWaveformTime = -1e6;
 
       std::vector<bool> OpHitWvfValid = {};
+      std::vector<float> OpHitWvfTime = {};
       std::vector<std::vector<int>> OpHitWvfIntVector = {};
-      GetOpHitSignal(Cluster, OpHitWvfIntVector, OpHitWvfValid, evt); // Get OpHit waveforms
+      GetOpHitSignal(Cluster, OpHitWvfIntVector, OpHitWvfTime, OpHitWvfValid, evt); // Get OpHit waveforms
 
       // Compute total number of PE and MaxPE.
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
@@ -80,6 +87,7 @@ namespace solar
         NHit++;
         double thisTime = -1e6;
         double thisPE = PDSHit->PE();
+        double thisAmp = PDSHit->Amplitude();
         auto thisPlane = GetOpHitPlane(PDSHit, 0.1);
         
         if (thisPlane != Plane) {
@@ -98,6 +106,7 @@ namespace solar
         TimeSum += thisTime * thisPE;
         
         if (thisPE > MaxPE) {
+          Amplitude = thisAmp;
           MaxPE = thisPE;
           MaxIdx = Idx;
           TimeMax = thisTime;
@@ -109,6 +118,8 @@ namespace solar
 
       if (OpHitWvfValid[MaxIdx]) {
         MainOpWaveform = OpHitWvfIntVector[MaxIdx];
+        MainOpWaveformTime = OpHitWvfTime[MaxIdx];
+        MainOpWaveformValid = true;
       }
 
       float HotPE = 0;
@@ -170,7 +181,29 @@ namespace solar
           FastToTotal += PDSHit->PE();
       }
       FastToTotal /= PE;
-      FlashVec.push_back(FlashInfo{Plane, NHit, TimeMax, TimeWidth, TimeWeighted, PE, MaxPE, PEperOpDet, FastToTotal, X, Y, Z, XWidth, YWidth, ZWidth, STD, MainOpWaveform});
+      FlashVec.push_back(FlashInfo{
+        Plane, 
+        NHit, 
+        MaxPE, 
+        TimeMax, 
+        Amplitude, 
+        TimeWidth, 
+        TimeWeighted, 
+        PE, 
+        PEperOpDet, 
+        FastToTotal, 
+        X, 
+        Y, 
+        Z, 
+        XWidth, 
+        YWidth, 
+        ZWidth, 
+        STD, 
+        MainOpWaveform, 
+        MainOpWaveformTime, 
+        MainOpWaveformValid
+        }
+      );
     }
     return;
   }
@@ -633,7 +666,7 @@ namespace solar
   }
 
 
-  void AdjOpHitsUtils::GetOpHitSignal(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<int>> &OpHitWvfIntVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
+  void AdjOpHitsUtils::GetOpHitSignal(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<int>> &OpHitWvfIntVector, std::vector<float> &OpHitWvfTime, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
   {
     auto geoName = geom->DetectorName();
     if (geoName.find("dune10kt") != std::string::npos) {
@@ -649,9 +682,11 @@ namespace solar
             wvfInt.push_back(int(adc));
           }
           OpHitWvfIntVector.push_back(wvfInt);
+          OpHitWvfTime.push_back(wvf->TimeStamp());
         }
         else {
           OpHitWvfIntVector.push_back(std::vector<int>{});
+          OpHitWvfTime.push_back(-1e6);
         }
       } 
     }
@@ -667,9 +702,11 @@ namespace solar
             wvfInt.push_back(int(adc));
           }
           OpHitWvfIntVector.push_back(wvfInt);
+          OpHitWvfTime.push_back(wvf->TimeStamp());
         }
         else {
           OpHitWvfIntVector.push_back(std::vector<int>{});
+          OpHitWvfTime.push_back(-1e6);
         }
       }
     }

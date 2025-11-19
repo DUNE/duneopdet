@@ -46,11 +46,12 @@ namespace solar
         {
             int Plane;
             int NHit;
-            double Time;
+            double MainOpHitPE;
+            double MainOpHitTime;
+            double MainOpHitAmplitude;
             double TimeWidth;
             double TimeWeighted;
             double PE;
-            double MaxPE;
             std::vector<double> PEperOpDet;
             double FastToTotal;
             double X;
@@ -61,6 +62,8 @@ namespace solar
             double ZWidth;
             double STD;
             std::vector<int> MainOpWaveform;
+            float MainOpWaveformTime;
+            bool MainOpWaveformValid;
         };
         struct OpFlashes
         {
@@ -84,7 +87,7 @@ namespace solar
         bool CheckOpHitPlane(std::map<int, int> OpHitPlane, int refHit1, int refHit2);
         void GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<art::Ptr<raw::OpDetWaveform>> &OpDetWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt);
         void GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<art::Ptr<recob::OpWaveform>> &OpDetWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt);
-        void GetOpHitSignal(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<int>> &OpDetWvfIntVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt);
+        void GetOpHitSignal(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<int>> &OpDetWvfIntVector, std::vector<float> &OpHitWvfTime, std::vector<bool> &OpHitWvfValid, art::Event const &evt);
 
     private:
         art::ServiceHandle<geo::Geometry> geom;

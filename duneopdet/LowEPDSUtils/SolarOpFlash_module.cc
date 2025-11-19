@@ -212,7 +212,7 @@ namespace solar
         OpFlashT = OpFlash.TimeWeighted - fOpFlashTimeOffset; // Convert to time to us happens in MakeFlashVector
       }
       else {
-        OpFlashT = OpFlash.Time - fOpFlashTimeOffset; // Convert to time to us happens in MakeFlashVector
+        OpFlashT = OpFlash.MainOpHitTime - fOpFlashTimeOffset; // Convert to time to us happens in MakeFlashVector
       }
       double OpFlashdT = OpFlash.TimeWidth; // Convert to time to us happens in MakeFlashVector
       std::vector<double> OpFlashPEs = OpFlash.PEperOpDet;
