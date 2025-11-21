@@ -96,6 +96,7 @@ namespace solar
         const std::string fOpWaveformLabel;
         const std::string fOpHitLabel;
         const std::string fOpHitTimeVariable;
+        const bool fOpHitTime2us;
         const int fOpFlashAlgoNHit;
         const float fOpFlashAlgoMinTime;
         const float fOpFlashAlgoMaxTime;
