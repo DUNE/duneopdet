@@ -5,12 +5,13 @@ using namespace producer;
 namespace solar
 {
   AdjOpHitsUtils::AdjOpHitsUtils(fhicl::ParameterSet const &p)
-      : fOpWaveformLabel(p.get<std::string>("OpWaveformLabel", "opdetwaveform")), // Label for OpDetWaveform collection
-        fOpHitLabel(p.get<std::string>("OpHitLabel", "ophit")), // Label for OpHit collection
-        fOpHitTimeVariable(p.get<std::string>("OpHitTimeVariable", "PeakTime")), // Variable to use for time sorting ("StartTime" or "PeakTime")
+      : fOpWaveformLabel(p.get<std::string>("OpWaveformLabel", "opdetwaveform")), // Label for OpDetWaveform collection.
+        fOpHitLabel(p.get<std::string>("OpHitLabel", "ophit")), // Label for OpHit collection.
+        fOpHitTimeVariable(p.get<std::string>("OpHitTimeVariable", "PeakTime")), // Variable to use for time sorting ("StartTime" or "PeakTime").
+        fOpHitTime2us(p.get<bool>("OpHitTime2us", false)), // Conversion factor from OpHit time units to microseconds. Default factor is TickPeriod() from DetectorClocksService.
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit", 3)),       // Minimum number of OpHits in a cluster to consider it for flash creation.
-        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.08)), // Negative time window to look for adj. OpHits. Default for HD 8 ns [0.5 tick]
-        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.016)), // Positive time window to look for adj. OpHits. Default for HD 16 ns [1 tick]
+        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.32)), // Negative time window to look for adj. OpHits in [us].
+        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.96)), // Positive time window to look for adj. OpHits in [us].
         fOpFlashAlgoWeightedTime(p.get<bool>("OpFlashAlgoWeightedTime", false)), // Whether to use weighted time of trigger time for flash time reference.
         fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 300.0)),     // Radius to look for adj. OpHits in [cm] units.
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE", 1.5)),         // Minimum PE of OpHit to consider it for flash creation.
@@ -36,14 +37,9 @@ namespace solar
     
     for (std::vector<art::Ptr<recob::OpHit>> Cluster : OpHitClusters)
     {
-      if (!Cluster.empty())
+      if (Cluster.empty())
       {
-        if (fOpHitTimeVariable == "StartTime")
-          std::stable_sort(Cluster.begin(), Cluster.end(), [](art::Ptr<recob::OpHit> a, art::Ptr<recob::OpHit> b)
-                           { return a->StartTime() < b->StartTime(); });
-        else // Default to PeakTime
-          std::stable_sort(Cluster.begin(), Cluster.end(), [](art::Ptr<recob::OpHit> a, art::Ptr<recob::OpHit> b)
-                          { return a->PeakTime() < b->PeakTime(); });
+        continue;
       }
 
       int Plane = GetOpHitPlane(Cluster[0], 0.1);
@@ -54,9 +50,10 @@ namespace solar
       double TimeWidth = 0;
       double TimeWeighted = -1e6;
       double TimeSum = 0;
+      double Amplitude = 0;
       double PE = 0;
       double MaxPE = 0;
-      std::vector<double> PEperOpDet;
+      std::vector<double> PEperOpDet = {};
       double FastToTotal = 1;
       double X = 0;
       double Y = 0;
@@ -69,10 +66,13 @@ namespace solar
       double ZSum = 0;
       double STD = 0;
       std::vector<int> MainOpWaveform = {}; // Make vector for main OpWaveform with 1000 entries (max waveform size)
+      bool MainOpWaveformValid = false;
+      float MainOpWaveformTime = -1e6;
 
       std::vector<bool> OpHitWvfValid = {};
+      std::vector<float> OpHitWvfTime = {};
       std::vector<std::vector<int>> OpHitWvfIntVector = {};
-      GetOpHitSignal(Cluster, OpHitWvfIntVector, OpHitWvfValid, evt); // Get OpHit waveforms
+      GetOpHitSignal(Cluster, OpHitWvfIntVector, OpHitWvfTime, OpHitWvfValid, evt); // Get OpHit waveforms
 
       // Compute total number of PE and MaxPE.
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
@@ -80,6 +80,7 @@ namespace solar
         NHit++;
         double thisTime = -1e6;
         double thisPE = PDSHit->PE();
+        double thisAmp = PDSHit->Amplitude();
         auto thisPlane = GetOpHitPlane(PDSHit, 0.1);
         
         if (thisPlane != Plane) {
@@ -88,16 +89,20 @@ namespace solar
         }
 
         if (fOpHitTimeVariable == "StartTime") {
-          thisTime = PDSHit->StartTime() * TickPeriod; // Use StartTime
+          thisTime = PDSHit->StartTime(); // Use StartTime
         }
         else {
-          thisTime = PDSHit->PeakTime() * TickPeriod; // Default to PeakTime
+          thisTime = PDSHit->PeakTime(); // Default to PeakTime
+        }
+        if (fOpHitTime2us) {
+          thisTime *= TickPeriod; // Convert to microseconds
         }
         
         PE += thisPE;
         TimeSum += thisTime * thisPE;
         
         if (thisPE > MaxPE) {
+          Amplitude = thisAmp;
           MaxPE = thisPE;
           MaxIdx = Idx;
           TimeMax = thisTime;
@@ -109,6 +114,8 @@ namespace solar
 
       if (OpHitWvfValid[MaxIdx]) {
         MainOpWaveform = OpHitWvfIntVector[MaxIdx];
+        MainOpWaveformTime = OpHitWvfTime[MaxIdx];
+        MainOpWaveformValid = true;
       }
 
       float HotPE = 0;
@@ -125,6 +132,7 @@ namespace solar
           HotPE += PDSHit->PE();
         }
       }
+      
       X = XSum / HotPE;
       Y = YSum / HotPE;
       Z = ZSum / HotPE;
@@ -135,12 +143,18 @@ namespace solar
       std::vector<float> varXZ;
       for (art::Ptr<recob::OpHit> PDSHit : Cluster)
       {
+        float ThisOpHitTime = -1e6;
         auto OpHitXYZ = wireReadout.OpDetGeoFromOpChannel(PDSHit->OpChannel()).GetCenter();
-        if (fOpHitTimeVariable == "StartTime")
-          TimeWidth += (TimeMax - PDSHit->StartTime() * TickPeriod) * (TimeMax - PDSHit->StartTime() * TickPeriod);
-        else // Default to PeakTime
-          TimeWidth += (TimeMax - PDSHit->PeakTime() * TickPeriod) * (TimeMax - PDSHit->PeakTime() * TickPeriod);
         
+        if (fOpHitTimeVariable == "StartTime")
+          ThisOpHitTime = PDSHit->StartTime();
+        else // Default to PeakTime
+          ThisOpHitTime = PDSHit->PeakTime();
+        if (fOpHitTime2us) {
+          ThisOpHitTime *= TickPeriod;
+        }
+        
+        TimeWidth += (TimeMax - ThisOpHitTime) * (TimeMax - ThisOpHitTime);
         XWidth += (OpHitXYZ.X() - X) * (OpHitXYZ.X() - X);
         YWidth += (OpHitXYZ.Y() - Y) * (OpHitXYZ.Y() - Y);
         ZWidth += (OpHitXYZ.Z() - Z) * (OpHitXYZ.Z() - Z);
@@ -161,16 +175,41 @@ namespace solar
       {
         auto thisTime = -1e6;
         if (fOpHitTimeVariable == "StartTime")
-          thisTime = PDSHit->StartTime() * TickPeriod;
+          thisTime = PDSHit->StartTime();
         else // Default to PeakTime
-          thisTime = PDSHit->PeakTime() * TickPeriod;
+          thisTime = PDSHit->PeakTime();
+        if (fOpHitTime2us) {
+          thisTime *= TickPeriod;
+        }
         
         // Check if thisTime is within 10% of the time window in positive and negative direction
         if (std::abs(thisTime - TimeMax) <= 0.05 * TimeWidth)
           FastToTotal += PDSHit->PE();
       }
       FastToTotal /= PE;
-      FlashVec.push_back(FlashInfo{Plane, NHit, TimeMax, TimeWidth, TimeWeighted, PE, MaxPE, PEperOpDet, FastToTotal, X, Y, Z, XWidth, YWidth, ZWidth, STD, MainOpWaveform});
+      FlashVec.push_back(FlashInfo{
+        Plane, 
+        NHit, 
+        MaxPE, 
+        TimeMax, 
+        Amplitude, 
+        TimeWidth, 
+        TimeWeighted, 
+        PE, 
+        PEperOpDet, 
+        FastToTotal, 
+        X, 
+        Y, 
+        Z, 
+        XWidth, 
+        YWidth, 
+        ZWidth, 
+        STD, 
+        MainOpWaveform, 
+        MainOpWaveformTime, 
+        MainOpWaveformValid
+        }
+      );
     }
     return;
   }
@@ -256,14 +295,21 @@ namespace solar
       const auto &hit = OpHitVector[*it];
       if (hit->PE() < fOpFlashAlgoTriggerPE)
         continue;
-
+      float hitTime = -1e6;
+      if (fOpHitTimeVariable == "StartTime")
+        hitTime = hit->StartTime();
+      else // Default to PeakTime
+        hitTime = hit->PeakTime();
+      if (fOpHitTime2us) {
+        hitTime *= TickPeriod;
+      }
       bool main_hit = true;
 
       // If a trigger hit is found, start a new cluster with the hits around it that are within the time and radius range
       ClusteredHits[*it] = true;
       AdjHitIdx.push_back(*it);
       AdjHitVec.push_back(hit);
-      sOpHitClustering += "Trigger hit found: PE " + ProducerUtils::str(hit->PE()) + " CH " + ProducerUtils::str(hit->OpChannel()) + " Time " + ProducerUtils::str(hit->PeakTime() * TickPeriod) + "\n";
+      sOpHitClustering += "Trigger hit found: PE " + ProducerUtils::str(hit->PE()) + " CH " + ProducerUtils::str(hit->OpChannel()) + " Time " + ProducerUtils::str(hitTime) + "\n";
 
       int refHit1 = hit->OpChannel();
       auto ref1 = wireReadout.OpDetGeoFromOpChannel(refHit1).GetCenter();
@@ -289,9 +335,13 @@ namespace solar
           thisHitTime = hit->PeakTime();
           thisAdjHitTime = adjHit->PeakTime();
         }
+        if (fOpHitTime2us) {
+          thisHitTime *= TickPeriod;
+          thisAdjHitTime *= TickPeriod;
+        }
 
-        if (std::abs(thisAdjHitTime - thisHitTime) * TickPeriod > fOpFlashAlgoMaxTime) {
-          sOpHitClustering += "Breaking time loop at dT " + ProducerUtils::str(std::abs(thisAdjHitTime - thisHitTime) * TickPeriod) + " us\n";
+        if (std::abs(thisAdjHitTime - thisHitTime) > fOpFlashAlgoMaxTime) {
+          sOpHitClustering += "Breaking time loop at dT " + ProducerUtils::str(std::abs(thisAdjHitTime - thisHitTime)) + " us\n";
           break;
         }
         
@@ -305,7 +355,7 @@ namespace solar
 
         // If hit has already been clustered, skip
         if (ClusteredHits[*it2] == true && !fOpFlashAlgoHitDuplicates) {
-          sOpHitClustering += "Skipping already clustered hit: CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime() * TickPeriod) + "\n";
+          sOpHitClustering += "Skipping already clustered hit: CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(thisAdjHitTime) + "\n";
           continue;
         }
 
@@ -315,20 +365,27 @@ namespace solar
         {
           if (adjHit->PE() > hit->PE())
           {
-            sOpHitClustering += "¡¡¡Hit with PE > TriggerPE found: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime() * TickPeriod) + "\n";
+            sOpHitClustering += "¡¡¡Hit with PE > TriggerPE found: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(thisAdjHitTime) + "\n";
             ClusteredHits[*it] = false;
             main_hit = false;
 
             // Reset the ClusteredHits values for the hits that have been added to the cluster
             for (auto it3 = AdjHitIdx.begin(); it3 != AdjHitIdx.end(); ++it3)
             {
-              sOpHitClustering += "---Removing hit: CH " + ProducerUtils::str(OpHitVector[*it3]->OpChannel()) + " Time " + ProducerUtils::str(OpHitVector[*it3]->PeakTime() * TickPeriod) + "\n";
+              auto refTime = OpHitVector[*it3]->PeakTime();
+              auto refChannel = OpHitVector[*it3]->OpChannel();
+              if (fOpHitTimeVariable == "StartTime")
+                refTime = OpHitVector[*it3]->StartTime();
+              if (fOpHitTime2us) {
+                refTime *= TickPeriod;
+              }
+              sOpHitClustering += "---Removing hit: CH " + ProducerUtils::str(refChannel) + " Time " + ProducerUtils::str(refTime) + "\n";
               ClusteredHits[*it3] = false;
             }
             break;
           }
           else {
-            sOpHitClustering += "+++Adding hit: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime() * TickPeriod) + "\n";
+            sOpHitClustering += "+++Adding hit: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(thisAdjHitTime) + "\n";
             AdjHitVec.push_back(adjHit);
             AdjHitIdx.push_back(*it2);
             ClusteredHits[*it2] = true;
@@ -364,8 +421,12 @@ namespace solar
           thisHitTime = hit->PeakTime();
           thisAdjHitTime = adjHit->PeakTime();
         }
+        if (fOpHitTime2us) {
+          thisHitTime *= TickPeriod;
+          thisAdjHitTime *= TickPeriod;
+        }
 
-        if (std::abs(thisHitTime - thisAdjHitTime) * TickPeriod > fOpFlashAlgoMinTime)
+        if (std::abs(thisHitTime - thisAdjHitTime) > fOpFlashAlgoMinTime)
           break;
         
         if (adjHit->PE() < fOpFlashAlgoPE)
@@ -378,7 +439,7 @@ namespace solar
 
         // if hit has already been clustered, skip
         if (ClusteredHits[*it4] == true && !fOpFlashAlgoHitDuplicates) {
-          sOpHitClustering += "Skipping already clustered hit: CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime() * TickPeriod) + "\n";
+          sOpHitClustering += "Skipping already clustered hit: CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(thisAdjHitTime) + "\n";
           continue;
         }
 
@@ -388,20 +449,27 @@ namespace solar
         {
           if (adjHit->PE() > hit->PE())
           {
-            sOpHitClustering += "¡¡¡Hit with PE > TriggerPE found: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime() * TickPeriod) + "\n";
+            sOpHitClustering += "¡¡¡Hit with PE > TriggerPE found: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(thisAdjHitTime) + "\n";
             ClusteredHits[*it] = false;
             main_hit = false;
 
             // Reset the ClusteredHits values for the hits that have been added to the cluster
             for (auto it5 = AdjHitIdx.begin(); it5 != AdjHitIdx.end(); ++it5)
             {
-              sOpHitClustering += "---Removing hit: CH " + ProducerUtils::str(OpHitVector[*it5]->OpChannel()) + " Time " + ProducerUtils::str(OpHitVector[*it5]->PeakTime() * TickPeriod) + "\n";
+              auto refTime = OpHitVector[*it5]->PeakTime();
+              auto refChannel = OpHitVector[*it5]->OpChannel();
+              if (fOpHitTimeVariable == "StartTime")
+                refTime = OpHitVector[*it5]->StartTime();
+              if (fOpHitTime2us) {
+                refTime *= TickPeriod;
+              }
+              sOpHitClustering += "---Removing hit: CH " + ProducerUtils::str(refChannel) + " Time " + ProducerUtils::str(refTime) + "\n";
               ClusteredHits[*it5] = false;
             }
             break;
           }
           else {
-            sOpHitClustering += "Adding hit: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(adjHit->PeakTime() * TickPeriod) + "\n";
+            sOpHitClustering += "Adding hit: PE " + ProducerUtils::str(adjHit->PE()) + " CH " + ProducerUtils::str(adjHit->OpChannel()) + " Time " + ProducerUtils::str(thisAdjHitTime) + "\n";
             AdjHitVec.push_back(adjHit);
             AdjHitIdx.push_back(*it4);
             ClusteredHits[*it4] = true;
@@ -567,11 +635,21 @@ namespace solar
     for (const auto &hit : OpHitVector)
     {
       bool found = false;
+      float hitTime = -1e6;
       unsigned int opChannel = hit->OpChannel();
-      float hitTime = hit->PeakTime() * clockData.OpticalClock().TickPeriod();
+      auto TickPeriod = clockData.OpticalClock().TickPeriod();
+      
+      if (fOpHitTimeVariable == "StartTime")
+        hitTime = hit->StartTime();
+      else // Default to PeakTime
+        hitTime = hit->PeakTime(); 
+      if (fOpHitTime2us) {
+        hitTime *= TickPeriod;
+      }
+      
       for (size_t i = 0; i < opDetWvfHandle->size(); i++)
       { // Match by channel number and amplitude
-        if ((*opDetWvfHandle)[i].ChannelNumber() == opChannel && hitTime >= (*opDetWvfHandle)[i].TimeStamp() && hitTime <= (*opDetWvfHandle)[i].TimeStamp() + (*opDetWvfHandle)[i].Waveform().size() * clockData.OpticalClock().TickPeriod())
+        if ((*opDetWvfHandle)[i].ChannelNumber() == opChannel && hitTime >= (*opDetWvfHandle)[i].TimeStamp() && hitTime <= (*opDetWvfHandle)[i].TimeStamp() + (*opDetWvfHandle)[i].Waveform().size() * TickPeriod)
         {
           ProducerUtils::PrintInColor("Matching OpDetWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("green"), "Debug");
           art::Ptr<raw::OpDetWaveform> wvfPtr(opDetWvfHandle, i);
@@ -608,11 +686,21 @@ namespace solar
     for (const auto &hit : OpHitVector)
     {
       bool found = false;
+      float hitTime = -1e6;
       unsigned int opChannel = hit->OpChannel();
-      float hitTime = hit->PeakTime() * clockData.OpticalClock().TickPeriod();
+      auto TickPeriod = clockData.OpticalClock().TickPeriod();
+
+      if (fOpHitTimeVariable == "StartTime")
+        hitTime = hit->StartTime();
+      else // Default to PeakTime
+        hitTime = hit->PeakTime();
+      if (fOpHitTime2us) {
+        hitTime *= TickPeriod;
+      }
+
       for (size_t i = 0; i < opWvfHandle->size(); i++)
       { // Match by channel number and amplitude
-        if ((*opWvfHandle)[i].Channel() == opChannel && hitTime >= (*opWvfHandle)[i].TimeStamp() && hitTime <= (*opWvfHandle)[i].TimeStamp() + (*opWvfHandle)[i].Signal().size() * clockData.OpticalClock().TickPeriod())
+        if ((*opWvfHandle)[i].Channel() == opChannel && hitTime >= (*opWvfHandle)[i].TimeStamp() && hitTime <= (*opWvfHandle)[i].TimeStamp() + (*opWvfHandle)[i].Signal().size() * TickPeriod)
         {
           ProducerUtils::PrintInColor("Matching OpWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("green"), "Debug");
           art::Ptr<recob::OpWaveform> wvfPtr(opWvfHandle, i);
@@ -633,7 +721,7 @@ namespace solar
   }
 
 
-  void AdjOpHitsUtils::GetOpHitSignal(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<int>> &OpHitWvfIntVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
+  void AdjOpHitsUtils::GetOpHitSignal(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<std::vector<int>> &OpHitWvfIntVector, std::vector<float> &OpHitWvfTime, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
   {
     auto geoName = geom->DetectorName();
     if (geoName.find("dune10kt") != std::string::npos) {
@@ -649,9 +737,11 @@ namespace solar
             wvfInt.push_back(int(adc));
           }
           OpHitWvfIntVector.push_back(wvfInt);
+          OpHitWvfTime.push_back(wvf->TimeStamp());
         }
         else {
           OpHitWvfIntVector.push_back(std::vector<int>{});
+          OpHitWvfTime.push_back(-1e6);
         }
       } 
     }
@@ -667,12 +757,13 @@ namespace solar
             wvfInt.push_back(int(adc));
           }
           OpHitWvfIntVector.push_back(wvfInt);
+          OpHitWvfTime.push_back(wvf->TimeStamp());
         }
         else {
           OpHitWvfIntVector.push_back(std::vector<int>{});
+          OpHitWvfTime.push_back(-1e6);
         }
       }
     }
   }
-
 } // namespace solar

@@ -3,11 +3,12 @@ BEGIN_PROLOG
 
 solar_opflash_dune10kt_1x2x6:
 {
-    OpWaveformLabel:            "opdec"     # The label for the process which ran the OpDigi
-    OpHitLabel:                 "ophitspe"     # The label for the process which ran the OpHit
+    OpWaveformLabel:            "opdec"         # The label for the process which ran the OpDigi
+    OpHitLabel:                 "ophitspe"      # The label for the process which ran the OpHit
     module_type:                "SolarOpFlash"
-    OpHitTimeVariable:          "PeakTime"     # Time variable to use for OpHit selection: "PeakTime" or "StartTime".
-    OpFlashTimeOffset:           18.1        # Time offset to be applied to the OpFlash time in [us] units.
+    OpHitTimeVariable:          "PeakTime"      # Time variable to use for OpHit selection: "PeakTime" or "StartTime".
+    OpHitTime2us:               false           # If true, the OpHit time is in [ticks] and will be converted to [us].
+    OpFlashTimeOffset:           18.1           # Time offset to be applied to the OpFlash time in [us] units.
 
     XACathodeX:                 0            # X position of the VD cathode XAs in [cm].
     XAMembraneY:                0            # Y position of the VD membrane XAs in [cm].
@@ -15,8 +16,8 @@ solar_opflash_dune10kt_1x2x6:
     XAStartCapZ:                0            # Z position of the VD start cap XAs in [cm].
 
     OpFlashAlgoNHit:            3            # Min number of hits to consider a flash. Change to > 3 for bkg productions.
-    OpFlashAlgoMinTime:         0.005        # Negative time window to look for adj. OpHits in [us] units.
-    OpFlashAlgoMaxTime:         0.016        # Positive time window to look for adj. OpHits in [us] units.
+    OpFlashAlgoMinTime:         0.32         # Negative time window to look for adj. OpHits in [us] units.
+    OpFlashAlgoMaxTime:         0.96         # Positive time window to look for adj. OpHits in [us] units.
     OpFlashAlgoRad:             300          # Distance to look for adj. OpHits in [cm] units.
     OpFlashAlgoPE:              1.5          # PE threshold to look for adj. OpHits.
     OpFlashAlgoTriggerPE:       1.5          # PE threshold to trigger an OpFlash.
