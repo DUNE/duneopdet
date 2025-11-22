@@ -469,16 +469,16 @@ namespace opdet {
             // functions below take a begin()/end() pair.
             const std::vector<double> sub(pdWaveforms[hardwareChannel].begin()+p.first,
                                           pdWaveforms[hardwareChannel].begin()+p.second+1);
-          
-            std::vector< short > waveformOfShorts = VectorOfDoublesToVectorOfShorts(sub);
+            
+            unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);  
+            std::vector< short > _waveformOfShorts = VectorOfDoublesToVectorOfShorts(sub);
+            raw::OpDetWaveform waveformOfShorts(-99999., opChannel, std::vector<short unsigned int> (_waveformOfShorts.begin(),  _waveformOfShorts.end()));
           
             std::map< size_t, std::vector < short > > mapTickWaveform =
               (!fFullWaveformOutput) ?
               SplitWaveform(waveformOfShorts, fls[hardwareChannel]) :
               std::map< size_t, std::vector< short > >{ std::make_pair(0,
                                                                        waveformOfShorts) };
-
-            unsigned int opChannel = wireReadout.OpChannel(opDet, hardwareChannel);
 
             for (auto const& pairTickWaveform : mapTickWaveform)
             {
@@ -749,14 +749,16 @@ namespace opdet {
 
   //---------------------------------------------------------------------------
   std::map< size_t, std::vector< short > > OpDetDigitizerDUNE::
-    SplitWaveform(std::vector< short > const& waveform,
+    SplitWaveform(std::vector< short > const& waveform_short,
         const FocusList& fls)
     {
 
       std::map< size_t, std::vector< short > > mapTickWaveform;
 
-      ::pmtana::PedestalMean_t  ped_mean (waveform.size(),0);
-      ::pmtana::PedestalSigma_t ped_sigma(waveform.size(),0);
+      ::pmtana::PedestalMean_t  ped_mean (waveform_short.size(),0);
+      ::pmtana::PedestalSigma_t ped_sigma(waveform_short.size(),0);
+
+      raw::OpDetWaveform waveform(-99999., 0,std::vector<short unsigned int> (waveform_short.begin(),  waveform_short.end())  );
 
       fThreshAlg->Reconstruct(waveform,ped_mean,ped_sigma);
 
