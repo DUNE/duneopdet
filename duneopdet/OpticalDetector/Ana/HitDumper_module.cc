@@ -63,8 +63,9 @@
 #include <string>
 #include <cmath>
 
-const int MAX_INT = std::numeric_limits<int>::max();
-const long int TIME_CORRECTION = (long int) std::numeric_limits<int>::max() * 2;
+// commented out Nov 24 to appease clang
+//const int MAX_INT = std::numeric_limits<int>::max();
+//const long int TIME_CORRECTION = (long int) std::numeric_limits<int>::max() * 2;
 const int DEFAULT_VALUE = -9999;
 
 enum CRTOrientation {
@@ -219,8 +220,9 @@ private:
   int _max_hits;                    ///< maximum number of hits (to be set via fcl)
   int _max_ophits;                  ///< maximum number of hits (to be set via fcl)
   int _max_samples;                 ///< maximum number of samples (to be set via fcl)
-  int _max_chits;                   ///< maximum number of CRT hits (to be set via fcl)
-  int _max_nctrks;                  ///< maximum number of CRT tracks (to be set via fcl)
+  // commented out Nov 24 to appease clang
+  //  int _max_chits;                   ///< maximum number of CRT hits (to be set via fcl)
+  //  int _max_nctrks;                  ///< maximum number of CRT tracks (to be set via fcl)
 
   std::string fHitsModuleLabel;     ///< Label for Hit dataproduct (to be set via fcl)
   std::string fLArG4ModuleLabel;    ///< Label for LArG4 dataproduct (to be set via fcl)
