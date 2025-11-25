@@ -4,6 +4,8 @@
 #include "services_protodunevd.fcl"
 #include "PDVDTriggerReader4.fcl"
 
+#include "RawWaveformAna.fcl"
+
 process_name: RawWaveformAna
 
 services:
@@ -65,11 +67,7 @@ physics: {
 
 
    analyzers: {
-      rawwfmana: {
-         module_type: "RawWaveformAna"
-         InputModule: "pdvddaphne:daq"
-         TriggerModule: "triggerrawdecoder:daq"
-      }
+      rawwfmana: @local::protodunevd_rawwaveform_ana
    }
 
    produce: [ rns,triggerrawdecoder,pdvddaphne ]
