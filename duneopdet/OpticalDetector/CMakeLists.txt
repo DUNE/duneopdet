@@ -98,3 +98,4 @@ install_source()
 
 add_subdirectory(Deconvolution)
 add_subdirectory(OpHitFinder)
+add_subdirectory(Ana)
