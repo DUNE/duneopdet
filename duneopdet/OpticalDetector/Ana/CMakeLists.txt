@@ -37,7 +37,6 @@ art_make(
         FFTW3::FFTW3
         dunecore::opdet_PDVDPDMapAlg
 	nlohmann_json::nlohmann_json
-        EXCLUDE DumpWaveformInfo_PDVD.C
 
         LIB_LIBRARIES
         lardataobj::RecoBase
