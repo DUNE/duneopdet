@@ -10,6 +10,8 @@
 // Modified:
 //     Oct 7, 2024, Viktor Pec
 //       Added possibility to use SPE and noise templates by channel.
+//     Dec 2, 2025, Viktor Pec
+//       Adding option to set gains channel by channel. Gains are read from an input file, configurable by fhicl.
 //=============================================================================
 
 #ifndef Deconvolution_h
@@ -121,6 +123,7 @@ namespace opdet {
 
 	  fhicl::Sequence<int> IgnoreChannels{ fhicl::Name("IgnoreChannels") }; // integer to allow for channel -1 = unrecognized channel
 
+          fhicl::Atom<std::string>          ChannelGainFile{ fhicl::Name("ChannelGainFile") }; // file containing pairs of channel and its corresponding gain in #ADC per SPE
 
           struct Filter {
             fhicl::Atom<std::string> Name{fhicl::Name("Name"), "Gauss"};
@@ -314,6 +317,9 @@ namespace opdet {
       std::vector<double> fNoiseDefault;
 
 
+      // Map of channel - gain pairs
+      std::map<unsigned int, double> fChannelToGainMap;
+
       //--------Filter Variables
       std::string fOutputProduct;
       WfmExtraFilter_t fPostfilterConfig;
@@ -327,6 +333,7 @@ namespace opdet {
       int  CountFileColumns(const char* file_path);
       void SourceSPETemplateFiles();
       void SourceNoiseTemplateFiles();
+      void ReadGains(const char* fname);
       void BuildExtraFilter(CmplxWaveform_t& xF0, const WfmExtraFilter_t config);
       void ComputeExpectedInput(std::vector<double>& s, double nmax);
       void CopyToOutput(const std::vector<float>& v, std::vector<float>& target);
@@ -489,6 +496,11 @@ namespace opdet {
     if (!fChannelToNoiseTemplateMap.size())
       mfi<<"Only using default white noise.\n";
     mfi<<"\n";
+
+
+    // prepare channel-to-gain map
+    if (!pars().ChannelGainFile().empty())
+        ReadGains(pars().ChannelGainFile().c_str());
 
 
     // info on ignored channels
@@ -699,6 +711,15 @@ namespace opdet {
         }
       }
       //
+
+      // Apply gains if available
+      if (!fChannelToGainMap.empty()) {
+          // if gains are available then the new scale is normalised to the template's amplitude and then scaled to the requested gain.
+          //
+          // there should be gain specified for each channel
+          // only a single template may be used for all channels - hence the effChannel
+          scale *= fChannelToGainMap[channel] / fSinglePEAmplitudes[fChannelToTemplateMap[effChannel]];
+      }
 
       // Apply pedestal after post-filter
       for (int i=0; i<fSamples; i++){
@@ -1013,6 +1034,28 @@ namespace opdet {
     file_.close();
     return N_COLUMNS;
   }
+
+
+    void Deconvolution::ReadGains(const char* fname) {
+        std::ifstream file_;
+        file_.open(fname);
+
+        if (!file_.is_open()) {
+            mf::LogError("Deconvolution::ReadGains()")
+                <<"Unable to open file "<<fname;
+            throw art::Exception(art::errors::FileOpenError);
+        }
+
+        std::string temp_str;
+        unsigned int channel;
+        double gain;
+	while (std::getline(file_, temp_str)) {
+	  std::stringstream ss; ss << temp_str;
+	  ss >> channel >> gain;
+	  fChannelToGainMap[channel] = gain;
+	}
+    }
+
 
   /**
    * @brief Compute normalization factor for a given filter
