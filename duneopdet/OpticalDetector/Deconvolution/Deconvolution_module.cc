@@ -1037,8 +1037,14 @@ namespace opdet {
 
 
     void Deconvolution::ReadGains(const char* fname) {
+        std::string full_path;
+        cet::search_path sp("FW_SEARCH_PATH");
+        sp.find_file(fname, full_path);
+        MF_LOG_DEBUG("Deconvolution::ReadGains()")<<"Found SPE template file "<<full_path;
+
+
         std::ifstream file_;
-        file_.open(fname);
+        file_.open(full_path);
 
         if (!file_.is_open()) {
             mf::LogError("Deconvolution::ReadGains()")
