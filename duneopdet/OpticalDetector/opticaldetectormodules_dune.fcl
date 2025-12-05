@@ -240,7 +240,7 @@ protodunevd_ophit: {
          SPEArea: 410
          SPEShift: 4.3e-1
          SPESize: 4.51e-1
-         UseCalibrator: true
+         UseCalibrator: false
          module_type: "OpHitFinder"
          reco_man: {
             module_type: "PulseRecoManager"
