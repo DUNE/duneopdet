@@ -31,15 +31,19 @@ namespace calib {
 
 
     fBadChannels = pset.get<std::vector<int> >("BadChannels");
+    auto chanNums = pset.get<std::vector<int> >("ChannelNumbers"); // to create a map
+    unsigned int idx = 0;
+    for (auto &ch: chanNums) {
+        fChannelMap[ch] = idx;
+    }
 
-    
-    fSPESizes={ 
-       
+    fSPESizes={
+
       //SSP101
       1411., 1416., 1405., 1436.,  //Channels 0-3, SensL-A, DS
       1437., 1442., 1432., 1436.,  //Channels 4-6, SensL-A, DC
       1409., 1421., 1423., 1445.,  //Channels 8-11, SensL-A, DS
-      
+
       //SSP102
       1427., 1400., 1419., 1421., //Channels 12-15, SensL-A, DC
       1410., 1402., 1451., 1637., //Channels 16-19, SensL-A, DS
@@ -49,7 +53,7 @@ namespace calib {
       1421., 1., 1407., 1387., //Channels 24-27, SensL-A, DS
       1439., 1434., 1423., 1463., //Channels 28-31, SensL-A, DC
       1434., 1604., 1407., 1416., //Channels 32-35, SensL-A, DS
-      
+
       //SSP104
       1., 1400., 1392., 1423., //Channels 36-39, SensL-A, DC
       1., 1., 1., 1., //Channels 40-43 --EMPTY
@@ -59,17 +63,17 @@ namespace calib {
       1410., 1824., 1386., 1841., //Channels 48-51, SensL-A, DS
       1411., 1439., 1408., 1435., //Channels 52-55, SensL-A, DC
       1389., 1392., 1., 1368., //Channels 56-59, SensL-A, DS
-      
+
       //SSP202
       1427., 1409., 1., 1459., //Channels 60-63, SensL-A, DC
       1430., 1., 1401., 1456., //Channels 64-67, SensL-A, DS
       1419., 1431., 1405., 1437., //Channels 68-71, SensL-A, DC
-      
+
       //SSP203
       1433., 1., 1421., 1., //Channels 72-75, SensL-A, DS
       1435., 1643., 1425., 1428., //Channels 76-79, SensL-A, DC
       1378., 1372., 1., 1364., //Channels 80-83, SensL-A, DS
-      
+
       //SSP204
       1417., 1430., 1434., 1432., //Channels 84-87, SensL-A, DC
       1., 1., 1., 1., //Channels 88-91 --EMPTY
@@ -89,28 +93,28 @@ namespace calib {
       1643., 1416., 1438., 1414., //Channels 120-123, SensL-A, DC
       1577., 1848., 1634., 1603., //Channels 124-127, SensL-A, DS
       1413., 1406., 1418., 1405., //Channels 128-131, SensL-C, DC
-     
+
       //SSP304
       //ARAPUCA
       782., 750., 780., 783., //Channels 132-135, MPPC, ARAPUCA
       812., 665., 737., 631., //Channels 136-139, MPPC, ARAPUCA
       673., 628., 721., 744., //Channels 140-143, MPPC, ARAPUCA
-      
+
       //SSP401
       1398., 1395., 1416., 1397., //Channels 144-147, SensL-C, DC
       1404., 1432., 1428., 1418., //Channels 148-151, SensL-C, DS
       1403., 1434., 1417., 1418., //Channels 152-155, SensL-A, DC
-      
+
       //SSP402
       1., 1419., 1443., 1410., //Channels 156-159, SensL-C, DS
       1., 1430., 1433., 1419., //Channels 160-163, SensL-C, DC
       1419., 1431., 1405., 1437., //Channels 164-167, SensL-C, DS
-      
+
       //SSP403
       1417., 1445., 1437., 1418., //Channels 168-171, SensL-C, DC
       1662., 1450., 1424., 1629., //Channels 172-175, SensL-C, DS
       1815., 1424., 1402., 1428., //Channels 176-179, SensL-C, DS
-      
+
       //SSP404
       1626., 1442., 1413., 1417., //Channels 180-183, SensL-C, DC
       1., 1., 1., 1., //Channels 184-187 --EMPTY
@@ -120,54 +124,54 @@ namespace calib {
       1433., 1426., 1418., 1418., //Channels 192-195, SensL-C, DC
       1436., 1427., 1419., 1430., //Channels 196-199, SensL-C, DC
       1440., 1634., 1436., 1431., //Channels 200-203, SensL-C, DS
-      
+
       //SSP502
       1439., 1469., 1455., 1429., //Channels 204-207, SensL-C DS
       1., 1., 1., 1., //Channels 208-211, EMPTY
       1., 1., 1., 1., //Channels 212-215, EMPTY
-      
-      
+
+
       //SSP503
       908., 950., 891., 876., //Channels 216-219, MPPC, DC
       890., 871., 876., 908., //Channels 220-223, MPPC, DS
       1107., 1098., 1131., 946., //Channels 224-227, MPPC, DC
-      
+
       //SSP504
       986., 1267., 1017., 1046., //Channels 228-231, MPPC, DS
       1012., 1014., 997., 1020., //Channels 232-235, MPPC, DS
       1029., 996., 992., 1019., //Channels 236-239, MPPC, DC
-      
-      
+
+
       //SSP601
       945., 977., 990., 924., //Channels 240-243, MPPC, DC
       963., 983., 980., 974., //Channels 244-247, MPPC, DS
       1013., 1038., 1023., 1083., //Channels 248-251, MPPC, DC
-      
+
       //SSP602
       1017., 1023., 987., 973., //Channels 252-255, MPPC, DS
       960., 993., 1021., 992., //Channels 256-259, MPPC, DC
       1038., 1010., 1015., 1068., //Channels 260-263, MPPC, DC
-      
+
       //SSP603
       //ARAPUCA
       758., 780., 772., 628., //Channels 264-267, MPPC, ARAPUCA
       804., 637., 668., 738., //Channels 268-271, MPPC, ARAPUCA
       638., 755., 709., 831., //Channels 272-275, MPPC, ARAPUCA
-      
-      
+
+
       //SSP604
       1003., 987., 1009., 1022., //Channels 276-279, MPPC, DS
       1008., 1032., 981., 1045., //Channels 280-283, MPPC, DC
       987., 992., 1009., 989. //Channels 284-287, MPPC, DS
     };
-    
+
     fSPEShifts = {
-       
+
       //SSP101
       0.01, 0.00, 0.01, 0.00,  //Channels 0-3, SensL-A, DS
       0.00, -0.02, -0.01, -0.01,  //Channels 4-6, SensL-A, DC
       -0.02, 0.00, 0.01, 0.00,  //Channels 8-11, SensL-A, DS
-      
+
       //SSP102
       -0.02, -0.02, -0.02, -0.02, //Channels 12-15, SensL-A, DC
       -0.02, 0.00, -0.03, -0.01, //Channels 16-19, SensL-A, DS
@@ -177,7 +181,7 @@ namespace calib {
       -0.02, 0., -0.03, -0.01, //Channels 24-27, SensL-A, DS
       0.00, -0.03, -0.02, -0.01, //Channels 28-31, SensL-A, DC
       -0.01, 0.01, -0.02, -0.04, //Channels 32-35, SensL-A, DS
-      
+
       //SSP104
       0., -0.04, -0.01, -0.03, //Channels 36-39, SensL-A, DC
       0., 0., 0., 0., //Channels 40-43 --EMPTY
@@ -187,17 +191,17 @@ namespace calib {
       -0.01, 0.00, 0.01, 0.01, //Channels 48-51, SensL-A, DS
       0.00, -0.02, 0.01, -0.01, //Channels 52-55, SensL-A, DC
       -0.03, 0.00, 0., 0.00, //Channels 56-59, SensL-A, DS
-      
+
       //SSP202
       -0.02, -0.01, 0., -0.03, //Channels 60-63, SensL-A, DC
       -0.02, 0., 0.00, -0.03, //Channels 64-67, SensL-A, DS
       0.02, -0.02, -0.03, -0.01, //Channels 68-71, SensL-A, DC
-      
+
       //SSP203
       -0.03, 0., -0.03, 0., //Channels 72-75, SensL-A, DS
       -0.01, -0.01, -0.01, -0.01, //Channels 76-79, SensL-A, DC
       0.03, 0.01, 0., 0.01, //Channels 80-83, SensL-A, DS
-      
+
       //SSP204
       -0.01, -0.02, -0.03, -0.03, //Channels 84-87, SensL-A, DC
       0., 0., 0., 0., //Channels 88-91 --EMPTY
@@ -213,7 +217,7 @@ namespace calib {
       -0.02, -0.04, -0.02, -0.01, //Channels 112-115, SensL-A, DS
       -0.05, -0.07, -0.03, 0., //Channels 116-119, SensL-A, DC
 
-      
+
       //SSP303
       -0.01, -0.03, -0.01, 0.00, //Channels 120-123, SensL-A, DC
       0.02, 0.01, 0.00, 0.01, //Channels 124-127, SensL-A, DS
@@ -224,22 +228,22 @@ namespace calib {
       -0.05, -0.05, -0.05, -0.03, //Channels 132-135, MPPC, ARAPUCA
       -0.07, -0.06, -0.09, -0.02, //Channels 136-139, MPPC, ARAPUCA
       -0.08, 0.00, 0., 0., //Channels 140-143, MPPC, ARAPUCA
-      
+
       //SSP401
       0.01, 0.00, 0.01, 0.00, //Channels 144-147, SensL-C, DC
       -0.02, -0.02, -0.01, -0.04, //Channels 148-151, SensL-C, DS
       -0.01, -0.01, -0.01, -0.03, //Channels 152-155, SensL-A, DC
-      
+
       //SSP402
       0., 0.00, -0.02, -0.00, //Channels 156-159, SensL-C, DS
       0., -0.04, -0.02, -0.02, //Channels 160-163, SensL-C, DC
       0.02, -0.02, -0.03, -0.01, //Channels 164-167, SensL-C, DS
-      
+
       //SSP403
       -0.02, -0.02, -0.03, -0.01, //Channels 168-171, SensL-C, DC
       -0.01, -0.03, -0.02, 0.02, //Channels 172-175, SensL-C, DS
       0.00, -0.01, -0.02, -0.01, //Channels 176-179, SensL-C, DS
-      
+
       //SSP404
       0.00, -0.01, -0.03, 0.00, //Channels 180-183, SensL-C, DC
       0., 0., 0., 0., //Channels 184-187 --EMPTY
@@ -249,7 +253,7 @@ namespace calib {
       -0.02, 0.00, -0.01, -0.03, //Channels 192-195, SensL-C, DC
       0.01, 0.01, -0.03, -0.01, //Channels 196-199, SensL-C, DC
       -0.01, 0.00, -0.01, -0.03, //Channels 200-203, SensL-C, DS
-     
+
       //SSP502
       -0.02, -0.01, -0.01, -0.01, //Channels 204-207, SensL-C DS
       0., 0., 0., 0., //Channel 208-211, EMPTY
@@ -259,35 +263,46 @@ namespace calib {
       0.15, 0.12, 0.19, 0.19, //Channels 216-219, MPPC, DC
       0.17, 0.22, 0.20, 0.14, //Channels 220-223, MPPC, DS
       0.02, 0., 0., 0.23, //Channels 224-227, MPPC, DC
-      
+
       //SSP504
       0.11, 0., 0.06, 0.04, //Channels 228-231, MPPC, DS
       0., 0., 0., 0., //Channels 232-235, MPPC, DS
       0., 0., 0., 0., //Channels 236-239, MPPC, DC
-      
-      
+
+
       //SSP601
       0.12, 0.11, 0.14, 0.19, //Channels 240-243, MPPC, DC
       0.08, 0.08, 0.13, 0.11, //Channels 244-247, MPPC, DS
       0., 0., 0., 0., //Channels 248-251, MPPC, DC
-      
+
       //SSP602
       0., 0., 0., 0., //Channels 252-255, MPPC, DS
       0., 0., 0., 0., //Channels 256-259, MPPC, DC
       0., 0., 0., 0., //Channels 260-263, MPPC, DC
-      
+
       //SSP603
       //ARAPUCA
       -0.04, -0.03, -0.05, -0.01, //Channels 264-267, MPPC, ARAPUCA
       -0.06, -0.06, -0.04, -0.01, //Channels 268-271, MPPC, ARAPUCA
       -0.08, -0.05, 0., -0.08, //Channels 272-275, MPPC, ARAPUCA
-      
-      
+
+
       //SSP604
       0., 0., 0., 0., //Channels 276-279, MPPC, DS
       0., 0., 0., 0., //Channels 280-283, MPPC, DC
       0., 0., 0., 0. //Channels 284-287, MPPC, DS
     };
+
+
+    auto speSizes = pset.get<std::vector<float> >("SPESizes");
+    auto speShifts = pset.get<std::vector<float> >("SPEShifts");
+    if (speSizes.size() ) { // update defaults
+        fSPESizes = speSizes;
+        if (speShifts.size() )
+            fSPEShifts = speShifts;
+        else
+            fSPEShifts = std::vector<float>(speSizes.size(),0.);
+    }
 
 
   }
@@ -297,8 +312,13 @@ namespace calib {
       mf::LogDebug("PhotonCalibratorProtoDUNESP") << "Skipping bad channel " << opchannel;
       return 0;
     }
-      
-    return adcs/fSPESizes[opchannel] + fSPEShifts[opchannel];
+
+    unsigned int idx = opchannel;
+    if (fChannelMap.size()) {
+        idx = fChannelMap.at(opchannel);
+    }
+
+    return adcs/fSPESizes[idx] + fSPEShifts[idx];
   }
 
 }
