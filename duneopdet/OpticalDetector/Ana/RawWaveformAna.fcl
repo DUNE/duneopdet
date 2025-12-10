@@ -1,0 +1,19 @@
+BEGIN_PROLOG
+
+rawwaveform_ana: {
+   module_type: "RawWaveformAna"
+   TriggerModule: "triggerrawdecoder:daq"
+}
+
+
+protodunevd_rawwaveform_ana: {
+   @table::rawwaveform_ana
+   InputModule: "pdvddaphne:daq"
+}
+protodunehd_rawwaveform_ana: {
+   @table::rawwaveform_ana
+   InputModule: "pdhddaphne:daq"
+}
+
+
+END_PROLOG
