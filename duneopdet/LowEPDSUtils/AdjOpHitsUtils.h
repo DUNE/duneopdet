@@ -49,6 +49,7 @@ namespace solar
             double PE;
             double MaxPE;
             std::vector<double> PEperOpDet;
+            std::vector<int> OpDetIdx;
             double FastToTotal;
             double X;
             double Y;

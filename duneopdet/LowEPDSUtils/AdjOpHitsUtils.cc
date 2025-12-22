@@ -48,6 +48,7 @@ namespace solar
       double PE = 0;
       double MaxPE = 0;
       std::vector<double> PEperOpDet;
+      std::vector<int> OpDetIdx;
       double FastToTotal = 1;
       double X = 0;
       double Y = 0;
@@ -75,6 +76,7 @@ namespace solar
           MaxPE = PDSHit->PE();
 
         PEperOpDet.push_back(PDSHit->PE());
+        OpDetIdx.push_back(PDSHit->OpChannel());
         if (fOpHitTimeVariable == "StartTime")
           TimeSum += PDSHit->StartTime() * TickPeriod * PDSHit->PE();
         else // Default to PeakTime
@@ -138,7 +140,7 @@ namespace solar
           FastToTotal += PDSHit->PE();
       }
       FastToTotal /= PE;
-      FlashVec.push_back(FlashInfo{Plane, NHit, Time, TimeWidth, PE, MaxPE, PEperOpDet, FastToTotal, X, Y, Z, XWidth, YWidth, ZWidth, STD});
+      FlashVec.push_back(FlashInfo{Plane, NHit, Time, TimeWidth, PE, MaxPE, PEperOpDet, OpDetIdx, FastToTotal, X, Y, Z, XWidth, YWidth, ZWidth, STD});
     }
     return;
   }

@@ -208,6 +208,7 @@ namespace solar
       double OpFlashT = OpFlash.Time - fOpFlashTimeOffset; // Convert to time to us happens in MakeFlashVector
       double OpFlashdT = OpFlash.TimeWidth; // Convert to time to us happens in MakeFlashVector
       std::vector<double> OpFlashPEs = OpFlash.PEperOpDet;
+      std::vector<int> OpFlashOpDetIdx = OpFlash.OpDetIdx;
 
       // From OpFlashAlg
       // Use Frame to save the OpFlash Plane -> more usefull for analysis
@@ -235,7 +236,7 @@ namespace solar
         OnBeamTime = 1;
 
       oflashes.emplace_back(OpFlashT, OpFlashdT, OpFlashT, Plane,
-                            OpFlashPEs, OnPlane, OnBeamTime, OpFlashFast2Tot,
+                            OpFlashPEs, OpFlashOpDetIdx, OnPlane, OnBeamTime, OpFlashFast2Tot,
                             OpFlashX, OpFlashdX, OpFlashY, OpFlashdY, OpFlashZ, OpFlashdZ);
     }
   }
