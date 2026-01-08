@@ -32,7 +32,7 @@ standard_vddaphne.BackTime:             0.200
 standard_vddaphne.Pedestal:             500      # ADC
 standard_vddaphne.DynamicBitRange:      14      # 14-bit dynamic range
 
-standard_vddaphne_xe10ppm: @local::standard_daphne
+standard_vddaphne_xe10ppm: @local::standard_vddaphne
 standard_vddaphne_xe10ppm.InputTags: [sipmAr10ppm, sipmXe10ppm, sipmAr10ppmExt, sipmXe10ppmExt]
 
 
