@@ -73,9 +73,9 @@ namespace opdet {
         uint64_t TimeStamp;
         int OpChannel;
         unsigned int nSamples;
-        double SampleSize;
+        //double SampleSize;
         std::vector<short> adc_value;
-        unsigned int nOpDet;
+        //unsigned int nOpDet;
         unsigned int TriggerType;
 
     };
