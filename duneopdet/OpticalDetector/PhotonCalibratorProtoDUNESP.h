@@ -39,8 +39,8 @@ namespace calib {
     std::vector<float>  fSPESizes;
     std::vector<float>  fSPEShifts;
     std::vector<int>    fBadChannels;
+    std::map<int, unsigned int> fChannelMap; // maps offline channel number to the index in the SPESizes/Shifts vectors
 
-    
   }; // class PhotonCalibratorProtoDUNESP
 }
 
