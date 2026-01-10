@@ -620,16 +620,6 @@ namespace solar
     art::Handle<std::vector<raw::OpDetWaveform>> opDetWvfHandle;
     evt.getByLabel(fOpWaveformLabel, opDetWvfHandle);
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
-    if (!opDetWvfHandle.isValid())
-    {
-      ProducerUtils::PrintInColor("Invalid OpDetWaveform handle", ProducerUtils::GetColor("red"), "Error");
-      for (size_t i = 0; i < OpHitVector.size(); i++)
-      {
-        OpHitWvfVector.push_back(art::Ptr<raw::OpDetWaveform>());  // Fill with a null pointer to keep the indices consistent
-        OpHitWvfValid.push_back(false);
-      }
-      return;
-    }
 
     // Loop over the OpHit vector and get the corresponding OpDetWaveform
     for (const auto &hit : OpHitVector)
@@ -647,18 +637,21 @@ namespace solar
         hitTime *= TickPeriod;
       }
       
-      for (size_t i = 0; i < opDetWvfHandle->size(); i++)
-      { // Match by channel number and amplitude
-        if ((*opDetWvfHandle)[i].ChannelNumber() == opChannel && hitTime >= (*opDetWvfHandle)[i].TimeStamp() && hitTime <= (*opDetWvfHandle)[i].TimeStamp() + (*opDetWvfHandle)[i].Waveform().size() * TickPeriod)
-        {
-          ProducerUtils::PrintInColor("Matching OpDetWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("green"), "Debug");
-          art::Ptr<raw::OpDetWaveform> wvfPtr(opDetWvfHandle, i);
-          OpHitWvfVector.push_back(wvfPtr);
-          OpHitWvfValid.push_back(true);
-          found = true;
-          break;
+      if (opDetWvfHandle.isValid()) {
+        for (size_t i = 0; i < opDetWvfHandle->size(); i++)
+        { // Match by channel number and amplitude
+          if ((*opDetWvfHandle)[i].ChannelNumber() == opChannel && hitTime >= (*opDetWvfHandle)[i].TimeStamp() && hitTime <= (*opDetWvfHandle)[i].TimeStamp() + (*opDetWvfHandle)[i].Waveform().size() * TickPeriod)
+          {
+            ProducerUtils::PrintInColor("Matching OpDetWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("green"), "Debug");
+            art::Ptr<raw::OpDetWaveform> wvfPtr(opDetWvfHandle, i);
+            OpHitWvfVector.push_back(wvfPtr);
+            OpHitWvfValid.push_back(true);
+            found = true;
+            break;
+          }
         }
       }
+
       if (!found)
       {
         ProducerUtils::PrintInColor("No matching OpDetWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("red"), "Debug");
@@ -666,6 +659,7 @@ namespace solar
         OpHitWvfValid.push_back(false);
       }
     }
+
     return;
   }
 
@@ -676,11 +670,6 @@ namespace solar
     art::Handle<std::vector<recob::OpWaveform>> opWvfHandle;
     evt.getByLabel(fOpWaveformLabel, opWvfHandle);
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
-    if (!opWvfHandle.isValid())
-    {
-      ProducerUtils::PrintInColor("Invalid OpWaveform handle", ProducerUtils::GetColor("red"), "Error");
-      return;
-    }
 
     // Loop over the OpHit vector and get the corresponding OpWaveform
     for (const auto &hit : OpHitVector)
@@ -698,16 +687,18 @@ namespace solar
         hitTime *= TickPeriod;
       }
 
-      for (size_t i = 0; i < opWvfHandle->size(); i++)
-      { // Match by channel number and amplitude
-        if ((*opWvfHandle)[i].Channel() == opChannel && hitTime >= (*opWvfHandle)[i].TimeStamp() && hitTime <= (*opWvfHandle)[i].TimeStamp() + (*opWvfHandle)[i].Signal().size() * TickPeriod)
-        {
-          ProducerUtils::PrintInColor("Matching OpWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("green"), "Debug");
-          art::Ptr<recob::OpWaveform> wvfPtr(opWvfHandle, i);
-          OpHitWvfVector.push_back(wvfPtr);
-          OpHitWvfValid.push_back(true);
-          found = true;
-          break;
+      if (opWvfHandle.isValid()) {
+        for (size_t i = 0; i < opWvfHandle->size(); i++)
+        { // Match by channel number and amplitude
+          if ((*opWvfHandle)[i].Channel() == opChannel && hitTime >= (*opWvfHandle)[i].TimeStamp() && hitTime <= (*opWvfHandle)[i].TimeStamp() + (*opWvfHandle)[i].Signal().size() * TickPeriod)
+          {
+            ProducerUtils::PrintInColor("Matching OpWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("green"), "Debug");
+            art::Ptr<recob::OpWaveform> wvfPtr(opWvfHandle, i);
+            OpHitWvfVector.push_back(wvfPtr);
+            OpHitWvfValid.push_back(true);
+            found = true;
+            break;
+          }
         }
       }
 
