@@ -35,6 +35,7 @@ namespace calib {
     unsigned int idx = 0;
     for (auto &ch: chanNums) {
         fChannelMap[ch] = idx;
+        ++idx;
     }
 
     fSPESizes={
