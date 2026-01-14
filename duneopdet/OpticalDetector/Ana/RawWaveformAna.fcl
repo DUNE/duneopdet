@@ -3,16 +3,19 @@ BEGIN_PROLOG
 rawwaveform_ana: {
    module_type: "RawWaveformAna"
    TriggerModule: "triggerrawdecoder:daq"
+   TriggerDataFormat: ""
 }
 
 
 protodunevd_rawwaveform_ana: {
    @table::rawwaveform_ana
    InputModule: "pdvddaphne:daq"
+   TriggerDataFormat: "PDVD"
 }
 protodunehd_rawwaveform_ana: {
    @table::rawwaveform_ana
    InputModule: "pdhddaphne:daq"
+   TriggerDataFormat: "PDHD"
 }
 
 
