@@ -64,11 +64,13 @@ namespace solar
   private:
     // The parameters we'll read from the .fcl file.
     art::ServiceHandle<geo::Geometry> geo;
+    std::string fOpWaveformLabel; // Input tag for OpDetWaveform collection
     std::string fOpHitLabel; // Input tag for OpHit collection
     std::string fOpHitTimeVariable;
     int fOpFlashAlgoNHit;
     float fOpFlashAlgoMinTime;
     float fOpFlashAlgoMaxTime;
+    bool fOpFlashAlgoWeightedTime;
     float fOpFlashAlgoRad;
     float fOpFlashAlgoPE;
     float fOpFlashAlgoTriggerPE;
@@ -96,8 +98,8 @@ namespace solar
         fOpHitLabel(p.get<std::string>("OpHitLabel", "ophitspe")),
         fOpHitTimeVariable(p.get<std::string>("OpHitTimeVariable", "PeakTime")),
         fOpFlashAlgoNHit(p.get<int>("OpFlashAlgoNHit", 3)),
-        fOpFlashAlgoMinTime(p.get<float>("OpFlashAlgoMinTime", 0.010)), // 10 ns [0.6 tick]
-        fOpFlashAlgoMaxTime(p.get<float>("OpFlashAlgoMaxTime", 0.016)), // 16 ns [1 tick]
+        fOpFlashAlgoMinTime(p.get<double>("OpFlashAlgoMinTime", 0.32)), //  [20 PDS tick]
+        fOpFlashAlgoMaxTime(p.get<double>("OpFlashAlgoMaxTime", 0.96)), //  [60 PDS tick]
         fOpFlashAlgoRad(p.get<float>("OpFlashAlgoRad", 500.0)),
         fOpFlashAlgoPE(p.get<float>("OpFlashAlgoPE", 1.5)),
         fOpFlashAlgoTriggerPE(p.get<float>("OpFlashAlgoTriggerPE", 1.5)),
@@ -205,7 +207,13 @@ namespace solar
       double OpFlashdY = OpFlash.YWidth;
       double OpFlashZ = OpFlash.Z;
       double OpFlashdZ = OpFlash.ZWidth;
-      double OpFlashT = OpFlash.Time - fOpFlashTimeOffset; // Convert to time to us happens in MakeFlashVector
+      double OpFlashT = -1e6;
+      if (fOpFlashAlgoWeightedTime) {
+        OpFlashT = OpFlash.TimeWeighted - fOpFlashTimeOffset; // Convert to time to us happens in MakeFlashVector
+      }
+      else {
+        OpFlashT = OpFlash.MainOpHitTime - fOpFlashTimeOffset; // Convert to time to us happens in MakeFlashVector
+      }
       double OpFlashdT = OpFlash.TimeWidth; // Convert to time to us happens in MakeFlashVector
       std::vector<double> OpFlashPEs = OpFlash.PEperOpDet;
 
@@ -234,7 +242,7 @@ namespace solar
       if (InBeamFrame)
         OnBeamTime = 1;
 
-      oflashes.emplace_back(OpFlashT, OpFlashdT, OpFlashT, Plane,
+      oflashes.emplace_back(OpFlashT, OpFlashdT, OpFlashT, Plane, // Using Frame to save the OpFlash Plane
                             OpFlashPEs, OnPlane, OnBeamTime, OpFlashFast2Tot,
                             OpFlashX, OpFlashdX, OpFlashY, OpFlashdY, OpFlashZ, OpFlashdZ);
     }
