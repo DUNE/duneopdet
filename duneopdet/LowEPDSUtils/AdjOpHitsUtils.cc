@@ -613,8 +613,7 @@ namespace solar
       return false;
   }
 
-  void AdjOpHitsUtils::GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector,
-                                         std::vector<art::Ptr<raw::OpDetWaveform>> &OpHitWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
+  void AdjOpHitsUtils::GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<art::Ptr<raw::OpDetWaveform>> &OpHitWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
   { // Define a function to get the OpHit waveforms that correspond to each OpHit in the input vector
     // Get the OpDetWaveform handle
     art::Handle<std::vector<raw::OpDetWaveform>> opDetWvfHandle;
