@@ -53,7 +53,8 @@ namespace solar
       double Amplitude = 0;
       double PE = 0;
       double MaxPE = 0;
-      std::vector<double> PEperOpDet = {};
+      size_t NOpDets = art::ServiceHandle<geo::Geometry>()->NOpDets();
+      std::vector<double> PEperOpDet(NOpDets, 0.);
       double FastToTotal = 1;
       double X = 0;
       double Y = 0;
