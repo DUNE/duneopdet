@@ -622,7 +622,7 @@ namespace solar
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     if (!opDetWvfHandle.isValid())
     {
-      ProducerUtils::PrintInColor("Invalid OpDetWaveform handle", ProducerUtils::GetColor("red"), "Error");
+      ProducerUtils::PrintInColor("Invalid OpDetWaveform handle", ProducerUtils::GetColor("red"), "Debug");
       for (size_t i = 0; i < OpHitVector.size(); i++)
       {
         OpHitWvfVector.push_back(art::Ptr<raw::OpDetWaveform>());  // Fill with a null pointer to keep the indices consistent
@@ -659,6 +659,7 @@ namespace solar
           break;
         }
       }
+
       if (!found)
       {
         ProducerUtils::PrintInColor("No matching OpDetWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("red"), "Debug");
@@ -666,6 +667,7 @@ namespace solar
         OpHitWvfValid.push_back(false);
       }
     }
+
     return;
   }
 
@@ -678,7 +680,12 @@ namespace solar
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     if (!opWvfHandle.isValid())
     {
-      ProducerUtils::PrintInColor("Invalid OpWaveform handle", ProducerUtils::GetColor("red"), "Error");
+      ProducerUtils::PrintInColor("Invalid OpWaveform handle", ProducerUtils::GetColor("red"), "Debug");
+      for (size_t i = 0; i < OpHitVector.size(); i++)
+      {
+        OpHitWvfVector.push_back(art::Ptr<recob::OpWaveform>());  // Fill with a null pointer to keep the indices consistent
+        OpHitWvfValid.push_back(false);
+      }
       return;
     }
 
