@@ -23,8 +23,8 @@ protodunevd_photoncalibrator_config3:          @local::protodunevd_photoncalibra
 protodunevd_photoncalibrator_config3.SPEAreas: [ 3450.06, 1950.04, 2138.67, 4251.92, 2063.53, 2000, 2336.25, 2197.08, 5225.09, 5185.5, 2426.86, 2685.4, 3831.38, 3567.7, 1526.98, 1258.39, 2000, 2000, 2000, 2000, 2794.99, 2732.12, 2073.26, 1948.84, 4302.94, 4255.39, 2900.88, 2826.3, 3238.6, 3074.78, 3669.16, 3723.37, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 ] #Values from waffles/np02_data/calibration_data/np02-config-v3.0.0.csv
 
 #Data taken from August 10th on
-protodunevd_photoncalibrator_config3:          @local::protodunevd_photoncalibrator_config1
-protodunevd_photoncalibrator_config3.SPEAreas: [ 3482.9, 1893.97, 2148.87, 4332.16, 2063.53, 2000, 2257.92, 2530.51, 5225.09, 5185.5, 2426.86, 2685.4, 3831.38, 3567.7, 1526.98, 1258.39, 2000, 2000, 2000, 2000, 3147.79, 3278.53, 1380.77, 2205.66, 4364.88, 4221.51, 3058.11, 3009.3, 2634.38, 2557.6, 3771.75, 3723.89, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 ] #Values from waffles/np02_data/calibration_data/np02-config-v4.0.0.csv
+protodunevd_photoncalibrator_config4:          @local::protodunevd_photoncalibrator_config1
+protodunevd_photoncalibrator_config4.SPEAreas: [ 3482.9, 1893.97, 2148.87, 4332.16, 2063.53, 2000, 2257.92, 2530.51, 5225.09, 5185.5, 2426.86, 2685.4, 3831.38, 3567.7, 1526.98, 1258.39, 2000, 2000, 2000, 2000, 3147.79, 3278.53, 1380.77, 2205.66, 4364.88, 4221.51, 3058.11, 3009.3, 2634.38, 2557.6, 3771.75, 3723.89, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100, 100 ] #Values from waffles/np02_data/calibration_data/np02-config-v4.0.0.csv
 
 
 END_PROLOG
