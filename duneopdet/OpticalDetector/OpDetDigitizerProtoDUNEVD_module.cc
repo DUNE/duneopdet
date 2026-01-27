@@ -534,10 +534,10 @@ void OpDetDigitizerProtoDUNEVD::produce(art::Event &evt) {
     art::fill_ptr_vector(mybtr_vec[mybtr_vec.size() - 1], btr_handles[hh]);
     for (auto const &btr : mybtr_vec[mybtr_vec.size() - 1]) {
       if (std::find(fInputModulesAr.begin(),fInputModulesAr.end(),
-             btr_handles[hh].provenance()->moduleLabel())==fInputModulesAr.end())
+             btr_handles[hh].provenance()->moduleLabel())!=fInputModulesAr.end())
         ODBMap[btr.get()->OpDetNum()].first.push_back(&btr); // Ar modules
       else if (std::find(fInputModulesXe.begin(),fInputModulesXe.end(),
-                   btr_handles[hh].provenance()->moduleLabel())==fInputModulesXe.end())
+                   btr_handles[hh].provenance()->moduleLabel())!=fInputModulesXe.end())
         ODBMap[btr.get()->OpDetNum()].second.push_back(&btr); // Xe  modules
       else
         throw art::Exception(art::errors::LogicError)
@@ -943,10 +943,32 @@ void OpDetDigitizerProtoDUNEVD::CheckFHiCLParameters() const {
         << "TimeBegin should be less than TimeEnd!\n";
 }
 double OpDetDigitizerProtoDUNEVD::getPDE_Ar(int OpDet) const {
-  return fPDMapTool->ArgonEfficiency(OpDet);
+  // Correct out the prescaling applied during simulation
+  auto const *LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
+  double QE = fPDMapTool->ArgonEfficiency(OpDet);
+  QE = QE / LarProp->ScintPreScale();
+  if (QE > 1.0001 ) {
+    mf::LogError("OpDetDigitizerProtoDUNEVD") << "Channel PDE set as OpDetDigitizerProtoDUNEVD.QE, " << QE
+                                           << " is too large.  It is larger than the prescaling applied during simulation, "
+                                           << LarProp->ScintPreScale()
+                                           << ".  Final PDE must be equal to or smaller than the PreScale applied at simulation time.";
+    std::abort();
+  }
+  return QE;
 }
 double OpDetDigitizerProtoDUNEVD::getPDE_Xe(int OpDet) const {
-  return fPDMapTool->XenonEfficiency(OpDet);
+  // Correct out the prescaling applied during simulation
+  auto const *LarProp = lar::providerFrom<detinfo::LArPropertiesService>();
+  double QE = fPDMapTool->XenonEfficiency(OpDet);
+  QE = QE / LarProp->ScintPreScale();
+  if (QE > 1.0001 ) {
+    mf::LogError("OpDetDigitizerProtoDUNEVD") << "Channel PDE set as OpDetDigitizerProtoDUNEVD.QE, " << QE
+                                           << " is too large.  It is larger than the prescaling applied during simulation, "
+                                           << LarProp->ScintPreScale()
+                                           << ".  Final PDE must be equal to or smaller than the PreScale applied at simulation time.";
+    std::abort();
+  }
+  return QE;
 }
 double OpDetDigitizerProtoDUNEVD::getDarkCountRate(int OpDet) const {
   return fDarkCountRateMap.second.at(
