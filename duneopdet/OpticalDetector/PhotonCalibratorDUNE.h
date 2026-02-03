@@ -1,15 +1,15 @@
 ////////////////////////////////////////////////////////////////////////
-// \file PhotonCalibratorProtoDUNEVD.h
+// \file PhotonCalibratorDUNE.h
 //
-// \brief ProtoDUNEVD service provider applying a channel based scale factor to optical hits.
+// \brief DUNE service provider applying a channel based scale factor to optical hits.
 //
 // \author lpaulucc@fnal.gov based on PhotonCalibratorProtoduneSP by ahimmel
 //
 ////////////////////////////////////////////////////////////////////////
 
 
-#ifndef PHOTONCALIBRATORPROTODUNEVD_H
-#define PHOTONCALIBRATORPROTODUNEVD_H
+#ifndef PHOTONCALIBRATORDUNE_H
+#define PHOTONCALIBRATORDUNE_H
 
 #include "larreco/Calibrator/IPhotonCalibrator.h"
 
@@ -22,10 +22,10 @@
 
 namespace calib {
 
-  class PhotonCalibratorProtoDUNEVD : public IPhotonCalibrator
+  class PhotonCalibratorDUNE : public IPhotonCalibrator
   {
   public:
-    PhotonCalibratorProtoDUNEVD(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
+    PhotonCalibratorDUNE(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg);
 
     // Override base class functions
     double PE(double adcs, int opchannel) const override;
@@ -42,10 +42,10 @@ namespace calib {
     std::vector<int>        fBadChannels;
     std::map<int, float>    fAreaMap;
     std::map<int, float>    fShiftMap;
-  }; // class PhotonCalibratorProtoDUNEVD
+  }; // class PhotonCalibratorDUNE
 }
 
-//DECLARE_ART_SERVICE_INTERFACE_IMPL(calib::PhotonCalibratorProtoDUNEVD, calib::IPhotonCalibrator, LEGACY)
+//DECLARE_ART_SERVICE_INTERFACE_IMPL(calib::PhotonCalibratorDUNE, calib::IPhotonCalibrator, LEGACY)
 
 
 #endif

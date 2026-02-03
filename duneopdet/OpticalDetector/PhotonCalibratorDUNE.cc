@@ -1,5 +1,5 @@
 // dunetpc includes
-#include "duneopdet/OpticalDetector/PhotonCalibratorProtoDUNEVD.h"
+#include "duneopdet/OpticalDetector/PhotonCalibratorDUNE.h"
 
 // LArSoft Includes
 #include "larreco/Calibrator/IPhotonCalibrator.h"
@@ -20,7 +20,7 @@
 
 namespace calib {
 
-  PhotonCalibratorProtoDUNEVD::PhotonCalibratorProtoDUNEVD(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg)
+  PhotonCalibratorDUNE::PhotonCalibratorDUNE(fhicl::ParameterSet const& pset, art::ActivityRegistry& reg)
   {
 
     fBadChannels = pset.get<std::vector<int> >("BadChannels");
@@ -36,10 +36,10 @@ namespace calib {
   
   }
 
-  double PhotonCalibratorProtoDUNEVD::PE(double adcs, int opchannel) const
+  double PhotonCalibratorDUNE::PE(double adcs, int opchannel) const
   {
     if (std::find(fBadChannels.begin(), fBadChannels.end(), opchannel) != fBadChannels.end()) {
-      mf::LogDebug("PhotonCalibratorProtoDUNEVD") << "Skipping bad channel " << opchannel;
+      mf::LogDebug("PhotonCalibratorDUNE") << "Skipping bad channel " << opchannel;
       return 0;
     }
     auto entry = fAreaMap.find(opchannel);
@@ -51,4 +51,4 @@ namespace calib {
 
 }
 
-//DEFINE_ART_SERVICE_INTERFACE_IMPL(calib::PhotonCalibratorProtoDUNEVD, calib::IPhotonCalibrator)
+//DEFINE_ART_SERVICE_INTERFACE_IMPL(calib::PhotonCalibratorDUNE, calib::IPhotonCalibrator)

@@ -1,18 +1,18 @@
 ////////////////////////////////////////////////////////////////////////
-// \file PhotonCalibratorServiceProtoDUNEVD.h
+// \file PhotonCalibratorServiceDUNE.h
 //
-// \brief Framework interface to PhotonCalibratorProtoDUNEVD
+// \brief Framework interface to PhotonCalibratorDUNE
 //
 // \author lpaulucc@fnal.gov based on PhotonCalibratorServiceProtuDUNESP by ahimmel@fnal.gov
 //
 ////////////////////////////////////////////////////////////////////////
 
 
-#ifndef PHOTONCALIBRATORSERVICEPROTODUNEVD
-#define PHOTONCALIBRATORSERVICEPROTODUNEVD
+#ifndef PHOTONCALIBRATORSERVICEDUNE
+#define PHOTONCALIBRATORSERVICEDUNE
 
 // LArSoft Includes
-#include "duneopdet/OpticalDetector/PhotonCalibratorProtoDUNEVD.h"
+#include "duneopdet/OpticalDetector/PhotonCalibratorDUNE.h"
 #include "larreco/Calibrator/IPhotonCalibratorService.h"
 
 
@@ -32,10 +32,10 @@
 namespace calib {
 
   
-  class PhotonCalibratorServiceProtoDUNEVD : public IPhotonCalibratorService
+  class PhotonCalibratorServiceDUNE : public IPhotonCalibratorService
   {
   public:
-    using provider_type = PhotonCalibratorProtoDUNEVD;
+    using provider_type = PhotonCalibratorDUNE;
     
     struct ServiceConfiguration_t
     {
@@ -48,21 +48,21 @@ namespace calib {
     using Parameters = art::ServiceTable<ServiceConfiguration_t>;
 
   public:
-    PhotonCalibratorServiceProtoDUNEVD(Parameters const & config,
+    PhotonCalibratorServiceDUNE(Parameters const & config,
                                        art::ActivityRegistry& aReg)
-      : fProvider( new PhotonCalibratorProtoDUNEVD(config.get_PSet(), aReg) )
+      : fProvider( new PhotonCalibratorDUNE(config.get_PSet(), aReg) )
       { }
     
     provider_type const* provider() const override { return fProvider.get(); }
 
   private:
-    std::unique_ptr<PhotonCalibratorProtoDUNEVD> fProvider;
+    std::unique_ptr<PhotonCalibratorDUNE> fProvider;
   };
 
 }
 
-DECLARE_ART_SERVICE_INTERFACE_IMPL(calib::PhotonCalibratorServiceProtoDUNEVD, 
+DECLARE_ART_SERVICE_INTERFACE_IMPL(calib::PhotonCalibratorServiceDUNE, 
                                    calib::IPhotonCalibratorService, 
                                    LEGACY)
 
-#endif // PHOTONCALIBRATORSERVICEPROTODUNEVD
+#endif // PHOTONCALIBRATORSERVICEDUNE
