@@ -128,8 +128,10 @@ namespace opdet {
     assert(wvfHandle.isValid());
 
     // Reserve a large enough array
-    int totalsize = 0;
-    totalsize += wvfHandle->size();
+    // TODO: Commented out int totalsize to fix unused variable build error in clang.
+    //       Uncomment when implementing the full logic.
+    //int totalsize = 0;
+    //totalsize += wvfHandle->size();
     std::vector<double> fwaveform;
     fwaveform.reserve(fMaxTicks); 
 
