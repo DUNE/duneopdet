@@ -1,5 +1,6 @@
-BEGIN_PROLOG
+#include "ProtoDUNESP_SPE_calibs.fcl"
 
+BEGIN_PROLOG
 
 generic_photoncalibrator :
 {
@@ -9,6 +10,21 @@ generic_photoncalibrator :
    SPEShifts:        [ ] # use shift = 0 for all channels
    SPESizes:         [ ] # use default SPE gains - can be amplitudes or areas. The calibrator should not care.
 }
+
+
+### ProtoDUNE SP ###
+protodunesp_photoncalibrator:
+{
+   @table::generic_photoncalibrator
+   BadChannels:      [25, 36, 49, 51, 58, 62, 65, 72, 73, 75, 82, 101, 110, 119, 156, 160  ]
+   # from ProtoDUNESP_SPE_calibs.fcl
+   SPESizes: @local::protodunesp_photon_spe_calibs.SPESizes
+   SPEShifts: @local::protodunesp_photon_spe_calibs.SPEShifts
+}
+
+
+
+### ProtoDUNE VD ###
 
 generic_protodunevd_photoncalibrator :
 {
