@@ -23,7 +23,7 @@
 #include "art/Framework/Services/Registry/ActivityRegistry.h"
 #include "art/Framework/Services/Registry/ServiceHandle.h"
 #include "art/Framework/Services/Registry/ServiceMacros.h"
-#include "art/Framework/Services/Registry/ServiceTable.h" 
+#include "art/Framework/Services/Registry/ServiceTable.h"
 #include "art/Framework/Principal/Run.h"
 
 
@@ -31,19 +31,20 @@
 
 namespace calib {
 
-  
+
   class PhotonCalibratorServiceProtoDUNESP : public IPhotonCalibratorService
   {
   public:
     using provider_type = PhotonCalibratorProtoDUNESP;
-    
+
     struct ServiceConfiguration_t
     {
-      //fhicl::Atom<float> SPESize  { fhicl::Name("SPESize")  };
-      //fhicl::Atom<float> SPEShift { fhicl::Name("SPEShift") };
+      fhicl::Sequence<float> SPESizes  { fhicl::Name("SPESizes")  };
+      fhicl::Sequence<float> SPEShifts { fhicl::Name("SPEShifts") };
+      fhicl::Sequence<int> ChannelNumbers { fhicl::Name("ChannelNumbers") };
       fhicl::Sequence<int> BadChannels { fhicl::Name("BadChannels"), fhicl::Comment("Channels to remove from reconstruction")  };
     };
-    
+
     using Parameters = art::ServiceTable<ServiceConfiguration_t>;
 
   public:
@@ -51,7 +52,7 @@ namespace calib {
                                        art::ActivityRegistry& aReg)
       : fProvider( new PhotonCalibratorProtoDUNESP(config.get_PSet(), aReg) )
       { }
-    
+
     provider_type const* provider() const override { return fProvider.get(); }
 
   private:
@@ -60,8 +61,8 @@ namespace calib {
 
 }
 
-DECLARE_ART_SERVICE_INTERFACE_IMPL(calib::PhotonCalibratorServiceProtoDUNESP, 
-                                   calib::IPhotonCalibratorService, 
+DECLARE_ART_SERVICE_INTERFACE_IMPL(calib::PhotonCalibratorServiceProtoDUNESP,
+                                   calib::IPhotonCalibratorService,
                                    LEGACY)
 
 #endif // PHOTONCALIBRATORSERVICEPROTODUNESP
