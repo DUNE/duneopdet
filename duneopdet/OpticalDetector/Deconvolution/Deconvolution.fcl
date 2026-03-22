@@ -80,30 +80,23 @@ deconvolution_snr.OutputProduct: "SNR"
 
 
 ### ProtoDUNE HD ###
-protodunehd_deconvolution: @local::dune_deconvolution
-protodunehd_deconvolution.Samples:        1024
-protodunehd_deconvolution.Pedestal:       8180
-protodunehd_deconvolution.PreTrigger:     50
-protodunehd_deconvolution.PedestalBuffer: 30
-protodunehd_deconvolution.InputModule: "pdhddaphne"
-protodunehd_deconvolution.InstanceName: "daq"
-protodunehd_deconvolution.InputPolarity: -1
-protodunehd_deconvolution.ApplyPostfilter: true
-protodunehd_deconvolution.WfmPostfilter.Cutoff: 1.5
-protodunehd_deconvolution.ApplyPostBLCorrection: true
+protodunehd_deconvolution: {
+   @table::dune_deconvolution
+   Samples:        1024
+   Pedestal:       8180
+   PreTrigger:     50
+   PedestalBuffer: 30
+   InputModule: "pdhddaphne"
+   InstanceName: "daq"
+   InputPolarity: -1
+   ApplyPostfilter: true
+   WfmPostfilter: {
+    Cutoff: 1.5
+   }
+   ApplyPostBLCorrection: true
 
-protodunehd_deconvolution.IgnoreChannels:      @local::protodunehd_pds_channels_data.IgnoreChannels
-
-# SPE Template
-protodunehd_deconvolution.SPETemplatePath:        @local::protodunehd_pds_channels_data.SPETemplatePath
-protodunehd_deconvolution.SPETemplateFiles:        @local::protodunehd_pds_channels_data.SPETemplateFiles
-protodunehd_deconvolution.SPETemplateMapChannels:  @local::protodunehd_pds_channels_data.SPETemplateMapChannels
-protodunehd_deconvolution.SPETemplateMapTemplates: @local::protodunehd_pds_channels_data.SPETemplateMapTemplates
-# Noise template
-protodunehd_deconvolution.NoiseTemplatePath:        @local::protodunehd_pds_channels_data.NoiseTemplatePath
-protodunehd_deconvolution.NoiseTemplateFiles:        @local::protodunehd_pds_channels_data.NoiseTemplateFiles
-protodunehd_deconvolution.NoiseTemplateMapChannels:  @local::protodunehd_pds_channels_data.NoiseTemplateMapChannels
-protodunehd_deconvolution.NoiseTemplateMapTemplates: @local::protodunehd_pds_channels_data.NoiseTemplateMapTemplates
+   @table::protodunehd_pds_channels_data_v1
+}
 
 
 ### ProtoDUNE HD MC ###
