@@ -91,7 +91,8 @@ protodunehd_deconvolution: {
    InputPolarity: -1
    ApplyPostfilter: true
    WfmPostfilter: {
-    Cutoff: 1.5
+      Cutoff: 1.5
+      Name: "Gauss"
    }
    ApplyPostBLCorrection: true
 
