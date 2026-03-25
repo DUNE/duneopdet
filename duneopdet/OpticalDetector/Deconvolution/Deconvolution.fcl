@@ -128,6 +128,9 @@ protodunehd_mc_deconvolution.NoiseTemplateMapChannels:  []
 protodunehd_mc_deconvolution.NoiseTemplateMapTemplates: []
 
 # read channel-by-channel gain file
+# "v6" refers to the version of ProtoDUNE-HD geometry (protodunehd_v6_refactored.gdml)
+# values inside reco_channel_gain_protoDUNEHD_v6.dat are from protodunehd_opdigi.SPEAmplitudeVector, 
+# which is defined at opticaldetectormodules_dune.fcl
 protodunehd_mc_deconvolution.ChannelGainFile: "reco_channel_gain_protoDUNEHD_v6.dat"
 
 END_PROLOG
