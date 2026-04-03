@@ -1,4 +1,5 @@
 #include "protodunehd_first_template_list.fcl"
+#include "protodunehd_template_list_v1.fcl"
 BEGIN_PROLOG
 
 ### ProtoDUNE HD ###
@@ -48,19 +49,9 @@ protodunehd_pds_channels_data_dummy.SPETemplateMapTemplates: [
 
 
 # ProtoDUNE HD data
-protodunehd_pds_channels_data: {
-   SPETemplatePath:		@local::protodunehd_first_template_list.spe_template_path
-   SPETemplateFiles:		@local::protodunehd_first_template_list.spe_template_files
-   SPETemplateMapChannels:	@local::protodunehd_first_template_list.spe_template_channels
-   SPETemplateMapTemplates:	@local::protodunehd_first_template_list.spe_template_id
+protodunehd_pds_channels_data_v0: @local::protodunehd_first_template_list
+protodunehd_pds_channels_data_v1: @local::protodunehd_template_list_v1
 
-   NoiseTemplatePath:		@local::protodunehd_first_template_list.noise_template_path
-   NoiseTemplateFiles:		@local::protodunehd_first_template_list.noise_template_files
-   NoiseTemplateMapChannels:	@local::protodunehd_first_template_list.noise_template_channels
-   NoiseTemplateMapTemplates:	@local::protodunehd_first_template_list.noise_template_id
-
-   IgnoreChannels:		@local::protodunehd_first_template_list.ignore_channels
-}
 
 
 ### ProtoDUNE HD MC ###
