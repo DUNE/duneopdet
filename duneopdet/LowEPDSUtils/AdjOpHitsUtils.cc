@@ -109,7 +109,7 @@ namespace solar
           TimeMax = thisTime;
         }
 
-        PEperOpDet[PDSHit->OpChannel()] += PDSHit->PE();
+        PEperOpDet[wireReadout.OpDetFromOpChannel(PDSHit->OpChannel())] += PDSHit->PE();
         Idx++;
       }
 
