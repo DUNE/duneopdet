@@ -206,6 +206,7 @@ namespace opdet {
         if (wf[i] < Peak) { // If the current point is below the plateau, check if it's flanked by saturated points. This indicates it's a hole in the plateau, not a natural peak
           if(wf[i - 1] >= Peak) {//check for saturation - dent - saturation
             for (size_t j = i + 1; j < std::min(i + MaxTicksDent, wf.size()); j++) { // Look ahead to see if it saturates soon
+              if(wf[j] < 0.5*Peak) break; //There are two genuine saturated separated peaks within the interval
               if (wf[j] >= Peak) {
                 wf[i] = Peak;
                 break;
