@@ -223,15 +223,18 @@ namespace opdet {
     auto it = std::max_element(wf.begin(), wf.end()); //Find the highest adc value in the waveform
     Float_t Peak = *it;
     if(Peak < fDynamicRangeSaturation) return false; //wvf is not saturated
-    // it_end (it_start) contains the iterator to the last (first) element in the peak where waveform is saturated
-    auto it_start = std::find_if( wf.begin(), wf.end(), [fDynamicRangeSaturation](double x){ return x >= fDynamicRangeSaturation; } );
-    size_t index_start = std::distance(wf.begin(), it_start);//get the start time
-    if(it_start != wf.end()) {
-      auto it_end = std::find_if(it_start, wf.end(), [fDynamicRangeSaturation](double x){ return x < fDynamicRangeSaturation; });
-      size_t index_end = std::distance(wf.begin(), it_end);// get the end time
-      if(index_end - index_start < fMaxTicksSat) return false; //level of saturation is below the maximum accepted
+    size_t consecutiveSatTicks = 0;
+    for(double sample : wf) {
+      if(sample >= fDynamicRangeSaturation){// We are inside a saturated region
+        consecutiveSatTicks++;
+        // Check if THIS specific peak has exceeded the limit
+        if (consecutiveSatTicks > fMaxTicksSat) return true; 
+      }else{ // Signal dropped below threshold; reset counter for the next peak
+        consecutiveSatTicks = 0;
+      }
     }
-    return true;
+    // If we finished the entire waveform without the counter exceeding fMaxTicksSat
+    return false;
   }
 
   void WaveformPreProcessing::DenoisingAlgo(std::vector<double> &waveform, double lambda){
