@@ -85,7 +85,8 @@ namespace opdet{
     // The parameters we'll read from the .fcl file.
     std::string fInputModule; // Input tag for OpDetWaveform collection
     bool fApplyDenoising;
-    bool fRemoveFluctuation;
+    bool fRemoveBaselineFluctuation;
+    std::vector<int> fIgnoreChannels;
     bool fIsPDVD;
     double fLambda;
     int fMaxTicks;        //Maximum number of ticks in waveform
@@ -112,15 +113,15 @@ namespace opdet {
     // Indicate that the Input Module comes from .fcl
     fInputModule        = p.get<std::string>("InputModule"); 
     fApplyDenoising     = p.get<bool>("ApplyDenoising"); 
-    fRemoveFluctuation  = p.get<bool>("RemoveFluctuation"); 
-    fIsPDVD             = p.get<bool>("IsPDVD"); 
+    fIgnoreChannels     = p.get<std::vector<int> >("IgnoreChannels");
     fLambda             = p.get<double>("Lambda"); //parameter for the denoising algorithm
     fMaxTicks           = p.get<int>("MaxTicks"); //maximum number of ticks in the waveform
     fMaxTicksDent       = p.get<size_t>("MaxTicksDent"); //maximum number of ticks for dent formation
     fMaxTicksSat        = p.get<size_t>("MaxTicksSat"); //maximum number of saturated ticks in the waveform to apply baseline removal
     fSecondBaselineSub  = p.get<double>("SecondBaselineSub"); //the mode of lowest SecondBaslineSub of the signal for second baseline estimate
     fFirstBaselineSub   = p.get<double>("FirstBaselineSub"); //around 3 times the expected large signals
-    fDynamicRangeSaturation = p.get<Float_t>("DynamicRangeSaturation");
+    fDynamicRangeSaturation    = p.get<Float_t>("DynamicRangeSaturation");
+    fRemoveBaselineFluctuation = p.get<bool>("RemoveBaselineFluctuation"); 
   
     // This module produces (infrastructure piece)
     produces< std::vector< raw::OpDetWaveform > >();
@@ -155,10 +156,10 @@ namespace opdet {
         fwaveform[i] = wf[i];
       }
 
-      if(fIsPDVD && wf.ChannelNumber() > 3000 ) { //Excluding PMTs from the pre processing in PDVD
+      if(std::find(fIgnoreChannels.begin(), fIgnoreChannels.end(), wf.ChannelNumber()) != fIgnoreChannels.end()){
       }else{
         DentCorrection(fwaveform, fDynamicRangeSaturation, fMaxTicksDent, wf.ChannelNumber());
-        if(fRemoveFluctuation && !CheckSaturation(fwaveform, fDynamicRangeSaturation, fMaxTicksSat)){ BaselineExtractor(fwaveform);}
+        if(fRemoveBaselineFluctuation && !CheckSaturation(fwaveform, fDynamicRangeSaturation, fMaxTicksSat)){ BaselineExtractor(fwaveform);}
         if(fApplyDenoising){
           double lambda = fLambda;
           DenoisingAlgo(fwaveform, lambda);
