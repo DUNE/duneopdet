@@ -436,7 +436,7 @@ namespace opdet {
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     auto const detProp = art::ServiceHandle<detinfo::DetectorPropertiesService const>()->DataFor(evt, clockData);
     try {
-      auto MClistHandle = evt.getValidHandle<std::vector<simb::MCTruth> >(fSignalLabel);
+      auto MClistHandle = evt.getHandle<std::vector<simb::MCTruth> >(fSignalLabel);
 
       art::Ptr<simb::MCTruth> mctruth(MClistHandle, 0);
       if (mctruth->NParticles() == 0) {
@@ -452,33 +452,40 @@ namespace opdet {
         }
       }    
 
-
       //Get the total visible energy deposited in the LAr AV
       //TPC SimChannels
       float totalEdep=0.0;
       std::vector<const sim::SimChannel*> fSimChannels;
-      if (!evt.getView(felecDriftLabel, fSimChannels)) {
-        mf::LogWarning("FlashMatchAna") << "Cannot load electron drift product. Failing";
+      try {
+        if (!evt.getView(felecDriftLabel, fSimChannels)) {
+          mf::LogWarning("FlashMatchAna") << "Cannot load electron drift product. Failing";
+        }
+        evt.getView(felecDriftLabel,fSimChannels);
+        for(auto const &chan : fSimChannels ){
+          for(auto const &tdcide : chan->TDCIDEMap()){
+            for(const auto& ide :tdcide.second){
+              const art::Ptr<simb::MCTruth> mc=pinv->TrackIdToMCTruth_P(ide.trackID);
+              if(fIsNDK){//trick to get correct Edep for NDK events since they are labelled as unknown generator/Origin
+                if(mc->Origin()==4) continue;//all bkg generators are labelled as single particles (Origin =4)
+              }else{
+                if(mc->Origin()!=fkgenerator) continue;}
+              totalEdep +=ide.energy;
+            }
+          }
+        }
       }
-      evt.getView(felecDriftLabel,fSimChannels);
-      for(auto const &chan : fSimChannels ){
-	for(auto const &tdcide : chan->TDCIDEMap()){
-	  for(const auto& ide :tdcide.second){
-	    const art::Ptr<simb::MCTruth> mc=pinv->TrackIdToMCTruth_P(ide.trackID);
-	    if(fIsNDK){//trick to get correct Edep for NDK events since they are labelled as unknown generator/Origin
-              if(mc->Origin()==4) continue;//all bkg generators are labelled as single particles (Origin =4)
-            }else{
-	      if(mc->Origin()!=fkgenerator) continue;}
-	    totalEdep +=ide.energy;
-	  }
-	}
+      catch (art::Exception const& err) 
+      {
+        if ( err.categoryCode() != art::errors::ProductNotFound ) throw;
       }
+
+
       double edepsim=0.0;
       ////Energy deposit using SimEnergyDeposit
-       for (auto const& edepi : *edep_handle) {
-	 edepsim+=edepi.Energy();
+      for (auto const& edepi : *edep_handle) {
+        edepsim+=edepi.Energy();
       }
-      
+
       ////////////////////
 
 
@@ -500,7 +507,7 @@ namespace opdet {
       // Get all the paricle including neutrino, and record its properties
       unsigned int const nParticles = mctruth->NParticles();
       for (unsigned int i = 0; i < nParticles; ++i) {
-	simb::MCParticle const& particle = mctruth->GetParticle(i);
+        simb::MCParticle const& particle = mctruth->GetParticle(i);
         fTruePxallpart    .emplace_back(particle.Px());
         fTruePyallpart    .emplace_back(particle.Py());
         fTruePzallpart    .emplace_back(particle.Pz());

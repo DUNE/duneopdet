@@ -1,0 +1,15 @@
+BEGIN_PROLOG
+
+protodunevd_wvfpreprocessing:
+{
+  module_type:          "WaveformPreProcessing"
+  InputModule:          "pdvddaphne:daq" // Input tag for OpDetWaveform collection (data)
+  ApplyDenoising:       true
+  IsPDVD:               true //Not to apply to PMTs
+  Lambda:               10.0
+  MaxTicks:             30000 //Maximum number of ticks in a waveform
+  SecondBaselineSub:    0.1 //the mode of lowest SecondBaslineSub of the signal for second baseline estimate
+  FirstBaselineSub:     900 //around 3 times the expected large signals
+}
+
+END_PROLOG
