@@ -53,7 +53,8 @@ namespace solar
       double Amplitude = 0;
       double PE = 0;
       double MaxPE = 0;
-      std::vector<double> PEperOpDet = {};
+      size_t NOpDets = art::ServiceHandle<geo::Geometry>()->NOpDets();
+      std::vector<double> PEperOpDet(NOpDets, 0.);
       double FastToTotal = 1;
       double X = 0;
       double Y = 0;
@@ -108,7 +109,7 @@ namespace solar
           TimeMax = thisTime;
         }
 
-        PEperOpDet.push_back(thisPE);
+        PEperOpDet[wireReadout.OpDetFromOpChannel(PDSHit->OpChannel())] += PDSHit->PE();
         Idx++;
       }
 
@@ -613,7 +614,6 @@ namespace solar
       return false;
   }
 
-
   void AdjOpHitsUtils::GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<art::Ptr<raw::OpDetWaveform>> &OpHitWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
   { // Define a function to get the OpHit waveforms that correspond to each OpHit in the input vector
     // Get the OpDetWaveform handle
@@ -622,7 +622,7 @@ namespace solar
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     if (!opDetWvfHandle.isValid())
     {
-      ProducerUtils::PrintInColor("Invalid OpDetWaveform handle", ProducerUtils::GetColor("red"), "Error");
+      ProducerUtils::PrintInColor("Invalid OpDetWaveform handle", ProducerUtils::GetColor("red"), "Debug");
       for (size_t i = 0; i < OpHitVector.size(); i++)
       {
         OpHitWvfVector.push_back(art::Ptr<raw::OpDetWaveform>());  // Fill with a null pointer to keep the indices consistent
@@ -659,6 +659,7 @@ namespace solar
           break;
         }
       }
+
       if (!found)
       {
         ProducerUtils::PrintInColor("No matching OpDetWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("red"), "Debug");
@@ -666,6 +667,7 @@ namespace solar
         OpHitWvfValid.push_back(false);
       }
     }
+
     return;
   }
 
@@ -678,7 +680,12 @@ namespace solar
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     if (!opWvfHandle.isValid())
     {
-      ProducerUtils::PrintInColor("Invalid OpWaveform handle", ProducerUtils::GetColor("red"), "Error");
+      ProducerUtils::PrintInColor("Invalid OpWaveform handle", ProducerUtils::GetColor("red"), "Debug");
+      for (size_t i = 0; i < OpHitVector.size(); i++)
+      {
+        OpHitWvfVector.push_back(art::Ptr<recob::OpWaveform>());  // Fill with a null pointer to keep the indices consistent
+        OpHitWvfValid.push_back(false);
+      }
       return;
     }
 
