@@ -7,8 +7,10 @@
 // from cetpkgsupport v1_14_01.
 // This module works on data waveforms and can perform two tasks
 // 1. Remove baselines that fluctuate with time (code developed by A. Paudel)
+//    for waveforms which are not "too much" saturated
 // 2. Use a denoising algorithm (the same one used in PDSP) to make
-// waveforms smoother (fhicl adjustable)
+//    waveforms smoother 
+// (both fhicl adjustable)
 // This module produces a new set of OpDetWaveforms that should be
 // used as input to the OpHitFinder
 // TO DO: Implement a ROI finder to decrease the size of the optical
@@ -64,7 +66,9 @@ namespace opdet{
 
     // Required functions.
     void produce(art::Event & evt) override;
+    bool CheckSaturation(std::vector<double> wf, Float_t fDynamicRangeSaturation, size_t fMaxTicksSat);
     void BaselineExtractor(std::vector<double>& wf);
+    void DentCorrection(std::vector<double> &wf, Float_t fDynamicRangeSaturation, size_t MaxTicksDent, int channel);
     void DenoisingAlgo(std::vector<double>& waveform, double lambda);
     bool TV1D_denoise(std::vector<double>& waveform, std::vector<double>& outwaveform, const double lambda);
     std::vector<double> ComputeMovingAverage(const std::vector<double>& data, int n);
@@ -81,9 +85,14 @@ namespace opdet{
     // The parameters we'll read from the .fcl file.
     std::string fInputModule; // Input tag for OpDetWaveform collection
     bool fApplyDenoising;
+    bool fRemoveBaselineFluctuation;
+    std::vector<int> fIgnoreChannels;
     bool fIsPDVD;
     double fLambda;
-    int fMaxTicks;
+    int fMaxTicks;        //Maximum number of ticks in waveform
+    size_t fMaxTicksDent;     //Maximum number of ticks for dent correction
+    size_t fMaxTicksSat;   //Maximum number of saturated ticks to apply baseline removal
+    Float_t fDynamicRangeSaturation;
     double fSecondBaselineSub;
     double fFirstBaselineSub;
   };
@@ -104,11 +113,15 @@ namespace opdet {
     // Indicate that the Input Module comes from .fcl
     fInputModule        = p.get<std::string>("InputModule"); 
     fApplyDenoising     = p.get<bool>("ApplyDenoising"); 
-    fIsPDVD             = p.get<bool>("IsPDVD"); 
+    fIgnoreChannels     = p.get<std::vector<int> >("IgnoreChannels");
     fLambda             = p.get<double>("Lambda"); //parameter for the denoising algorithm
     fMaxTicks           = p.get<int>("MaxTicks"); //maximum number of ticks in the waveform
+    fMaxTicksDent       = p.get<size_t>("MaxTicksDent"); //maximum number of ticks for dent formation
+    fMaxTicksSat        = p.get<size_t>("MaxTicksSat"); //maximum number of saturated ticks in the waveform to apply baseline removal
     fSecondBaselineSub  = p.get<double>("SecondBaselineSub"); //the mode of lowest SecondBaslineSub of the signal for second baseline estimate
     fFirstBaselineSub   = p.get<double>("FirstBaselineSub"); //around 3 times the expected large signals
+    fDynamicRangeSaturation    = p.get<Float_t>("DynamicRangeSaturation");
+    fRemoveBaselineFluctuation = p.get<bool>("RemoveBaselineFluctuation"); 
   
     // This module produces (infrastructure piece)
     produces< std::vector< raw::OpDetWaveform > >();
@@ -128,10 +141,6 @@ namespace opdet {
     assert(wvfHandle.isValid());
 
     // Reserve a large enough array
-    // TODO: Commented out int totalsize to fix unused variable build error in clang.
-    //       Uncomment when implementing the full logic.
-    //int totalsize = 0;
-    //totalsize += wvfHandle->size();
     std::vector<double> fwaveform;
     fwaveform.reserve(fMaxTicks); 
 
@@ -147,13 +156,14 @@ namespace opdet {
         fwaveform[i] = wf[i];
       }
 
-      if (fIsPDVD && wf.ChannelNumber() > 3000 ) { //Excluding PMTs from the pre processing in PDVD
+      if(std::find(fIgnoreChannels.begin(), fIgnoreChannels.end(), wf.ChannelNumber()) != fIgnoreChannels.end()){
       }else{
-        if (fApplyDenoising){
+        DentCorrection(fwaveform, fDynamicRangeSaturation, fMaxTicksDent, wf.ChannelNumber());
+        if(fRemoveBaselineFluctuation && !CheckSaturation(fwaveform, fDynamicRangeSaturation, fMaxTicksSat)){ BaselineExtractor(fwaveform);}
+        if(fApplyDenoising){
           double lambda = fLambda;
           DenoisingAlgo(fwaveform, lambda);
         }
-        BaselineExtractor(fwaveform);
       }
       std::vector< short > waveformOfShorts = VectorOfDoublesToVectorOfShorts(fwaveform);
 
@@ -175,7 +185,7 @@ namespace opdet {
   void WaveformPreProcessing::BaselineExtractor(std::vector<double> &wf){
     std::vector<double> signal_base, waveform_full_bs;
     std::vector<double> temp = wf; 
-    //MA, baseline estimate, basline subtraction
+    //MA, baseline estimate, baseline subtraction
     std::vector<double> signalsma = ComputeMovingAverage(temp, 4);
     std::vector<double> basev = EstimateBaselineOpeningCentered(signalsma, fFirstBaselineSub, 1);
     for (size_t j=0; j<signalsma.size(); ++j){
@@ -186,6 +196,46 @@ namespace opdet {
       waveform_full_bs.push_back(signal_base.at(j)-base);
     }
     wf = waveform_full_bs;
+  }
+
+  void WaveformPreProcessing::DentCorrection(std::vector<double> &wf, Float_t fDynamicRangeSaturation, size_t MaxTicksDent, int channel){
+  //Checks if the waveform is saturated and if it has a "dent" at the start of the saturation plateau (likely caused by a temporary laser failure). If yes, replace the dent by the maximum ADC value. 
+    Float_t Peak = *std::max_element(wf.begin(), wf.end()); //Find the highest adc value in the waveform
+    if(Peak >= fDynamicRangeSaturation){
+    // Iterate through the data to find if there is a "dent". We look for a pattern: High -> Low (Dent) -> High
+      for (size_t i = 1; i < wf.size(); i++) {
+        if (wf[i] < Peak) { // If the current point is below the plateau, check if it's flanked by saturated points. This indicates it's a hole in the plateau, not a natural peak
+          if(wf[i - 1] >= Peak) {//check for saturation - dent - saturation
+            for (size_t j = i + 1; j < std::min(i + MaxTicksDent, wf.size()); j++) { // Look ahead to see if it saturates soon
+              if(wf[j] < 0.5*Peak) break; //There are two genuine saturated separated peaks within the interval
+              if (wf[j] >= Peak) {
+                wf[i] = Peak;
+                break;
+              }//end if
+            }// end for
+          }
+        }//end wf[i]<Peak
+      }//end for
+    }//end Peak>saturation
+  } 
+  
+  bool WaveformPreProcessing::CheckSaturation(std::vector<double> wf, Float_t fDynamicRangeSaturation, size_t fMaxTicksSat){
+  //Checks if the waveform has a hit with a very large charge that prevents the baseline from returning to the original value
+    auto it = std::max_element(wf.begin(), wf.end()); //Find the highest adc value in the waveform
+    Float_t Peak = *it;
+    if(Peak < fDynamicRangeSaturation) return false; //wvf is not saturated
+    size_t consecutiveSatTicks = 0;
+    for(double sample : wf) {
+      if(sample >= fDynamicRangeSaturation){// We are inside a saturated region
+        consecutiveSatTicks++;
+        // Check if THIS specific peak has exceeded the limit
+        if (consecutiveSatTicks > fMaxTicksSat) return true; 
+      }else{ // Signal dropped below threshold; reset counter for the next peak
+        consecutiveSatTicks = 0;
+      }
+    }
+    // If we finished the entire waveform without the counter exceeding fMaxTicksSat
+    return false;
   }
 
   void WaveformPreProcessing::DenoisingAlgo(std::vector<double> &waveform, double lambda){
