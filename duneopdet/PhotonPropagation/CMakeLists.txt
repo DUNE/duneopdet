@@ -37,9 +37,9 @@ install_fhicl()
 install_source()
 
 # NeedsTensorflow depends on LegacyLArG4 and cannot be built with geant 4.11
-##if(DEFINED ENV{TENSORFLOW_DIR})
-##  add_subdirectory(NeedsTensorflow)
-##endif()
+if(DEFINED ENV{TENSORFLOW_DIR})
+  add_subdirectory(NeedsTensorflow)
+endif()
 add_subdirectory(LibraryBuildTools)
 add_subdirectory(ScintTimeTools)
 add_subdirectory(OpticalPathTools)
