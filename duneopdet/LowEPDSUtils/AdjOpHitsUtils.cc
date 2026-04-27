@@ -53,7 +53,8 @@ namespace solar
       double Amplitude = 0;
       double PE = 0;
       double MaxPE = 0;
-      std::vector<double> PEperOpDet = {};
+      size_t NOpDets = art::ServiceHandle<geo::Geometry>()->NOpDets();
+      std::vector<double> PEperOpDet(NOpDets, 0.);
       double FastToTotal = 1;
       double X = 0;
       double Y = 0;
@@ -108,7 +109,7 @@ namespace solar
           TimeMax = thisTime;
         }
 
-        PEperOpDet.push_back(thisPE);
+        PEperOpDet[wireReadout.OpDetFromOpChannel(PDSHit->OpChannel())] += PDSHit->PE();
         Idx++;
       }
 
@@ -493,68 +494,6 @@ namespace solar
   }
 
 
-  void AdjOpHitsUtils::FlashMatchResidual(float &Residual, std::vector<art::Ptr<recob::OpHit>> Hits, double x, double y, double z)
-  {
-    if (Hits.size() == 0)
-    {
-      Residual = 1e6;
-      ProducerUtils::PrintInColor("Failed Residual Evaluation: Empty Flash!", ProducerUtils::GetColor("yellow"), "Error");
-      return;
-    }
-    // Initialize variables
-    Residual = 0;
-    float PE = 0;
-
-    // Find index of the hit with the highest PE
-    int maxPEIdx = 0;
-    for (unsigned int i = 0; i < Hits.size(); i++)
-    {
-      if (Hits[i]->PE() > Hits[maxPEIdx]->PE())
-        maxPEIdx = i;
-    }
-
-    // Start with the first hit in the flash as reference point
-    double firstHitY = wireReadout.OpDetGeoFromOpChannel(Hits[maxPEIdx]->OpChannel()).GetCenter().Y();
-    double firstHitZ = wireReadout.OpDetGeoFromOpChannel(Hits[maxPEIdx]->OpChannel()).GetCenter().Z();
-
-    // Get the first hit PE and calculate the squared distance and angle to the reference point
-    float firstHitPE = Hits[maxPEIdx]->PE();
-    float firstHitDistSq = pow(firstHitY - y, 2) + pow(firstHitZ - z, 2);
-
-    // Calculate the expected PE value for the reference point based on the first hit PE and the squared distance + angle
-    // float firstHitAngle = atan2(sqrt(firstHitDistSq), abs(x));
-    // float refHitPE = firstHitPE * (pow(x, 2) + firstHitDistSq) / pow(x, 2) / cos(firstHitAngle);
-    float refHitPE = firstHitPE * (pow(x, 2) + firstHitDistSq) / pow(x, 2);
-
-    // Loop over all OpHits in the flash and compute the squared distance to the reference point
-    for (const auto &hit : Hits)
-    {
-      double hitY = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Y();
-      double hitZ = wireReadout.OpDetGeoFromOpChannel(hit->OpChannel()).GetCenter().Z();
-
-      // The expected distribution of PE corresponds to a decrease of 1/r² with the distance from the flash center. Between adjacent OpHits, the expected decrease in charge has the form r²/(r²+d²)
-      float hitDistSq = pow(hitY - y, 2) + pow(hitZ - z, 2);
-
-      // float hitAngle = atan2(sqrt(hitDistSq), abs(x));
-      // float predPE = refHitPE * cos(hitAngle) * pow(x, 2) / (pow(x, 2) + hitDistSq);
-      float predPE = refHitPE * pow(x, 2) / (pow(x, 2) + hitDistSq);
-
-      Residual += pow(hit->PE() - predPE, 2);
-      PE += hit->PE();
-    }
-
-    Residual /= float(Hits.size());
-    std::string debug = "PE: " + ProducerUtils::str(PE) +
-      " X: " + ProducerUtils::str(x) +
-      " RefPE: " + ProducerUtils::str(refHitPE) +
-      " NHits: " + ProducerUtils::str(int(Hits.size())) +
-      " Residual: " + ProducerUtils::str(Residual);
-
-    ProducerUtils::PrintInColor(debug, ProducerUtils::GetColor("yellow"), "Debug");
-    return;
-  }
-
-
   int AdjOpHitsUtils::GetOpHitPlane(const art::Ptr<recob::OpHit> &hit, float buffer)
   {
     std::string geoName = geom->DetectorName();
@@ -613,7 +552,6 @@ namespace solar
       return false;
   }
 
-
   void AdjOpHitsUtils::GetOpHitWaveforms(const std::vector<art::Ptr<recob::OpHit>> &OpHitVector, std::vector<art::Ptr<raw::OpDetWaveform>> &OpHitWvfVector, std::vector<bool> &OpHitWvfValid, art::Event const &evt)
   { // Define a function to get the OpHit waveforms that correspond to each OpHit in the input vector
     // Get the OpDetWaveform handle
@@ -622,7 +560,7 @@ namespace solar
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     if (!opDetWvfHandle.isValid())
     {
-      ProducerUtils::PrintInColor("Invalid OpDetWaveform handle", ProducerUtils::GetColor("red"), "Error");
+      ProducerUtils::PrintInColor("Invalid OpDetWaveform handle", ProducerUtils::GetColor("red"), "Debug");
       for (size_t i = 0; i < OpHitVector.size(); i++)
       {
         OpHitWvfVector.push_back(art::Ptr<raw::OpDetWaveform>());  // Fill with a null pointer to keep the indices consistent
@@ -659,6 +597,7 @@ namespace solar
           break;
         }
       }
+
       if (!found)
       {
         ProducerUtils::PrintInColor("No matching OpDetWaveform found for OpHit channel " + ProducerUtils::str(int(opChannel)), ProducerUtils::GetColor("red"), "Debug");
@@ -666,6 +605,7 @@ namespace solar
         OpHitWvfValid.push_back(false);
       }
     }
+
     return;
   }
 
@@ -678,7 +618,12 @@ namespace solar
     auto const clockData = art::ServiceHandle<detinfo::DetectorClocksService const>()->DataFor(evt);
     if (!opWvfHandle.isValid())
     {
-      ProducerUtils::PrintInColor("Invalid OpWaveform handle", ProducerUtils::GetColor("red"), "Error");
+      ProducerUtils::PrintInColor("Invalid OpWaveform handle", ProducerUtils::GetColor("red"), "Debug");
+      for (size_t i = 0; i < OpHitVector.size(); i++)
+      {
+        OpHitWvfVector.push_back(art::Ptr<recob::OpWaveform>());  // Fill with a null pointer to keep the indices consistent
+        OpHitWvfValid.push_back(false);
+      }
       return;
     }
 
