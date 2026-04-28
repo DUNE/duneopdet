@@ -68,7 +68,7 @@ namespace opdet{
     void produce(art::Event & evt) override;
     bool CheckSaturation(std::vector<double> wf, Float_t fDynamicRangeSaturation, size_t fMaxTicksSat);
     void BaselineExtractor(std::vector<double>& wf);
-    void DentCorrection(std::vector<double> &wf, Float_t fDynamicRangeSaturation, size_t MaxTicksDent, int channel);
+    void DentCorrection(std::vector<double> &wf, Float_t fDynamicRangeSaturation, size_t MaxTicksDent, int channel, double MaxDentDepth);
     void DenoisingAlgo(std::vector<double>& waveform, double lambda);
     bool TV1D_denoise(std::vector<double>& waveform, std::vector<double>& outwaveform, const double lambda);
     std::vector<double> ComputeMovingAverage(const std::vector<double>& data, int n);
@@ -95,6 +95,7 @@ namespace opdet{
     Float_t fDynamicRangeSaturation;
     double fSecondBaselineSub;
     double fFirstBaselineSub;
+    double fMaxDentDepth; //Maximum percentage of falling from saturation to be considered a laser failure
   };
 }//namespace opdet
 
@@ -120,6 +121,7 @@ namespace opdet {
     fMaxTicksSat        = p.get<size_t>("MaxTicksSat"); //maximum number of saturated ticks in the waveform to apply baseline removal
     fSecondBaselineSub  = p.get<double>("SecondBaselineSub"); //the mode of lowest SecondBaslineSub of the signal for second baseline estimate
     fFirstBaselineSub   = p.get<double>("FirstBaselineSub"); //around 3 times the expected large signals
+    fMaxDentDepth       = p.get<double>("MaxDentDepth");     //Maximum percentage of falling from saturation to be considered a laser failure
     fDynamicRangeSaturation    = p.get<Float_t>("DynamicRangeSaturation");
     fRemoveBaselineFluctuation = p.get<bool>("RemoveBaselineFluctuation"); 
   
@@ -158,7 +160,7 @@ namespace opdet {
 
       if(std::find(fIgnoreChannels.begin(), fIgnoreChannels.end(), wf.ChannelNumber()) != fIgnoreChannels.end()){
       }else{
-        DentCorrection(fwaveform, fDynamicRangeSaturation, fMaxTicksDent, wf.ChannelNumber());
+        DentCorrection(fwaveform, fDynamicRangeSaturation, fMaxTicksDent, wf.ChannelNumber(), fMaxDentDepth);
         if(fRemoveBaselineFluctuation && !CheckSaturation(fwaveform, fDynamicRangeSaturation, fMaxTicksSat)){ BaselineExtractor(fwaveform);}
         if(fApplyDenoising){
           double lambda = fLambda;
@@ -198,16 +200,16 @@ namespace opdet {
     wf = waveform_full_bs;
   }
 
-  void WaveformPreProcessing::DentCorrection(std::vector<double> &wf, Float_t fDynamicRangeSaturation, size_t MaxTicksDent, int channel){
+  void WaveformPreProcessing::DentCorrection(std::vector<double> &wf, Float_t fDynamicRangeSaturation, size_t MaxTicksDent, int channel, double MaxDentDepth){
   //Checks if the waveform is saturated and if it has a "dent" at the start of the saturation plateau (likely caused by a temporary laser failure). If yes, replace the dent by the maximum ADC value. 
     Float_t Peak = *std::max_element(wf.begin(), wf.end()); //Find the highest adc value in the waveform
     if(Peak >= fDynamicRangeSaturation){
     // Iterate through the data to find if there is a "dent". We look for a pattern: High -> Low (Dent) -> High
       for (size_t i = 1; i < wf.size(); i++) {
-        if (wf[i] < Peak) { // If the current point is below the plateau, check if it's flanked by saturated points. This indicates it's a hole in the plateau, not a natural peak
+        if (wf[i] < Peak) { // If the current point is below the plateau, check if it's flanked by saturated points. This may be a hole in the plateau, not a natural peak
           if(wf[i - 1] >= Peak) {//check for saturation - dent - saturation
             for (size_t j = i + 1; j < std::min(i + MaxTicksDent, wf.size()); j++) { // Look ahead to see if it saturates soon
-              if(wf[j] < 0.5*Peak) break; //There are two genuine saturated separated peaks within the interval
+              if(wf[j] < MaxDentDepth*Peak) break; //There are two genuine saturated separated peaks within the interval
               if (wf[j] >= Peak) {
                 wf[i] = Peak;
                 break;
