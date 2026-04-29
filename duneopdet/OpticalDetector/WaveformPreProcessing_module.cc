@@ -460,8 +460,13 @@ namespace opdet {
 
   std::vector<short> WaveformPreProcessing::VectorOfDoublesToVectorOfShorts (std::vector<double> const& vectorOfDoubles) 
   {
-    // Don't bother to round properly, it's faster this way
-    return std::vector<short>(vectorOfDoubles.begin(), vectorOfDoubles.end());
+    // Rounding properly
+    std::vector<short> result;
+    result.reserve(vectorOfDoubles.size());
+    for (double val : vectorOfDoubles) {
+      result.push_back(static_cast<short>(std::round(val)));
+    }
+    return result;
   }
 
 }//namespace opdet
