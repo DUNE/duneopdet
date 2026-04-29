@@ -10,7 +10,7 @@ cmake_minimum_required (VERSION 3.20 FATAL_ERROR)
 
 find_package(cetmodules REQUIRED)
 project(duneopdet LANGUAGES CXX)
-set(${PROJECT_NAME}_CMAKE_PROJECT_VERSION_STRING 10.20.05d01)
+set(${PROJECT_NAME}_CMAKE_PROJECT_VERSION_STRING 10.20.06)
 set(${PROJECT_NAME}_FW_DIR  "config_data")
 
 include(CetCMakeEnv)
@@ -21,6 +21,8 @@ cet_set_compiler_flags(DIAGS CAUTIOUS
   NO_UNDEFINED
   EXTRA_FLAGS -pedantic -Wno-unused-local-typedefs
 )
+
+cet_cmake_module_directories(Modules BINARY)
 
 cet_report_compiler_flags()
 
@@ -52,5 +54,6 @@ include(ArtMake)
 include(BuildPlugins)
 
 add_subdirectory(duneopdet)
+add_subdirectory(Modules)
 
 cet_cmake_config()
