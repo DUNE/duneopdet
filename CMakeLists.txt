@@ -22,6 +22,8 @@ cet_set_compiler_flags(DIAGS CAUTIOUS
   EXTRA_FLAGS -pedantic -Wno-unused-local-typedefs
 )
 
+cet_cmake_module_directories(Modules BINARY)
+
 cet_report_compiler_flags()
 
 find_package( art REQUIRED )
@@ -52,5 +54,6 @@ include(ArtMake)
 include(BuildPlugins)
 
 add_subdirectory(duneopdet)
+add_subdirectory(Modules)
 
 cet_cmake_config()
