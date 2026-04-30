@@ -69,7 +69,7 @@ namespace opdet{
     bool CheckSaturation(std::vector<double> wf, Float_t fDynamicRangeSaturation, size_t fMaxTicksSat);
     void BaselineExtractor(std::vector<double>& wf);
     void DentCorrection(std::vector<double> &wf, Float_t fDynamicRangeSaturation, size_t MaxTicksDent, int channel, double MaxDentDepth);
-    void DenoisingAlgo(std::vector<double>& waveform, double lambda);
+    void DenoisingAlgo(std::vector<double>& waveform, double lambda, Float_t fDynamicRangeSaturation);
     bool TV1D_denoise(std::vector<double>& waveform, std::vector<double>& outwaveform, const double lambda);
     std::vector<double> ComputeMovingAverage(const std::vector<double>& data, int n);
     double median_func(std::vector<double> vec, double fraction);
@@ -164,7 +164,7 @@ namespace opdet {
         if(fRemoveBaselineFluctuation && !CheckSaturation(fwaveform, fDynamicRangeSaturation, fMaxTicksSat)){ BaselineExtractor(fwaveform);}
         if(fApplyDenoising){
           double lambda = fLambda;
-          DenoisingAlgo(fwaveform, lambda);
+          DenoisingAlgo(fwaveform, lambda, fDynamicRangeSaturation);
         }
       }
       std::vector< short > waveformOfShorts = VectorOfDoublesToVectorOfShorts(fwaveform);
@@ -240,7 +240,7 @@ namespace opdet {
     return false;
   }
 
-  void WaveformPreProcessing::DenoisingAlgo(std::vector<double> &waveform, double lambda){
+  void WaveformPreProcessing::DenoisingAlgo(std::vector<double> &waveform, double lambda, Float_t fDynamicRangeSaturation){
     int length = waveform.size();
     std::vector<double> outwaveform; 
     outwaveform = waveform;  // copy
@@ -257,8 +257,8 @@ namespace opdet {
       }
     }
 
-    for(int i = 0; i < length; i++) { //replacing non-zero entries
-      if(outwaveform[i]) waveform[i] = outwaveform[i];
+    for(int i = 0; i < length; i++) { //replacing non-zero and non-saturated entries
+      if(outwaveform[i] && waveform[i]<fDynamicRangeSaturation) waveform[i] = outwaveform[i];
     }
   }
 
