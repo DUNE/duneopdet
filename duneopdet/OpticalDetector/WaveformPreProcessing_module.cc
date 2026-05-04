@@ -87,7 +87,7 @@ namespace opdet{
     bool fApplyDenoising;
     bool fRemoveBaselineFluctuation;
     std::vector<int> fIgnoreChannels;
-    bool fIsPDVD;
+//    bool fIsPDVD; laliaga commenting: causing warning failure on c14:prof compiling process due to unused variable 
     double fLambda;
     int fMaxTicks;        //Maximum number of ticks in waveform
     size_t fMaxTicksDent;     //Maximum number of ticks for dent correction
