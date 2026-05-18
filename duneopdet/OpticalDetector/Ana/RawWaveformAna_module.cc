@@ -18,6 +18,7 @@
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 #include "detdataformats/trigger/TriggerCandidateData2.hpp"
+#include "detdataformats/trigger/TriggerCandidateData.hpp"
 
 
 // Framework includes
@@ -61,9 +62,14 @@ namespace opdet {
         void analyze (const art::Event&);
 
     private:
+        unsigned int GetTrigType(const art::Event& evt);
+        void GetTrigTime(const art::Event& evt, uint64_t &ts_uint64, double &ts_double);
+
+
         // The parameters we'll read from the .fcl file.
         std::string fInputModuleLabel;          // Input tag for OpDetWaveform collection
         std::string fTriggerModuleLabel;          // Input tag for raw::Trigger
+        std::string fTriggerDataFormat;          // Which trigger data format to use. PDHD uses namespace dunedaq::trgdataformats, PDVD uses dunedaq::trgdataformats2
 
         TTree* fWaveformTree;
 
@@ -96,6 +102,7 @@ namespace opdet {
         // Read the fcl-file
         fInputModuleLabel  =   pset.get< std::string >("InputModule");
         fTriggerModuleLabel  =   pset.get< std::string >("TriggerModule");
+        fTriggerDataFormat  =   pset.get< std::string >("TriggerDataFormat");
 
         art::ServiceHandle< art::TFileService > tfs;
 
@@ -133,18 +140,13 @@ namespace opdet {
         art::Handle< std::vector< raw::OpDetWaveform >> wfmHndl;
         evt.getByLabel(fInputModuleLabel, wfmHndl);
 
-
-        auto trigHndl = evt.getHandle< std::vector<dunedaq::trgdataformats2::TriggerCandidateData>>(fTriggerModuleLabel);
-        auto &trig = trigHndl->at(0);
-
         Run = evt.id().run();
         SubRun = evt.id().subRun();
         Event = evt.id().event();
-        TriggerType = (unsigned int)trig.type;
-        // TriggerCandidateData::time_candidate ... time of the trigger signal?
-        // TriggerCandidateData::time_start ... time of the DAQ window opened?
-        TriggerTime_uint64 = trig.time_candidate; // in ticks (16 ns, time system clock) since epoch
-        TriggerTime_double = (double)trig.time_candidate;
+
+        TriggerType = GetTrigType(evt);
+
+        GetTrigTime(evt, TriggerTime_uint64, TriggerTime_double);
 
         for (auto &wfm: *wfmHndl) {
             OpChannel = wfm.ChannelNumber();
@@ -162,5 +164,47 @@ namespace opdet {
         }
 
 
+    }
+
+
+    unsigned int RawWaveformAna::GetTrigType(const art::Event& evt) {
+        if (fTriggerDataFormat == "PDVD") {
+            auto trigHndl = evt.getHandle< std::vector<dunedaq::trgdataformats2::TriggerCandidateData>>(fTriggerModuleLabel);
+            auto &trig = trigHndl->at(0);
+
+            return (unsigned int)trig.type;
+        } else if (fTriggerDataFormat == "PDHD") {
+            auto trigHndl = evt.getHandle< std::vector<dunedaq::trgdataformats::TriggerCandidateData>>(fTriggerModuleLabel);
+            auto &trig = trigHndl->at(0);
+
+            return (unsigned int)trig.type;
+        }
+
+        return 0;
+    }
+
+    void RawWaveformAna::GetTrigTime(const art::Event& evt, uint64_t &ts_uint64, double &ts_double) {
+        if (fTriggerDataFormat == "PDVD") {
+            auto trigHndl = evt.getHandle<
+                std::vector<dunedaq::trgdataformats2::TriggerCandidateData>
+                >(fTriggerModuleLabel);
+            auto &trig = trigHndl->at(0);
+
+            // TriggerCandidateData::time_candidate ... time of the trigger signal?
+            // TriggerCandidateData::time_start ... time of the DAQ window opened?
+            ts_uint64 = trig.time_candidate; // in ticks (16 ns, time system clock) since epoch
+            ts_double = (double)trig.time_candidate;
+
+        } else if (fTriggerDataFormat == "PDHD") {
+            auto trigHndl = evt.getHandle<
+                std::vector<dunedaq::trgdataformats::TriggerCandidateData>
+                >(fTriggerModuleLabel);
+            auto &trig = trigHndl->at(0);
+
+            ts_uint64 = trig.time_candidate; // in ticks (16 ns, time system clock) since epoch
+            ts_double = (double)trig.time_candidate;
+        }
+
+        return;
     }
 } // namespace opdet
