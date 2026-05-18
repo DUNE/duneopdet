@@ -70,14 +70,16 @@ namespace opdet {
         int Run;
         int SubRun;
         int Event;
-        uint64_t TimeStamp;
+        uint64_t TimeStamp_uint64;
+        double TimeStamp_double;
         int OpChannel;
         unsigned int nSamples;
         //double SampleSize;
         std::vector<short> adc_value;
         //unsigned int nOpDet;
         unsigned int TriggerType;
-
+        uint64_t TriggerTime_uint64;
+        double TriggerTime_double;
     };
 }
 
@@ -103,7 +105,10 @@ namespace opdet {
         fWaveformTree->Branch("SubRun"    , &SubRun    , "SubRun/I"    );
         fWaveformTree->Branch("Event"     , &Event     , "Event/I"     );
         fWaveformTree->Branch("Trigger"     , &TriggerType     , "Trigger/I"     );
-        fWaveformTree->Branch("TimeStamp" , &TimeStamp     , "TimeStamp/l"     );
+        fWaveformTree->Branch("TriggerTime_uint64" , &TriggerTime_uint64, "TriggerTime_uint64/l" );
+        fWaveformTree->Branch("TriggerTime_double" , &TriggerTime_double, "TriggerTime_double/D" );
+        fWaveformTree->Branch("TimeStamp_uint64" , &TimeStamp_uint64     , "TimeStamp_uint64/l"     );
+        fWaveformTree->Branch("TimeStamp_double" , &TimeStamp_double     , "TimeStamp_double/D"     );
         fWaveformTree->Branch("NSamples"     , &nSamples     , "NSamples/I"     );
         fWaveformTree->Branch("OpChannel"     , &OpChannel     , "OpChannel/I"     );
         fWaveformTree->Branch("adc", &adc_value);
@@ -136,11 +141,16 @@ namespace opdet {
         SubRun = evt.id().subRun();
         Event = evt.id().event();
         TriggerType = (unsigned int)trig.type;
+        // TriggerCandidateData::time_candidate ... time of the trigger signal?
+        // TriggerCandidateData::time_start ... time of the DAQ window opened?
+        TriggerTime_uint64 = trig.time_candidate; // in ticks (16 ns, time system clock) since epoch
+        TriggerTime_double = (double)trig.time_candidate;
 
         for (auto &wfm: *wfmHndl) {
             OpChannel = wfm.ChannelNumber();
             nSamples  = wfm.Waveform().size();
-            TimeStamp = (uint64_t)wfm.TimeStamp();
+            TimeStamp_uint64 = (uint64_t)wfm.TimeStamp();
+            TimeStamp_double = wfm.TimeStamp(); // was in ticks (16 ns, PDS clock), now custom fix to microseconds
             adc_value.resize(nSamples);
 
             for (unsigned int ii = 0; ii< nSamples ; ii++) {
