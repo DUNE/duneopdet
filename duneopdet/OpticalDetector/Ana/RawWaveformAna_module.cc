@@ -151,8 +151,14 @@ namespace opdet {
         for (auto &wfm: *wfmHndl) {
             OpChannel = wfm.ChannelNumber();
             nSamples  = wfm.Waveform().size();
+
+            // Waveform timestamp convetion is dependending on the decoder.
+            // For PD HD and VD, the decoder stored this in ticks (16 ns, PDS clock) since the epoch. However, the type double cannot hold its precision.
+            // The latest fix to the PD VD digitizer trims the original raw timestamp (uint64) to 40 least significant bits and converts it to a double in microseconds.
+            // The uint64 form here stays for backward compatibility. Use the double version if the time stamp is in microseconds.
             TimeStamp_uint64 = (uint64_t)wfm.TimeStamp();
-            TimeStamp_double = wfm.TimeStamp(); // was in ticks (16 ns, PDS clock), now custom fix to microseconds
+            TimeStamp_double = wfm.TimeStamp(); 
+            
             adc_value.resize(nSamples);
 
             for (unsigned int ii = 0; ii< nSamples ; ii++) {
