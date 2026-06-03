@@ -214,6 +214,17 @@ protodunevd_daphne: {
          module_type: "DAPHNEReaderPDVD"
          ExportWaveformTree: true
       }
+protodunehd_daphne: {
+         #Using VD implementation for HD now. See issue: https://github.com/DUNE/duneopdet/issues/120
+         DAPHNEInterface: {
+            tool_type: "DAPHNEInterface3"
+         }
+         InputLabel: "daq"
+         OutputLabel: "daq"
+         SubDetString: [ "HD_PDS" ]
+         module_type: "DAPHNEReaderPDVD"
+         ExportWaveformTree: true
+      }
 
 protodunevd_ophit: {
          AreaToPE: true
