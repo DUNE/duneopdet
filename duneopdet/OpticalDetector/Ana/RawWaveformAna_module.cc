@@ -18,6 +18,7 @@
 #include "lardata/DetectorInfoServices/DetectorClocksService.h"
 
 #include "detdataformats/trigger/TriggerCandidateData2.hpp"
+#include "detdataformats/trigger/TriggerCandidateData.hpp"
 
 
 // Framework includes
@@ -61,23 +62,30 @@ namespace opdet {
         void analyze (const art::Event&);
 
     private:
+        unsigned int GetTrigType(const art::Event& evt);
+        void GetTrigTime(const art::Event& evt, uint64_t &ts_uint64, double &ts_double);
+
+
         // The parameters we'll read from the .fcl file.
         std::string fInputModuleLabel;          // Input tag for OpDetWaveform collection
         std::string fTriggerModuleLabel;          // Input tag for raw::Trigger
+        std::string fTriggerDataFormat;          // Which trigger data format to use. PDHD uses namespace dunedaq::trgdataformats, PDVD uses dunedaq::trgdataformats2
 
         TTree* fWaveformTree;
 
         int Run;
         int SubRun;
         int Event;
-        uint64_t TimeStamp;
+        uint64_t TimeStamp_uint64;
+        double TimeStamp_double;
         int OpChannel;
         unsigned int nSamples;
         //double SampleSize;
         std::vector<short> adc_value;
         //unsigned int nOpDet;
         unsigned int TriggerType;
-
+        uint64_t TriggerTime_uint64;
+        double TriggerTime_double;
     };
 }
 
@@ -94,6 +102,7 @@ namespace opdet {
         // Read the fcl-file
         fInputModuleLabel  =   pset.get< std::string >("InputModule");
         fTriggerModuleLabel  =   pset.get< std::string >("TriggerModule");
+        fTriggerDataFormat  =   pset.get< std::string >("TriggerDataFormat");
 
         art::ServiceHandle< art::TFileService > tfs;
 
@@ -103,7 +112,10 @@ namespace opdet {
         fWaveformTree->Branch("SubRun"    , &SubRun    , "SubRun/I"    );
         fWaveformTree->Branch("Event"     , &Event     , "Event/I"     );
         fWaveformTree->Branch("Trigger"     , &TriggerType     , "Trigger/I"     );
-        fWaveformTree->Branch("TimeStamp" , &TimeStamp     , "TimeStamp/l"     );
+        fWaveformTree->Branch("TriggerTime_uint64" , &TriggerTime_uint64, "TriggerTime_uint64/l" );
+        fWaveformTree->Branch("TriggerTime_double" , &TriggerTime_double, "TriggerTime_double/D" );
+        fWaveformTree->Branch("TimeStamp_uint64" , &TimeStamp_uint64     , "TimeStamp_uint64/l"     );
+        fWaveformTree->Branch("TimeStamp_double" , &TimeStamp_double     , "TimeStamp_double/D"     );
         fWaveformTree->Branch("NSamples"     , &nSamples     , "NSamples/I"     );
         fWaveformTree->Branch("OpChannel"     , &OpChannel     , "OpChannel/I"     );
         fWaveformTree->Branch("adc", &adc_value);
@@ -128,19 +140,25 @@ namespace opdet {
         art::Handle< std::vector< raw::OpDetWaveform >> wfmHndl;
         evt.getByLabel(fInputModuleLabel, wfmHndl);
 
-
-        auto trigHndl = evt.getHandle< std::vector<dunedaq::trgdataformats2::TriggerCandidateData>>(fTriggerModuleLabel);
-        auto &trig = trigHndl->at(0);
-
         Run = evt.id().run();
         SubRun = evt.id().subRun();
         Event = evt.id().event();
-        TriggerType = (unsigned int)trig.type;
+
+        TriggerType = GetTrigType(evt);
+
+        GetTrigTime(evt, TriggerTime_uint64, TriggerTime_double);
 
         for (auto &wfm: *wfmHndl) {
             OpChannel = wfm.ChannelNumber();
             nSamples  = wfm.Waveform().size();
-            TimeStamp = (uint64_t)wfm.TimeStamp();
+
+            // Waveform timestamp convetion is dependending on the decoder.
+            // For PD HD and VD, the decoder stored this in ticks (16 ns, PDS clock) since the epoch. However, the type double cannot hold its precision.
+            // The latest fix to the PD VD digitizer trims the original raw timestamp (uint64) to 40 least significant bits and converts it to a double in microseconds.
+            // The uint64 form here stays for backward compatibility. Use the double version if the time stamp is in microseconds.
+            TimeStamp_uint64 = (uint64_t)wfm.TimeStamp();
+            TimeStamp_double = wfm.TimeStamp(); 
+            
             adc_value.resize(nSamples);
 
             for (unsigned int ii = 0; ii< nSamples ; ii++) {
@@ -152,5 +170,47 @@ namespace opdet {
         }
 
 
+    }
+
+
+    unsigned int RawWaveformAna::GetTrigType(const art::Event& evt) {
+        if (fTriggerDataFormat == "PDVD") {
+            auto trigHndl = evt.getHandle< std::vector<dunedaq::trgdataformats2::TriggerCandidateData>>(fTriggerModuleLabel);
+            auto &trig = trigHndl->at(0);
+
+            return (unsigned int)trig.type;
+        } else if (fTriggerDataFormat == "PDHD") {
+            auto trigHndl = evt.getHandle< std::vector<dunedaq::trgdataformats::TriggerCandidateData>>(fTriggerModuleLabel);
+            auto &trig = trigHndl->at(0);
+
+            return (unsigned int)trig.type;
+        }
+
+        return 0;
+    }
+
+    void RawWaveformAna::GetTrigTime(const art::Event& evt, uint64_t &ts_uint64, double &ts_double) {
+        if (fTriggerDataFormat == "PDVD") {
+            auto trigHndl = evt.getHandle<
+                std::vector<dunedaq::trgdataformats2::TriggerCandidateData>
+                >(fTriggerModuleLabel);
+            auto &trig = trigHndl->at(0);
+
+            // TriggerCandidateData::time_candidate ... time of the trigger signal?
+            // TriggerCandidateData::time_start ... time of the DAQ window opened?
+            ts_uint64 = trig.time_candidate; // in ticks (16 ns, time system clock) since epoch
+            ts_double = (double)trig.time_candidate;
+
+        } else if (fTriggerDataFormat == "PDHD") {
+            auto trigHndl = evt.getHandle<
+                std::vector<dunedaq::trgdataformats::TriggerCandidateData>
+                >(fTriggerModuleLabel);
+            auto &trig = trigHndl->at(0);
+
+            ts_uint64 = trig.time_candidate; // in ticks (16 ns, time system clock) since epoch
+            ts_double = (double)trig.time_candidate;
+        }
+
+        return;
     }
 } // namespace opdet
