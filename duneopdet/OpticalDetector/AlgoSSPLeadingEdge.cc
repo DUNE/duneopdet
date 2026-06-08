@@ -55,7 +55,7 @@ namespace pmtana {
   }
 
   //---------------------------------------------------------------------------
-  bool AlgoSSPLeadingEdge::RecoPulse( const pmtana::Waveform_t& wf,
+  bool AlgoSSPLeadingEdge::RecoPulse( const raw::OpDetWaveform& wf,
                             const pmtana::PedestalMean_t& ped_mean,
                             const pmtana::PedestalSigma_t& ped_rms )
   {
