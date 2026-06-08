@@ -1,10 +1,13 @@
 #include "services_dune.fcl"
 #include "singles_dune.fcl"
-#include "largeantmodules_dune.fcl"
 #include "detsimmodules_dune.fcl"
+#include "LArG4_dune.fcl"
+#include "IonAndScint_dune.fcl"
 #include "mccheatermodules.fcl"
 #include "photpropservices_dune.fcl"
 #include "opticaldetectormodules_dune.fcl"
+#include "PDFastSim_dune.fcl"
+#include "elecdrift_dune.fcl"
 
 
 BEGIN_PROLOG
@@ -71,7 +74,10 @@ physics:
  producers:
  {
    generator: @local::standard_textfilegen
-   largeant:  @local::dunefd_largeant
+   largeant:  @local::dunefd_larg4
+   IonAndScint: @local::dunefd_ionandscint
+   PDFastSim:   @local::dunefd_pdfastsim
+   elecDrift: @local::dunefd_elecdrift
    rns:       { module_type: "RandomNumberSaver" }
  }
 
@@ -104,6 +110,13 @@ physics:
 
       SimulationLabel: "largeant"
 
+      # After the larg4 refactorization, the largeant module mentioned 
+      # above does not produce SimChannel products anymore and another 
+      # label is needed. Using elecDrift which is lighter but should
+      # work with wirecell too
+
+      SimChannelLabel: "elecDrift"
+
       # Hits can be created by more than one module in
       # ${LARRECO_DIR}/source/HitFinder. For this example, I picked
       # the one that's usually run first.
@@ -127,7 +140,7 @@ physics:
  #define the producer and filter modules for this path, order matters,
  #filters reject all following items.  see lines starting physics.producers below
  # simulate: [ generator, largeant, daq, rns ]
- simulate: [ generator, largeant, rns ]
+ simulate: [ generator, largeant, IonAndScint, PDFastSim, elecDrift, rns ]
  analyzeIt:  [ AnalysisExample, pmtresponse]
 
  #define the output stream, there could be more than one if using filters
@@ -155,3 +168,4 @@ outputs:
 }
 
 physics.producers.generator.Offset: 0
+physics.analyzers.pmtresponse.InputModule: "PDFastSim"
