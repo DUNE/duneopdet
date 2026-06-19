@@ -144,7 +144,7 @@ dunefd_simphotoncounter:
 {
   module_type:            "SimPhotonCounter"
   Verbosity:               0
-  InputModule:            "largeant"
+  InputModule:            "PDFastSim"
   MakeAllPhotonsTree:      true
   MakeDetectedPhotonsTree: true
   MakeOpDetsTree:          true
