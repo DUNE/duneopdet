@@ -1,6 +1,5 @@
 #include "services_dune.fcl"
 #include "singles_dune.fcl"
-#include "largeantmodules_dune.fcl"
 #include "detsimmodules_dune.fcl"
 #include "mccheatermodules.fcl"
 #include "photpropservices_dune.fcl"
@@ -44,7 +43,7 @@ physics:
    
    producers:
    {
-      opdigi:    @local::dunefd_opdigi_threegang    # simple digitizer with no noise and high saturation
+      opdigi:    @local::dunefd_opdigi_threegang_refactor    # simple digitizer with no noise and high saturation
       rns:       { module_type: "RandomNumberSaver" }
    }
 

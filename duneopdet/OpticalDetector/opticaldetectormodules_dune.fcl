@@ -144,7 +144,7 @@ dunefd_simphotoncounter:
 {
   module_type:            "SimPhotonCounter"
   Verbosity:               0
-  InputModule:            "largeant"
+  InputModule:            "PDFastSim"
   MakeAllPhotonsTree:      true
   MakeDetectedPhotonsTree: true
   MakeOpDetsTree:          true
@@ -212,7 +212,18 @@ protodunevd_daphne: {
          OutputLabel: "daq"
          SubDetString: ["VD_Membrane_PDS","VD_Cathode_PDS"]
          module_type: "DAPHNEReaderPDVD"
-         ExportWaveformTree: true
+         ExportWaveformTree: false
+      }
+protodunehd_daphne: {
+         #Using VD implementation for HD now. See issue: https://github.com/DUNE/duneopdet/issues/120
+         DAPHNEInterface: {
+            tool_type: "DAPHNEInterface3"
+         }
+         InputLabel: "daq"
+         OutputLabel: "daq"
+         SubDetString: [ "HD_PDS" ]
+         module_type: "DAPHNEReaderPDVD"
+         ExportWaveformTree: false
       }
 
 protodunevd_ophit: {
