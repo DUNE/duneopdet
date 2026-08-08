@@ -13,6 +13,7 @@
 #define AlgoSSPLeadingEdge_H 1
 
 #include "fhiclcpp/ParameterSet.h"
+#include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/PMTPulseRecoBase.h"
 #include <vector>
 
@@ -34,9 +35,10 @@ namespace pmtana {
     void Reset();
   protected:
 
-    bool RecoPulse( const pmtana::Waveform_t&,
+    bool RecoPulse( const raw::OpDetWaveform&,
                     const pmtana::PedestalMean_t&,
                     const pmtana::PedestalSigma_t&     );
+
   
     // A variable holder for a user-defined absolute ADC threshold value
     double _adc_thres;
