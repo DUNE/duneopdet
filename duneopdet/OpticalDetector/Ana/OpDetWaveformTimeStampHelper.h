@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <cstdint>
+#include <ctime>
 #include <limits>
 
 namespace opdet {
@@ -184,6 +185,121 @@ namespace opdet {
       const auto max = std::numeric_limits<TriggerTimeStamp_t>::max();
       return (max - referenceTriggerTimeStamp < magnitude) ?
         max : referenceTriggerTimeStamp + magnitude;
+    }
+
+    static TriggerTimeStamp_t WaveformToTriggerTicksNearUnixSeconds(
+      raw::OpDetWaveform const& waveform,
+      TriggerTimeStamp_t unixSeconds,
+      double opticalClockTickPeriod)
+    {
+      return WaveformToTriggerTicksNear(
+        waveform,
+        UnixSecondsToTriggerTicks(unixSeconds, opticalClockTickPeriod),
+        opticalClockTickPeriod);
+    }
+
+    static TriggerTimeStamp_t WaveformToTriggerTicksNearUnixSeconds(
+      raw::OpDetWaveform const& waveform,
+      TriggerTimeStamp_t unixSeconds,
+      detinfo::DetectorClocksData const& clockData)
+    {
+      return WaveformToTriggerTicksNearUnixSeconds(
+        waveform, unixSeconds, clockData.OpticalClock().TickPeriod());
+    }
+
+    static TriggerTimeStamp_t WaveformToTriggerTicksNearUnixSeconds(
+      TriggerTimeStamp_t waveformTrimmedTicks,
+      TriggerTimeStamp_t unixSeconds,
+      double opticalClockTickPeriod)
+    {
+      return WaveformToTriggerTicksNear(
+        waveformTrimmedTicks,
+        UnixSecondsToTriggerTicks(unixSeconds, opticalClockTickPeriod));
+    }
+
+    static TriggerTimeStamp_t WaveformToTriggerTicksInUnixEra(
+      raw::OpDetWaveform const& waveform,
+      TriggerTimeStamp_t unixSeconds,
+      double opticalClockTickPeriod)
+    {
+      return WaveformToTriggerTicksInUnixEra(
+        WaveformToTriggerTicks(waveform, opticalClockTickPeriod),
+        unixSeconds,
+        opticalClockTickPeriod);
+    }
+
+    static TriggerTimeStamp_t WaveformToTriggerTicksInUnixEra(
+      raw::OpDetWaveform const& waveform,
+      TriggerTimeStamp_t unixSeconds,
+      detinfo::DetectorClocksData const& clockData)
+    {
+      return WaveformToTriggerTicksInUnixEra(
+        waveform, unixSeconds, clockData.OpticalClock().TickPeriod());
+    }
+
+    static TriggerTimeStamp_t WaveformToTriggerTicksInUnixEra(
+      TriggerTimeStamp_t waveformTrimmedTicks,
+      TriggerTimeStamp_t unixSeconds,
+      double opticalClockTickPeriod)
+    {
+      return TriggerEraFromUnixSeconds(unixSeconds, opticalClockTickPeriod) +
+             (waveformTrimmedTicks & TrimmedMask);
+    }
+
+    static TriggerTimeStamp_t WaveformToTriggerTicksNearCurrentTime(
+      raw::OpDetWaveform const& waveform,
+      double opticalClockTickPeriod)
+    {
+      return WaveformToTriggerTicksNearUnixSeconds(
+        waveform, CurrentUnixSeconds(), opticalClockTickPeriod);
+    }
+
+    static TriggerTimeStamp_t WaveformToTriggerTicksNearCurrentTime(
+      raw::OpDetWaveform const& waveform,
+      detinfo::DetectorClocksData const& clockData)
+    {
+      return WaveformToTriggerTicksNearCurrentTime(
+        waveform, clockData.OpticalClock().TickPeriod());
+    }
+
+    static TriggerTimeStamp_t WaveformToTriggerTicksNearCurrentTime(
+      TriggerTimeStamp_t waveformTrimmedTicks,
+      double opticalClockTickPeriod)
+    {
+      return WaveformToTriggerTicksNearUnixSeconds(
+        waveformTrimmedTicks, CurrentUnixSeconds(), opticalClockTickPeriod);
+    }
+
+    static TriggerTimeStamp_t UnixSecondsToTriggerTicks(
+      TriggerTimeStamp_t unixSeconds,
+      double opticalClockTickPeriod)
+    {
+      if (opticalClockTickPeriod <= 0.0) {
+        return TriggerTimeStamp_t{0};
+      }
+
+      const auto ticks = std::llround(
+        (static_cast<long double>(unixSeconds) * 1000000.0L) /
+        static_cast<long double>(opticalClockTickPeriod));
+
+      return (ticks <= 0) ?
+        TriggerTimeStamp_t{0} : static_cast<TriggerTimeStamp_t>(ticks);
+    }
+
+    static TriggerTimeStamp_t TriggerEraFromUnixSeconds(
+      TriggerTimeStamp_t unixSeconds,
+      double opticalClockTickPeriod)
+    {
+      const auto ticks = UnixSecondsToTriggerTicks(
+        unixSeconds, opticalClockTickPeriod);
+      return ticks - (ticks & TrimmedMask);
+    }
+
+    static TriggerTimeStamp_t CurrentUnixSeconds()
+    {
+      const auto now = std::time(nullptr);
+      return (now <= 0) ? TriggerTimeStamp_t{0} :
+        static_cast<TriggerTimeStamp_t>(now);
     }
 
   private:
