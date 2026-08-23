@@ -100,6 +100,7 @@ standard_hpk_caen_template_digitizer: @local::standard_fbk_daphnev2_template_dig
 standard_kpk_caen_template_digitizer.SPEDataFile: "SPE_CAEN_HPK_2022.dat" # Path to SPE template
 
 standard_template_digitizer: @local::standard_fbk_daphnev2_template_digitizer
+standard_template_digitizer.FullWaveformOutput: true
 
 #New protodune-sp digitizer
 protodune_opdigitizer:
