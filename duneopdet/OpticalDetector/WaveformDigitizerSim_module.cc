@@ -594,27 +594,34 @@ namespace opdet {
 
     Ranges_t readouts;
 
+    // All of these are size_t: clamp instead of subtracting, so a trigger in
+    // the first fPreTrigger ticks can't wrap around to an out-of-bounds window.
+    auto const windowEnd = [&](size_t tick) {
+      size_t const end = tick + fReadoutWindow;
+      return std::min(end > fPreTrigger ? end - fPreTrigger : 0, wf.size() - 1);
+    };
+
     for (auto range: fls.ranges) {
       size_t  wstart = -1;
       size_t  wend   = -1;
       bool fire   = false;
 
-      for (size_t tick = range.first; tick < range.second - fDwindow; ++tick) {
+      for (size_t tick = range.first; tick + fDwindow < range.second; ++tick) {
 
         // Fire CFD
         if (wf[tick+fDwindow] - wf[tick] > fThresholdADC) {
 
           if (!fire) {
-            // Start a new readout window 
+            // Start a new readout window
             fire   = true;
-            wstart = tick-fPreTrigger;
-            wend   = tick-fPreTrigger+fReadoutWindow;
+            wstart = tick > fPreTrigger ? tick - fPreTrigger : 0;
+            wend   = windowEnd(tick);
           }
           else {
             // Extend the current readout window
             // Simplest to implement here, update to the
             // actual DAPHNE algorithm once known
-            wend = tick-fPreTrigger+fReadoutWindow;
+            wend = windowEnd(tick);
           }
 
         }
