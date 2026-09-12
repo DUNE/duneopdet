@@ -531,35 +531,42 @@ namespace opdet {
                                               std::vector<FocusList>&        fls) //const
   {
     // Vector of DivRec time bins (struct OpDet_Time_Chans)
-    for (auto odtc: dr_p->GetTimeChans()) {
+    for (auto const& odtc: dr_p->GetTimeChans()) {
 
-      // Extract time for this odtc within the event
+      // Extract time for this odtc within the event, in fractional ticks
       double photonTime_ns = odtc.time;
-      size_t timeBin       = ns2Tick(photonTime_ns);
+      double const tdc     = (photonTime_ns/1000. - fTimeBegin)*fSampleFreqMHz;
+      // First sample at or after the photon arrival
+      double const first   = std::ceil(tdc);
 
       // Check if the photon is inside the digitization range. If not, skip it.
-      if ( timeBin < 0 || timeBin >= pdWaveform[0].size() ) { //fine to compare with a single waveform since they are all the same size
+      if ( first < 0 || first >= pdWaveform[0].size() ) { //fine to compare with a single waveform since they are all the same size
         mf::LogWarning("WaveformDigitizerSim") << "Skipping a photon at " << photonTime_ns/1000. << " us, outside digitization window of " << fTimeBegin << " to " << fTimeEnd;
         continue;
       }
+      size_t const timeBin = first;
 
       // Loop through records at this time and count photons
       int nPE = 0;
       for (auto const& sdp : odtc.phots)
         nPE += sdp.phot;
 
+      size_t const stop = std::min(fPulseLengthTicks, pdWaveform[0].size()-timeBin);
+
+      vector<double> pulse(stop);
+      for (size_t tick = 0; tick < stop; ++tick)
+        pulse[tick] = Pulse1PE((timeBin + tick - tdc)/fSampleFreqMHz);
+
       for(int n=0; n<nPE; n++){
         // Randomly distribute detected photons into the different readout channels in this optical detector
         int hardwareChannel = (int) ( fRandFlat.fire(1.0) * nChannelsPerOpDet ) ;
-        // Add ticks until the end of the single PE waveform or end of the whole pdWaveform
-        size_t stop = std::min(fPulseLengthTicks, pdWaveform[hardwareChannel].size()-timeBin);
 
         // Add this range to the focus list
         fls[hardwareChannel].AddRange(timeBin, timeBin+stop-1);
 
         // Add the PE pulse to the waveform
         for (size_t tick = 0; tick < stop; ++tick)
-          pdWaveform[hardwareChannel][timeBin+tick] += fSinglePEWaveform[tick];
+          pdWaveform[hardwareChannel][timeBin+tick] += pulse[tick];
       }
     }
   }
