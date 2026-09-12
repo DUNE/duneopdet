@@ -127,9 +127,11 @@ namespace opdet {
                                                            Comment("Override earliest allowed waveform time, default -1 drift window") };
       fhicl::OptionalAtom<double>    TimeEnd             { Name("TimeEnd"), 
                                                            Comment("Override latest allowed waveform time, default end of TPC readout") };
-      fhicl::Atom<bool>              FullWaveformOutput  { Name("FullWaveformOutput"),  
-                                                           Comment("Write out the whole waveform, slow with *large* output sizes. Default false."), 
-                                                           false };
+      fhicl::Atom<int>               WaveformMode        { Name("WaveformMode"),
+                                                           Comment("0: Triggered (CFD self-triggered readout windows), "
+                                                                   "1: AllPEs (one waveform per PE pulse range plus Padding, no trigger), "
+                                                                   "2: FullWindow (one waveform per channel covering the whole window; large output). Default 0."),
+                                                           0 };
     };
     using Parameters = art::EDProducer::Table<Config>;
 
@@ -169,7 +171,8 @@ namespace opdet {
     // Optional debugging settings
     double  fTimeBegin;
     double  fTimeEnd;
-    bool    fFullWaveformOutput;
+    enum class WaveformMode_t { Triggered = 0, AllPEs = 1, FullWindow = 2 };
+    WaveformMode_t fWaveformMode;
 
 
     ////////////////////////////////////
@@ -271,7 +274,7 @@ namespace opdet {
     , fLineNoiseRMS{        config().LineNoiseRMS() }
     , fMaxSaturationCutOff{ std::numeric_limits<int>::max() }
 
-    , fFullWaveformOutput{  config().FullWaveformOutput() }
+    , fWaveformMode{ static_cast<WaveformMode_t>(config().WaveformMode()) }
 
     , fOpDigiEngine( art::ServiceHandle<rndm::NuRandomService>()->registerAndSeedEngine(
         createEngine(0, "HepJamesRandom", "waveformdigi"),
@@ -392,6 +395,14 @@ namespace opdet {
         << "fLineNoiseRMS: " << fLineNoiseRMS << '\n'
         << "Line noise RMS should be non-negative!\n";
 
+    // Check the waveform output mode
+    if (fWaveformMode != WaveformMode_t::Triggered &&
+        fWaveformMode != WaveformMode_t::AllPEs &&
+        fWaveformMode != WaveformMode_t::FullWindow)
+      throw art::Exception(art::errors::Configuration)
+        << "WaveformMode: " << static_cast<int>(fWaveformMode) << '\n'
+        << "WaveformMode must be 0 (Triggered), 1 (AllPEs) or 2 (FullWindow)!\n";
+
     // Sanity check beginning and end times
     if (fTimeBegin >= fTimeEnd) {
       throw art::Exception(art::errors::Configuration)
@@ -452,25 +463,25 @@ namespace opdet {
       //Loop to correctly assign the waveforms to readout channels, if more than 1 per OpDet
       for(unsigned int rdCh=0; rdCh<nChannelsPerOpDet; rdCh++){
         int readoutChannel = wireReadout.OpChannel(opDet, rdCh);
-        // So that line noise is added to all ticks in full output mode
-        if (fFullWaveformOutput)  fls[rdCh].Reset(); 
+        // So that line noise is added to all ticks in full window mode
+        if (fWaveformMode == WaveformMode_t::FullWindow)  fls[rdCh].Reset();
 
         // Add line noise
         AddLineNoise(pdWaveforms[rdCh], fls[rdCh]);
 
-        if (fFullWaveformOutput) {
-        wave_forms_p->emplace_back(Tick2us(0), readoutChannel, Digitize(pdWaveforms[rdCh].begin(), pdWaveforms[rdCh].end()));
-        }
-        else {
-        // Checking for tiggers on floats, rather than shorts.
-        // This is an approximation, but it saves making an extra copy
-        // of the waveform and makes the code easier to follow.
+        if (fWaveformMode == WaveformMode_t::Triggered) {
           for ( auto t: CFDTrigger(pdWaveforms[rdCh], fls[rdCh]) ) {
 
             // Digitize and store
             auto shortWF = Digitize(pdWaveforms[rdCh].begin()+t.first, pdWaveforms[rdCh].begin()+t.second+1);
             wave_forms_p->emplace_back(Tick2us(t.first), readoutChannel,  shortWF);
           }
+        }
+        else {
+          // AllPEs: one waveform per focus list range. FullWindow: the single range is the whole window.
+          for (auto const& [first, last] : fls[rdCh].ranges)
+            wave_forms_p->emplace_back(Tick2us(first), readoutChannel,
+                                       Digitize(pdWaveforms[rdCh].begin()+first, pdWaveforms[rdCh].begin()+last+1));
         }
      }
     }
