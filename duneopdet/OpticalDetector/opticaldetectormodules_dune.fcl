@@ -27,8 +27,9 @@ dunefd_opdigi_unganged:
    Pedestal:             1500     # in ADC counts
    DefaultSimWindow:     true     # Use -1*drift window as the start time and
                                   # the TPC readout window end time as the end time
-   FullWaveformOutput:   false    # Output full waveform. Be careful with this option:
-                                  # setting it to "true" can result in large output files
+   WaveformMode:         0        # 0: Triggered (ranges split by the threshold hit finder),
+                                  # 1: AllPEs (every PE pulse + Padding, unsplit), 2: FullWindow (whole window per channel)
+                                  # Modes 1 and 2 can produce large output files
    TimeBegin:            0        # In us (not used if DefaultSimWindow is set to true)
    TimeEnd:              1600     # In us (not used if DefaultSimWindow is set to true)
    PreTrigger:           100      # In ticks

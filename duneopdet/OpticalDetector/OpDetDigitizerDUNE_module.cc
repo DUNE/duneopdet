@@ -104,8 +104,8 @@ namespace opdet {
       bool   fDefaultSimWindow;              // Set the start time to -1 drift window and
                                              // the end time to the end time
                                              // of the TPC readout
-      bool   fFullWaveformOutput;            // Output full waveforms -- produces large
-                                             // output. Mostly for debug purposes
+      enum class WaveformMode_t { Triggered = 0, AllPEs = 1, FullWindow = 2 };
+      WaveformMode_t fWaveformMode;          // 0: Triggered, 1: AllPEs, 2: FullWindow
       size_t fReadoutWindow;                 // In ticks
       size_t fPreTrigger;                    // In ticks
 
@@ -225,7 +225,7 @@ namespace opdet {
     fCrossTalk          = pset.get< double  >("CrossTalk"         );
     fPedestal           = pset.get< short  >("Pedestal"          );
     fDefaultSimWindow   = pset.get< bool   >("DefaultSimWindow"  );
-    fFullWaveformOutput = pset.get< bool   >("FullWaveformOutput");
+    fWaveformMode       = static_cast<WaveformMode_t>(pset.get< int >("WaveformMode"));
     fReadoutWindow      = pset.get< size_t >("ReadoutWindow"     );
     fPreTrigger         = pset.get< size_t >("PreTrigger"        );
     
@@ -416,12 +416,9 @@ namespace opdet {
           fl.Finalize();
         }
       
-        // Uncomment to undo the effect of FocusLists. Replaces the accumulated
-        // lists with ones asserting we need to look at the whole trace.
-        // for(FocusList& fl: fls){
-        //        fl.ranges.clear();
-        //        fl.ranges.emplace_back(0, nSamples-1);
-        // }
+        // FullWindow: read out the whole trace instead of the focus list ranges
+        if (fWaveformMode == WaveformMode_t::FullWindow)
+          for (FocusList& fl: fls) fl.Reset();
         // Vary the pedestal
         if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls);
 
@@ -439,7 +436,7 @@ namespace opdet {
             std::vector< short > waveformOfShorts = VectorOfDoublesToVectorOfShorts(sub);
           
             std::map< size_t, std::vector < short > > mapTickWaveform =
-              (!fFullWaveformOutput) ?
+              (fWaveformMode == WaveformMode_t::Triggered) ?
               SplitWaveform(waveformOfShorts, fls[hardwareChannel]) :
               std::map< size_t, std::vector< short > >{ std::make_pair(0,
                                                                        waveformOfShorts) };
@@ -826,6 +823,13 @@ namespace opdet {
         << "TimeBegin: " << fTimeBegin << " and "
         << "TimeEnd: "   << fTimeEnd   << '\n'
         << "TimeBegin should be less than TimeEnd!\n";
+
+    if (fWaveformMode != WaveformMode_t::Triggered &&
+        fWaveformMode != WaveformMode_t::AllPEs &&
+        fWaveformMode != WaveformMode_t::FullWindow)
+      throw art::Exception(art::errors::Configuration)
+        << "WaveformMode: " << static_cast<int>(fWaveformMode) << '\n'
+        << "WaveformMode must be 0 (Triggered), 1 (AllPEs) or 2 (FullWindow)!\n";
 
   }
 
