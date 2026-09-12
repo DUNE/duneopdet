@@ -58,6 +58,7 @@
 
 // C++ includes
 
+#include <algorithm>
 #include <vector>
 #include <map>
 #include <cmath>
@@ -578,13 +579,13 @@ namespace opdet {
   //---------------------------------------------------------------------------
   vector< uint16_t > WaveformDigitizerSim::Digitize(vector<double>::iterator itBegin, vector<double>::iterator itEnd) const
   {
-    for(auto it = itBegin; it != itEnd; ++it) {
-      if(*it > fMaxSaturationCutOff) 
-        *it = fMaxSaturationCutOff; 
-    }
+    double const maxADC = std::min<double>(fMaxSaturationCutOff, std::numeric_limits<uint16_t>::max());
 
-    // Don't bother to round properly, it's faster this way
-    return vector< uint16_t >(itBegin, itEnd);
+    vector<uint16_t> adcs;
+    adcs.reserve(itEnd - itBegin);
+    for (auto it = itBegin; it != itEnd; ++it)
+      adcs.push_back(static_cast<uint16_t>(std::lround(std::clamp(*it, 0.0, maxADC))));
+    return adcs;
   }
 
   //---------------------------------------------------------------------------
