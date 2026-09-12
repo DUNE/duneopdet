@@ -47,6 +47,7 @@
 #include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
 #include "duneopdet/OpticalDetector/AlgoSSPLeadingEdge.h"
+#include "duneopdet/OpticalDetector/FocusList.h"
 #include "dunecore/DuneObj/OpDetDivRec.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
@@ -75,52 +76,6 @@
 
 
 namespace opdet {
-
-  class FocusList
-  {
-  public:
-      FocusList(int nSamples, int padding)
-        : fNSamples(nSamples), fPadding(padding) {}
-
-      void AddRange(int from, int to)
-      {
-        from -= fPadding;
-        to += fPadding;
-
-        if(from < 0) from = 0;
-        if(to >= fNSamples) to = fNSamples-1;
-        ranges.emplace_back(from, to);
-      }
-    
-
-      // Perform merge of overlapping ranges and sort them
-      void Finalize() {
-        if (ranges.empty()) return;
-        std::sort(ranges.begin(), ranges.end());
-        std::vector<std::pair<int, int>> merged;
-        int curr_from = ranges[0].first;
-        int curr_to = ranges[0].second;
-        for (size_t i = 1; i < ranges.size(); ++i) {
-          if (ranges[i].first <= curr_to) {
-            // Overlapping ranges, merge them
-            curr_to = std::max(curr_to, ranges[i].second);
-          } else {
-            // Non-overlapping range, add the previous one and start a new one
-            merged.emplace_back(curr_from, curr_to);
-            curr_from = ranges[i].first;
-            curr_to = ranges[i].second;
-          }
-        }
-        merged.emplace_back(curr_from, curr_to);
-        std::swap(ranges, merged);
-      }
-
-      std::vector<std::pair<int, int>> ranges;
-
-    protected:
-      int fNSamples;
-      int fPadding;
-  };
 
   class OpDetDigitizerDUNE : public art::EDProducer{
 

@@ -47,6 +47,7 @@
 #include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
 #include "duneopdet/OpticalDetector/AlgoSSPLeadingEdge.h"
+#include "duneopdet/OpticalDetector/FocusList.h"
 #include "dunecore/DuneObj/OpDetDivRec.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "larcore/Geometry/WireReadout.h"
@@ -74,53 +75,7 @@
 namespace opdet {
 
   using std::vector;
-  using std::pair;
   typedef std::vector< std::pair< size_t, size_t > > Ranges_t;
-
-  class FocusList
-  {
-  public:
-    FocusList(size_t nSamples, size_t padding)
-      : fNSamples(nSamples), fPadding(padding) 
-    {}
-
-    void AddRange(size_t from, size_t to)
-    {
-      from -= std::min(from, fPadding);
-      to   =  std::min(to+fPadding, fNSamples-1);
-
-      for(size_t i = 0; i < ranges.size(); ++i){
-        pair<size_t, size_t>& r = ranges[i];
-        // Completely nested, discard
-        if(from >= r.first && to <= r.second) return;
-        // Extend end
-        if(from >= r.first && from <= r.second){
-          r.second = to;
-          return;
-        }
-        // Extend front
-        if(to >= r.first && to <= r.second){
-          r.first = from;
-          return;
-        }
-      }
-      // Discontiguous, add
-      ranges.emplace_back(from, to);
-    }
-
-    void everything()
-    {
-      ranges.clear();
-      ranges.emplace_back(0, fNSamples-1);
-    }
-
-    
-    Ranges_t ranges;
-
-  protected:
-    size_t fNSamples;
-    size_t fPadding;
-  };
 
   class WaveformDigitizerSim : public art::EDProducer{
 
@@ -492,12 +447,13 @@ namespace opdet {
 
       // Add a PE template to the waveform for each true photon
       for (auto dr_p: vDivRecs) AddPEsToWaveform(dr_p, nChannelsPerOpDet, pdWaveforms, fls);
+      for (FocusList& fl: fls) fl.Finalize();
 
       //Loop to correctly assign the waveforms to readout channels, if more than 1 per OpDet
       for(unsigned int rdCh=0; rdCh<nChannelsPerOpDet; rdCh++){
         int readoutChannel = wireReadout.OpChannel(opDet, rdCh);
         // So that line noise is added to all ticks in full output mode
-        if (fFullWaveformOutput)  fls[rdCh].everything(); 
+        if (fFullWaveformOutput)  fls[rdCh].Reset(); 
 
         // Add line noise
         AddLineNoise(pdWaveforms[rdCh], fls[rdCh]);
@@ -609,12 +565,15 @@ namespace opdet {
       return std::min(end > fPreTrigger ? end - fPreTrigger : 0, wf.size() - 1);
     };
 
-    for (auto range: fls.ranges) {
+    for (auto const& range: fls.ranges) {
+      // FocusList clamps ranges to [0, nSamples-1], so they are never negative
+      size_t const first = range.first;
+      size_t const last  = range.second;
       size_t  wstart = -1;
       size_t  wend   = -1;
       bool fire   = false;
 
-      for (size_t tick = range.first; tick + fDwindow < range.second; ++tick) {
+      for (size_t tick = first; tick + fDwindow < last; ++tick) {
 
         // Fire CFD
         if (wf[tick+fDwindow] - wf[tick] > fThresholdADC) {
@@ -644,7 +603,7 @@ namespace opdet {
       // Check for lingering window, add a final window
       // up to the end of the waveform if so.
       if (fire == true) {
-        readouts.emplace_back(wstart, range.second-1);
+        readouts.emplace_back(wstart, last-1);
       }
     }
 
