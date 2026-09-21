@@ -33,6 +33,7 @@ art_make( BASENAME_ONLY ALLOW_UNDERSCORES
                                 dunecore::DuneObj
                                 lardataalg::DetectorInfo
                                 lardataobj::RecoBase
+                                lardataobj::RawData
                                 lardata::headers
                                 larana::OpticalDetector
                                 larana::OpticalDetector_OpHitFinder
