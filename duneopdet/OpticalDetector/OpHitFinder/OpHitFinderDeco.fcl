@@ -11,6 +11,8 @@ dune_ophit_finder_deco:
     InputDigiType:   "recob" # Write recob for OpWaveform object raw OpDetWaveform object
     ChannelMasks:    []      # Will ignore channels in this list
     HitThreshold:    3.0     # Amplitude threshold for hits "5.0 for Gauss" and "3.0 for Wiener" 
+    TimeStampIsRelative: false # PDHD/VD Raw Decoders can make the timestamp relative to trigger time
+                               # Turning this on means we don't need to subtract the TriggerTime again
     UseCalibrator:   false   # If set to false, SPE parameters below
                              # are used. If set to true, is it unusable? 
     AreaToPE:        true    # Use area to calculate number of PEs
@@ -39,5 +41,8 @@ dune_ophit_finder_deco:
 dune_ophit_finder_gauss_deco: @local::dune_ophit_finder_deco
 dune_ophit_finder_gauss_deco.HitThreshold: 5.0
 dune_ophit_finder_gauss_deco.HitAlgoPset.ADCThreshold: 5.0
+
+protodunehd_data_ophit_finder_deco: @local::dune_ophit_finder_deco
+protodunehd_data_ophit_finder_deco.TimeStampIsRelative: true
 
 END_PROLOG
