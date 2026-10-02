@@ -42,7 +42,7 @@ dune_ophit_finder_gauss_deco: @local::dune_ophit_finder_deco
 dune_ophit_finder_gauss_deco.HitThreshold: 5.0
 dune_ophit_finder_gauss_deco.HitAlgoPset.ADCThreshold: 5.0
 
-protodunehd_data_ophit_finder_deco: @local::dune_ophit_finder_deco
-protodunehd_data_ophit_finder_deco.TimeStampIsRelative: true
+protodunehd_ophit_finder_deco: @local::dune_ophit_finder_deco
+protodunehd_ophit_finder_deco.TimeStampIsRelative: true
 
 END_PROLOG
