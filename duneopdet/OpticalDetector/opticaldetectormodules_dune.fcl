@@ -252,11 +252,15 @@ protodunevd_ophit: {
          SPEShift: 4.3e-1
          SPESize: 4.51e-1
          UseCalibrator: false
+         TimeStampIsRelative: false
          module_type: "OpHitFinder"
          reco_man: {
             module_type: "PulseRecoManager"
          }
       }
+protodunevd_ophit_data: @local::protodunevd_ophit
+protodunevd_ophit_data.TimeStampIsRelative: true
+
 protodunevd_opflash:
 {
    module_type:          "OpFlashFinderVerticalDrift"
