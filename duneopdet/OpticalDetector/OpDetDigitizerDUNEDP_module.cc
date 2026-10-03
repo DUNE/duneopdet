@@ -41,6 +41,7 @@
 #include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
 #include "duneopdet/OpticalDetector/AlgoSSPLeadingEdge.h"
+#include "duneopdet/OpticalDetector/FocusList.h"
 #include "larana/OpticalDetector/OpDigiProperties.h"
 
 // CLHEP includes
@@ -62,47 +63,6 @@
 
 
 namespace opdet {
-
-  class FocusList
-  {
-  public:
-    FocusList(int nSamples, int padding)
-      : fNSamples(nSamples), fPadding(padding) {}
-
-    //Warning, this FocusList feature is actually not used to split the waveform,
-    //the use a standard hit finding algorithm instead.
-    void AddRange(int from, int to)
-    {
-      from -= fPadding;
-      to += fPadding;
-      if(from < 0) from = 0;
-      if(to >= fNSamples) to = fNSamples-1;
-
-      for(unsigned int i = 0; i < ranges.size(); ++i){
-        std::pair<int, int>& r = ranges[i];
-        // Completely nested, discard
-        if(from >= r.first && to <= r.second) return;
-        // Extend end
-        if(from >= r.first && from <= r.second){
-          r.second = to;
-          return;
-        }
-        // Extend front
-        if(to >= r.first && to <= r.second){
-          r.first = from;
-          return;
-        }
-      }
-      // Discontiguous, add
-      ranges.emplace_back(from, to);
-    }
-
-    std::vector<std::pair<int, int>> ranges;
-
-  protected:
-    int fNSamples;
-    int fPadding;
-  };
 
   class OpDetDigitizerDUNEDP : public art::EDProducer{
 
@@ -485,6 +445,8 @@ namespace opdet {
           // Generate dark noise
           if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet], opDet);
 
+          for (FocusList& fl: fls[opDet]) fl.Finalize();
+
           // Uncomment to undo the effect of FocusLists. Replaces the accumulated
           // lists with ones asserting we need to look at the whole trace.
           // for(FocusList& fl: fls){
@@ -557,6 +519,8 @@ namespace opdet {
           if((unsigned)modulecounter<fInputModule.size()) continue;//==fInputModule.size()
 
           if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls[opDet], opDet);
+
+          for (FocusList& fl: fls[opDet]) fl.Finalize();
 
           if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls[opDet]);
 
