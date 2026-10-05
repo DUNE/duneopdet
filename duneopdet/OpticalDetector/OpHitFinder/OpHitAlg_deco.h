@@ -41,7 +41,8 @@ namespace duneopdet {
                     float,
                     detinfo::DetectorClocksData const&,
                     calib::IPhotonCalibrator const&,
-                    bool use_start_time = false);
+                    bool use_start_time = false,
+                    bool timestamp_is_relative = false);
 
   void RunHitFinder_deco(std::vector<recob::OpWaveform> const&,
                     std::vector<recob::OpHit>&,
@@ -52,7 +53,8 @@ namespace duneopdet {
                     float,
                     detinfo::DetectorClocksData const&,
                     calib::IPhotonCalibrator const&,
-                    bool use_start_time = false);
+                    bool use_start_time = false,
+                    bool timestamp_is_relative = false);
 
   void ConstructHit(float,
                     int,
@@ -61,7 +63,8 @@ namespace duneopdet {
                     std::vector<recob::OpHit>&,
                     detinfo::DetectorClocksData const&,
                     calib::IPhotonCalibrator const&,
-                    bool use_start_time = false);
+                    bool use_start_time = false,
+                    bool timestamp_is_relative = false);
 
 } // End duneopdet namespace
 

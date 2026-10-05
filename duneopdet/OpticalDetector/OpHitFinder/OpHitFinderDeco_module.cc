@@ -89,7 +89,7 @@ namespace duneopdet {
       Float_t fHitThreshold;
       Float_t fScale;
       unsigned int fMaxOpChannel;
-      bool fUseStartTime;
+      bool fUseStartTime, fTimeStampIsRelative;
 
       calib::IPhotonCalibrator const* fCalib = nullptr;
   };
@@ -111,6 +111,7 @@ namespace duneopdet {
     fInputDigiType      = pset.get<std::string>("InputDigiType");
     fInputLabels        = pset.get<std::vector<std::string>>("InputLabels");
     fUseStartTime       = pset.get<bool>("UseStartTime", false);
+    fTimeStampIsRelative       = pset.get<bool>("TimeStampIsRelative", false);
     fHitThreshold       = pset.get<float>("HitThreshold");
     fScale              = pset.get<float>("ScalingFactor");
     bool useCalibrator  = pset.get<bool>("UseCalibrator");
@@ -219,7 +220,8 @@ namespace duneopdet {
                         fScale,
                         clock_data,
                         calibrator,
-                        fUseStartTime);
+                        fUseStartTime,
+                        fTimeStampIsRelative);
     }
 
     if (fInputDigiType == "raw"){
@@ -242,7 +244,8 @@ namespace duneopdet {
                      fHitThreshold,
                      clock_data,
                      calibrator,
-                     fUseStartTime);
+                     fUseStartTime,
+                     fTimeStampIsRelative);
       }
 
       else{
@@ -275,7 +278,8 @@ namespace duneopdet {
                      fHitThreshold,
                      clock_data,
                      calibrator,
-                     fUseStartTime);
+                     fUseStartTime,
+                     fTimeStampIsRelative);
       }
     }
     // Store results into the event
