@@ -137,13 +137,14 @@ namespace duneopdet {
     // ProtoDUNE-HD/VD OpDetWaveform timestamps were made relative to the trigger timestamp in the following commit
     // https://github.com/DUNE/duneprototypes/pull/109/changes/6ab18a41cdc78edcc609bc5043ad93d9b5ac2134
     // So we can turn off this shifting here if necessary
+    double relTime = absTime;
     if (timestamp_is_relative) {
        absTime += clocksData.TriggerTime();
     }
     else {
        startTime -= clocksData.TriggerTime();
+       relTime -= clocksData.TriggerTime();
     }
-    double relTime = absTime - clocksData.TriggerTime();
 
     double riseTime = tick_period * pulse.t_rise;
 
