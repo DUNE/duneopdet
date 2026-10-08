@@ -45,6 +45,7 @@
 #include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
 #include "duneopdet/OpticalDetector/AlgoSSPLeadingEdge.h"
+#include "duneopdet/OpticalDetector/FocusList.h"
 #include "dunecore/DuneObj/OpDetDivRec.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 
@@ -72,55 +73,6 @@
 
 
 namespace opdet {
-
-  class FocusList
-  {
-  public:
-      FocusList(int nSamples, int padding)
-        : fNSamples(nSamples), fPadding(padding) {}
-
-      void AddRange(int from, int to)
-      {
-        from -= fPadding;
-        to += fPadding;
-        if(from < 0) from = 0;
-        if(to >= fNSamples) to = fNSamples-1;
-
-        for(unsigned int i = 0; i < ranges.size(); ++i){
-          std::pair<int, int>& r = ranges[i];
-          // Completely nested, discard
-          if(from >= r.first && to <= r.second) return;
-          // Extend end
-         if(from >= r.first && from <= r.second){
-           r.second = to;
-           return;
-          }
-          // Extend front
-          if(to >= r.first && to <= r.second){
-            r.first = from;
-            return;
-          }
-        }
-        // Discontiguous, add
-        ranges.emplace_back(from, to);
-    }
-    void Reset()
-    {
-      ranges=std::vector<std::pair<int,int>>({{0,fNSamples-1}});
-    }
-    
-    std::vector<std::pair<int, int>> ranges;
-    void Print()
-    {
-      
-      std::cout << "ranges.size():" << ranges.size() << std::endl;
-      for(size_t i=0;i<ranges.size();i++) std::cout << "\t" << i << "\t" << ranges[i].first <<"\t" << ranges[i].second << std::endl;
-      }
-
-    protected:
-      int fNSamples;
-      int fPadding;
-  };
 
   class OpDetDigitizerProtoDUNEHD : public art::EDProducer{
 
@@ -498,6 +450,8 @@ namespace opdet {
       
       // Generate dark noise
       if (fDarkNoiseRate > 0.0) AddDarkNoise(pdWaveforms, fls,opDet);
+
+      for (FocusList& fl: fls) fl.Finalize();
             
       // Vary the pedestal
       if (fLineNoiseRMS > 0.0)  AddLineNoise(pdWaveforms, fls);
