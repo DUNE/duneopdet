@@ -24,6 +24,8 @@ standard_daphne:
   LineNoiseRMS:           2.6    # Pedestal RMS in ADC counts, likely an underestimate
   DynamicBitRange:       13      # 13-bit dynamic range
 
+  WaveformMode:           0      # 0: Triggered (CFD), 1: AllPEs (every PE pulse + Padding, no trigger), 2: FullWindow (whole window)
+
 }
 
 standard_vddaphne: @local::standard_daphne

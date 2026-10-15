@@ -47,6 +47,7 @@
 #include "lardataobj/RawData/OpDetWaveform.h"
 #include "larana/OpticalDetector/OpHitFinder/AlgoSiPM.h"
 #include "duneopdet/OpticalDetector/AlgoSSPLeadingEdge.h"
+#include "duneopdet/OpticalDetector/FocusList.h"
 #include "dunecore/DuneObj/OpDetDivRec.h"
 #include "lardata/DetectorInfoServices/LArPropertiesService.h"
 #include "larcore/Geometry/WireReadout.h"
@@ -58,6 +59,7 @@
 
 // C++ includes
 
+#include <algorithm>
 #include <vector>
 #include <map>
 #include <cmath>
@@ -73,53 +75,7 @@
 namespace opdet {
 
   using std::vector;
-  using std::pair;
   typedef std::vector< std::pair< size_t, size_t > > Ranges_t;
-
-  class FocusList
-  {
-  public:
-    FocusList(size_t nSamples, size_t padding)
-      : fNSamples(nSamples), fPadding(padding) 
-    {}
-
-    void AddRange(size_t from, size_t to)
-    {
-      from -= std::min(from, fPadding);
-      to   =  std::min(to+fPadding, fNSamples-1);
-
-      for(size_t i = 0; i < ranges.size(); ++i){
-        pair<size_t, size_t>& r = ranges[i];
-        // Completely nested, discard
-        if(from >= r.first && to <= r.second) return;
-        // Extend end
-        if(from >= r.first && from <= r.second){
-          r.second = to;
-          return;
-        }
-        // Extend front
-        if(to >= r.first && to <= r.second){
-          r.first = from;
-          return;
-        }
-      }
-      // Discontiguous, add
-      ranges.emplace_back(from, to);
-    }
-
-    void everything()
-    {
-      ranges.clear();
-      ranges.emplace_back(0, fNSamples-1);
-    }
-
-    
-    Ranges_t ranges;
-
-  protected:
-    size_t fNSamples;
-    size_t fPadding;
-  };
 
   class WaveformDigitizerSim : public art::EDProducer{
 
@@ -171,9 +127,11 @@ namespace opdet {
                                                            Comment("Override earliest allowed waveform time, default -1 drift window") };
       fhicl::OptionalAtom<double>    TimeEnd             { Name("TimeEnd"), 
                                                            Comment("Override latest allowed waveform time, default end of TPC readout") };
-      fhicl::Atom<bool>              FullWaveformOutput  { Name("FullWaveformOutput"),  
-                                                           Comment("Write out the whole waveform, slow with *large* output sizes. Default false."), 
-                                                           false };
+      fhicl::Atom<int>               WaveformMode        { Name("WaveformMode"),
+                                                           Comment("0: Triggered (CFD self-triggered readout windows), "
+                                                                   "1: AllPEs (one waveform per PE pulse range plus Padding, no trigger), "
+                                                                   "2: FullWindow (one waveform per channel covering the whole window; large output). Default 0."),
+                                                           0 };
     };
     using Parameters = art::EDProducer::Table<Config>;
 
@@ -213,7 +171,8 @@ namespace opdet {
     // Optional debugging settings
     double  fTimeBegin;
     double  fTimeEnd;
-    bool    fFullWaveformOutput;
+    enum class WaveformMode_t { Triggered = 0, AllPEs = 1, FullWindow = 2 };
+    WaveformMode_t fWaveformMode;
 
 
     ////////////////////////////////////
@@ -315,7 +274,7 @@ namespace opdet {
     , fLineNoiseRMS{        config().LineNoiseRMS() }
     , fMaxSaturationCutOff{ std::numeric_limits<int>::max() }
 
-    , fFullWaveformOutput{  config().FullWaveformOutput() }
+    , fWaveformMode{ static_cast<WaveformMode_t>(config().WaveformMode()) }
 
     , fOpDigiEngine( art::ServiceHandle<rndm::NuRandomService>()->registerAndSeedEngine(
         createEngine(0, "HepJamesRandom", "waveformdigi"),
@@ -436,6 +395,14 @@ namespace opdet {
         << "fLineNoiseRMS: " << fLineNoiseRMS << '\n'
         << "Line noise RMS should be non-negative!\n";
 
+    // Check the waveform output mode
+    if (fWaveformMode != WaveformMode_t::Triggered &&
+        fWaveformMode != WaveformMode_t::AllPEs &&
+        fWaveformMode != WaveformMode_t::FullWindow)
+      throw art::Exception(art::errors::Configuration)
+        << "WaveformMode: " << static_cast<int>(fWaveformMode) << '\n'
+        << "WaveformMode must be 0 (Triggered), 1 (AllPEs) or 2 (FullWindow)!\n";
+
     // Sanity check beginning and end times
     if (fTimeBegin >= fTimeEnd) {
       throw art::Exception(art::errors::Configuration)
@@ -491,29 +458,30 @@ namespace opdet {
 
       // Add a PE template to the waveform for each true photon
       for (auto dr_p: vDivRecs) AddPEsToWaveform(dr_p, nChannelsPerOpDet, pdWaveforms, fls);
+      for (FocusList& fl: fls) fl.Finalize();
 
       //Loop to correctly assign the waveforms to readout channels, if more than 1 per OpDet
       for(unsigned int rdCh=0; rdCh<nChannelsPerOpDet; rdCh++){
         int readoutChannel = wireReadout.OpChannel(opDet, rdCh);
-        // So that line noise is added to all ticks in full output mode
-        if (fFullWaveformOutput)  fls[rdCh].everything(); 
+        // So that line noise is added to all ticks in full window mode
+        if (fWaveformMode == WaveformMode_t::FullWindow)  fls[rdCh].Reset();
 
         // Add line noise
         AddLineNoise(pdWaveforms[rdCh], fls[rdCh]);
 
-        if (fFullWaveformOutput) {
-        wave_forms_p->emplace_back(Tick2us(0), readoutChannel, Digitize(pdWaveforms[rdCh].begin(), pdWaveforms[rdCh].end()));
-        }
-        else {
-        // Checking for tiggers on floats, rather than shorts.
-        // This is an approximation, but it saves making an extra copy
-        // of the waveform and makes the code easier to follow.
+        if (fWaveformMode == WaveformMode_t::Triggered) {
           for ( auto t: CFDTrigger(pdWaveforms[rdCh], fls[rdCh]) ) {
 
             // Digitize and store
             auto shortWF = Digitize(pdWaveforms[rdCh].begin()+t.first, pdWaveforms[rdCh].begin()+t.second+1);
             wave_forms_p->emplace_back(Tick2us(t.first), readoutChannel,  shortWF);
           }
+        }
+        else {
+          // AllPEs: one waveform per focus list range. FullWindow: the single range is the whole window.
+          for (auto const& [first, last] : fls[rdCh].ranges)
+            wave_forms_p->emplace_back(Tick2us(first), readoutChannel,
+                                       Digitize(pdWaveforms[rdCh].begin()+first, pdWaveforms[rdCh].begin()+last+1));
         }
      }
     }
@@ -530,35 +498,42 @@ namespace opdet {
                                               std::vector<FocusList>&        fls) //const
   {
     // Vector of DivRec time bins (struct OpDet_Time_Chans)
-    for (auto odtc: dr_p->GetTimeChans()) {
+    for (auto const& odtc: dr_p->GetTimeChans()) {
 
-      // Extract time for this odtc within the event
+      // Extract time for this odtc within the event, in fractional ticks
       double photonTime_ns = odtc.time;
-      size_t timeBin       = ns2Tick(photonTime_ns);
+      double const tdc     = (photonTime_ns/1000. - fTimeBegin)*fSampleFreqMHz;
+      // First sample at or after the photon arrival
+      double const first   = std::ceil(tdc);
 
       // Check if the photon is inside the digitization range. If not, skip it.
-      if ( timeBin < 0 || timeBin >= pdWaveform[0].size() ) { //fine to compare with a single waveform since they are all the same size
+      if ( first < 0 || first >= pdWaveform[0].size() ) { //fine to compare with a single waveform since they are all the same size
         mf::LogWarning("WaveformDigitizerSim") << "Skipping a photon at " << photonTime_ns/1000. << " us, outside digitization window of " << fTimeBegin << " to " << fTimeEnd;
         continue;
       }
+      size_t const timeBin = first;
 
       // Loop through records at this time and count photons
       int nPE = 0;
       for (auto const& sdp : odtc.phots)
         nPE += sdp.phot;
 
+      size_t const stop = std::min(fPulseLengthTicks, pdWaveform[0].size()-timeBin);
+
+      vector<double> pulse(stop);
+      for (size_t tick = 0; tick < stop; ++tick)
+        pulse[tick] = Pulse1PE((timeBin + tick - tdc)/fSampleFreqMHz);
+
       for(int n=0; n<nPE; n++){
         // Randomly distribute detected photons into the different readout channels in this optical detector
         int hardwareChannel = (int) ( fRandFlat.fire(1.0) * nChannelsPerOpDet ) ;
-        // Add ticks until the end of the single PE waveform or end of the whole pdWaveform
-        size_t stop = std::min(fPulseLengthTicks, pdWaveform[hardwareChannel].size()-timeBin);
 
         // Add this range to the focus list
         fls[hardwareChannel].AddRange(timeBin, timeBin+stop-1);
 
         // Add the PE pulse to the waveform
         for (size_t tick = 0; tick < stop; ++tick)
-          pdWaveform[hardwareChannel][timeBin+tick] += fSinglePEWaveform[tick];
+          pdWaveform[hardwareChannel][timeBin+tick] += pulse[tick];
       }
     }
   }
@@ -578,13 +553,13 @@ namespace opdet {
   //---------------------------------------------------------------------------
   vector< uint16_t > WaveformDigitizerSim::Digitize(vector<double>::iterator itBegin, vector<double>::iterator itEnd) const
   {
-    for(auto it = itBegin; it != itEnd; ++it) {
-      if(*it > fMaxSaturationCutOff) 
-        *it = fMaxSaturationCutOff; 
-    }
+    double const maxADC = std::min<double>(fMaxSaturationCutOff, std::numeric_limits<uint16_t>::max());
 
-    // Don't bother to round properly, it's faster this way
-    return vector< uint16_t >(itBegin, itEnd);
+    vector<uint16_t> adcs;
+    adcs.reserve(itEnd - itBegin);
+    for (auto it = itBegin; it != itEnd; ++it)
+      adcs.push_back(static_cast<uint16_t>(std::lround(std::clamp(*it, 0.0, maxADC))));
+    return adcs;
   }
 
   //---------------------------------------------------------------------------
@@ -594,27 +569,37 @@ namespace opdet {
 
     Ranges_t readouts;
 
-    for (auto range: fls.ranges) {
+    // All of these are size_t: clamp instead of subtracting, so a trigger in
+    // the first fPreTrigger ticks can't wrap around to an out-of-bounds window.
+    auto const windowEnd = [&](size_t tick) {
+      size_t const end = tick + fReadoutWindow;
+      return std::min(end > fPreTrigger ? end - fPreTrigger : 0, wf.size() - 1);
+    };
+
+    for (auto const& range: fls.ranges) {
+      // FocusList clamps ranges to [0, nSamples-1], so they are never negative
+      size_t const first = range.first;
+      size_t const last  = range.second;
       size_t  wstart = -1;
       size_t  wend   = -1;
       bool fire   = false;
 
-      for (size_t tick = range.first; tick < range.second - fDwindow; ++tick) {
+      for (size_t tick = first; tick + fDwindow < last; ++tick) {
 
         // Fire CFD
         if (wf[tick+fDwindow] - wf[tick] > fThresholdADC) {
 
           if (!fire) {
-            // Start a new readout window 
+            // Start a new readout window
             fire   = true;
-            wstart = tick-fPreTrigger;
-            wend   = tick-fPreTrigger+fReadoutWindow;
+            wstart = tick > fPreTrigger ? tick - fPreTrigger : 0;
+            wend   = windowEnd(tick);
           }
           else {
             // Extend the current readout window
             // Simplest to implement here, update to the
             // actual DAPHNE algorithm once known
-            wend = tick-fPreTrigger+fReadoutWindow;
+            wend = windowEnd(tick);
           }
 
         }
@@ -629,7 +614,7 @@ namespace opdet {
       // Check for lingering window, add a final window
       // up to the end of the waveform if so.
       if (fire == true) {
-        readouts.emplace_back(wstart, range.second-1);
+        readouts.emplace_back(wstart, last-1);
       }
     }
 

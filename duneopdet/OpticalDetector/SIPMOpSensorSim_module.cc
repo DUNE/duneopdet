@@ -326,7 +326,8 @@ namespace opdet {
 	    //Currently using all zeros as an indicator of Dark Noise for the trackID.
       int PE = 1+CrossTalk();
       for(int j = 0; j < PE; j++) {
-        dr_plusnoise.AddPhoton(dr_plusnoise.OpDetNum(), 0, darkNoiseTime);
+        // darkNoiseTime is in us; OpDetDivRec times are in ns like the photons from PhotonsToPE
+        dr_plusnoise.AddPhoton(dr_plusnoise.OpDetNum(), 0, darkNoiseTime * 1000.);
       }
 
       // Find next time to simulate a single PE pulse
