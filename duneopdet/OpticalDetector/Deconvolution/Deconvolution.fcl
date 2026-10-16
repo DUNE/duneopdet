@@ -121,4 +121,9 @@ protodunehd_mc_deconvolution.NoiseTemplateFiles:        []
 protodunehd_mc_deconvolution.NoiseTemplateMapChannels:  []
 protodunehd_mc_deconvolution.NoiseTemplateMapTemplates: []
 
+# read channel-by-channel gain file
+# values inside the dat file are from protodunehd_opdigi.SPEAmplitudeVector, 
+# which is defined at opticaldetectormodules_dune.fcl. This is for simulation.
+protodunehd_mc_deconvolution.ChannelGainFile: "reco_channel_gain_protoDUNEHD_sim_v0.dat"
+
 END_PROLOG
