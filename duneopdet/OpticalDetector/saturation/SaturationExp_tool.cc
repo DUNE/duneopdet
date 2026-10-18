@@ -52,7 +52,7 @@ namespace opdet {
         if (std::abs((static_cast<double>(wf[i]) - static_cast<double>(wf[i - 1])) <= tolerance) && (static_cast<double>(wf[i]) >= fCalibThrs) && (static_cast<double>(wf[i]) >= (_pulse.peak - max_margin))){//the last one is just a safegard against spurious fluctuations 
           if (!in_saturation) {
             in_saturation = true;
-            satcounter = 1;
+            satcounter = 2; //when the condition is satisfied, this is already the second tick the waveform is saturated
           }else{ satcounter++; }
         }else{ // End of a saturated region
           if(in_saturation) {
@@ -72,7 +72,7 @@ namespace opdet {
       if (!plateau_lengths.empty()) {
         //For the moment, the correction applied here is based on the "time-over-saturation (ToS)" method, where the missing area is added to the original area calculation
         //(see Maressa's presentation here: https://indico.fnal.gov/event/74741/contributions/342609/attachments/198490/276375/Jun_ToTUpdate_PDVD.pdf)
-        //parameters of the calib curve, channel dependent, in order: a, b, c
+        //parameters of the calib curve, channel dependent, in order: a, b, c (a*ToS^b*exp(c*ToS))  
         std::vector<double> calibvec = fCalibMap[ch];
         for(size_t i =0; i<plateau_lengths.size(); i++){
           double missingArea=calibvec[0]*pow(plateau_lengths[i],calibvec[1])*exp(calibvec[2]*plateau_lengths[i]);

@@ -54,7 +54,7 @@ namespace opdet {
         if (std::abs((static_cast<double>(wf[i]) - static_cast<double>(wf[i - 1])) <= tolerance) && (static_cast<double>(wf[i]) >= fCalibThrs) && (static_cast<double>(wf[i]) >= (_pulse.peak - max_margin))){//the last one is just a safegard against spurious fluctuations 
           if (!in_saturation) {
             in_saturation = true;
-            satcounter = 1;
+            satcounter = 2; //when the condition is satisfied, this is already the second tick the waveform is saturated
           }else{ satcounter++; }
         }else{ // End of a saturated region
           if(in_saturation) {
@@ -73,15 +73,15 @@ namespace opdet {
 
       if (!plateau_lengths.empty()) {
         //For the moment, the correction applied here is based on the "time-over-saturation (ToS)" method, where the missing area is added to the original area calculation
-        //parameters of the calib curve, channel dependent, are from the "smoothbreak", in order: a, b, c, d, x0
+        //parameters of the calib curve, channel dependent, are from the "smoothbreak", in order: a, b, e, x0, d (a*ToS^b*[1+(ToS/x0)^d]^((e-b)/d))  
         std::vector<double> calibvec = fCalibMap[ch];
-        double power = (calibvec[2]-calibvec[1])/calibvec[3];
+        double power = (calibvec[2]-calibvec[1])/calibvec[4];
         for(size_t i =0; i<plateau_lengths.size(); i++){
           double ToT = plateau_lengths[i];
-          double missingArea = 1 + pow(ToT/calibvec[4], calibvec[3]);
+          double missingArea = 1 + pow(ToT/calibvec[3], calibvec[4]);
           missingArea = calibvec[0] * pow(ToT,calibvec[1]) * pow(missingArea, power);
           //for debugging 
-          std::cout << "Saturated peak " << i << " ch " << ch << " old area " << _pulse.area << " sat ticks " << plateau_lengths[i] <<  " missing area " << missingArea*_pulse.peak << std::endl;
+          //std::cout << "Saturated peak " << i << " ch " << ch << " old area " << _pulse.area << " sat ticks " << plateau_lengths[i] <<  " missing area " << missingArea*_pulse.peak << std::endl;
           _pulse.area += missingArea*_pulse.peak;
         }
       }
