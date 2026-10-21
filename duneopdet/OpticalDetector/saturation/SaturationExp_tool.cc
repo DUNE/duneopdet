@@ -36,7 +36,7 @@ namespace opdet {
     int fMinPlateauSize;
     std::map<size_t, std::vector<double>> fCalibMap;
     //---------------------------------------------------------------------------
-    void CorrectSaturation(pmtana::Waveform_t const& wf, pmtana::pulse_param& _pulse, int ch) override
+    void CorrectSaturation(pmtana::Waveform_t const& wf, pmtana::pulse_param& _pulse, double pedestal, int ch) override
     {
       bool in_saturation = false;
       int satcounter=0, plateau_count=0;
@@ -76,7 +76,7 @@ namespace opdet {
         std::vector<double> calibvec = fCalibMap[ch];
         for(size_t i =0; i<plateau_lengths.size(); i++){
           double missingArea=calibvec[0]*pow(plateau_lengths[i],calibvec[1])*exp(calibvec[2]*plateau_lengths[i]);
-          _pulse.area += missingArea*_pulse.peak;
+          _pulse.area += missingArea*(double(_pulse.peak)-double(pedestal));
         }
       }
     }
