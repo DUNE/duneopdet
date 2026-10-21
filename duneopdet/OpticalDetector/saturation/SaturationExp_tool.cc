@@ -1,0 +1,87 @@
+/////////////////////////////////////////////////////////////////////////
+// SaturationExp_tool.cc
+//
+// Created: Oct 14 by Laura Paulucci (lpaulucc@fnal.gov)
+//
+// Saturation correction tool for an exponential fit of the ToS method.
+////////////////////////////////////////////////////////////////////////
+
+
+#include "larana/OpticalDetector/OpHitFinder/SaturationCorrectionTool.h"
+#include "art/Utilities/ToolMacros.h"
+#include "fhiclcpp/ParameterSet.h"
+#include <map>
+#include <vector>
+#include <cmath>
+
+namespace opdet {
+
+  class SaturationExp : public pmtana::SaturationCorrectionTool {
+  public:
+    explicit SaturationExp(fhicl::ParameterSet const& pset) {
+      fCalibThrs        = pset.get<double>("calibThrs");
+      fMinPlateauSize   = pset.get<int>("MinPlateauSize", 3);
+
+      auto channelVec  = pset.get<std::vector<size_t>>("channelVec");
+      auto calibParam1 = pset.get<std::vector<double>>("calibParam1");
+      auto calibParam2 = pset.get<std::vector<double>>("calibParam2");
+      auto calibParam3 = pset.get<std::vector<double>>("calibParam3");
+
+      for (size_t i = 0; i < channelVec.size(); ++i) {
+        fCalibMap[channelVec[i]] = {calibParam1[i], calibParam2[i], calibParam3[i]};
+      }
+    }
+  private:
+    double fCalibThrs;
+    int fMinPlateauSize;
+    std::map<size_t, std::vector<double>> fCalibMap;
+    //---------------------------------------------------------------------------
+    void CorrectSaturation(pmtana::Waveform_t const& wf, pmtana::pulse_param& _pulse, double pedestal, int ch) override
+    {
+      bool in_saturation = false;
+      int satcounter=0, plateau_count=0;
+      std::vector<int> plateau_lengths;
+      double tolerance = 0.1, max_margin = 100.0; // Derivative and max allowed drop (in ADC) from the pulse peak to count as saturation; //to be optimized
+
+      // Ensure valid indices
+      if (_pulse.t_start >= _pulse.t_end || _pulse.t_end >= static_cast<int>(wf.size())) return;
+      // Start loop at max(1, t_start) to prevent wf[i-1] out-of-bounds access
+      size_t start_tick = std::max(static_cast<size_t>(1), static_cast<size_t>(_pulse.t_start));
+
+      for (size_t i = start_tick; i <= static_cast<size_t>(_pulse.t_end); ++i) {//go over the full lenght of a pulse looking for saturation (slope ~ 0 near peak)
+        if (std::abs((static_cast<double>(wf[i]) - static_cast<double>(wf[i - 1])) <= tolerance) && (static_cast<double>(wf[i]) >= fCalibThrs) && (static_cast<double>(wf[i]) >= (_pulse.peak - max_margin))){//the last one is just a safegard against spurious fluctuations 
+          if (!in_saturation) {
+            in_saturation = true;
+            satcounter = 2; //when the condition is satisfied, this is already the second tick the waveform is saturated
+          }else{ satcounter++; }
+        }else{ // End of a saturated region
+          if(in_saturation) {
+            if(satcounter >= fMinPlateauSize) {
+              plateau_count++;
+              plateau_lengths.push_back(satcounter);
+            }
+            in_saturation = false;
+            satcounter = 0;
+          }
+        }
+      }
+
+      // Catch trailing saturation at the end of pulse window
+      if (in_saturation && satcounter >= fMinPlateauSize) { plateau_lengths.push_back(satcounter);}  
+
+      if (!plateau_lengths.empty()) {
+        //For the moment, the correction applied here is based on the "time-over-saturation (ToS)" method, where the missing area is added to the original area calculation
+        //(see Maressa's presentation here: https://indico.fnal.gov/event/74741/contributions/342609/attachments/198490/276375/Jun_ToTUpdate_PDVD.pdf)
+        //parameters of the calib curve, channel dependent, in order: a, b, c (a*ToS^b*exp(c*ToS))  
+        std::vector<double> calibvec = fCalibMap[ch];
+        for(size_t i =0; i<plateau_lengths.size(); i++){
+          double missingArea=calibvec[0]*pow(plateau_lengths[i],calibvec[1])*exp(calibvec[2]*plateau_lengths[i]);
+          _pulse.area += missingArea*(double(_pulse.peak)-double(pedestal));
+        }
+      }
+    }
+
+  };
+}
+
+DEFINE_ART_CLASS_TOOL(opdet::SaturationExp)
