@@ -145,6 +145,7 @@ namespace duneopdet {
                     bool timestamp_is_relative)
   {
     if (pulse.peak < hitThreshold) return;
+    if (pulse.area <= 0) return; // Drop hits with non-positive integrated charge
 
     auto tick_period = clocksData.OpticalClock().TickPeriod();
     double absTime = timeStamp +  tick_period * (use_start_time ? pulse.t_start : pulse.t_max);
