@@ -47,6 +47,7 @@ find_package( dunecore REQUIRED EXPORT )
 find_package( CLHEP REQUIRED )
 find_package( Geant4 REQUIRED )
 find_package( HDF5 REQUIRED )
+find_package( nlohmann_json REQUIRED )
 
 # macros for artdaq_dictionary and simple_plugin
 include(ArtDictionary)
