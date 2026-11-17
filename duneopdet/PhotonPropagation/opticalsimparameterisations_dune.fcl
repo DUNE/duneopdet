@@ -50,7 +50,7 @@ dune_vuv_timing_parameterization:
   Expo_over_Landau_norm:  @local::Expo_over_Landau_norm_dune
   
   # Discretisation step size in cm
-  step_size: 1.
+  step_size: 5. # coarser timing for speed
   # Min and maximum distance in cm parameterisations are generated for (only generated when required to prevent long initial loading time)
   max_d: 1000.
   min_d: 25.
@@ -667,7 +667,7 @@ dunevd_vuv_Argon_hits_parameterization:
 dunevd_vuv_timing_parameterization: @local::dune_vuv_timing_parameterization
 dunevd_vuv_timing_parameterization.angle_bin_timing_vuv: 90 	# run in single bin mode for speed, gain in precision not warranted without vd specific parameterisation
 dunevd_vuv_timing_parameterization.step_size: 5. 		# larger step size for speed, gain in precision not warranted without vd specific parameterisation
-dunevd_vuv_timing_parameterization.max_d: 4000.  		# cm
+dunevd_vuv_timing_parameterization.max_d: 1000.  		# cm
 
 
 
