@@ -1,0 +1,32 @@
+BEGIN_PROLOG
+
+protodunevd_exp_saturation_algo: {
+  ADCThreshold: 10
+  MinWidth: 60
+  Pedestal: 1500
+  SecondThreshold: 1
+  DefaultModule: "AlgoSaturation"
+  Name: "Saturation"
+  IgnoreChannels: [2010, 2011, 2020, 2021, 2030, 2031, 2040, 2041, 2050, 2051, 2060, 2061, 2070, 2071, 2080, 2081, 3010, 3020, 3030, 3040, 3050, 3060, 3070, 3080, 3090, 3100, 3110, 3120, 3130, 3140, 3150, 3160, 3170, 3180, 3190, 3200, 3210, 3220, 3230, 3240] //All membrane and PMTs
+  CorrectionTool: {
+    tool_type: "SaturationExp"  # Plugin class name from DEFINE_ART_CLASS_TOOL
+    MinPlateauSize: 3
+    #Params from Jacob Boza's fit, a*T^b*exp(c*T), in order a, b, c
+    calibThrs: 8000
+    channelVec: [ 1010, 1011, 1020, 1021, 1030, 1031, 1040, 1041, 1050, 1051, 1060, 1061, 1070, 1071, 1080, 1081 ]
+    calibParam1: [ 0.0436163, 0.033094, 0.0441963, 0.038691, 0.0391921, 0.0362973, 0.0492856, 0.0494075, 0.0334818, 0.0311186, 0.0364448, 0.0303094, 0.0352185, 0.0326038, 0.0237822, 0.0311396 ]
+    calibParam2: [ 1.33546, 1.3668, 1.3684, 1.39327, 1.40431, 1.39268, 1.27394, 1.27409, 1.36176, 1.47391, 1.35735, 1.44904, 1.30588, 1.33853, 1.42469, 1.4439 ]
+    calibParam3: [ 0.0123205, 0.0122676, 0.0108671, 0.00979486, 0.00973205, 0.0100309, 0.0131731, 0.0129459, 0.0135976, 0.0083925, 0.0118824, 0.00950556, 0.0132329, 0.0127378, 0.0124998, 0.00910758 ]
+  }
+}
+
+protodunevd_smoothbreak_saturation_algo: @local::protodunevd_exp_saturation_algo
+protodunevd_smoothbreak_saturation_algo.CorrectionTool.tool_type: "SaturationSmoothBreak"
+    #Params from Jacob Boza's fit, a*T^b*[1+(T/x0)^d]^((e-b)/d), in order a, b, e, x0, d
+protodunevd_smoothbreak_saturation_algo.CorrectionTool.calibParam1: [ 0.0344709, 0.0254386, 0.0371801, 0.0321557, 0.0305173, 0.0281756, 0.0345823, 0.0350967, 0.0253047, 0.0254805, 0.0273069, 0.0230472, 0.0274665, 0.024681, 0.0199307, 0.0260315 ]
+protodunevd_smoothbreak_saturation_algo.CorrectionTool.calibParam2: [ 1.50988, 1.55496, 1.50908, 1.53287, 1.57072, 1.56141, 1.50135, 1.49512, 1.56364, 1.61021, 1.55131, 1.62258, 1.4968, 1.53758, 1.57705, 1.57831 ]
+protodunevd_smoothbreak_saturation_algo.CorrectionTool.calibParam3: [ 2.26956, 2.43654, 2.28484, 2.1909, 2.42077, 2.32953, 2.42669, 2.40986, 2.462, 2.32674, 2.44369, 2.41674, 2.47872, 2.51747, 2.39665, 2.36015 ]
+protodunevd_smoothbreak_saturation_algo.CorrectionTool.calibParam4: [ 42.741, 48.0097, 43.9505, 45.0013, 55.6537, 52.0903, 50.2667, 50.0421, 45.376, 53.3508, 50.885, 56.8409, 48.0812, 50.6355, 41.143, 51.9369 ]
+protodunevd_smoothbreak_saturation_algo.CorrectionTool.calibParam5: [ 8, 7.81461, 8, 7.99996, 8, 8, 8, 7.99995, 8, 8, 6.76925, 8, 8, 8, 7.49191, 8 ]
+
+END_PROLOG
