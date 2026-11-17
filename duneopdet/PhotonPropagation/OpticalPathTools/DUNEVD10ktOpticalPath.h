@@ -17,7 +17,7 @@ namespace phot {
 
         const bool isOpDetVisible(geo::Point_t const& ScintPoint, geo::Point_t const& OpDetPoint) override {           
             // special case for DUNE-VD 10kt
-            // Anode PDs 
+            // Cathode PDs 
             // at X ~ 0cm, double-sided, visible from both drift volumes  
             if (std::abs(OpDetPoint.X()) < 10.0) return true;
 
