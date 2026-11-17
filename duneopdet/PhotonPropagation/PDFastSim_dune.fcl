@@ -15,31 +15,41 @@ BEGIN_PROLOG
 ###########
 # DUNE HD 10kt #
 ###########
+# Dedicated 10kt Parameters for Ar light only
+# Xe simulation using 1x2x6 paramters with vertical-only border corrections
 
 # Hits & Timing parameterization for DUNE HD, Ar scintillation
-dunefd_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
-dunefd_pdfastsim_par_ar.VUVTiming:             @local::dune_vuv_timing_parameterization
-dunefd_pdfastsim_par_ar.VUVHits:               @local::dune_vuv_RS100cm_hits_parameterization
-dunefd_pdfastsim_par_ar.OpticalPathTool:       @local::DUNEHD10ktOpticalPath
-dunefd_pdfastsim_par_ar.VUVHits.VerticalBorderCorrectionMode: true
+# Central region, vertical border corrections
+dunefd_pdfastsim_par_center_ar:                       @local::standard_pdfastsim_par_ar
+dunefd_pdfastsim_par_center_ar.VUVTiming:             @local::dune_vuv_timing_parameterization
+dunefd_pdfastsim_par_center_ar.VUVHits:               @local::dune_vuv_center_hits_parameterization
+dunefd_pdfastsim_par_center_ar.OpticalPathTool:       @local::DUNEHD10ktCenterOpticalPath
+dunefd_pdfastsim_par_center_ar.VUVHits.VerticalBorderCorrectionMode: true
 
-# As above, with cathode reflections included
-dunefd_pdfastsim_par_ar_refl:                  @local::dunefd_pdfastsim_par_ar
-dunefd_pdfastsim_par_ar_refl.DoReflectedLight: true
-dunefd_pdfastsim_par_ar_refl.VISTiming:        @local::dune_vis_timing_parameterization
-dunefd_pdfastsim_par_ar_refl.VISHits:          @local::dune_vis_RS100cm_hits_parameterization
+# Upsteam/downstream region, radial border corrections
+# Border correction offset of 2600 cm 
+dunefd_pdfastsim_par_ends_ar:                       @local::standard_pdfastsim_par_ar
+dunefd_pdfastsim_par_ends_ar.VUVTiming:             @local::dune_vuv_timing_parameterization
+dunefd_pdfastsim_par_ends_ar.VUVHits:               @local::dune_vuv_ends_hits_parameterization
+dunefd_pdfastsim_par_ends_ar.OpticalPathTool:       @local::DUNEHD10ktEndsOpticalPath
+dunefd_pdfastsim_par_ends_ar.VUVHits.VerticalBorderCorrectionMode: false
+dunefd_pdfastsim_par_ends_ar.VUVHits.ApplyBorderCorrectionZOffset: true
+dunefd_pdfastsim_par_ends_ar.VUVHits.BorderCorrectionZOffset: 2600
 
 # As above, but fast-only scintillation for high Xe concentration
-dunefd_pdfastsim_par_ar_fastonly:              @local::dunefd_pdfastsim_par_ar
-dunefd_pdfastsim_par_ar_fastonly.DoSlowComponent: false
+dunefd_pdfastsim_par_center_ar_fastonly:              @local::dunefd_pdfastsim_par_center_ar
+dunefd_pdfastsim_par_center_ar_fastonly.DoSlowComponent: false
+dunefd_pdfastsim_par_ends_ar_fastonly:              @local::dunefd_pdfastsim_par_ends_ar
+dunefd_pdfastsim_par_ends_ar_fastonly.DoSlowComponent: false
 
 # Hits parameterization for DUNE HD, Xe scintillation at 10 ppm
+# No center/ends split, using 1x2x6 parameters
 dunefd_pdfastsim_par_xe:                       @local::standard_pdfastsim_par_ar
 dunefd_pdfastsim_par_xe.DoFastComponent:       false          # Only slow Xe light
-dunefd_pdfastsim_par_xe.VUVHits:               @local::dune_vuv_Xenon_hits_parameterization
+dunefd_pdfastsim_par_xe.VUVHits:               @local::dune_1x2x6_vuv_Xenon_hits_parameterization
 dunefd_pdfastsim_par_xe.VUVHits.VerticalBorderCorrectionMode: true
-dunefd_pdfastsim_par_xe.IncludePropTime:       false          # Xe propoagation time not yet calculated
-#dunefd_pdfastsim_par_xe.VUVTiming:                           # Xe propoagation time not yet calculated
+dunefd_pdfastsim_par_xe.IncludePropTime:       true          
+dunefd_pdfastsim_par_xe.GeoPropTimeOnly:       true		
 dunefd_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
 dunefd_pdfastsim_par_xe.OpticalPathTool:       @local::DUNEHD10ktOpticalPath
 
@@ -48,59 +58,62 @@ dunefd_pdfastsim_par_xe50:                       @local::dunefd_pdfastsim_par_xe
 dunefd_pdfastsim_par_xe50.DoFastComponent:       true
 dunefd_pdfastsim_par_xe50.ScintTimeTool.XeConcentration: 50
 
-# As above, with cathode reflections included
-dunefd_pdfastsim_par_xe_refl:                  @local::dunefd_pdfastsim_par_xe
-dunefd_pdfastsim_par_xe_refl.DoReflectedLight: true
-dunefd_pdfastsim_par_xe_refl.VISHits:          @local::dune_vis_xenon_hits_parameterization
-#dunefd_pdfastsim_par_xe_refl.VISTiming:                      # Xe propoagation time not yet calculated
-
-# Photon library (or PVS parameterization) is not recommended for the FD
+# Photon library (or PVS parameterization) is not recommended for the FD [Does not exist]
 dunefd_pdfastsim_pvs:                          @local::standard_pdfastsim_pvs
 
 # Choose *the* pdfast sim module for the HD 10kt
-dunefd_pdfastsim:                              @local::dunefd_pdfastsim_par_ar
-
+# Run center and ends parts separately, to later be combined
+dunefd_pdfastsim_center:                            @local::dunefd_pdfastsim_par_center_ar
+dunefd_pdfastsim_ends:                              @local::dunefd_pdfastsim_par_ends_ar
 
 ###########
-# DUNE HD 10kt 1x2x6 #
+# DUNE HD 1x2x6 #
 ###########
 
-# Parameterisations identical as 10kt, except not using vertical border correction mode
-# Require different optical path tool, using standard tool rather than custom dune 10kt one
+# Uses dedicated 1x2x6 parameterisations
+# Requires different optical path tool, using standard tool rather than custom dune 10kt one
 
 # Hits & Timing parameterization for DUNE HD 1x2x6, Ar scintillation
-dunefd_1x2x6_pdfastsim_par_ar:                       @local::dunefd_pdfastsim_par_ar
+dunefd_1x2x6_pdfastsim_par_ar:                       @local::standard_pdfastsim_par_ar
+dunefd_1x2x6_pdfastsim_par_ar.VUVTiming:             @local::dune_vuv_timing_parameterization
+dunefd_1x2x6_pdfastsim_par_ar.VUVHits:               @local::dune_1x2x6_vuv_RS100cm_hits_parameterization
 dunefd_1x2x6_pdfastsim_par_ar.OpticalPathTool:       @local::StandardOpticalPath
 dunefd_1x2x6_pdfastsim_par_ar.VUVHits.VerticalBorderCorrectionMode: false
 
 # As above, with cathode reflections included
-dunefd_1x2x6_pdfastsim_par_ar_refl:                  @local::dunefd_pdfastsim_par_ar_refl
-dunefd_1x2x6_pdfastsim_par_ar_refl.OpticalPathTool:  @local::StandardOpticalPath
-dunefd_1x2x6_pdfastsim_par_ar_refl.VUVHits.VerticalBorderCorrectionMode: false
+dunefd_1x2x6_pdfastsim_par_ar_refl:                  @local::dunefd_1x2x6_pdfastsim_par_ar
+dunefd_1x2x6_pdfastsim_par_ar_refl.DoReflectedLight: true
+dunefd_1x2x6_pdfastsim_par_ar_refl.VISTiming:        @local::dune_vis_timing_parameterization
+dunefd_1x2x6_pdfastsim_par_ar_refl.VISHits:          @local::dune_vis_RS100cm_hits_parameterization
 
 # As above, but fast-only scintillation for high Xe concentration
-dunefd_1x2x6_pdfastsim_par_ar_fastonly:                     @local::dunefd_pdfastsim_par_ar_fastonly
-dunefd_1x2x6_pdfastsim_par_ar_fastonly.OpticalPathTool:     @local::StandardOpticalPath
-dunefd_1x2x6_pdfastsim_par_ar_fastonly.VUVHits.VerticalBorderCorrectionMode: false
+dunefd_1x2x6_pdfastsim_par_ar_fastonly:              @local::dunefd_1x2x6_pdfastsim_par_ar
+dunefd_1x2x6_pdfastsim_par_ar_fastonly.DoSlowComponent: false
 
 # Hits parameterization for DUNE HD 1x2x6, Xe scintillation at 10 ppm
-dunefd_1x2x6_pdfastsim_par_xe:                       @local::dunefd_pdfastsim_par_xe
-dunefd_1x2x6_pdfastsim_par_xe.OpticalPathTool:       @local::StandardOpticalPath
+dunefd_1x2x6_pdfastsim_par_xe:                       @local::standard_pdfastsim_par_ar
+dunefd_1x2x6_pdfastsim_par_xe.DoFastComponent:       false          # Only slow Xe light
+dunefd_1x2x6_pdfastsim_par_xe.VUVHits:               @local::dune_1x2x6_vuv_Xenon_hits_parameterization
 dunefd_1x2x6_pdfastsim_par_xe.VUVHits.VerticalBorderCorrectionMode: false
+dunefd_1x2x6_pdfastsim_par_xe.IncludePropTime:       true          
+dunefd_1x2x6_pdfastsim_par_xe.GeoPropTimeOnly:       true	
+dunefd_1x2x6_pdfastsim_par_xe.ScintTimeTool:         @local::ScintTimeXeDoping10ppm
+dunefd_1x2x6_pdfastsim_par_xe.OpticalPathTool:       @local::StandardOpticalPath
 
 # As above, but for higher Xe concentration
-dunefd_1x2x6_pdfastsim_par_xe50:                     @local::dunefd_pdfastsim_par_xe50
-dunefd_1x2x6_pdfastsim_par_xe50.OpticalPathTool:     @local::StandardOpticalPath
-dunefd_1x2x6_pdfastsim_par_xe50.VUVHits.VerticalBorderCorrectionMode: false
+dunefd_1x2x6_pdfastsim_par_xe50:                     @local::dunefd_1x2x6_pdfastsim_par_xe
+dunefd_1x2x6_pdfastsim_par_xe50.DoFastComponent:       true
+dunefd_1x2x6_pdfastsim_par_xe50.ScintTimeTool.XeConcentration: 50
 
-# As above, with cathode reflections included
-dunefd_1x2x6_pdfastsim_par_xe_refl:                  @local::dunefd_pdfastsim_par_xe_refl
-dunefd_1x2x6_pdfastsim_par_xe_refl.OpticalPathTool:  @local::StandardOpticalPath
-dunefd_1x2x6_pdfastsim_par_xe_refl.VUVHits.VerticalBorderCorrectionMode: false
+# As above, with cathode foil reflections included
+dunefd_1x2x6_pdfastsim_par_xe_refl:                  @local::dunefd_1x2x6_pdfastsim_par_xe
+dunefd_1x2x6_pdfastsim_par_xe_refl.DoReflectedLight: true
+dunefd_1x2x6_pdfastsim_par_xe_refl.IncludePropTime:       false
+dunefd_1x2x6_pdfastsim_par_xe_refl.VISHits:          @local::dune_vis_xenon_hits_parameterization
+#dunefd_1x2x6_pdfastsim_par_xe_refl.VISTiming:                # Foils light Xe propoagation time not yet calculated
 
 # Choose *the* pdfast sim module for the HD 10kt 1x2x6
 dunefd_1x2x6_pdfastsim:                              @local::dunefd_1x2x6_pdfastsim_par_ar
-
 
 ###########
 # DUNE VD 10kt #
@@ -124,7 +137,7 @@ dunevd_pdfastsim_par_xe.DoFastComponent:       false          # Only slow Xe lig
 dunevd_pdfastsim_par_xe.VUVHits:               @local::dunevd_vuv_Xenon_hits_parameterization
 dunevd_pdfastsim_par_xe.VUVHits.VerticalBorderCorrectionMode: true
 #dunevd_pdfastsim_par_xe.VISHits:               @local::dunevd_vuv_Xenon_anode_hits_parameteriszation
-dunevd_pdfastsim_par_xe.IncludeAnodeReflections: false           # Xenon light reflections from anode no longer in use
+dunevd_pdfastsim_par_xe.IncludeAnodeReflections: false           # Xenon light reflections from anode, no longer in use
 dunevd_pdfastsim_par_xe.OpticalPathTool:       @local::DUNEVD10ktOpticalPath
 dunevd_pdfastsim_par_xe.IncludePropTime:       true          
 dunevd_pdfastsim_par_xe.GeoPropTimeOnly:       true			  # Xe propoagation time geometric approximation
@@ -155,7 +168,7 @@ dunevd_1x8x14_pdfastsim_par_xe:                      @local::dunevd_pdfastsim_pa
 dunevd_1x8x14_pdfastsim_par_xe.OpticalPathTool:       @local::StandardOpticalPath
 dunevd_1x8x14_pdfastsim_par_xe.VUVHits.VerticalBorderCorrectionMode: false
 
-# External region for laterals (Hybrid model) -- what to do with this?
+# External region for laterals (Hybrid model)
 # Temporarily keeping this service for VD coldbox
 # Not available
 #dunevd_pdfastsim_pvs_external: 			  @local::standard_pdfastsim_pvs

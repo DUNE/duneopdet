@@ -7,6 +7,16 @@ DUNEHD10ktOpticalPath:
     tool_type: DUNEHD10ktOpticalPath
 }
 
+DUNEHD10ktCenterOpticalPath:
+{
+    tool_type: DUNEHD10ktCenterOpticalPath
+}
+
+DUNEHD10ktEndsOpticalPath:
+{
+    tool_type: DUNEHD10ktEndsOpticalPath
+}
+
 DUNEVD10ktOpticalPath:
 {
     tool_type: DUNEVD10ktOpticalPath
