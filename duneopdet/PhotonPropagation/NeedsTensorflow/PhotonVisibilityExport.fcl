@@ -3,7 +3,7 @@
 BEGIN_PROLOG
 
 semianalytical_model_settings: {
-  do_refl:                  @local::dunefd_pdfastsim_par_ar_refl.DoReflectedLight
+  do_refl:                  false
   do_include_anode_refl:    false
   vuvhitspars:              @local::dunefd_pdfastsim_par_ar.VUVHits
   vishitspars:              @local::dunefd_pdfastsim_par_ar_refl.VISHits
@@ -44,6 +44,14 @@ photovisexport_fdhd.tpc_vis_model.tool_type: "SemiAnalyticalVisModel"
 photovisexport_fdhd.tpc_vis_model.settings: @local::semianalytical_model_settings
 photovisexport_fdhd.buf_vis_model.tool_type: "PhotonLibraryVisModel"
 photovisexport_fdhd.buf_vis_model.settings: {}
+
+photovisexport_fdhd_center: @local::photovisexport_fdhd
+photovisexport_fdhd_center.tpc_vis_model.settings.vuvhitspars: @local::dunefd_pdfastsim_par_center_ar.VUVHits
+photovisexport_fdhd_center.tpc_vis_model.settings.OpticalPathTool: @local::dunefd_pdfastsim_par_center_ar.OpticalPathTool
+
+photovisexport_fdhd_ends: @local::photovisexport_fdhd
+photovisexport_fdhd_ends.tpc_vis_model.settings.vuvhitspars: @local::dunefd_pdfastsim_par_ends_ar.VUVHits
+photovisexport_fdhd_ends.tpc_vis_model.settings.OpticalPathTool: @local::dunefd_pdfastsim_par_ends_ar.OpticalPathTool
 
 photovisexport_fdvd_ar: @local::photovisexport_fdhd
 photovisexport_fdvd_ar.tpc_vis_model.settings.vuvhitspars: @local::dunevd_pdfastsim_par_ar.VUVHits
