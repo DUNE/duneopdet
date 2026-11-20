@@ -33,6 +33,9 @@
 #include "fhiclcpp/ParameterSet.h"
 
 #include "dunecore/ProducerUtils/ProducerUtils.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcorealg/Geometry/GeometryCore.h"
+
 
 #include "TH1I.h"
 #include "TH1F.h"
