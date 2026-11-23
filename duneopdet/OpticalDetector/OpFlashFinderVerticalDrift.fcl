@@ -15,4 +15,23 @@ dunefdvd_opflash:
    MMdz:                 1500.0 # dist. criteria for neighbouring hits on membrane planes (cm) 
 }
 
+# FD-VD 10 ppm Xe, for flashes without a trigger time (e.g. atmospheric neutrinos, where the
+# neutrino flash must be found among the radiological flashes of the whole readout).
+# Hits are linked within 0.8 us and 400 cm in z, whatever the planes; flashes need >= 20
+# channels; the flash time is the 10% leading edge minus the median Xe light delay (0.65 us).
+# Few-channel flashes are mostly radiological decays next to one PD module (~2,000 PE on ~6
+# channels); they outshine low-energy neutrino flashes, which light ~190 channels.
+# FD-VD 1x8x14 atmospheric sample with radiological background, 9,380 events: the brightest
+# flash is the neutrino flash (leading edge within 1 us) for 99.85% of CC and 83.8% of NC
+# fiducial events.
+# Author: Pierre Granger (pgranger23@gmail.com)
+dunefdvd_opflash_atmos:                     @local::dunefdvd_opflash
+dunefdvd_opflash_atmos.MaximumTimeDistance: 0.8
+dunefdvd_opflash_atmos.MaximumTimeWindow:   1e9   # no limit on the flash duration
+dunefdvd_opflash_atmos.LinkByZOnly:         true
+dunefdvd_opflash_atmos.ZLinkDistance:       400.
+dunefdvd_opflash_atmos.MinChannels:         20
+dunefdvd_opflash_atmos.LeadingEdgeFraction: 0.1
+dunefdvd_opflash_atmos.TimeOffset:          0.65
+
 END_PROLOG

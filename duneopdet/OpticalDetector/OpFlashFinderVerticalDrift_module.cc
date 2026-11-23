@@ -7,6 +7,16 @@
 // 
 // Based on modification on José Soto's code for DP 
 // *Upper volume only/adapt if lower volume is implemented
+//
+// Modified: Pierre Granger (pgranger23@gmail.com), 2026
+//   - fix the OpHit indices stored in each flash (time-sorted positions were
+//     stored as OpHit indices)
+//   - optional settings, all off by default (behaviour unchanged):
+//     LinkByZOnly/ZLinkDistance: link hits on |dz| only, whatever the planes
+//     MinChannels: drop flashes with fewer distinct optical channels
+//     LeadingEdgeFraction/TimeOffset: flash time = time at which this
+//       fraction of the flash PE is collected, minus TimeOffset, instead of
+//       the PE-weighted mean
 
 
 #ifndef OpFlashFinderVerticalDrift_H
@@ -35,9 +45,12 @@
 // ROOT includes
 
 // C++ Includes
-#include <vector>
-#include <string>
+#include <algorithm>
+#include <cmath>
 #include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace opdet {
  
@@ -108,6 +121,11 @@ namespace opdet {
     Double_t fCdyz;                       // distance criteria for position neighbouring hits according to the different combinations of sensor planes with hits
     Double_t fCMdz;
     Double_t fMMdz;
+    bool     fLinkByZOnly;                // link hits on |dz| < fZLinkDistance only, whatever the planes
+    Double_t fZLinkDistance;
+    int      fMinChannels;                // minimum number of distinct optical channels per flash
+    Double_t fLeadingEdgeFraction;        // > 0: flash time = leading edge at this PE fraction
+    Double_t fTimeOffset;                 // subtracted from the leading-edge time
 
 
   };
@@ -157,6 +175,11 @@ namespace opdet {
     fCdyz = pset.get< double >("Cdyz",400.0);
     fCMdz = pset.get< double >("CMdz",450.0);
     fMMdz = pset.get< double >("MMdz",450.0);
+    fLinkByZOnly         = pset.get< bool >("LinkByZOnly", false);
+    fZLinkDistance       = pset.get< double >("ZLinkDistance", 400.0);
+    fMinChannels         = pset.get< int >("MinChannels", 0);
+    fLeadingEdgeFraction = pset.get< double >("LeadingEdgeFraction", 0.0);
+    fTimeOffset          = pset.get< double >("TimeOffset", 0.0);
 
   }
 
@@ -234,6 +257,17 @@ namespace opdet {
     
     AssignHitsToFlash(HitVector,
                       HitsPerFlash);
+
+    // Channel threshold, applied after clustering: it only removes flashes
+    if (fMinChannels > 0) {
+      auto tooFew = [&](std::vector< int > const& hits) {
+        std::set< int > channels;
+        for (int const h : hits) channels.insert(HitVector[h].OpChannel());
+        return static_cast< int >(channels.size()) < fMinChannels;
+      };
+      HitsPerFlash.erase(std::remove_if(HitsPerFlash.begin(), HitsPerFlash.end(), tooFew),
+                         HitsPerFlash.end());
+    }
     
     // Now we have all our hits assigned to a flash. 
     // Make the recob::OpFlash objects
@@ -301,6 +335,23 @@ namespace opdet {
     double meany = sumy/TotalPE;
     double meanz = sumz/TotalPE;
     
+    // Flash time: PE-weighted mean (default), or the leading edge
+    double FlashTime    = AveTime;
+    double FlashAbsTime = AveAbsTime;
+    if (fLeadingEdgeFraction > 0) {
+      std::vector< int > byTime(HitsPerFlashVec);
+      std::stable_sort(byTime.begin(), byTime.end(), [&](int a, int b) {
+        return HitVector[a].PeakTime() < HitVector[b].PeakTime(); });
+      std::vector< double > cumPE;
+      cumPE.reserve(byTime.size());
+      double cum = 0;
+      for (int const h : byTime) cumPE.push_back(cum += HitVector[h].PE());
+      auto const lead = std::lower_bound(cumPE.begin(), cumPE.end(), fLeadingEdgeFraction*cum);
+      recob::OpHit const& leadHit = HitVector[byTime[lead - cumPE.begin()]];
+      FlashTime    = leadHit.PeakTime()    - fTimeOffset;
+      FlashAbsTime = leadHit.PeakTimeAbs() - fTimeOffset;
+    }
+
     double widthy = CalculateWidth(sumy, sumy2, TotalPE);
     double widthz = CalculateWidth(sumz, sumz2, TotalPE);
     
@@ -314,7 +365,7 @@ namespace opdet {
 
     // Empirical corrections to get the Frame right.
     // Eventual solution - remove frames
-    int Frame = ts.OpticalClock().Frame(AveAbsTime - 18.1);
+    int Frame = ts.OpticalClock().Frame(FlashAbsTime - 18.1);
     if (Frame == 0) Frame = 1;
     
     int BeamFrame = ts.OpticalClock().Frame(ts.TriggerTime());
@@ -324,11 +375,11 @@ namespace opdet {
     double TimeWidth = (MaxTime - MinTime)/2.0;
 
     int OnBeamTime = 0; 
-    if (InBeamFrame && (std::abs(AveTime) < TrigCoinc)) OnBeamTime = 1;
+    if (InBeamFrame && (std::abs(FlashTime) < TrigCoinc)) OnBeamTime = 1;
     
-    FlashVector.emplace_back(AveTime,
+    FlashVector.emplace_back(FlashTime,
                              TimeWidth,
-                             AveAbsTime,
+                             FlashAbsTime,
                              Frame,
                              PEs, 
                              InBeamFrame,
@@ -449,6 +500,16 @@ namespace opdet {
        dz  = (xyz_h - xyz_hitnumber).Z();
        dt  = TMath::Abs(  HitVector[sorted[hitnumber]].PeakTime() - HitVector[sorted[h]].PeakTime() );
        dtmax  = TMath::Abs(initimecluster - HitVector[sorted[h]].PeakTime() );       
+       if (fLinkByZOnly) {
+         // double precision and inclusive cuts: hit times sit on the digitizer tick grid,
+         // so gaps equal to MaximumTimeDistance are common and must not depend on rounding
+         double const dtd = std::abs(HitVector[sorted[hitnumber]].PeakTime() - HitVector[sorted[h]].PeakTime());
+         double const dzd = std::abs((xyz_h - xyz_hitnumber).Z());
+         if (dtd <= fMaximumTimeDistance && dtmax < fMaximumTimeWindow && dzd <= fZLinkDistance) {
+           neighbors.push_back(h); processed[h]=true;
+         }
+         continue;
+       }
        double dist = TMath::Sqrt(dx*dx + dy*dy + dz*dz);
        
        if(xyz_h.X() < fCx && xyz_hitnumber.X() < fCx){
