@@ -22,6 +22,9 @@
 #include "larreco/Calibrator/IPhotonCalibrator.h"
 #include "messagefacility/MessageLogger/MessageLogger.h"
 
+#include <algorithm>
+#include <cmath>
+#include <limits>
 #include <vector>
 
 namespace duneopdet {
@@ -96,16 +99,27 @@ namespace duneopdet {
 
        // Loop to convert from float to short
        std::vector<short int> short_deco_waveform; //vector used to convert from float to short.
+       // Lower the scale of waveforms that would overflow short, and undo it on the hits below.
+       float max_signal = 0;
        for (unsigned int i_tick=0; i_tick < deco_waveform.SignalROI().size(); ++i_tick)
        {
-       short_deco_waveform.emplace_back(static_cast<short int>(scale*deco_waveform.SignalROI()[i_tick]));
+       max_signal = std::max(max_signal, std::abs(deco_waveform.SignalROI()[i_tick]));
+       }
+       constexpr float short_max = std::numeric_limits<short int>::max();
+       const float wf_scale = (scale*max_signal > short_max) ? short_max/max_signal : scale;
+
+       for (unsigned int i_tick=0; i_tick < deco_waveform.SignalROI().size(); ++i_tick)
+       {
+       short_deco_waveform.emplace_back(static_cast<short int>(wf_scale*deco_waveform.SignalROI()[i_tick]));
        }
 
        pulseRecoMgr.Reconstruct(short_deco_waveform);
 
       // Get the result
       auto const& pulses = threshAlg.GetPulses();
-      for (auto const& pulse : pulses)
+      for (auto pulse : pulses) {
+        pulse.area *= scale/wf_scale;
+        pulse.peak *= scale/wf_scale;
         ConstructHit(hitThreshold,
                      channel,
                      timeStamp,
@@ -115,6 +129,7 @@ namespace duneopdet {
                      calibrator,
                      use_start_time,
                      timestamp_is_relative);
+      }
      }
  }
 
@@ -130,6 +145,7 @@ namespace duneopdet {
                     bool timestamp_is_relative)
   {
     if (pulse.peak < hitThreshold) return;
+    if (pulse.area <= 0) return; // Drop hits with non-positive integrated charge
 
     auto tick_period = clocksData.OpticalClock().TickPeriod();
     double absTime = timeStamp +  tick_period * (use_start_time ? pulse.t_start : pulse.t_max);
