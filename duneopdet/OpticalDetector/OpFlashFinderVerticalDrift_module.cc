@@ -522,9 +522,13 @@ namespace opdet {
            //std::cout << "Go: " << i << nb2.size() << std::endl;
            N.insert( N.end(), nb2.begin(), nb2.end() );
        }
-           N.push_back(sorted[h]);
-           //std::cout << "N size:  " << N.size() << std::endl;         
-           HitsPerFlash.push_back(N);
+           // N holds positions in the time-sorted list; ConstructFlash and the
+           // associations need indices into HitVector
+           std::vector<int> hitIndices;
+           hitIndices.reserve(N.size() + 1);
+           for (int pos : N) hitIndices.push_back(sorted[pos]);
+           hitIndices.push_back(sorted[h]);
+           HitsPerFlash.push_back(hitIndices);
      } 
    }
     
