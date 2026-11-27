@@ -128,7 +128,10 @@ namespace opdet {
     double firstWaveformTime = -9999;
     for (long unsigned int i = 0; i < fopDigi.size(); ++i)
       {
-	auto const &waveform = fopDigi.at(i).ref();
+	// changed waveform from a reference to a regular variable as C++20 complained about
+	// a possibly dangling reference to a temporary.  The  fopDigi.at(i).ref() apparently makes
+	// a temporary that is destroyed at the end of the full expression
+	auto const waveform = fopDigi.at(i).ref();
 	if (firstWaveformTime == -9999 || firstWaveformTime > waveform.TimeStamp())
 	  firstWaveformTime = waveform.TimeStamp();
       }
@@ -147,7 +150,7 @@ namespace opdet {
     mfi<<"Number of deconvolved waveforms to be saved in this event: "<<max_wfms<<"\n";
 
     for (size_t i = 0; i < max_wfms; i++){
-      raw::OpDetWaveform const& waveform = fopDigi.at(i).ref();
+      raw::OpDetWaveform const waveform = fopDigi.at(i).ref();
       recob::OpWaveform& decowaveform = OpWaveform.at(i);
       int channel = decowaveform.Channel();
 
