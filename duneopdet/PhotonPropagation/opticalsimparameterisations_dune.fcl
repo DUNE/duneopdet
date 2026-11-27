@@ -50,7 +50,7 @@ dune_vuv_timing_parameterization:
   Expo_over_Landau_norm:  @local::Expo_over_Landau_norm_dune
   
   # Discretisation step size in cm
-  step_size: 1.
+  step_size: 5. # coarser timing for speed
   # Min and maximum distance in cm parameterisations are generated for (only generated when required to prevent long initial loading time)
   max_d: 1000.
   min_d: 25.
@@ -272,7 +272,57 @@ dune_vis_timing_parameterization:
 
 
 # VUV/DIRECT LIGHT: NUMBER OF HITS CORRECTIONS UPDATED MODEL
-# DUNE-SP Gaisser-Hillas 
+# DUNE HD 10kt 
+# Argon - default
+# Central region 300 < Z < 5500 cm, using vertical border corrections
+GH_PARS_RS100cm_hd10kt_vertical_flat_dune: [ [1.06676, 1.01311, 0.974114, 0.930791, 0.836359, 0.746859, 0.630658, 0.513366, 0.441066],
+    						 [114.114, 156.451, 139.516, 151.897, 168.984, 192.8, 212.355, 217.731, 189.779],
+			     			 [10.0001, 10.8385, 13.806, 14.613, 17.0247, 47.9752, 87.7652, 109.726, 189.374],
+			    			 [-5000, -3000, -3000, -3000, -3000, -1000, -500, -500, -100] ]
+GH_border_RS100cm_hd10kt_vertical_angulo_flat_dune: [5, 15, 25, 35, 45, 55, 65, 75, 85]
+GH_border_RS100cm_hd10kt_vertical_flat_dune: [ [0.000221008, 0.000467632, 0.000471365, 0.000324986, 0.000299784, 0.000247915, 0.000233705, 0.000193561, 0.000177598],
+							   [0.039901, 0.0105496, 0.0453694, 0.0552124, 0.0435214, 0.034592, 0.00885774, 0.00709083, -0.0157815],
+							   [-1.3978e-07, -0.00126383, -0.00421211, -0.00460304, -0.00549817, -0.0166145, -0.0212808, -0.0328777, -0.029873] ]
+
+dune_vuv_center_hits_parameterization:
+{
+ FlatPDCorr: true
+ GH_PARS_flat: @local::GH_PARS_RS100cm_hd10kt_vertical_flat_dune
+ GH_border_angulo_flat: @local::GH_border_RS100cm_hd10kt_vertical_angulo_flat_dune
+ GH_border_flat: @local::GH_border_RS100cm_hd10kt_vertical_flat_dune
+ 
+ DomePDCorr: false
+
+ MaxPDDistance: 1000
+
+ delta_angulo_vuv: 10
+}
+
+# Upsteam/downstream region Z < 300 or Z > 5500 cm, using radial border corrections
+GH_PARS_RS100cm_hd10kt_radial_flat_dune: [ [1.05962, 1.0434, 0.984799, 0.928345, 0.852519, 0.769517, 0.655745, 0.531146, 0.447953],
+    						 [117.105, 155.595, 145.433, 163.945, 182.881, 206.071, 228.283, 239.438, 205.96],
+			     			 [10, 10.8886, 14.185, 14.4347, 16.3998, 45.5123, 82.5221, 100.763, 176.188],
+			    			 [-5000, -3000, -3000, -3000, -3000, -1000, -500, -500, -100] ]
+GH_border_RS100cm_hd10kt_radial_angulo_flat_dune: [5, 15, 25, 35, 45, 55, 65, 75, 85]
+GH_border_RS100cm_hd10kt_radial_flat_dune: [ [0.000425189, 0.000579831, 0.000651524, 0.000567743, 0.000455184, 0.000364426, 0.000308084, 0.000262211, 0.000257592],
+							   [0.0759555, 0.0403092, 0.0648501, 0.0504999, 0.0406464, 0.0253774, -0.00991721, -0.0320789, -0.0414782],
+							   [1.07079e-08, -0.00231586, -0.00708859, -0.005772, -0.00647616, -0.0152878, -0.014774, -0.0155895, -0.00908033] ]
+
+dune_vuv_ends_hits_parameterization:
+{
+ FlatPDCorr: true
+ GH_PARS_flat: @local::GH_PARS_RS100cm_hd10kt_radial_flat_dune
+ GH_border_angulo_flat: @local::GH_border_RS100cm_hd10kt_radial_angulo_flat_dune
+ GH_border_flat: @local::GH_border_RS100cm_hd10kt_radial_flat_dune
+ 
+ DomePDCorr: false
+
+ MaxPDDistance: 1000
+
+ delta_angulo_vuv: 10
+}
+
+# DUNE-SP 1x2x6 Gaisser-Hillas 
 # Note: corrections include effects of fully simulated wire planes  
 
 # Argon - default
@@ -285,7 +335,7 @@ GH_border_RS100cm_flat_dune: [ [-9.63855e-05, -6.82604e-05, -9.63478e-05, -0.000
 							   [-0.0662469, -0.0504497, -0.0596321, -0.0418021, -0.0342462, -0.0531668, -0.0522639, -0.0578887, -0.0591081],
 							   [-0.00593207, -0.00672713, -0.0020843, -0.00216374, 0.00901291, 0.00385402, 0.0066081, 0.0341547, 0.0446519] ]
 
-dune_vuv_RS100cm_hits_parameterization:
+dune_1x2x6_vuv_RS100cm_hits_parameterization:
 {
  FlatPDCorr: true
  GH_PARS_flat: @local::GH_PARS_RS100cm_flat_dune
@@ -310,7 +360,7 @@ GH_border_Xenon_flat_dune: [ [0.000212425, 0.000200659, 0.000179874, 0.000165088
 							 [0.151348, 0.168286, 0.153929, 0.12419, 0.0834517, 0.0955464, -0.0175567, -0.112032, -1.98752e-10],
 							 [-0.114771, -0.19272, -0.182644, -0.130611, -0.115369, -0.279817, -0.276752, -0.294378, 0.0783223] ]
 
-dune_vuv_Xenon_hits_parameterization:
+dune_1x2x6_vuv_Xenon_hits_parameterization:
 {
  FlatPDCorr: true
  GH_PARS_flat: @local::GH_PARS_Xenon_flat_dune
@@ -617,7 +667,7 @@ dunevd_vuv_Argon_hits_parameterization:
 dunevd_vuv_timing_parameterization: @local::dune_vuv_timing_parameterization
 dunevd_vuv_timing_parameterization.angle_bin_timing_vuv: 90 	# run in single bin mode for speed, gain in precision not warranted without vd specific parameterisation
 dunevd_vuv_timing_parameterization.step_size: 5. 		# larger step size for speed, gain in precision not warranted without vd specific parameterisation
-dunevd_vuv_timing_parameterization.max_d: 4000.  		# cm
+dunevd_vuv_timing_parameterization.max_d: 1000.  		# cm
 
 
 

@@ -16,7 +16,7 @@ namespace phot {
         ~DUNEHD10ktOpticalPath() noexcept override = default;
 
         const bool isOpDetVisible(geo::Point_t const& ScintPoint, geo::Point_t const& OpDetPoint) override {           
-            // special case for DUNE-HD 10kt
+            // special case for DUNE-HD 10kt      
             // check whether distance in drift direction > 1 drift distance (360.375 cm)
             if (std::abs(ScintPoint.X() - OpDetPoint.X()) > 360.375) return false;
             else return true; 

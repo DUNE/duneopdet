@@ -169,7 +169,7 @@ dunesp_Nhits_vuv_Xe_photonvisibilityservice:
    DoNotLoadLibrary: true
 
    # Semi-analytic VUV Nhits parameters
-   @table::dune_vuv_Xenon_hits_parameterization
+   @table::dune_1x2x6_vuv_Xenon_hits_parameterization
 }
 
 #
@@ -188,7 +188,7 @@ dunesp_Nhits_vuv_vis_prop_timing_RS100cm_photonvisibilityservice:
    @table::dune_vuv_timing_parameterization
 
    # DUNE-specific VUV semi-analytic Nhits parameters
-   @table::dune_vuv_RS100cm_hits_parameterization
+   @table::dune_1x2x6_vuv_RS100cm_hits_parameterization
 
    # Flag to enable visible light simulation
    StoreReflected: true
@@ -243,7 +243,10 @@ dune10kt_1x2x6_refl_photonvisibilityservice_buildlib.LibraryFile:      "PhotonPr
 # DUNE VD #
 ######################
 
-dune10kt_vd_photonvisibilityservice_ArXe: # Generated using 1x8x14 geometry. 
+# Currently libraries are available only for the 1x8x14 workspace
+# The 10kt configurations are placeholders until the libaries are in place 
+
+dune10kt_vd_photonvisibilityservice_ArXe: # Placeholder
 {
   # hybrid library
   NX: 85
@@ -267,8 +270,7 @@ dune10kt_vd_photonvisibilityservice_ArXe: # Generated using 1x8x14 geometry.
 
 }
 
-
-dune10kt_vd_photonvisibilityservice_Ar: # Generated using 1x8x14 geometry. 
+dune10kt_vd_photonvisibilityservice_Ar: # Placeholder. 
 {
   # hybrid library
   NX: 85
@@ -292,7 +294,79 @@ dune10kt_vd_photonvisibilityservice_Ar: # Generated using 1x8x14 geometry.
 
 }
 
-dune10kt_vd_photonvisibilityservice_Xe: # Generated using 1x8x14 geometry. 
+dune10kt_vd_photonvisibilityservice_Xe: # Placeholder
+{
+  # hybrid library
+  NX: 85
+  NY: 174
+  NZ: 220
+
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  # IncludePropTime: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/PhotonLibrary_dunevd10kt_3view_30deg_v5_refactored_1x8x14ref_xenon_active_removed.root"    
+  # This is the library for xenon, for the hybrid model. 
+
+  XMin: -425
+  XMax: 425
+  YMin: -781.26
+  YMax: 781.26
+  ZMin: -104.0305
+  ZMax: 2195.6405
+
+}
+
+dune10kt_vd_1x8x14_photonvisibilityservice_ArXe: # Generated using 1x8x14 geometry. 
+{
+  # hybrid library
+  NX: 85
+  NY: 174
+  NZ: 220
+
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  # IncludePropTime: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/Photon_library_dunevd10kt_3view_v2_refactored_1x8x14ref_ReflAnode_non_active_merged.root"    
+  # This is the merged library between argon and xenon, for the hybrid model. 
+
+  XMin: -425
+  XMax: 425
+  YMin: -781.26
+  YMax: 781.26
+  ZMin: -104.0305
+  ZMax: 2195.6405
+
+}
+
+dune10kt_vd_1x8x14_photonvisibilityservice_Ar: # Generated using 1x8x14 geometry. 
+{
+  # hybrid library
+  NX: 85
+  NY: 174
+  NZ: 220
+
+  UseCryoBoundary: false
+  DoNotLoadLibrary: false
+  LibraryBuildJob: false
+  # IncludePropTime: true
+
+  LibraryFile: "PhotonPropagation/LibraryData/PhotonLibrary_dunevd10kt_3view_30deg_v5_refactored_1x8x14ref_argon_active_removed.root"    
+  # This is the library for argon, for the hybrid model. 
+
+  XMin: -425
+  XMax: 425
+  YMin: -781.26
+  YMax: 781.26
+  ZMin: -104.0305
+  ZMax: 2195.6405
+
+}
+
+dune10kt_vd_1x8x14_photonvisibilityservice_Xe: # Generated using 1x8x14 geometry. 
 {
   # hybrid library
   NX: 85
