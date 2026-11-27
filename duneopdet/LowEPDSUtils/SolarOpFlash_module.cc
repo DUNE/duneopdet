@@ -14,6 +14,8 @@
 
 #include "duneopdet/LowEPDSUtils/AdjOpHitsUtils.h"
 #include "dunecore/ProducerUtils/ProducerUtils.h"
+#include "larcore/Geometry/Geometry.h"
+#include "larcorealg/Geometry/GeometryCore.h"
 
 // LArSoft includes
 #include "larcore/Geometry/Geometry.h"
