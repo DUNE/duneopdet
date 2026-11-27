@@ -722,10 +722,10 @@ void OpDetDigitizerProtoDUNEVD::CreatePDWaveform(
         if ((photonTime + 1.0 / fSampleFreq >= fTimeBegin) &&
             (photonTime < fTimeEnd - 1.0 / fSampleFreq)) {
           // Sample a random subset according to PDE
-          if (CLHEP::RandFlat::shoot(1.0) < getPDE(opDet)) {
+          if (fRandFlat->fire(1.0) < getPDE(opDet)) {
             float NOpHardwareChannels = wireReadout.NOpHardwareChannels(opDet);
             int hardwareChannel =
-                (int)(CLHEP::RandFlat::shoot(1.0) * NOpHardwareChannels);
+                (int)(fRandFlat->fire(1.0) * NOpHardwareChannels);
             //                 int readoutChannel = geometry.OpChannel(opDet,
             //                 hardwareChannel);
 
